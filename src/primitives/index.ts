@@ -62,6 +62,9 @@ export { Radio, RadioGroup } from "./radio";
 export type { SkeletonProps, SkeletonTextProps } from "./skeleton";
 // Skeleton
 export { Skeleton, SkeletonCircle, SkeletonText } from "./skeleton";
+export type { SpinnerProps } from "./spinner";
+// Spinner
+export { Spinner } from "./spinner";
 
 // Stat
 export {
