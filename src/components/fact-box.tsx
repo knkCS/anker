@@ -29,10 +29,21 @@ export interface FactBoxProps extends CardRootProps {
 	actions?: FactBoxAction[];
 	children: React.ReactNode;
 	collapsible?: boolean;
+	/** Label for collapse button when expanded. @default "Collapse" */
+	collapseLabel?: string;
+	/** Label for collapse button when collapsed. @default "Expand" */
+	expandLabel?: string;
 }
 
 export const FactBox: React.FC<FactBoxProps> = (props) => {
-	const { name, actions, collapsible = true, ...rest } = props;
+	const {
+		name,
+		actions,
+		collapsible = true,
+		collapseLabel = "Collapse",
+		expandLabel = "Expand",
+		...rest
+	} = props;
 
 	const [show, setShow] = React.useState(true);
 
@@ -57,7 +68,7 @@ export const FactBox: React.FC<FactBoxProps> = (props) => {
 						<Box minW={0} flex="1 1 0%">
 							<HStack>
 								<IconButton
-									aria-label={show ? "Collapse" : "Expand"}
+									aria-label={show ? collapseLabel : expandLabel}
 									variant="ghost"
 									size="sm"
 									onClick={(e) => {
@@ -75,7 +86,7 @@ export const FactBox: React.FC<FactBoxProps> = (props) => {
 							</HStack>
 						</Box>
 						{actions ? (
-							<Flex flexShrink={0} ml={{ md: 4 }}>
+							<Flex flexShrink={0} marginInlineStart={{ md: 4 }}>
 								<ButtonGroup>
 									{actions.map((action) =>
 										action.type === "button" ? (

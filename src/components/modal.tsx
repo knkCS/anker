@@ -24,6 +24,8 @@ export interface ModalProps
 	footer?: React.ReactNode;
 	/** Dialog size variant. */
 	size?: DialogRootProps["size"];
+	/** Label for the close button. */
+	closeLabel?: string;
 	/** Label for the save button. */
 	saveLabel?: string;
 	/** Label for the cancel button. */
@@ -41,6 +43,7 @@ export const Modal: React.FC<ModalProps> = ({
 	children,
 	footer,
 	size = "xl",
+	closeLabel = "Close",
 	saveLabel = "Save",
 	cancelLabel = "Cancel",
 	onSave,
@@ -84,7 +87,7 @@ export const Modal: React.FC<ModalProps> = ({
 							{header}
 							<Spacer />
 							<Dialog.CloseTrigger asChild>
-								<IconButton variant="ghost" size="sm" aria-label="Close">
+								<IconButton variant="ghost" size="sm" aria-label={closeLabel}>
 									<X size={16} />
 								</IconButton>
 							</Dialog.CloseTrigger>

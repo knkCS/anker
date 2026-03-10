@@ -44,10 +44,14 @@ export function ColorModeIcon() {
 	return colorMode === "dark" ? <Moon /> : <Sun />;
 }
 
-interface ColorModeButtonProps extends Omit<IconButtonProps, "aria-label"> {}
+interface ColorModeButtonProps extends Omit<IconButtonProps, "aria-label"> {
+	/** Accessible label for the color mode toggle button. @default "Toggle color mode" */
+	label?: string;
+}
 
 export const ColorModeButton = function ColorModeButton({
 	ref,
+	label = "Toggle color mode",
 	...props
 }: ColorModeButtonProps & { ref?: React.Ref<HTMLButtonElement> }) {
 	const { toggleColorMode } = useColorMode();
@@ -56,7 +60,7 @@ export const ColorModeButton = function ColorModeButton({
 			<IconButton
 				onClick={toggleColorMode}
 				variant="ghost"
-				aria-label="Toggle color mode"
+				aria-label={label}
 				size="sm"
 				ref={ref}
 				{...props}

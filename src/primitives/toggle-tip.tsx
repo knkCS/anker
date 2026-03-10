@@ -61,20 +61,24 @@ export const ToggleTip = function ToggleTip({
 
 export interface InfoTipProps extends Partial<ToggleTipProps> {
 	buttonProps?: IconButtonProps | undefined;
+	/** Accessible label for the info tip button. @default "info" */
+	label?: string;
 }
 
 export const InfoTip = function InfoTip({
 	ref,
 	...props
 }: InfoTipProps & { ref?: React.Ref<HTMLDivElement> }) {
-	const { children, buttonProps, ...rest } = props;
+	const { children, buttonProps, label = "info", ...rest } = props;
 	return (
 		<ToggleTip content={children} {...rest} ref={ref}>
 			<IconButton
 				variant="ghost"
-				aria-label="info"
+				aria-label={label}
 				size="2xs"
 				colorPalette="gray"
+				minWidth="44px"
+				minHeight="44px"
 				{...buttonProps}
 			>
 				<Info />
