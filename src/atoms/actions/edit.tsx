@@ -15,7 +15,7 @@ export const Edit = ({
 }: EditProps & { ref?: React.Ref<HTMLButtonElement> }) => {
 	return (
 		<Action ref={ref} cursor="pointer" aria-label={editLabel} {...props}>
-			<Icon color="gray.500" asChild>
+			<Icon color="subtle" asChild>
 				<Pencil />
 			</Icon>
 		</Action>

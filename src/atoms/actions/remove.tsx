@@ -15,7 +15,7 @@ export const Remove = ({
 }: RemoveProps & { ref?: React.Ref<HTMLButtonElement> }) => {
 	return (
 		<Action ref={ref} aria-label={removeLabel} {...props}>
-			<Icon color="gray.500" asChild>
+			<Icon color="subtle" asChild>
 				<X />
 			</Icon>
 		</Action>

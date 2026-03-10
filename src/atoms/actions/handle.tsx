@@ -15,7 +15,7 @@ export const Handle = ({
 }: HandleProps & { ref?: React.Ref<HTMLButtonElement> }) => {
 	return (
 		<Action ref={ref} cursor="grab" aria-label={handleLabel} {...props}>
-			<Icon color="gray.500" asChild>
+			<Icon color="subtle" asChild>
 				<GripVertical />
 			</Icon>
 		</Action>

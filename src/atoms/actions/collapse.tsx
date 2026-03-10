@@ -18,7 +18,7 @@ export const Collapse = ({
 
 	return (
 		<Action ref={ref} cursor="pointer" aria-label={collapseLabel} {...rest}>
-			<Icon color="gray.500">
+			<Icon color="subtle">
 				{collapsed ? <ChevronRight /> : <ChevronDown />}
 			</Icon>
 		</Action>
