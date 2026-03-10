@@ -2,24 +2,35 @@ import { Heading, Stack, Text } from "@chakra-ui/react";
 import type React from "react";
 
 export interface EmptyStateProps {
+	/** Main heading text. */
 	header: string;
-	description?: string;
+	/** Description text or rich content. */
+	description?: React.ReactNode;
+	/** Optional icon displayed above the heading. */
+	icon?: React.ReactNode;
+	/** Optional action buttons below the description. */
 	actions?: React.ReactNode;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = (props) => {
-	const { header, description, actions } = props;
+	const { header, description, icon, actions } = props;
 
 	return (
 		<Stack
 			justifyContent="center"
 			alignItems="center"
-			gap={2}
+			textAlign="center"
+			gap={4}
 			p={16}
-			borderRadius={8}
+			borderRadius="lg"
 		>
+			{icon}
 			<Heading size="lg">{header}</Heading>
-			<Text textAlign="center">{description}</Text>
+			{description && (
+				<Text color="muted" fontSize="sm">
+					{description}
+				</Text>
+			)}
 			{actions && (
 				<Stack pt={4} gap={2}>
 					{actions}

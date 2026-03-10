@@ -1,5 +1,6 @@
-import { Button } from "@chakra-ui/react";
+import { Button, Icon } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { InboxIcon } from "lucide-react";
 import { EmptyState } from "./empty-state";
 
 const meta = {
@@ -14,6 +15,14 @@ export const Default: Story = {
 	args: {
 		header: "No results found",
 		description: "Try adjusting your search or filters.",
+	},
+};
+
+export const WithIcon: Story = {
+	args: {
+		header: "No items found",
+		description: "There are no items to display. Try adding some.",
+		icon: <Icon asChild color="muted" boxSize={10}><InboxIcon /></Icon>,
 	},
 };
 

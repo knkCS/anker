@@ -45,9 +45,6 @@ export {
 	type RelativeDateTimeProps,
 } from "./datetime";
 
-// EmptyPanel
-export { EmptyPanel, type EmptyPanelProps } from "./empty-panel";
-
 // EmptyState
 export { EmptyState, type EmptyStateProps } from "./empty-state";
 
