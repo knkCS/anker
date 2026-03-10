@@ -13,9 +13,9 @@ Anker is the shared UI component library for the knk software group, extracted a
 Single npm package (`@knkcs/anker`) with subpath exports organized in six layers:
 
 1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, and 24 component recipes. Consumers use `<Provider>` (defaults to anker's system).
-2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Alert, Avatar, Menu, Skeleton, Tooltip, Switch, etc.). 14 components.
-3. **`/components`** — Higher-level composites: Card, Drawer, Modal, Stepper, Table, Widget, FactBox. 10 components.
-4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, SearchInput, DateTime, EmptyState, Comment, Select, etc. 14 component groups.
+2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
+3. **`/components`** — Higher-level composites: Card, Drawer, Modal, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox. 13 components.
+4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, SearchInput, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc. 16 component groups.
 5. **`/forms`** — Form controls built on React Hook Form + Zod: InputField, TextareaField, ArrayField, DatePickerField, CodeField, etc. 19 components.
 6. **`/feedback`** — Feedback patterns: ConfirmModal with provider + `useConfirmModal` hook.
 
@@ -40,9 +40,9 @@ src/
 │   ├── tokens/      # colors, semantic, shadows, spacing, radii, typography, animations, z-index
 │   ├── recipes/     # Chakra component recipes (24 files)
 │   └── utils/       # Color manipulation helpers
-├── primitives/      # Chakra wrappers (alert, avatar, menu, tooltip, etc.)
-├── components/      # Card, Drawer, Modal, Stepper, Table, Widget, FactBox
-├── atoms/           # Persona, StatusBadge, SearchInput, DateTime, Select, etc.
+├── primitives/      # Chakra wrappers (accordion, alert, avatar, breadcrumb, hover-card, menu, pin-input, popover, progress, segmented-control, skeleton, slider, spinner, tooltip, etc.)
+├── components/      # Card, Drawer, Modal, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox
+├── atoms/           # Persona, StatusBadge, SearchInput, DateTime, Select, Clipboard, DataList, etc.
 ├── forms/           # React Hook Form controls (InputField, ArrayField, etc.)
 ├── feedback/        # ConfirmModal + provider
 └── index.ts
