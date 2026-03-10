@@ -37,6 +37,8 @@ export interface ArrayFieldProps<T extends FieldValues>
 	addLabel?: string;
 	/** Aria label for the remove button. @default "Remove Item" */
 	removeLabel?: string;
+	/** Content to display when there are no items. */
+	emptyState?: React.ReactNode;
 }
 
 export function ArrayField<T extends FieldValues>(props: ArrayFieldProps<T>) {
@@ -50,6 +52,7 @@ export function ArrayField<T extends FieldValues>(props: ArrayFieldProps<T>) {
 		addLabel = "Add Field",
 		removeLabel = "Remove Item",
 		readOnly,
+		emptyState,
 		...rest
 	} = props;
 
@@ -65,6 +68,7 @@ export function ArrayField<T extends FieldValues>(props: ArrayFieldProps<T>) {
 							addLabel={addLabel}
 							removeLabel={removeLabel}
 							readOnly={readOnly}
+							emptyState={emptyState}
 						/>
 					) : (
 						<KeyedArray
@@ -90,11 +94,19 @@ interface DynamicArrayProps {
 	addLabel: string;
 	removeLabel: string;
 	readOnly?: boolean;
+	emptyState?: React.ReactNode;
 }
 
 const DynamicArray: React.FC<DynamicArrayProps> = React.memo((props) => {
-	const { name, valueHeader, keyHeader, addLabel, removeLabel, readOnly } =
-		props;
+	const {
+		name,
+		valueHeader,
+		keyHeader,
+		addLabel,
+		removeLabel,
+		readOnly,
+		emptyState,
+	} = props;
 
 	const { control, register } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
@@ -135,6 +147,11 @@ const DynamicArray: React.FC<DynamicArrayProps> = React.memo((props) => {
 					</React.Fragment>
 				))}
 			</Grid>
+			{fields.length === 0 && emptyState && (
+				<Box py={4} textAlign="center">
+					{emptyState}
+				</Box>
+			)}
 			<ButtonGroup>
 				<Button
 					variant="outline"

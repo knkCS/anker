@@ -1,4 +1,5 @@
 import { Box, Flex, Grid, GridItem } from "@chakra-ui/react";
+import { Children } from "react";
 
 export interface TableProps {
 	headers: string[];
@@ -7,6 +8,8 @@ export interface TableProps {
 	children?: React.ReactNode;
 	/** Total number of grid columns. Defaults to 12. */
 	columnCount?: number;
+	/** Content to display when there are no rows. */
+	emptyState?: React.ReactNode;
 }
 
 export const Table: React.FC<TableProps> = ({
@@ -15,8 +18,10 @@ export const Table: React.FC<TableProps> = ({
 	hasComponentLeft,
 	hasMenu,
 	columnCount = 12,
+	emptyState,
 }) => {
 	const colSpan = Math.floor(columnCount / headers.length);
+	const isEmpty = Children.count(children) === 0;
 
 	return (
 		<Box role="grid" aria-colcount={headers.length}>
@@ -40,7 +45,7 @@ export const Table: React.FC<TableProps> = ({
 			</Flex>
 
 			<Flex direction="column" gap="3">
-				{children}
+				{isEmpty && emptyState ? emptyState : children}
 			</Flex>
 		</Box>
 	);
