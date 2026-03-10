@@ -1,4 +1,4 @@
-import { Field, HStack } from "@chakra-ui/react";
+import { Field, HStack, Text } from "@chakra-ui/react";
 import type React from "react";
 import {
 	Controller,
@@ -11,6 +11,8 @@ export interface FormFieldProps<T extends FieldValues> {
 	name: Path<T>;
 	label?: React.ReactNode;
 	helperText?: React.ReactNode;
+	/** Persistent description that shows even when there's an error. */
+	description?: React.ReactNode;
 	required?: boolean;
 	disabled?: boolean;
 	readOnly?: boolean;
@@ -28,6 +30,7 @@ export function FormField<T extends FieldValues>({
 	name,
 	label,
 	helperText,
+	description,
 	required,
 	disabled,
 	readOnly,
@@ -59,6 +62,11 @@ export function FormField<T extends FieldValues>({
 							label
 						))}
 					{children(field)}
+					{description && (
+						<Text fontSize="xs" color="muted">
+							{description}
+						</Text>
+					)}
 					{helperText &&
 						(typeof helperText === "string" ? (
 							<Field.HelperText>{helperText}</Field.HelperText>
