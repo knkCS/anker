@@ -53,16 +53,15 @@ export {
 
 // Prose
 export { Prose } from "./prose";
-
+export type { ProviderProps } from "./provider";
 // Provider
 export { Provider } from "./provider";
-export type { ProviderProps } from "./provider";
 export type { RadioProps } from "./radio";
 // Radio
 export { Radio, RadioGroup } from "./radio";
 export type { SkeletonProps, SkeletonTextProps } from "./skeleton";
 // Skeleton
-export { Skeleton, SkeletonText, SkeletonCircle } from "./skeleton";
+export { Skeleton, SkeletonCircle, SkeletonText } from "./skeleton";
 
 // Stat
 export {

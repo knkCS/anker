@@ -27,14 +27,17 @@ export const SkeletonText: React.FC<SkeletonTextProps> = ({
 }) => {
 	return (
 		<Stack gap={gap}>
-			{Array.from({ length: lines }).map((_, i) => (
-				<ChakraSkeleton
-					key={i}
-					height="3"
-					width={i === lines - 1 ? "80%" : "100%"}
-					borderRadius="sm"
-				/>
-			))}
+			{Array.from({ length: lines }).map((_, i) => {
+				const isLast = i === lines - 1;
+				return (
+					<ChakraSkeleton
+						key={isLast ? "last" : `line-${String(i)}`}
+						height="3"
+						width={isLast ? "80%" : "100%"}
+						borderRadius="sm"
+					/>
+				);
+			})}
 		</Stack>
 	);
 };

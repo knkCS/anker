@@ -22,7 +22,11 @@ export const WithIcon: Story = {
 	args: {
 		header: "No items found",
 		description: "There are no items to display. Try adding some.",
-		icon: <Icon asChild color="muted" boxSize={10}><InboxIcon /></Icon>,
+		icon: (
+			<Icon asChild color="muted" boxSize={10}>
+				<InboxIcon />
+			</Icon>
+		),
 	},
 };
 
