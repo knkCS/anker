@@ -3,6 +3,7 @@ import type React from "react";
 import { useId } from "react";
 import {
 	Controller,
+	type ControllerRenderProps,
 	type FieldValues,
 	type Path,
 	useFormContext,
@@ -18,15 +19,12 @@ export interface FormFieldProps<T extends FieldValues> {
 	disabled?: boolean;
 	readOnly?: boolean;
 	actions?: React.ReactNode;
-	children: (field: {
-		value: any;
-		onChange: (...event: any[]) => void;
-		onBlur: () => void;
-		ref: React.Ref<any>;
-		name: string;
-		/** Computed aria-describedby linking to helper/description/error elements. */
-		"aria-describedby"?: string;
-	}) => React.ReactNode;
+	children: (
+		field: ControllerRenderProps<T, Path<T>> & {
+			/** Computed aria-describedby linking to helper/description/error elements. */
+			"aria-describedby"?: string;
+		},
+	) => React.ReactNode;
 }
 
 export function FormField<T extends FieldValues>({

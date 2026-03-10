@@ -91,9 +91,7 @@ export function FileField<T extends FieldValues>(props: FileFieldProps<T>) {
 						/>
 						{field.value && (
 							<Text mt={2} fontSize="sm" color="fg.muted">
-								{field.value instanceof File
-									? field.value.name
-									: "File selected"}
+								{(field.value as File)?.name ?? "File selected"}
 							</Text>
 						)}
 					</Box>
