@@ -65,3 +65,4 @@ export function NumberInputField<T extends FieldValues>({
 		</FormField>
 	);
 }
+(NumberInputField as { displayName?: string }).displayName = "NumberInputField";

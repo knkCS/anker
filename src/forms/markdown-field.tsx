@@ -75,3 +75,4 @@ export function MarkdownField<T extends FieldValues>(
 		</FormField>
 	);
 }
+(MarkdownField as { displayName?: string }).displayName = "MarkdownField";

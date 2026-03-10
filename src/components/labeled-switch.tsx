@@ -22,3 +22,4 @@ export const LabeledSwitch = ({
 		</Box>
 	);
 };
+LabeledSwitch.displayName = "LabeledSwitch";

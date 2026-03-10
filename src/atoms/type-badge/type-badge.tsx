@@ -25,3 +25,4 @@ export const TypeBadge: React.FC<TypeBadgeProps> = ({
 		</Badge>
 	);
 };
+TypeBadge.displayName = "TypeBadge";

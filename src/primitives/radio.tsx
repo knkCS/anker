@@ -21,5 +21,6 @@ export const Radio = function Radio({
 		</ChakraRadioGroup.Item>
 	);
 };
+Radio.displayName = "Radio";
 
 export const RadioGroup = ChakraRadioGroup.Root;

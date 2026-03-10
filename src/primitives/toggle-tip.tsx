@@ -58,6 +58,7 @@ export const ToggleTip = function ToggleTip({
 		</ChakraPopover.Root>
 	);
 };
+ToggleTip.displayName = "ToggleTip";
 
 export interface InfoTipProps extends Partial<ToggleTipProps> {
 	buttonProps?: IconButtonProps | undefined;
@@ -86,3 +87,4 @@ export const InfoTip = function InfoTip({
 		</ToggleTip>
 	);
 };
+InfoTip.displayName = "InfoTip";

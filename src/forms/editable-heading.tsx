@@ -64,3 +64,4 @@ export const EditableHeading: React.FC<EditableHeadingProps> = ({
 		</Editable.Root>
 	);
 };
+EditableHeading.displayName = "EditableHeading";

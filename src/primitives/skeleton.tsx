@@ -12,6 +12,7 @@ export type SkeletonProps = ChakraSkeletonProps;
 export const Skeleton: React.FC<SkeletonProps> = (props) => {
 	return <ChakraSkeleton {...props} />;
 };
+Skeleton.displayName = "Skeleton";
 
 export interface SkeletonTextProps {
 	/** Number of text lines. @default 3 */
@@ -41,6 +42,7 @@ export const SkeletonText: React.FC<SkeletonTextProps> = ({
 		</Stack>
 	);
 };
+SkeletonText.displayName = "SkeletonText";
 
 /** Circular skeleton placeholder for avatars. */
 export const SkeletonCircle: React.FC<{ size?: string | number }> = ({
@@ -52,3 +54,4 @@ export const SkeletonCircle: React.FC<{ size?: string | number }> = ({
 		</Circle>
 	);
 };
+SkeletonCircle.displayName = "SkeletonCircle";

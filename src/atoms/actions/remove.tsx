@@ -21,3 +21,4 @@ export const Remove = ({
 		</Action>
 	);
 };
+Remove.displayName = "Remove";

@@ -50,3 +50,4 @@ export const Table: React.FC<TableProps> = ({
 		</Box>
 	);
 };
+Table.displayName = "Table";

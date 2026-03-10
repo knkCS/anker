@@ -21,3 +21,4 @@ export const Handle = ({
 		</Action>
 	);
 };
+Handle.displayName = "Handle";

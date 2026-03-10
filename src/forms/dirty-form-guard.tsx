@@ -35,3 +35,4 @@ export const DirtyFormGuard: React.FC<DirtyFormGuardProps> = ({
 		/>
 	);
 };
+DirtyFormGuard.displayName = "DirtyFormGuard";

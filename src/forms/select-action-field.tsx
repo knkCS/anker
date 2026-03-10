@@ -74,3 +74,4 @@ export const SelectActionField: React.FC<SelectActionFieldProps> = (props) => {
 		</HStack>
 	);
 };
+SelectActionField.displayName = "SelectActionField";

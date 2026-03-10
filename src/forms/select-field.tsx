@@ -55,3 +55,4 @@ export function SelectField<T extends FieldValues>({
 		</FormField>
 	);
 }
+(SelectField as { displayName?: string }).displayName = "SelectField";

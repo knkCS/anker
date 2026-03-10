@@ -76,3 +76,4 @@ export function ColorPickerField<T extends FieldValues>({
 		</FormField>
 	);
 }
+(ColorPickerField as { displayName?: string }).displayName = "ColorPickerField";

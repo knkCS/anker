@@ -39,3 +39,4 @@ export function SwitchField<T extends FieldValues>({
 		</FormField>
 	);
 }
+(SwitchField as { displayName?: string }).displayName = "SwitchField";

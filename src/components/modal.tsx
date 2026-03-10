@@ -113,3 +113,4 @@ export const Modal: React.FC<ModalProps> = ({
 		</Dialog.Root>
 	);
 };
+Modal.displayName = "Modal";

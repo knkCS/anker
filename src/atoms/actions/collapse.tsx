@@ -24,3 +24,4 @@ export const Collapse = ({
 		</Action>
 	);
 };
+Collapse.displayName = "Collapse";

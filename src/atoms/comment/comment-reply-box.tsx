@@ -107,3 +107,4 @@ export const CommentReplyBox = ({
 		</Box>
 	);
 };
+CommentReplyBox.displayName = "CommentReplyBox";

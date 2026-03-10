@@ -46,3 +46,4 @@ export const Card = ({
 		</ChakraCard.Root>
 	);
 };
+Card.displayName = "Card";

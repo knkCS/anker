@@ -144,3 +144,4 @@ export const FactBox: React.FC<FactBoxProps> = (props) => {
 		</Box>
 	);
 };
+FactBox.displayName = "FactBox";

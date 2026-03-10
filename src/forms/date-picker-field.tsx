@@ -52,3 +52,4 @@ export function DatePickerField<T extends FieldValues>({
 		</FormField>
 	);
 }
+(DatePickerField as { displayName?: string }).displayName = "DatePickerField";

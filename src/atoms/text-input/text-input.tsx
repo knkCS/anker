@@ -19,5 +19,6 @@ const TextInput = ({
 		</Group>
 	);
 };
+TextInput.displayName = "TextInput";
 
 export default TextInput;

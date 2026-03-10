@@ -73,3 +73,4 @@ export const LeavePageConfirmation: React.FC<LeavePageConfirmationProps> = (
 		</Dialog.Root>
 	);
 };
+LeavePageConfirmation.displayName = "LeavePageConfirmation";

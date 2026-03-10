@@ -47,3 +47,4 @@ export function TextareaField<T extends FieldValues>({
 		</FormField>
 	);
 }
+(TextareaField as { displayName?: string }).displayName = "TextareaField";

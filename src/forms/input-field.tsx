@@ -57,3 +57,4 @@ export function InputField<T extends FieldValues>({
 		</FormField>
 	);
 }
+(InputField as { displayName?: string }).displayName = "InputField";

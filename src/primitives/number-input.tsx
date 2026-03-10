@@ -22,6 +22,7 @@ export const NumberInputRoot = function NumberInput({
 		</ChakraNumberInput.Root>
 	);
 };
+NumberInputRoot.displayName = "NumberInputRoot";
 
 export const NumberInputField = ChakraNumberInput.Input;
 export const NumberInputScrubber = ChakraNumberInput.Scrubber;

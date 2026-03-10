@@ -34,3 +34,4 @@ export const Widget: React.FC<WidgetProps> = ({
 		</Card.Root>
 	);
 };
+Widget.displayName = "Widget";

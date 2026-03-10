@@ -31,5 +31,7 @@ export const Avatar = function Avatar({
 		</ChakraAvatar.Root>
 	);
 };
+Avatar.displayName = "Avatar";
 
 export const AvatarGroup = ChakraAvatarGroup;
+AvatarGroup.displayName = "AvatarGroup";

@@ -146,3 +146,4 @@ export const BaseSelect = <T extends BaseOption>({
 		/>
 	);
 };
+(BaseSelect as { displayName?: string }).displayName = "BaseSelect";

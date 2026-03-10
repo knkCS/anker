@@ -100,6 +100,7 @@ export const TableMenuList = <T extends BaseOption>({
 		</chakraComponents.MenuList>
 	);
 };
+(TableMenuList as { displayName?: string }).displayName = "TableMenuList";
 
 /**
  * A custom Option component that renders as a table row.
@@ -165,6 +166,7 @@ export const TableOption = <T extends BaseOption>({
 		</Table.Row>
 	);
 };
+(TableOption as { displayName?: string }).displayName = "TableOption";
 
 export interface CreateTableMenuComponentsOptions {
 	columns: TableMenuColumn[];

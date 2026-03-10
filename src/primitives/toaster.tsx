@@ -60,4 +60,6 @@ export function createAnkerToaster(options: CreateToasterOptions = {}) {
 // Default instance for convenience
 const { toaster, Toaster } = createAnkerToaster();
 
+(Toaster as { displayName?: string }).displayName = "Toaster";
+
 export { toaster, Toaster };

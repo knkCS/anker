@@ -99,3 +99,4 @@ export function FormField<T extends FieldValues>({
 		/>
 	);
 }
+(FormField as { displayName?: string }).displayName = "FormField";

@@ -15,3 +15,4 @@ export function Provider({ system, ...props }: ProviderProps) {
 		</ChakraProvider>
 	);
 }
+Provider.displayName = "Provider";

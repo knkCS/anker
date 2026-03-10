@@ -36,3 +36,4 @@ export const Switch = function Switch({
 		</ChakraSwitch.Root>
 	);
 };
+Switch.displayName = "Switch";

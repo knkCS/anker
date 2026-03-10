@@ -21,3 +21,4 @@ export const Edit = ({
 		</Action>
 	);
 };
+Edit.displayName = "Edit";

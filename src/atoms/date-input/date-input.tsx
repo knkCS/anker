@@ -51,5 +51,6 @@ const DateInput = ({
 		/>
 	);
 };
+DateInput.displayName = "DateInput";
 
 export default DateInput;

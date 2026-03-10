@@ -63,3 +63,4 @@ export const ControlledFormField: React.FC<ControlledFormFieldProps> = ({
 		</Field.Root>
 	);
 };
+ControlledFormField.displayName = "ControlledFormField";

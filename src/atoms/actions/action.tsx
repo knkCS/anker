@@ -28,3 +28,4 @@ export const Action = ({
 		</Box>
 	);
 };
+Action.displayName = "Action";

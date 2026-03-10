@@ -120,3 +120,4 @@ export const TableItem = <T extends string = string>({
 		</Flex>
 	);
 };
+(TableItem as { displayName?: string }).displayName = "TableItem";

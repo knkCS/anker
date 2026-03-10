@@ -105,3 +105,4 @@ export const DrawerRoot: React.FC<DrawerProps> = ({
 		</Drawer.Root>
 	);
 };
+DrawerRoot.displayName = "DrawerRoot";

@@ -12,6 +12,7 @@ export function ColorModeProvider(props: ColorModeProviderProps) {
 		<ThemeProvider attribute="class" disableTransitionOnChange {...props} />
 	);
 }
+ColorModeProvider.displayName = "ColorModeProvider";
 
 export type ColorMode = "light" | "dark";
 
@@ -43,6 +44,7 @@ export function ColorModeIcon() {
 	const { colorMode } = useColorMode();
 	return colorMode === "dark" ? <Moon /> : <Sun />;
 }
+ColorModeIcon.displayName = "ColorModeIcon";
 
 interface ColorModeButtonProps extends Omit<IconButtonProps, "aria-label"> {
 	/** Accessible label for the color mode toggle button. @default "Toggle color mode" */
@@ -76,6 +78,7 @@ export const ColorModeButton = function ColorModeButton({
 		</ClientOnly>
 	);
 };
+ColorModeButton.displayName = "ColorModeButton";
 
 export const LightMode = function LightMode({
 	ref,
@@ -93,6 +96,7 @@ export const LightMode = function LightMode({
 		/>
 	);
 };
+LightMode.displayName = "LightMode";
 
 export const DarkMode = function DarkMode({
 	ref,
@@ -110,3 +114,4 @@ export const DarkMode = function DarkMode({
 		/>
 	);
 };
+DarkMode.displayName = "DarkMode";

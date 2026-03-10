@@ -41,3 +41,4 @@ export const Filter = ({
 		</Box>
 	);
 };
+Filter.displayName = "Filter";

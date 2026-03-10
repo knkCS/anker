@@ -46,3 +46,4 @@ export function RadioGroupField<T extends FieldValues>(
 		</FormField>
 	);
 }
+(RadioGroupField as { displayName?: string }).displayName = "RadioGroupField";

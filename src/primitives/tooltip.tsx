@@ -45,3 +45,4 @@ export const Tooltip = function Tooltip({
 		</ChakraTooltip.Root>
 	);
 };
+Tooltip.displayName = "Tooltip";

@@ -28,3 +28,4 @@ export const Alert = function Alert({
 		</ChakraAlert.Root>
 	);
 };
+Alert.displayName = "Alert";

@@ -92,3 +92,4 @@ export function CodeField<T extends FieldValues>({
 		</FormField>
 	);
 }
+(CodeField as { displayName?: string }).displayName = "CodeField";

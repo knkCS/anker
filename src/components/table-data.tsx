@@ -22,3 +22,4 @@ export const TableData: React.FC<TableDataProps> = ({
 		</Tooltip>
 	);
 };
+TableData.displayName = "TableData";

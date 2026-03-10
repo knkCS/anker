@@ -86,3 +86,4 @@ export function CheckboxField<T extends FieldValues>({
 		/>
 	);
 }
+(CheckboxField as { displayName?: string }).displayName = "CheckboxField";

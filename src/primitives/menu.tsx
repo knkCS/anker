@@ -22,6 +22,7 @@ export const MenuContent = function MenuContent({
 		</Portal>
 	);
 };
+MenuContent.displayName = "MenuContent";
 
 export const MenuArrow = function MenuArrow({
 	ref,
@@ -33,6 +34,7 @@ export const MenuArrow = function MenuArrow({
 		</ChakraMenu.Arrow>
 	);
 };
+MenuArrow.displayName = "MenuArrow";
 
 export const MenuCheckboxItem = function MenuCheckboxItem({
 	ref,
@@ -49,6 +51,7 @@ export const MenuCheckboxItem = function MenuCheckboxItem({
 		</ChakraMenu.CheckboxItem>
 	);
 };
+MenuCheckboxItem.displayName = "MenuCheckboxItem";
 
 export const MenuRadioItem = function MenuRadioItem({
 	ref,
@@ -66,6 +69,7 @@ export const MenuRadioItem = function MenuRadioItem({
 		</ChakraMenu.RadioItem>
 	);
 };
+MenuRadioItem.displayName = "MenuRadioItem";
 
 export const MenuItemGroup = function MenuItemGroup({
 	ref,
@@ -83,6 +87,7 @@ export const MenuItemGroup = function MenuItemGroup({
 		</ChakraMenu.ItemGroup>
 	);
 };
+MenuItemGroup.displayName = "MenuItemGroup";
 
 export interface MenuTriggerItemProps extends ChakraMenu.ItemProps {
 	startIcon?: React.ReactNode;
@@ -101,6 +106,7 @@ export const MenuTriggerItem = function MenuTriggerItem({
 		</ChakraMenu.TriggerItem>
 	);
 };
+MenuTriggerItem.displayName = "MenuTriggerItem";
 
 export const MenuRadioItemGroup = ChakraMenu.RadioItemGroup;
 export const MenuContextTrigger = ChakraMenu.ContextTrigger;

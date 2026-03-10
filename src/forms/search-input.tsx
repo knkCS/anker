@@ -59,3 +59,4 @@ export const SearchInput: React.FC<SearchInputProps> = (props) => {
 		</InputGroup>
 	);
 };
+SearchInput.displayName = "SearchInput";
