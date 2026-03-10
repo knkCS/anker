@@ -27,8 +27,8 @@ export const Filter = ({
 			{activeFilterCount && activeFilterCount > 0 ? (
 				<Circle
 					size="24px"
-					bg="primary.500"
-					color="white"
+					bg="accent"
+					color="on-accent"
 					position="absolute"
 					top={5}
 					right={-1.5}
