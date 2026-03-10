@@ -94,6 +94,11 @@ export { Radio, RadioGroup } from "./radio";
 export type { SkeletonProps, SkeletonTextProps } from "./skeleton";
 // Skeleton
 export { Skeleton, SkeletonCircle, SkeletonText } from "./skeleton";
+
+// Slider
+export type { SliderProps } from "./slider";
+export { Slider } from "./slider";
+
 export type { SpinnerProps } from "./spinner";
 // Spinner
 export { Spinner } from "./spinner";
