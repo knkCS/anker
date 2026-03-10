@@ -34,13 +34,15 @@ ClipboardButton.displayName = "ClipboardButton";
 export interface ClipboardInputProps extends ChakraClipboard.RootProps {
 	/** Props passed to the input element. */
 	inputProps?: InputProps;
+	/** Label for the copy button. @default "Copy" */
+	label?: string;
 }
 
 export const ClipboardInput = function ClipboardInput({
 	ref,
 	...props
 }: ClipboardInputProps & { ref?: React.Ref<HTMLDivElement> }) {
-	const { inputProps, ...rest } = props;
+	const { inputProps, label = "Copy", ...rest } = props;
 	return (
 		<ChakraClipboard.Root ref={ref} {...rest}>
 			<ChakraClipboard.Control>
@@ -48,7 +50,7 @@ export const ClipboardInput = function ClipboardInput({
 					<Input readOnly {...inputProps} />
 				</ChakraClipboard.Input>
 				<ChakraClipboard.Trigger asChild>
-					<IconButton variant="outline" size="sm" aria-label="Copy">
+					<IconButton variant="outline" size="sm" aria-label={label}>
 						<ChakraClipboard.Indicator copied={<Check size={16} />}>
 							<Clipboard size={16} />
 						</ChakraClipboard.Indicator>

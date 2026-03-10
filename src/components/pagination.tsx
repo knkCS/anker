@@ -46,9 +46,9 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
 			>
 				<ChevronLeft size={16} />
 			</IconButton>
-			{pages.map((p, i) =>
-				p === "ellipsis" ? (
-					<Text key={`ellipsis-${i}`} px={2} color="muted" fontSize="sm">
+			{pages.map((p) =>
+				p === "ellipsis-start" || p === "ellipsis-end" ? (
+					<Text key={p} px={2} color="muted" fontSize="sm">
 						…
 					</Text>
 				) : (
@@ -84,12 +84,12 @@ function getVisiblePages(
 	current: number,
 	total: number,
 	max: number,
-): Array<number | "ellipsis"> {
+): Array<number | "ellipsis-start" | "ellipsis-end"> {
 	if (total <= max) {
 		return Array.from({ length: total }, (_, i) => i + 1);
 	}
 
-	const pages: Array<number | "ellipsis"> = [];
+	const pages: Array<number | "ellipsis-start" | "ellipsis-end"> = [];
 	const half = Math.floor((max - 2) / 2);
 	let start = Math.max(2, current - half);
 	let end = Math.min(total - 1, current + half);
@@ -102,11 +102,11 @@ function getVisiblePages(
 	}
 
 	pages.push(1);
-	if (start > 2) pages.push("ellipsis");
+	if (start > 2) pages.push("ellipsis-start");
 	for (let i = start; i <= end; i++) {
 		pages.push(i);
 	}
-	if (end < total - 1) pages.push("ellipsis");
+	if (end < total - 1) pages.push("ellipsis-end");
 	pages.push(total);
 
 	return pages;

@@ -1,27 +1,10 @@
 import { Popover as ChakraPopover, Portal } from "@chakra-ui/react";
 import type * as React from "react";
 
-export interface PopoverProps extends ChakraPopover.RootProps {
-	/** Whether to show an arrow pointing to the trigger. @default false */
-	showArrow?: boolean;
-	/** Whether to render content in a portal. @default true */
-	portalled?: boolean;
-	/** Container ref for portal. */
-	portalRef?: React.RefObject<HTMLElement | null>;
-	/** Props passed to the content element. */
-	contentProps?: ChakraPopover.ContentProps;
-}
+export type PopoverProps = ChakraPopover.RootProps;
 
 export const Popover = function Popover(props: PopoverProps) {
-	const {
-		showArrow,
-		children,
-		portalled = true,
-		portalRef,
-		contentProps,
-		...rest
-	} = props;
-	return <ChakraPopover.Root {...rest}>{children}</ChakraPopover.Root>;
+	return <ChakraPopover.Root {...props}>{props.children}</ChakraPopover.Root>;
 };
 Popover.displayName = "Popover";
 

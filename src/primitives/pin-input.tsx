@@ -17,6 +17,7 @@ export const PinInput = function PinInput({
 			<ChakraPinInput.HiddenInput />
 			<ChakraPinInput.Control>
 				{Array.from({ length }).map((_, i) => (
+					// biome-ignore lint/suspicious/noArrayIndexKey: index is the stable identity for pin input fields
 					<ChakraPinInput.Input key={i} index={i} />
 				))}
 			</ChakraPinInput.Control>

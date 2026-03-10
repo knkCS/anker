@@ -20,16 +20,12 @@ export const Default: Story = {
 		return (
 			<AccordionRoot defaultValue={["item-1"]} collapsible>
 				<AccordionItem {...args} />
-				<AccordionItem
-					value="item-2"
-					label="How do I install it?"
-					children="Run npm install @knkcs/anker"
-				/>
-				<AccordionItem
-					value="item-3"
-					label="What framework does it use?"
-					children="Chakra UI v3 with React 19 and TypeScript."
-				/>
+				<AccordionItem value="item-2" label="How do I install it?">
+					Run npm install @knkcs/anker
+				</AccordionItem>
+				<AccordionItem value="item-3" label="What framework does it use?">
+					Chakra UI v3 with React 19 and TypeScript.
+				</AccordionItem>
 			</AccordionRoot>
 		);
 	},

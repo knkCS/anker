@@ -19,8 +19,8 @@ export const DataList = function DataList({
 	return (
 		<ChakraDataList.Root ref={ref} {...rest}>
 			{items
-				? items.map((item, i) => (
-						<ChakraDataList.Item key={i}>
+				? items.map((item) => (
+						<ChakraDataList.Item key={String(item.label)}>
 							<ChakraDataList.ItemLabel>{item.label}</ChakraDataList.ItemLabel>
 							<ChakraDataList.ItemValue>{item.value}</ChakraDataList.ItemValue>
 						</ChakraDataList.Item>
