@@ -32,7 +32,9 @@
       "types": "./dist/feedback/index.d.ts"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "storybook dev -p 6006",
     "build": "tsup",
@@ -45,46 +47,47 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
+    "@chakra-ui/react": "^3.0.0",
+    "@hookform/resolvers": "^3.0.0",
     "react": ">=18",
     "react-dom": ">=18",
-    "@chakra-ui/react": "^3.0.0",
     "react-hook-form": "^7.0.0",
-    "@hookform/resolvers": "^3.0.0",
-    "zod": "^3.0.0",
+    "react-i18next": ">=12",
     "react-router-dom": "^6.0.0",
-    "react-i18next": ">=12"
+    "zod": "^3.0.0"
   },
   "dependencies": {
-    "lucide-react": "^0.400.0",
-    "next-themes": "^0.4.0",
+    "chakra-react-select": "^6.0.0",
     "color2k": "^2.0.0",
     "dayjs": "^1.11.0",
-    "chakra-react-select": "^6.0.0",
-    "lodash.debounce": "^4.0.0"
+    "lodash.debounce": "^4.0.0",
+    "lucide-react": "^0.400.0",
+    "next-themes": "^0.4.0"
   },
   "devDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "@chakra-ui/react": "^3.33.0",
-    "react-hook-form": "^7.54.0",
-    "@hookform/resolvers": "^3.9.0",
-    "zod": "^3.23.0",
-    "react-router-dom": "^6.28.0",
-    "react-i18next": "^14.0.0",
-    "i18next": "^23.0.0",
-    "typescript": "^5.7.0",
-    "tsup": "^8.3.0",
     "@biomejs/biome": "^2.2.0",
-    "vitest": "^3.0.0",
-    "@testing-library/react": "^16.0.0",
-    "@testing-library/jest-dom": "^6.0.0",
-    "jsdom": "^25.0.0",
-    "storybook": "^8.4.0",
+    "@chakra-ui/react": "^3.33.0",
+    "@hookform/resolvers": "^3.9.0",
+    "@storybook/addon-a11y": "^8.4.0",
+    "@storybook/addon-essentials": "^8.4.0",
+    "@storybook/blocks": "^8.4.0",
     "@storybook/react": "^8.4.0",
     "@storybook/react-vite": "^8.4.0",
-    "@storybook/addon-essentials": "^8.4.0",
-    "@storybook/addon-a11y": "^8.4.0",
-    "@storybook/blocks": "^8.4.0"
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^16.0.0",
+    "@types/lodash.debounce": "^4.0.9",
+    "i18next": "^23.0.0",
+    "jsdom": "^25.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.0",
+    "react-i18next": "^14.0.0",
+    "react-router-dom": "^6.28.0",
+    "storybook": "^8.4.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0",
+    "zod": "^3.23.0"
   },
   "license": "SEE LICENSE IN LICENSE"
 }

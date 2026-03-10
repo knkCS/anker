@@ -17,7 +17,10 @@ import { Avatar } from "../../primitives/avatar";
 import type { BaseOption } from "./types";
 
 export interface BaseSelectProps<T extends BaseOption>
-	extends Omit<Props<T, boolean, GroupBase<T>>, "value" | "onChange" | "isLoading" | "isDisabled"> {
+	extends Omit<
+		Props<T, boolean, GroupBase<T>>,
+		"value" | "onChange" | "isLoading" | "isDisabled"
+	> {
 	value: T | T[] | null;
 	onChange?: (
 		newValue: MultiValue<T> | SingleValue<T>,

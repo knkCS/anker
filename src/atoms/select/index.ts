@@ -15,11 +15,11 @@ export {
 } from "chakra-react-select";
 export { BaseSelect, type BaseSelectProps } from "./base-select";
 export {
+	type CreateTableMenuComponentsOptions,
+	createTableMenuComponents,
+	type TableMenuColumn,
 	TableMenuList,
 	type TableMenuListProps,
 	TableOption,
-	type TableMenuColumn,
-	type CreateTableMenuComponentsOptions,
-	createTableMenuComponents,
 } from "./table-menu-list";
 export type { BaseOption } from "./types";

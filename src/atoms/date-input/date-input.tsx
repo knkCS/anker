@@ -1,7 +1,8 @@
 import { Input, type InputProps } from "@chakra-ui/react";
 import type React from "react";
 
-export interface DateInputProps extends Omit<InputProps, "type" | "value" | "onChange"> {
+export interface DateInputProps
+	extends Omit<InputProps, "type" | "value" | "onChange"> {
 	/** The date value as an ISO date string (YYYY-MM-DD) or ISO datetime string */
 	value?: string;
 	/** Called when the date value changes */

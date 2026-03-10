@@ -37,11 +37,7 @@ export const Multiple: Story = {
 			<HStack gap={4}>
 				<Stat label="Revenue" value="$12,345" icon={<DollarSign size={16} />} />
 				<Stat label="Users" value="1,234" icon={<Users size={16} />} />
-				<Stat
-					label="Growth"
-					value="+12.5%"
-					icon={<BarChart3 size={16} />}
-				/>
+				<Stat label="Growth" value="+12.5%" icon={<BarChart3 size={16} />} />
 			</HStack>
 		);
 	},

@@ -18,35 +18,39 @@ const options: BaseOption[] = [
 	{ id: "4", label: "Option 4", avatar: "John Doe" },
 ];
 
+function DefaultDemo() {
+	const [value, setValue] = useState<BaseOption | null>(null);
+	return (
+		<Box maxW="400px">
+			<BaseSelect
+				value={value}
+				onChange={(newValue) => setValue(newValue as BaseOption)}
+				options={options}
+				placeholder="Select an option..."
+			/>
+		</Box>
+	);
+}
+
 export const Default: Story = {
-	render() {
-		const [value, setValue] = useState<BaseOption | null>(null);
-		return (
-			<Box maxW="400px">
-				<BaseSelect
-					value={value}
-					onChange={(newValue) => setValue(newValue as BaseOption)}
-					options={options}
-					placeholder="Select an option..."
-				/>
-			</Box>
-		);
-	},
+	render: () => <DefaultDemo />,
 };
 
+function MultiDemo() {
+	const [value, setValue] = useState<BaseOption[]>([]);
+	return (
+		<Box maxW="400px">
+			<BaseSelect
+				value={value}
+				onChange={(newValue) => setValue(newValue as BaseOption[])}
+				options={options}
+				isMulti
+				placeholder="Select options..."
+			/>
+		</Box>
+	);
+}
+
 export const Multi: Story = {
-	render() {
-		const [value, setValue] = useState<BaseOption[]>([]);
-		return (
-			<Box maxW="400px">
-				<BaseSelect
-					value={value}
-					onChange={(newValue) => setValue(newValue as BaseOption[])}
-					options={options}
-					isMulti
-					placeholder="Select options..."
-				/>
-			</Box>
-		);
-	},
+	render: () => <MultiDemo />,
 };

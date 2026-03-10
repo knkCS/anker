@@ -1,4 +1,7 @@
-export { RelativeDateTime, type RelativeDateTimeProps } from "./relative-datetime";
+export {
+	RelativeDateTime,
+	type RelativeDateTimeProps,
+} from "./relative-datetime";
 export type { DateFormat, DateType } from "./types";
 export {
 	formatDate,

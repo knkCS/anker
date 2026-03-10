@@ -1,1 +1,1 @@
-export { default as DateInput, type DateInputProps } from "./date-input";
+export { type DateInputProps, default as DateInput } from "./date-input";
