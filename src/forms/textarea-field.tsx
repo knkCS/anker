@@ -39,6 +39,7 @@ export function TextareaField<T extends FieldValues>({
 					placeholder={placeholder}
 					readOnly={readOnly}
 					disabled={disabled}
+					opacity={readOnly ? 0.8 : 1}
 					ref={ref}
 					{...textareaProps}
 				/>
