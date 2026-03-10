@@ -26,7 +26,7 @@ export const SearchInput: React.FC<SearchInputProps> = (props) => {
 	return (
 		<InputGroup maxWidth={maxWidth} startElement={<Search size={16} />}>
 			<Input
-				bgColor="gray.50"
+				bgColor="bg-subtle"
 				variant="outline"
 				type="text"
 				autoComplete="off"
