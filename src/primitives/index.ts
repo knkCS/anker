@@ -60,6 +60,9 @@ export type { ProviderProps } from "./provider";
 export type { RadioProps } from "./radio";
 // Radio
 export { Radio, RadioGroup } from "./radio";
+export type { SkeletonProps, SkeletonTextProps } from "./skeleton";
+// Skeleton
+export { Skeleton, SkeletonText, SkeletonCircle } from "./skeleton";
 
 // Stat
 export {
