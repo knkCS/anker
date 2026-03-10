@@ -14,6 +14,9 @@ export { LabeledSwitch } from "./labeled-switch";
 // Modal
 export type { ModalProps } from "./modal";
 export { Modal } from "./modal";
+// Pagination
+export type { PaginationProps } from "./pagination";
+export { Pagination } from "./pagination";
 // Stepper
 export type {
 	StepperContentProps,
