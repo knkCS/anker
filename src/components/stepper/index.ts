@@ -1,32 +1,32 @@
 export type {
-	StepperProps,
-	StepperStepsProps,
-	StepperStepProps,
 	StepperContentProps,
 	StepperIconProps,
+	StepperProps,
 	StepperSeparatorProps,
+	StepperStepProps,
+	StepperStepsProps,
 } from "./stepper";
 export {
 	Stepper,
+	StepperCompleted,
 	StepperContainer,
-	StepperSteps,
-	StepperStep,
 	StepperContent,
 	StepperIcon,
 	StepperSeparator,
+	StepperStep,
+	StepperSteps,
 	StepperStepTitle,
-	StepperCompleted,
 } from "./stepper";
 export type {
+	UseStepProps,
 	UseStepperProps,
 	UseStepperReturn,
-	UseStepProps,
 } from "./use-stepper";
 export {
 	StepperProvider,
-	useStepperContext,
-	useStepper,
 	useStep,
-	useStepperPrevButton,
+	useStepper,
+	useStepperContext,
 	useStepperNextButton,
+	useStepperPrevButton,
 } from "./use-stepper";

@@ -16,7 +16,11 @@ export const Default: Story = {
 		heading: "Total Users",
 		subHeading: "Last 30 days",
 		icon: <Users size={20} />,
-		children: <Text fontSize="3xl" fontWeight="bold">1,234</Text>,
+		children: (
+			<Text fontSize="3xl" fontWeight="bold">
+				1,234
+			</Text>
+		),
 	},
 };
 
@@ -24,6 +28,10 @@ export const WithChart: Story = {
 	args: {
 		heading: "Revenue",
 		icon: <BarChart3 size={20} />,
-		children: <Text fontSize="3xl" fontWeight="bold">$12,345</Text>,
+		children: (
+			<Text fontSize="3xl" fontWeight="bold">
+				$12,345
+			</Text>
+		),
 	},
 };

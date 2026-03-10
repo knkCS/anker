@@ -23,11 +23,7 @@ export const Multiple: Story = {
 			<Stack gap="4">
 				<LabeledSwitch name="email" label="Email notifications" />
 				<LabeledSwitch name="sms" label="SMS notifications" />
-				<LabeledSwitch
-					name="push"
-					label="Push notifications"
-					defaultChecked
-				/>
+				<LabeledSwitch name="push" label="Push notifications" defaultChecked />
 			</Stack>
 		);
 	},

@@ -1,10 +1,6 @@
 import { Button, Flex, Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
-import {
-	Stepper,
-	StepperCompleted,
-	StepperStep,
-} from "./stepper";
+import { Stepper, StepperCompleted, StepperStep } from "./stepper";
 import { useStepperNextButton, useStepperPrevButton } from "./use-stepper";
 
 const meta = {

@@ -10,7 +10,8 @@ import {
 } from "@chakra-ui/react";
 import { X } from "lucide-react";
 
-export interface ModalProps extends Omit<DialogRootProps, "open" | "onOpenChange"> {
+export interface ModalProps
+	extends Omit<DialogRootProps, "open" | "onOpenChange"> {
 	/** Whether the modal is open. */
 	open: boolean;
 	/** Called when the modal should close. */
@@ -83,11 +84,7 @@ export const Modal: React.FC<ModalProps> = ({
 							{header}
 							<Spacer />
 							<Dialog.CloseTrigger asChild>
-								<IconButton
-									variant="ghost"
-									size="sm"
-									aria-label="Close"
-								>
+								<IconButton variant="ghost" size="sm" aria-label="Close">
 									<X size={16} />
 								</IconButton>
 							</Dialog.CloseTrigger>

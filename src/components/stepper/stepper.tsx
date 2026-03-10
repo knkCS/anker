@@ -1,13 +1,12 @@
 import {
 	Collapsible,
 	chakra,
-	useSlotRecipe,
 	type HTMLChakraProps,
 	type SystemStyleObject,
+	useSlotRecipe,
 } from "@chakra-ui/react";
 import { Check } from "lucide-react";
-import type React from "react";
-import { createContext, useContext } from "react";
+import React, { createContext, useContext } from "react";
 import {
 	StepperProvider,
 	type UseStepperProps,
@@ -20,25 +19,21 @@ import {
 // Inlined helpers (from core utils)
 // ---------------------------------------------------------------------------
 
-function getChildOfType(
-	children: React.ReactNode,
-	type: React.ComponentType,
-) {
-	return (
-		React.Children.toArray(children) as React.ReactElement[]
-	).find((item) => item.type === type);
+function getChildOfType(children: React.ReactNode, type: React.ComponentType) {
+	return (React.Children.toArray(children) as React.ReactElement[]).find(
+		(item) => item.type === type,
+	);
 }
 
 function getChildrenOfType<P = Record<string, unknown>>(
 	children: React.ReactNode,
 	type: React.ComponentType<P> | React.ComponentType<P>[],
 ) {
-	return (
-		React.Children.toArray(children) as React.ReactElement<P>[]
-	).filter((item) =>
-		Array.isArray(type)
-			? type.some((component) => component === item.type)
-			: item.type === type,
+	return (React.Children.toArray(children) as React.ReactElement<P>[]).filter(
+		(item) =>
+			Array.isArray(type)
+				? type.some((component) => component === item.type)
+				: item.type === type,
 	);
 }
 
@@ -244,11 +239,7 @@ export const StepperIcon: React.FC<StepperIconProps> = (props) => {
 
 	const styles = useStyles();
 
-	const content: React.ReactNode = isCompleted ? (
-		<Check size={14} />
-	) : (
-		icon
-	);
+	const content: React.ReactNode = isCompleted ? <Check size={14} /> : icon;
 
 	return (
 		<chakra.div
