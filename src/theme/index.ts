@@ -30,6 +30,8 @@ import {
 } from "./recipes";
 import {
 	colors,
+	durations,
+	easings,
 	fonts,
 	radii,
 	semanticTokens,
@@ -66,6 +68,8 @@ const system = createSystem(defaultConfig, {
 	theme: {
 		tokens: {
 			colors,
+			durations,
+			easings,
 			fonts: {
 				heading: { value: fonts.heading },
 				body: { value: fonts.body },
@@ -133,6 +137,8 @@ export default system;
 // Re-export all tokens and utilities for consumer overrides
 export {
 	colors,
+	durations,
+	easings,
 	fonts,
 	radii,
 	semanticTokens,
