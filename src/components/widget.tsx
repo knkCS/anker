@@ -20,11 +20,11 @@ export const Widget: React.FC<WidgetProps> = ({
 			<Card.Body>
 				<Box mb="6">
 					<Flex justifyContent="space-between" alignItems="center">
-						<Text fontWeight="bold">{heading}</Text>
+						<Text fontWeight="semibold">{heading}</Text>
 						<Box color="subtle">{icon}</Box>
 					</Flex>
 					{subHeading && (
-						<Text fontWeight="bold" fontSize="xs" color="muted">
+						<Text fontWeight="medium" fontSize="xs" color="muted">
 							{subHeading}
 						</Text>
 					)}
