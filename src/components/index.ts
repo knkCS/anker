@@ -53,6 +53,18 @@ export { TableData } from "./table-data";
 // TableItem
 export type { TableItemProps, TableMenuItem } from "./table-item";
 export { TableItem } from "./table-item";
+// Timeline
+export type { TimelineItemProps, TimelineRootProps } from "./timeline";
+export {
+	TimelineConnector,
+	TimelineContent,
+	TimelineDescription,
+	TimelineIndicator,
+	TimelineItem,
+	TimelineRoot,
+	TimelineSeparator,
+	TimelineTitle,
+} from "./timeline";
 // Widget
 export type { WidgetProps } from "./widget";
 export { Widget } from "./widget";
