@@ -65,6 +65,20 @@ export {
 	NumberInputScrubber,
 } from "./number-input";
 
+// Popover
+export type { PopoverContentProps, PopoverProps } from "./popover";
+export {
+	Popover,
+	PopoverBody,
+	PopoverCloseTrigger,
+	PopoverContent,
+	PopoverDescription,
+	PopoverFooter,
+	PopoverHeader,
+	PopoverTitle,
+	PopoverTrigger,
+} from "./popover";
+
 // Progress
 export type { ProgressCircleProps, ProgressProps } from "./progress";
 export { Progress, ProgressCircle } from "./progress";
