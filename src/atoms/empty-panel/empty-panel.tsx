@@ -19,11 +19,11 @@ export const EmptyPanel: React.FC<EmptyPanelProps> = ({
 				textAlign="center"
 				gap={4}
 			>
-				<Heading fontSize="lg" color="gray.500" as="h3">
+				<Heading fontSize="lg" color="muted" as="h3">
 					{header}
 				</Heading>
 
-				<Text color="gray.500" fontSize="sm">
+				<Text color="muted" fontSize="sm">
 					{description}
 				</Text>
 			</Stack>
