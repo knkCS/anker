@@ -2,6 +2,18 @@
 export type { AccordionItemProps, AccordionRootProps } from "./accordion";
 export { AccordionItem, AccordionRoot } from "./accordion";
 
+// Breadcrumb
+export type { BreadcrumbLinkProps, BreadcrumbRootProps } from "./breadcrumb";
+export {
+	BreadcrumbCurrentLink,
+	BreadcrumbEllipsis,
+	BreadcrumbItem,
+	BreadcrumbLink,
+	BreadcrumbList,
+	BreadcrumbRoot,
+	BreadcrumbSeparator,
+} from "./breadcrumb";
+
 export type { AlertProps } from "./alert";
 // Alert
 export { Alert } from "./alert";
