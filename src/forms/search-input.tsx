@@ -2,7 +2,7 @@ import { Input, InputGroup, type InputProps } from "@chakra-ui/react";
 import debounce from "lodash.debounce";
 import { Search } from "lucide-react";
 import type React from "react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 export interface SearchInputProps
 	extends Omit<InputProps, "onChange" | "defaultValue"> {
@@ -31,6 +31,12 @@ export const SearchInput: React.FC<SearchInputProps> = (props) => {
 		() => debounce((term: string) => onSearch(term), debounceMs),
 		[onSearch, debounceMs],
 	);
+
+	useEffect(() => {
+		return () => {
+			debouncedSearch.cancel();
+		};
+	}, [debouncedSearch]);
 
 	const handleChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {

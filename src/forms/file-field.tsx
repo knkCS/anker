@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Text } from "@chakra-ui/react";
 import { Upload } from "lucide-react";
 import type React from "react";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import type { FieldValues } from "react-hook-form";
 import { FormField, type FormFieldProps } from "./form-field";
 
@@ -149,6 +149,14 @@ const DropzoneContent: React.FC<DropzoneContentProps> = ({
 		},
 		[field, multiple],
 	);
+
+	useEffect(() => {
+		return () => {
+			if (field.value?.preview) {
+				URL.revokeObjectURL(field.value.preview);
+			}
+		};
+	}, [field.value]);
 
 	const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
 		noClick: true,

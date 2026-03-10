@@ -23,6 +23,13 @@ export const TextOverflow: React.FC<TextOverflowProps> = memo((props) => {
 
 	useEffect(() => {
 		compareSize();
+		const element = textElementRef.current;
+		if (!element) return;
+		const observer = new ResizeObserver(compareSize);
+		observer.observe(element);
+		return () => {
+			observer.disconnect();
+		};
 	}, [compareSize]);
 
 	return (
