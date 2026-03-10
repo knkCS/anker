@@ -35,6 +35,11 @@ export {
 	useColorMode,
 	useColorModeValue,
 } from "./color-mode";
+
+// HoverCard
+export type { HoverCardProps } from "./hover-card";
+export { HoverCard } from "./hover-card";
+
 export type { LeavePageConfirmationProps } from "./leave-page-confirmation";
 // LeavePageConfirmation
 export { LeavePageConfirmation } from "./leave-page-confirmation";
