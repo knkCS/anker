@@ -70,6 +70,22 @@ The theme includes both **UI-optimized color scales** (primary, secondary, gray)
 
 The UI primary blue intentionally differs from the brand guideline blue. The brand blue (`#004576`) is a deep navy designed for print materials; the UI blue (`#2087d7`) is brighter for web accessibility and matches the existing Core application.
 
+## Font
+
+The theme uses [Inter](https://rsms.me/inter/) as its primary typeface. Install the variable font in your app:
+
+```bash
+npm install @fontsource-variable/inter
+```
+
+Then import it in your app entry point:
+
+```tsx
+import "@fontsource-variable/inter";
+```
+
+If Inter is not installed, the theme gracefully falls back to the system font stack (`-apple-system, system-ui, sans-serif`).
+
 ## Development
 
 ```bash
