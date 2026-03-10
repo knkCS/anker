@@ -68,6 +68,21 @@ export {
 	TimelineSeparator,
 	TimelineTitle,
 } from "./timeline";
+// TreeView
+export type { TreeViewBranchProps, TreeViewItemProps, TreeViewRootProps } from "./tree-view";
+export {
+	TreeViewBranch,
+	TreeViewBranchContent,
+	TreeViewBranchControl,
+	TreeViewBranchIndicator,
+	TreeViewBranchText,
+	TreeViewBranchTrigger,
+	TreeViewItem,
+	TreeViewItemIndicator,
+	TreeViewItemText,
+	TreeViewRoot,
+	TreeViewTree,
+} from "./tree-view";
 // Widget
 export type { WidgetProps } from "./widget";
 export { Widget } from "./widget";
