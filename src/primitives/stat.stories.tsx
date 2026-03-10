@@ -22,7 +22,10 @@ export const Default: Story = {
 		return (
 			<StatRoot>
 				<StatLabel>Total Revenue</StatLabel>
-				<StatValueText value={45670} formatOptions={{ style: "currency", currency: "EUR" }} />
+				<StatValueText
+					value={45670}
+					formatOptions={{ style: "currency", currency: "EUR" }}
+				/>
 			</StatRoot>
 		);
 	},
@@ -34,14 +37,20 @@ export const WithTrend: Story = {
 			<Stack direction="row" gap="8">
 				<StatRoot>
 					<StatLabel>Revenue</StatLabel>
-					<StatValueText value={345670} formatOptions={{ style: "currency", currency: "EUR" }} />
+					<StatValueText
+						value={345670}
+						formatOptions={{ style: "currency", currency: "EUR" }}
+					/>
 					<StatHelpText>
 						<StatUpTrend>23.5%</StatUpTrend>
 					</StatHelpText>
 				</StatRoot>
 				<StatRoot>
 					<StatLabel>Costs</StatLabel>
-					<StatValueText value={120000} formatOptions={{ style: "currency", currency: "EUR" }} />
+					<StatValueText
+						value={120000}
+						formatOptions={{ style: "currency", currency: "EUR" }}
+					/>
 					<StatHelpText>
 						<StatDownTrend>12.1%</StatDownTrend>
 					</StatHelpText>
@@ -58,7 +67,10 @@ export const WithInfoTip: Story = {
 				<StatLabel info="Revenue from all sources this month">
 					Monthly Revenue
 				</StatLabel>
-				<StatValueText value={98500} formatOptions={{ style: "currency", currency: "EUR" }} />
+				<StatValueText
+					value={98500}
+					formatOptions={{ style: "currency", currency: "EUR" }}
+				/>
 			</StatRoot>
 		);
 	},

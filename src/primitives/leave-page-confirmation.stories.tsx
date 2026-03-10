@@ -11,44 +11,52 @@ const meta = {
 export default meta;
 type Story = StoryObj;
 
+function DefaultDemo() {
+	const [blocked, setBlocked] = useState(false);
+	return (
+		<>
+			<Button onClick={() => setBlocked(true)}>Simulate navigation</Button>
+			<LeavePageConfirmation
+				blocked={blocked}
+				onConfirmLeave={() => {
+					setBlocked(false);
+					console.log("User confirmed leave");
+				}}
+				onCancelLeave={() => {
+					setBlocked(false);
+					console.log("User cancelled leave");
+				}}
+			/>
+		</>
+	);
+}
+
 export const Default: Story = {
 	render() {
-		const [blocked, setBlocked] = useState(false);
-		return (
-			<>
-				<Button onClick={() => setBlocked(true)}>Simulate navigation</Button>
-				<LeavePageConfirmation
-					blocked={blocked}
-					onConfirmLeave={() => {
-						setBlocked(false);
-						console.log("User confirmed leave");
-					}}
-					onCancelLeave={() => {
-						setBlocked(false);
-						console.log("User cancelled leave");
-					}}
-				/>
-			</>
-		);
+		return <DefaultDemo />;
 	},
 };
 
+function CustomLabelsDemo() {
+	const [blocked, setBlocked] = useState(false);
+	return (
+		<>
+			<Button onClick={() => setBlocked(true)}>Trigger dialog</Button>
+			<LeavePageConfirmation
+				blocked={blocked}
+				onConfirmLeave={() => setBlocked(false)}
+				onCancelLeave={() => setBlocked(false)}
+				title="Discard changes?"
+				message="All unsaved work will be lost."
+				confirmLabel="Discard"
+				cancelLabel="Keep editing"
+			/>
+		</>
+	);
+}
+
 export const CustomLabels: Story = {
 	render() {
-		const [blocked, setBlocked] = useState(false);
-		return (
-			<>
-				<Button onClick={() => setBlocked(true)}>Trigger dialog</Button>
-				<LeavePageConfirmation
-					blocked={blocked}
-					onConfirmLeave={() => setBlocked(false)}
-					onCancelLeave={() => setBlocked(false)}
-					title="Discard changes?"
-					message="All unsaved work will be lost."
-					confirmLabel="Discard"
-					cancelLabel="Keep editing"
-				/>
-			</>
-		);
+		return <CustomLabelsDemo />;
 	},
 };
