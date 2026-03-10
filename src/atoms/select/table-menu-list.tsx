@@ -151,10 +151,10 @@ export const TableOption = <T extends BaseOption>({
 	return (
 		<Table.Row
 			{...rowProps}
-			_hover={{ bg: isFocused ? "gray.100" : "gray.50" }}
+			_hover={{ bg: isFocused ? "bg-muted" : "bg-subtle" }}
 			cursor="pointer"
 			_even={{
-				bg: isSelected ? "blue.100" : isFocused ? "gray.100" : undefined,
+				bg: isSelected ? "primary.subtle" : isFocused ? "bg-muted" : undefined,
 			}}
 		>
 			{derivedColumns.map((col) => (
