@@ -1,1 +1,1 @@
-export { Stat } from "./stat";
+export { Stat, type StatProps } from "./stat";

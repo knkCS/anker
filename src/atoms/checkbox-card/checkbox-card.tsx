@@ -8,7 +8,7 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 
-type CheckboxCardGroupProps = StackProps & {
+export type CheckboxCardGroupProps = StackProps & {
 	defaultValue?: UseCheckboxGroupProps["defaultValue"];
 	value?: UseCheckboxGroupProps["value"];
 	onValueChange?: (value: string[]) => void;
@@ -25,7 +25,7 @@ export const CheckboxCardGroup = (props: CheckboxCardGroupProps) => {
 	const cards = React.useMemo(
 		() =>
 			React.Children.toArray(children)
-				.filter<React.ReactElement<RadioCardProps>>(React.isValidElement)
+				.filter<React.ReactElement<CheckboxCardProps>>(React.isValidElement)
 				.map((card) => {
 					return React.cloneElement(card, {
 						checkboxProps: group.getItemProps({
@@ -46,12 +46,12 @@ type CheckboxItemProps = ReturnType<
 	ReturnType<typeof useCheckboxGroup>["getItemProps"]
 >;
 
-interface RadioCardProps extends BoxProps {
+export interface CheckboxCardProps extends BoxProps {
 	value: string;
 	checkboxProps?: CheckboxItemProps;
 }
 
-export const CheckboxCard = (props: RadioCardProps) => {
+export const CheckboxCard = (props: CheckboxCardProps) => {
 	const { checkboxProps, children, ...rest } = props;
 
 	const id = React.useId();

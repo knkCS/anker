@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import type React from "react";
 
-interface StatProps extends BoxProps {
+export interface StatProps extends BoxProps {
 	/** An icon element rendered as React node (e.g., a lucide-react icon) */
 	icon?: React.ReactNode;
 	label: string;

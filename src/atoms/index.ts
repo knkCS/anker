@@ -15,7 +15,12 @@ export {
 } from "./actions";
 
 // CheckboxCard
-export { CheckboxCard, CheckboxCardGroup } from "./checkbox-card";
+export {
+	CheckboxCard,
+	CheckboxCardGroup,
+	type CheckboxCardGroupProps,
+	type CheckboxCardProps,
+} from "./checkbox-card";
 
 // Comment
 export {
@@ -89,7 +94,7 @@ export {
 } from "./select";
 
 // Stat
-export { Stat } from "./stat";
+export { Stat, type StatProps } from "./stat";
 
 // StatusBadge
 export { StatusBadge, type StatusBadgeProps } from "./status-badge";
