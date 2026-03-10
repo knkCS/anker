@@ -287,6 +287,7 @@ export const StepperStep: React.FC<StepperStepProps> = (props) => {
 			css={styles.step}
 			data-active={dataAttr(step.isActive)}
 			data-completed={dataAttr(step.isCompleted)}
+			aria-current={step.isActive ? "step" : undefined}
 			className={cx("stepper__step", props.className)}
 		>
 			<StepperIcon icon={icon} isActive={isActive} isCompleted={isCompleted} />
