@@ -20,7 +20,7 @@ export const Action = ({
 			p={"15px"}
 			tabIndex={0}
 			cursor={cursor}
-			transition={"all 0.2s"}
+			transition={"background-color 150ms, color 150ms, opacity 150ms"}
 			bg={color}
 			asChild
 		>
