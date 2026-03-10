@@ -61,6 +61,14 @@ npm run typecheck    # TypeScript checking (tsc --noEmit)
 npm run test         # Run tests
 ```
 
+### Brand Color Guidelines
+
+The knk Brand Guidelines (October 2021) define six brand colors. The theme includes these as exact `brand.*` tokens (`brand.blue`, `brand.navy`, `brand.light-blue`, `brand.orange`, `brand.gold`, `brand.light-gray`) alongside the UI-optimized `primary`/`secondary`/`gray` scales.
+
+- **UI primary blue** (`primary.500: #2087d7`) is intentionally brighter than brand blue (`brand.blue: #004576`) for web accessibility
+- **UI secondary orange** (`secondary.500: #e9580c`) matches the brand orange exactly
+- Use `brand.*` tokens for branding elements (logos, headers, about pages), use `primary.*`/`secondary.*` for interactive UI (buttons, links, focus rings)
+
 ## Design Principles
 
 - **No domain coupling**: Components must not import from any service codebase (no @root/, no API calls, no service-specific types)

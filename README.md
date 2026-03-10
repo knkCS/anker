@@ -53,6 +53,23 @@ import { InputField, ArrayField, FormField } from "@knkcs/anker/forms";
 import { ConfirmModalProvider, useConfirmModal } from "@knkcs/anker/feedback";
 ```
 
+## Brand Colors
+
+The theme includes both **UI-optimized color scales** (primary, secondary, gray) and **exact brand guideline colors** from the knk Brand Guidelines (October 2021).
+
+| Token | HEX | Use |
+|-------|-----|-----|
+| `primary.500` | `#2087d7` | UI blue — buttons, links, focus rings |
+| `secondary.500` | `#e9580c` | UI orange — matches brand orange |
+| `brand.blue` | `#004576` | Exact brand blue — logos, headers, branding |
+| `brand.navy` | `#0f395d` | Dark blue variant |
+| `brand.light-blue` | `#6fa7d1` | Light blue variant |
+| `brand.orange` | `#e9580c` | Brand orange (same as secondary.500) |
+| `brand.gold` | `#f4b235` | Brand gold accent |
+| `brand.light-gray` | `#f2f2f2` | Brand neutral background |
+
+The UI primary blue intentionally differs from the brand guideline blue. The brand blue (`#004576`) is a deep navy designed for print materials; the UI blue (`#2087d7`) is brighter for web accessibility and matches the existing Core application.
+
 ## Development
 
 ```bash

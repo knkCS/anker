@@ -1,12 +1,15 @@
 /**
  * Raw color scales for the design system.
  *
- * `primary` is the brand blue, `secondary` is the brand orange,
- * and `gray` is a blue-tinted gray scale.
+ * `primary` is the UI blue (optimized for web contrast/readability),
+ * `secondary` is the brand orange (anchored to brand guideline #e9580c),
+ * `gray` is a blue-tinted gray scale, and `brand` contains the exact
+ * hex values from the knk Brand Guidelines (October 2021) for use in
+ * branding elements like headers, logos, and about pages.
  *
- * NOTE: The Core monolith had a duplicate `blue` scale in semantic tokens
- * that was identical to `primary`. That duplication is intentionally removed
- * here --- `primary` IS the blue.
+ * NOTE: The primary UI blue (#2087d7) intentionally differs from the brand
+ * guideline blue (#004576). The brand blue is a deep navy designed for print;
+ * the UI blue is brighter for web accessibility and matches the existing Core app.
  */
 const colors = {
 	primary: {
@@ -23,16 +26,26 @@ const colors = {
 		"950": { value: "#0d2744" },
 	},
 	secondary: {
-		"50": { value: "#F8D6BC" },
-		"100": { value: "#F6CAA9" },
-		"200": { value: "#F2B484" },
-		"300": { value: "#EE9D5F" },
-		"400": { value: "#EA863A" },
-		"500": { value: "#E47018" },
-		"600": { value: "#B15713" },
-		"700": { value: "#7E3E0D" },
-		"800": { value: "#4C2508" },
-		"900": { value: "#190C03" },
+		"50": { value: "#FEF0E6" },
+		"100": { value: "#FCD9BF" },
+		"200": { value: "#F9B888" },
+		"300": { value: "#F59651" },
+		"400": { value: "#F27726" },
+		"500": { value: "#e9580c" },
+		"600": { value: "#C54A0A" },
+		"700": { value: "#9A3A08" },
+		"800": { value: "#6F2A06" },
+		"900": { value: "#441A03" },
+	},
+	// Exact brand guideline colors for branding elements (headers, logos, about pages).
+	// See: knk Brand Guidelines, October 2021
+	brand: {
+		blue: { value: "#004576" },
+		navy: { value: "#0f395d" },
+		"light-blue": { value: "#6fa7d1" },
+		orange: { value: "#e9580c" },
+		gold: { value: "#f4b235" },
+		"light-gray": { value: "#f2f2f2" },
 	},
 	// Blue-tinted gray
 	gray: {
