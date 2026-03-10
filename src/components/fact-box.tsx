@@ -1,0 +1,135 @@
+import {
+	Box,
+	ButtonGroup,
+	type CardRootProps,
+	Collapsible,
+	Flex,
+	HStack,
+	IconButton,
+	Menu,
+	Portal,
+	Text,
+} from "@chakra-ui/react";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import React, { type MouseEventHandler } from "react";
+import { CardRoot } from "./card";
+
+export interface FactBoxAction {
+	id: number;
+	type: "button" | "menuButton";
+	ariaLabel: string;
+	icon?: React.ReactElement;
+	onClick?: MouseEventHandler<HTMLButtonElement>;
+	onSelect?: VoidFunction;
+	childs?: FactBoxAction[];
+}
+
+export interface FactBoxProps extends CardRootProps {
+	name?: string | React.ReactNode;
+	actions?: FactBoxAction[];
+	children: React.ReactNode;
+	collapsible?: boolean;
+}
+
+export const FactBox: React.FC<FactBoxProps> = (props) => {
+	const { name, actions, collapsible = true, ...rest } = props;
+
+	const [show, setShow] = React.useState(true);
+
+	const handleToggle = () => {
+		setShow(!show);
+	};
+
+	return (
+		<Box w="full">
+			{collapsible ? (
+				<Flex
+					flexDirection="column"
+					mx="auto"
+					borderBottom="1px solid"
+					borderColor="border"
+				>
+					<Box
+						display={{ md: "flex" }}
+						alignItems={{ md: "center" }}
+						justifyContent={{ md: "space-between" }}
+					>
+						<Box minW={0} flex="1 1 0%">
+							<HStack>
+								<IconButton
+									aria-label={show ? "Collapse" : "Expand"}
+									variant="ghost"
+									size="sm"
+									onClick={(e) => {
+										e.preventDefault();
+										handleToggle();
+									}}
+								>
+									{show ? (
+										<ChevronDown size={16} />
+									) : (
+										<ChevronRight size={16} />
+									)}
+								</IconButton>
+								{typeof name === "string" ? <Text>{name}</Text> : name}
+							</HStack>
+						</Box>
+						{actions ? (
+							<Flex flexShrink={0} ml={{ md: 4 }}>
+								<ButtonGroup>
+									{actions.map((action) =>
+										action.type === "button" ? (
+											<IconButton
+												key={action.id}
+												aria-label={action.ariaLabel}
+												size="md"
+												variant="ghost"
+												onClick={action.onClick}
+											>
+												{action.icon}
+											</IconButton>
+										) : (
+											<Menu.Root key={action.id}>
+												<Menu.Trigger asChild>
+													<IconButton
+														aria-label={action.ariaLabel}
+														size="md"
+														variant="ghost"
+													>
+														{action.icon}
+													</IconButton>
+												</Menu.Trigger>
+												<Portal>
+													<Menu.Positioner>
+														<Menu.Content>
+															{action.childs?.map((item) => (
+																<Menu.Item
+																	key={item.id}
+																	onSelect={item.onSelect}
+																	aria-label={item.ariaLabel}
+																	value={`action-${item.id}`}
+																>
+																	{item.icon}
+																	{item.ariaLabel}
+																</Menu.Item>
+															))}
+														</Menu.Content>
+													</Menu.Positioner>
+												</Portal>
+											</Menu.Root>
+										),
+									)}
+								</ButtonGroup>
+							</Flex>
+						) : null}
+					</Box>
+				</Flex>
+			) : null}
+			<Collapsible.Root open={show}>
+				<Collapsible.Content>
+					<CardRoot {...rest}>{rest.children}</CardRoot>
+				</Collapsible.Content>
+			</Collapsible.Root>
+		</Box>
+	);
+};
