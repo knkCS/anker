@@ -35,14 +35,12 @@ export const TableItem = <T extends string = string>({
 	return (
 		<Flex
 			role="row"
-			boxShadow="base"
+			boxShadow={isActive ? "0 0 0 2px var(--chakra-colors-accent)" : "sm"}
 			bg="bg-surface"
-			borderRadius="2xl"
+			borderRadius="lg"
 			alignItems="stretch"
 			overflow="hidden"
 			transition="all 200ms ease"
-			outline="solid 3px transparent"
-			outlineColor={isActive ? "accent" : "transparent"}
 		>
 			<Flex
 				width="100%"
