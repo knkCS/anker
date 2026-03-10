@@ -24,6 +24,10 @@ export interface PersonaProps {
 	 * The size of the persona, from 2xs to 2xl.
 	 */
 	size?: "2xs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+	/**
+	 * When true, adds hover styling and pointer cursor for clickable personas.
+	 */
+	interactive?: boolean;
 }
 
 interface PersonaStyles {
@@ -36,10 +40,10 @@ const PersonaStylesContext = createContext<PersonaStyles>({});
 const usePersonaStyles = () => useContext(PersonaStylesContext);
 
 export const Persona: React.FC<PersonaProps> = (props) => {
-	const { name, size = "sm", hideDetails, label } = props;
+	const { name, size = "sm", hideDetails, label, interactive } = props;
 
 	return (
-		<PersonaContainer>
+		<PersonaContainer interactive={interactive}>
 			<PersonaAvatar name={name} size={size} />
 			{!hideDetails && (
 				<PersonaDetails>
@@ -58,13 +62,17 @@ export interface PersonaContainerProps extends HTMLChakraProps<"div"> {
 	 * Optional style overrides passed down to child components via context.
 	 */
 	styles?: PersonaStyles;
+	/**
+	 * When true, adds hover styling and pointer cursor for clickable personas.
+	 */
+	interactive?: boolean;
 }
 
 export const PersonaContainer = ({
 	ref,
 	...props
 }: PersonaContainerProps & { ref?: React.Ref<HTMLDivElement> }) => {
-	const { children, styles = {}, ...rest } = props;
+	const { children, styles = {}, interactive, ...rest } = props;
 
 	return (
 		<PersonaStylesContext.Provider value={styles}>
@@ -73,6 +81,14 @@ export const PersonaContainer = ({
 				display="flex"
 				flexDirection="row"
 				alignItems="center"
+				{...(interactive && {
+					cursor: "pointer",
+					borderRadius: "md",
+					transition: "background-color 150ms",
+					_hover: { bg: "bg-subtle" },
+					px: 2,
+					py: 1,
+				})}
 				{...rest}
 			>
 				{children}
