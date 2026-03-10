@@ -1,6 +1,6 @@
 // Card
 export type { CardProps } from "./card";
-export { CardRoot } from "./card";
+export { Card } from "./card";
 
 // Drawer
 export type { DrawerProps } from "./drawer";

@@ -1,11 +1,11 @@
 import { Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { CardRoot } from "./card";
+import { Card } from "./card";
 
 const meta = {
 	title: "Components/Card",
-	component: CardRoot,
-} satisfies Meta<typeof CardRoot>;
+	component: Card,
+} satisfies Meta<typeof Card>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

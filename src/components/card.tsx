@@ -1,21 +1,48 @@
-import { Card, type CardRootProps } from "@chakra-ui/react";
+import {
+	Card as ChakraCard,
+	type CardRootProps,
+	Heading,
+} from "@chakra-ui/react";
+import type React from "react";
 
-export interface CardProps extends CardRootProps {
-	children: React.ReactNode;
-	/** Maximum width of the card. Defaults to "full". */
+export interface CardProps extends Omit<CardRootProps, "title"> {
 	maxW?: CardRootProps["maxW"];
+	/** Card title rendered in Card.Header. */
+	title?: React.ReactNode;
+	/** Custom header content. Overrides title if both provided. */
+	header?: React.ReactNode;
+	/** Footer content rendered in Card.Footer. */
+	footer?: React.ReactNode;
+	children: React.ReactNode;
 }
 
-export const CardRoot: React.FC<CardProps> = ({
+export const Card = ({
+	ref,
 	maxW = "full",
+	title,
+	header,
+	footer,
 	children,
 	...props
-}) => {
+}: CardProps & { ref?: React.Ref<HTMLDivElement> }) => {
 	return (
-		<Card.Root w="full" maxW={maxW} bg="bg-surface" margin="0 auto" {...props}>
-			<Card.Body height="full" overflow="hidden">
-				{children}
-			</Card.Body>
-		</Card.Root>
+		<ChakraCard.Root
+			ref={ref}
+			bg="bg-surface"
+			w="full"
+			height="full"
+			maxW={maxW}
+			margin="0 auto"
+			overflow="hidden"
+			{...props}
+		>
+			{(header || title) && (
+				<ChakraCard.Header>
+					{header ?? <Heading size="md">{title}</Heading>}
+				</ChakraCard.Header>
+			)}
+			<ChakraCard.Body overflow="hidden">{children}</ChakraCard.Body>
+			{footer && <ChakraCard.Footer>{footer}</ChakraCard.Footer>}
+		</ChakraCard.Root>
 	);
 };
