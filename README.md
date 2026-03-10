@@ -20,16 +20,17 @@ npm install @knkcs/anker
 
 ```tsx
 import { Provider } from "@knkcs/anker/primitives";
-import system from "@knkcs/anker/theme";
 
 function App() {
   return (
-    <Provider value={system}>
+    <Provider>
       <YourApp />
     </Provider>
   );
 }
 ```
+
+The `Provider` defaults to anker's theme system. To override with a custom system, pass it via the `system` prop.
 
 ### Imports by layer
 
@@ -38,7 +39,7 @@ function App() {
 import system from "@knkcs/anker/theme";
 
 // Chakra UI wrappers with consistent defaults
-import { Alert, Avatar, Menu, Tooltip } from "@knkcs/anker/primitives";
+import { Alert, Avatar, Menu, Skeleton, Tooltip } from "@knkcs/anker/primitives";
 
 // Higher-level composites (card, drawer, modal, stepper, table)
 import { Card, Drawer, Modal, Stepper } from "@knkcs/anker/components";
@@ -70,6 +71,17 @@ The theme includes both **UI-optimized color scales** (primary, secondary, gray)
 
 The UI primary blue intentionally differs from the brand guideline blue. The brand blue (`#004576`) is a deep navy designed for print materials; the UI blue (`#2087d7`) is brighter for web accessibility and matches the existing Core application.
 
+## Notable Component Props
+
+| Component | Prop | Description |
+|-----------|------|-------------|
+| `Modal`, `Drawer` | `loading` | Shows spinner on save button during async operations |
+| `Table`, `ArrayField` | `emptyState` | Content to display when there are no items |
+| `Card` | `title`, `header`, `footer` | Slot props for structured card layout |
+| `Persona` | `interactive` | Adds hover state and pointer cursor |
+| `TypeBadge` | `colorPalette` | Chakra color palette for visual differentiation |
+| `FormField` | `description` | Persistent description that shows alongside errors |
+
 ## Font
 
 The theme uses [Inter](https://rsms.me/inter/) as its primary typeface. Install the variable font in your app:
@@ -85,6 +97,18 @@ import "@fontsource-variable/inter";
 ```
 
 If Inter is not installed, the theme gracefully falls back to the system font stack (`-apple-system, system-ui, sans-serif`).
+
+## Accessibility
+
+- **Reduced motion** — The theme globally disables animations and transitions when the user prefers reduced motion (`prefers-reduced-motion: reduce`)
+- **RTL-ready** — All components use logical CSS properties (`marginInlineStart`, `insetInlineEnd`) instead of physical direction properties
+- **Form ARIA** — `FormField` automatically links inputs to helper text and errors via `aria-describedby`, errors are announced with `aria-live="polite"`
+- **Touch targets** — All interactive elements meet the WCAG 44×44px minimum touch target size
+- **Stepper** — Active step uses `aria-current="step"`
+
+## Breaking Changes
+
+- **FactBox**: The `childs` prop on `FactBoxAction` has been renamed to `items`
 
 ## Development
 

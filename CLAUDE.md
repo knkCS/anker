@@ -12,10 +12,10 @@ Anker is the shared UI component library for the knk software group, extracted a
 
 Single npm package (`@knkcs/anker`) with subpath exports organized in six layers:
 
-1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, and 24 component recipes. Consumers use `<ChakraProvider value={system}>`.
-2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Alert, Avatar, Menu, Tooltip, Switch, etc.). 13 components.
+1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, and 24 component recipes. Consumers use `<Provider>` (defaults to anker's system).
+2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Alert, Avatar, Menu, Skeleton, Tooltip, Switch, etc.). 14 components.
 3. **`/components`** — Higher-level composites: Card, Drawer, Modal, Stepper, Table, Widget, FactBox. 10 components.
-4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, SearchInput, DateTime, EmptyState, Comment, Select, etc. 15 component groups.
+4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, SearchInput, DateTime, EmptyState, Comment, Select, etc. 14 component groups.
 5. **`/forms`** — Form controls built on React Hook Form + Zod: InputField, TextareaField, ArrayField, DatePickerField, CodeField, etc. 19 components.
 6. **`/feedback`** — Feedback patterns: ConfirmModal with provider + `useConfirmModal` hook.
 
@@ -37,7 +37,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in six layers
 ```
 src/
 ├── theme/           # Design tokens + recipes
-│   ├── tokens/      # colors, semantic, shadows, spacing, radii, typography
+│   ├── tokens/      # colors, semantic, shadows, spacing, radii, typography, animations, z-index
 │   ├── recipes/     # Chakra component recipes (24 files)
 │   └── utils/       # Color manipulation helpers
 ├── primitives/      # Chakra wrappers (alert, avatar, menu, tooltip, etc.)
@@ -76,7 +76,10 @@ The knk Brand Guidelines (October 2021) define six brand colors. The theme inclu
 - **Props over i18n**: User-facing strings are props with English defaults, not i18n keys
 - **Lucide icons only**: All icons use lucide-react. No FontAwesome.
 - **React Hook Form**: Form controls use RHF Controller pattern. Provide ControlledFormField for non-RHF usage.
-- **Accessibility**: All interactive components must have proper ARIA attributes
+- **Accessibility**: All interactive components must have proper ARIA attributes (see Accessibility Conventions below)
+- **RTL-ready**: Use logical CSS properties (`marginInlineStart`, `insetInlineEnd`) instead of physical direction properties (`ml`, `right`)
+- **Reduced motion**: The theme handles `prefers-reduced-motion` globally — do not add per-component media queries
+- **displayName required**: All exported components must have `displayName` set for React DevTools
 - **Composable over opinionated**: Prefer render props and slots over baked-in behavior (e.g., Modal accepts children, not a Formik form)
 
 ## Patterns
@@ -106,6 +109,14 @@ interface InputFieldProps {
 }
 ```
 
+### Accessibility Conventions
+
+- **FormField** provides `aria-describedby` automatically via the children render callback, linking inputs to their description, helper text, and error messages
+- **Error messages** use `aria-live="polite"` so screen readers announce validation errors when they appear
+- **Stepper** uses `aria-current="step"` on the active step
+- **Touch targets**: All interactive elements (buttons, icon buttons) must meet the 44×44px minimum — use `minWidth="44px"` and `minHeight="44px"` if the visual size is smaller
+- **Icon-only buttons**: Must always have an `aria-label` prop (configurable, with English default)
+
 ### Theme Recipes
 
 Component recipes use Chakra v3's `defineRecipe` (single-part) or `defineSlotRecipe` (multi-part):
@@ -113,6 +124,10 @@ Component recipes use Chakra v3's `defineRecipe` (single-part) or `defineSlotRec
 import { defineRecipe } from "@chakra-ui/react";
 export const buttonRecipe = defineRecipe({ ... });
 ```
+
+## Breaking Changes
+
+- **FactBox**: The `childs` prop on `FactBoxAction` has been renamed to `items`
 
 ## Peer Dependencies
 
