@@ -34,6 +34,12 @@ TreeViewItemText.displayName = "TreeViewItemText";
 export const TreeViewItemIndicator = ChakraTreeView.ItemIndicator;
 TreeViewItemIndicator.displayName = "TreeViewItemIndicator";
 
+export const TreeViewNode = ChakraTreeView.Node;
+TreeViewNode.displayName = "TreeViewNode";
+
+export const TreeViewLabel = ChakraTreeView.Label;
+TreeViewLabel.displayName = "TreeViewLabel";
+
 export type TreeViewRootProps = ChakraTreeView.RootProps;
 export type TreeViewBranchProps = ChakraTreeView.BranchProps;
 export type TreeViewItemProps = ChakraTreeView.ItemProps;

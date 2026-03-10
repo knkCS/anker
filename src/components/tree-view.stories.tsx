@@ -1,16 +1,43 @@
+import { createTreeCollection } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { ChevronRight, File, Folder } from "lucide-react";
 import {
-	TreeViewBranch,
-	TreeViewBranchContent,
 	TreeViewBranchControl,
 	TreeViewBranchIndicator,
 	TreeViewBranchText,
 	TreeViewItem,
 	TreeViewItemText,
+	TreeViewNode,
 	TreeViewRoot,
 	TreeViewTree,
 } from "./tree-view";
+
+const collection = createTreeCollection({
+	nodeToValue: (node) => node.id,
+	nodeToString: (node) => node.name,
+	rootNode: {
+		id: "ROOT",
+		name: "",
+		children: [
+			{
+				id: "src",
+				name: "src",
+				children: [
+					{
+						id: "components",
+						name: "components",
+						children: [
+							{ id: "button.tsx", name: "button.tsx" },
+							{ id: "card.tsx", name: "card.tsx" },
+						],
+					},
+					{ id: "index.ts", name: "index.ts" },
+				],
+			},
+			{ id: "package.json", name: "package.json" },
+		],
+	},
+});
 
 const meta = {
 	title: "Components/TreeView",
@@ -23,46 +50,26 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
 	render() {
 		return (
-			<TreeViewRoot maxW="300px">
+			<TreeViewRoot collection={collection} maxW="300px">
 				<TreeViewTree>
-					<TreeViewBranch value="src" defaultExpanded>
-						<TreeViewBranchControl>
-							<TreeViewBranchIndicator>
-								<ChevronRight size={14} />
-							</TreeViewBranchIndicator>
-							<Folder size={14} />
-							<TreeViewBranchText>src</TreeViewBranchText>
-						</TreeViewBranchControl>
-						<TreeViewBranchContent>
-							<TreeViewBranch value="components">
+					<TreeViewNode
+						render={({ node, nodeState }) =>
+							nodeState.isBranch ? (
 								<TreeViewBranchControl>
 									<TreeViewBranchIndicator>
 										<ChevronRight size={14} />
 									</TreeViewBranchIndicator>
 									<Folder size={14} />
-									<TreeViewBranchText>components</TreeViewBranchText>
+									<TreeViewBranchText>{node.name}</TreeViewBranchText>
 								</TreeViewBranchControl>
-								<TreeViewBranchContent>
-									<TreeViewItem value="button.tsx">
-										<File size={14} />
-										<TreeViewItemText>button.tsx</TreeViewItemText>
-									</TreeViewItem>
-									<TreeViewItem value="card.tsx">
-										<File size={14} />
-										<TreeViewItemText>card.tsx</TreeViewItemText>
-									</TreeViewItem>
-								</TreeViewBranchContent>
-							</TreeViewBranch>
-							<TreeViewItem value="index.ts">
-								<File size={14} />
-								<TreeViewItemText>index.ts</TreeViewItemText>
-							</TreeViewItem>
-						</TreeViewBranchContent>
-					</TreeViewBranch>
-					<TreeViewItem value="package.json">
-						<File size={14} />
-						<TreeViewItemText>package.json</TreeViewItemText>
-					</TreeViewItem>
+							) : (
+								<TreeViewItem>
+									<File size={14} />
+									<TreeViewItemText>{node.name}</TreeViewItemText>
+								</TreeViewItem>
+							)
+						}
+					/>
 				</TreeViewTree>
 			</TreeViewRoot>
 		);

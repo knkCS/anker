@@ -84,6 +84,8 @@ export {
 	TreeViewItem,
 	TreeViewItemIndicator,
 	TreeViewItemText,
+	TreeViewLabel,
+	TreeViewNode,
 	TreeViewRoot,
 	TreeViewTree,
 } from "./tree-view";
