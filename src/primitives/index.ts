@@ -65,6 +65,10 @@ export {
 	NumberInputScrubber,
 } from "./number-input";
 
+// Progress
+export type { ProgressCircleProps, ProgressProps } from "./progress";
+export { Progress, ProgressCircle } from "./progress";
+
 // Prose
 export { Prose } from "./prose";
 export type { ProviderProps } from "./provider";
