@@ -1,5 +1,6 @@
 import { Field, HStack, Text } from "@chakra-ui/react";
 import type React from "react";
+import { useId } from "react";
 import {
 	Controller,
 	type FieldValues,
@@ -23,6 +24,8 @@ export interface FormFieldProps<T extends FieldValues> {
 		onBlur: () => void;
 		ref: React.Ref<any>;
 		name: string;
+		/** Computed aria-describedby linking to helper/description/error elements. */
+		"aria-describedby"?: string;
 	}) => React.ReactNode;
 }
 
@@ -38,46 +41,63 @@ export function FormField<T extends FieldValues>({
 	children,
 }: FormFieldProps<T>) {
 	const { control } = useFormContext<T>();
+	const uid = useId();
+	const descriptionId = `${uid}-description`;
+	const helperId = `${uid}-helper`;
+	const errorId = `${uid}-error`;
 
 	return (
 		<Controller
 			name={name}
 			control={control}
-			render={({ field, fieldState }) => (
-				<Field.Root
-					invalid={!!fieldState.error}
-					required={required}
-					disabled={disabled}
-					readOnly={readOnly}
-				>
-					{label &&
-						(typeof label === "string" ? (
-							<HStack>
-								<Field.Label flex="1" htmlFor={name}>
-									{label}
-								</Field.Label>
-								{actions}
-							</HStack>
-						) : (
-							label
-						))}
-					{children(field)}
-					{description && (
-						<Text fontSize="xs" color="muted">
-							{description}
-						</Text>
-					)}
-					{helperText &&
-						(typeof helperText === "string" ? (
-							<Field.HelperText>{helperText}</Field.HelperText>
-						) : (
-							helperText
-						))}
-					{fieldState.error && (
-						<Field.ErrorText>{fieldState.error.message}</Field.ErrorText>
-					)}
-				</Field.Root>
-			)}
+			render={({ field, fieldState }) => {
+				const describedBy =
+					[
+						description ? descriptionId : null,
+						helperText ? helperId : null,
+						fieldState.error ? errorId : null,
+					]
+						.filter(Boolean)
+						.join(" ") || undefined;
+
+				return (
+					<Field.Root
+						invalid={!!fieldState.error}
+						required={required}
+						disabled={disabled}
+						readOnly={readOnly}
+					>
+						{label &&
+							(typeof label === "string" ? (
+								<HStack>
+									<Field.Label flex="1" htmlFor={name}>
+										{label}
+									</Field.Label>
+									{actions}
+								</HStack>
+							) : (
+								label
+							))}
+						{children({ ...field, "aria-describedby": describedBy })}
+						{description && (
+							<Text id={descriptionId} fontSize="xs" color="muted">
+								{description}
+							</Text>
+						)}
+						{helperText &&
+							(typeof helperText === "string" ? (
+								<Field.HelperText id={helperId}>{helperText}</Field.HelperText>
+							) : (
+								<span id={helperId}>{helperText}</span>
+							))}
+						{fieldState.error && (
+							<Field.ErrorText id={errorId}>
+								{fieldState.error.message}
+							</Field.ErrorText>
+						)}
+					</Field.Root>
+				);
+			}}
 		/>
 	);
 }

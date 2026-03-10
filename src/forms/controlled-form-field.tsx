@@ -1,5 +1,6 @@
 import { Field, HStack } from "@chakra-ui/react";
 import type React from "react";
+import { useId } from "react";
 
 export interface ControlledFormFieldProps {
 	name: string;
@@ -24,6 +25,10 @@ export const ControlledFormField: React.FC<ControlledFormFieldProps> = ({
 	actions,
 	children,
 }) => {
+	const uid = useId();
+	const helperId = `${uid}-helper`;
+	const errorId = `${uid}-error`;
+
 	return (
 		<Field.Root
 			invalid={!!errorMessage}
@@ -42,14 +47,17 @@ export const ControlledFormField: React.FC<ControlledFormFieldProps> = ({
 				) : (
 					label
 				))}
+			{/* aria-describedby must be set manually by the consumer since children is ReactNode, not a render function. */}
 			{children}
 			{helperText &&
 				(typeof helperText === "string" ? (
-					<Field.HelperText>{helperText}</Field.HelperText>
+					<Field.HelperText id={helperId}>{helperText}</Field.HelperText>
 				) : (
-					helperText
+					<span id={helperId}>{helperText}</span>
 				))}
-			{errorMessage && <Field.ErrorText>{errorMessage}</Field.ErrorText>}
+			{errorMessage && (
+				<Field.ErrorText id={errorId}>{errorMessage}</Field.ErrorText>
+			)}
 		</Field.Root>
 	);
 };
