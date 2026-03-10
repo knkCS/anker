@@ -100,6 +100,11 @@ export { Provider } from "./provider";
 export type { RadioProps } from "./radio";
 // Radio
 export { Radio, RadioGroup } from "./radio";
+
+// SegmentedControl
+export type { SegmentedControlItem, SegmentedControlProps } from "./segmented-control";
+export { SegmentedControl } from "./segmented-control";
+
 export type { SkeletonProps, SkeletonTextProps } from "./skeleton";
 // Skeleton
 export { Skeleton, SkeletonCircle, SkeletonText } from "./skeleton";
