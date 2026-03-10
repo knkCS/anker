@@ -55,7 +55,7 @@ export const DrawerRoot: React.FC<DrawerProps> = ({
 								size="sm"
 								position="absolute"
 								top={2}
-								right={2}
+								insetInlineEnd={2}
 								aria-label={closeLabel}
 							>
 								<X size={16} />

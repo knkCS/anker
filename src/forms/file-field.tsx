@@ -175,7 +175,7 @@ const DropzoneContent: React.FC<DropzoneContentProps> = ({
 					<Flex
 						pointerEvents="none"
 						top="0"
-						left="0"
+						insetInlineStart="0"
 						position="absolute"
 						backgroundColor="blackAlpha.400"
 						width="100%"

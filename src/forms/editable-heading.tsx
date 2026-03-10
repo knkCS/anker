@@ -28,7 +28,11 @@ const EditableControls: React.FC<{ editLabel: string }> = ({ editLabel }) => {
 	return (
 		<ButtonGroup>
 			<Editable.EditTrigger asChild>
-				<IconButton variant="ghost" ml={2} aria-label={editLabel}>
+				<IconButton
+					variant="ghost"
+					marginInlineStart={2}
+					aria-label={editLabel}
+				>
 					<Pencil size={20} />
 				</IconButton>
 			</Editable.EditTrigger>

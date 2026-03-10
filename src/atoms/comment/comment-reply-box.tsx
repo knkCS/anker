@@ -90,7 +90,7 @@ export const CommentReplyBox = ({
 					display={isFocused ? "flex" : "none"}
 					justifyContent="flex-end"
 				>
-					<ButtonGroup ml="auto" size="sm">
+					<ButtonGroup marginInlineStart="auto" size="sm">
 						<Button
 							variant="outline"
 							loading={isSubmitting}

@@ -22,7 +22,13 @@ export const StatusBadge: React.FC<StatusBadgeProps> = (props) => {
 	}, [color]);
 
 	return (
-		<Badge bg={color} color={textColor} rounded="base" px={2} ml={1}>
+		<Badge
+			bg={color}
+			color={textColor}
+			rounded="base"
+			px={2}
+			marginInlineStart={1}
+		>
 			{label}
 		</Badge>
 	);

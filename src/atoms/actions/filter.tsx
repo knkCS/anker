@@ -31,7 +31,7 @@ export const Filter = ({
 					color="on-accent"
 					position="absolute"
 					top={5}
-					right={-1.5}
+					insetInlineEnd={-1.5}
 				>
 					<Text fontSize="xs" fontWeight={800}>
 						{activeFilterCount}

@@ -14,7 +14,13 @@ export const TypeBadge: React.FC<TypeBadgeProps> = ({
 	...rest
 }) => {
 	return (
-		<Badge rounded="base" px={2} ml={1} colorPalette={colorPalette} {...rest}>
+		<Badge
+			rounded="base"
+			px={2}
+			marginInlineStart={1}
+			colorPalette={colorPalette}
+			{...rest}
+		>
 			{name}
 		</Badge>
 	);
