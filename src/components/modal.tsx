@@ -34,6 +34,8 @@ export interface ModalProps
 	onSave?: () => void;
 	/** Whether the save button is disabled. */
 	saveDisabled?: boolean;
+	/** Whether the save action is in progress. Shows spinner on save button. */
+	loading?: boolean;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -48,6 +50,7 @@ export const Modal: React.FC<ModalProps> = ({
 	cancelLabel = "Cancel",
 	onSave,
 	saveDisabled = false,
+	loading = false,
 	...rest
 }) => {
 	const defaultFooter = onSave ? (
@@ -59,7 +62,8 @@ export const Modal: React.FC<ModalProps> = ({
 				variant="solid"
 				colorPalette="primary"
 				onClick={onSave}
-				disabled={saveDisabled}
+				disabled={saveDisabled || loading}
+				loading={loading}
 			>
 				{saveLabel}
 			</Button>

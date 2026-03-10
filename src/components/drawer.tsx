@@ -18,6 +18,8 @@ export interface DrawerProps
 	saveLabel?: string;
 	closeLabel?: string;
 	saveButtonDisabled?: boolean;
+	/** Whether the save action is in progress. Shows spinner on save button. */
+	loading?: boolean;
 	additionalButtons?: React.ReactNode;
 	onSave?(): void;
 }
@@ -29,6 +31,7 @@ export const DrawerRoot: React.FC<DrawerProps> = ({
 	saveLabel = "Save",
 	closeLabel = "Close",
 	saveButtonDisabled = false,
+	loading = false,
 	additionalButtons,
 	onSave,
 	open,
@@ -88,7 +91,8 @@ export const DrawerRoot: React.FC<DrawerProps> = ({
 										variant="solid"
 										colorPalette="primary"
 										onClick={onSave}
-										disabled={saveButtonDisabled}
+										disabled={saveButtonDisabled || loading}
+										loading={loading}
 									>
 										{saveLabel}
 									</Button>
