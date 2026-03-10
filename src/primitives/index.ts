@@ -56,6 +56,7 @@ export { Prose } from "./prose";
 
 // Provider
 export { Provider } from "./provider";
+export type { ProviderProps } from "./provider";
 export type { RadioProps } from "./radio";
 // Radio
 export { Radio, RadioGroup } from "./radio";
