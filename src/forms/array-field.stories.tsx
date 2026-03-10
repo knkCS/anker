@@ -15,9 +15,7 @@ export const Dynamic: Story = {
 		(Story) => {
 			const methods = useForm({
 				defaultValues: {
-					headers: [
-						{ key: "Content-Type", value: "application/json" },
-					],
+					headers: [{ key: "Content-Type", value: "application/json" }],
 				},
 			});
 			return (

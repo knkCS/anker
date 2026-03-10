@@ -29,22 +29,24 @@ export const WithError: Story = {
 	},
 };
 
+const InteractiveRender = () => {
+	const [value, setValue] = useState("");
+	const error = value.length === 0 ? "Required" : undefined;
+	return (
+		<ControlledFormField
+			name="demo"
+			label="Interactive Field"
+			errorMessage={error}
+		>
+			<Input
+				value={value}
+				onChange={(e) => setValue(e.target.value)}
+				placeholder="Type something..."
+			/>
+		</ControlledFormField>
+	);
+};
+
 export const Interactive: Story = {
-	render() {
-		const [value, setValue] = useState("");
-		const error = value.length === 0 ? "Required" : undefined;
-		return (
-			<ControlledFormField
-				name="demo"
-				label="Interactive Field"
-				errorMessage={error}
-			>
-				<Input
-					value={value}
-					onChange={(e) => setValue(e.target.value)}
-					placeholder="Type something..."
-				/>
-			</ControlledFormField>
-		);
-	},
+	render: () => <InteractiveRender />,
 };

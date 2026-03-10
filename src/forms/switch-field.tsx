@@ -1,11 +1,5 @@
-import { Box, Flex } from "@chakra-ui/react";
 import type React from "react";
-import {
-	Controller,
-	type FieldValues,
-	type Path,
-	useFormContext,
-} from "react-hook-form";
+import type { FieldValues } from "react-hook-form";
 import { Switch, type SwitchProps } from "../primitives/switch";
 import { FormField, type FormFieldProps } from "./form-field";
 
@@ -33,9 +27,7 @@ export function SwitchField<T extends FieldValues>({
 					id={name}
 					name={field.name}
 					checked={field.value || false}
-					onCheckedChange={(details) =>
-						field.onChange(!!details.checked)
-					}
+					onCheckedChange={(details) => field.onChange(!!details.checked)}
 					onBlur={field.onBlur}
 					disabled={disabled}
 					readOnly={readOnly}

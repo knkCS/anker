@@ -75,9 +75,7 @@ export function FileField<T extends FieldValues>(props: FileFieldProps<T>) {
 						<input
 							type="file"
 							accept={
-								accept
-									? Object.values(accept).flat().join(",")
-									: undefined
+								accept ? Object.values(accept).flat().join(",") : undefined
 							}
 							multiple={multiple}
 							disabled={disabled}

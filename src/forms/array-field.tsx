@@ -13,7 +13,6 @@ import { Plus, Trash2 } from "lucide-react";
 import React from "react";
 import {
 	type FieldValues,
-	type Path,
 	useFieldArray,
 	useFormContext,
 } from "react-hook-form";
@@ -40,9 +39,7 @@ export interface ArrayFieldProps<T extends FieldValues>
 	removeLabel?: string;
 }
 
-export function ArrayField<T extends FieldValues>(
-	props: ArrayFieldProps<T>,
-) {
+export function ArrayField<T extends FieldValues>(props: ArrayFieldProps<T>) {
 	const {
 		name,
 		label,
@@ -57,12 +54,7 @@ export function ArrayField<T extends FieldValues>(
 	} = props;
 
 	return (
-		<FormField<T>
-			name={name}
-			label={label}
-			readOnly={readOnly}
-			{...rest}
-		>
+		<FormField<T> name={name} label={label} readOnly={readOnly} {...rest}>
 			{(_field) => (
 				<Box py={4} px={4} bg="bg" rounded="md">
 					{mode === "dynamic" ? (

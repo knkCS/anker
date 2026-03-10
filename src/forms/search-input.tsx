@@ -2,7 +2,7 @@ import { Input, InputGroup, type InputProps } from "@chakra-ui/react";
 import debounce from "lodash.debounce";
 import { Search } from "lucide-react";
 import type React from "react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 export interface SearchInputProps
 	extends Omit<InputProps, "onChange" | "defaultValue"> {

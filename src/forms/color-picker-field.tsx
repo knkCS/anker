@@ -25,22 +25,10 @@ export function ColorPickerField<T extends FieldValues>({
 	ref,
 	...props
 }: ColorPickerFieldProps<T> & { ref?: React.Ref<HTMLButtonElement> }) {
-	const {
-		name,
-		label,
-		size = "md",
-		readOnly,
-		ColorPicker,
-		...rest
-	} = props;
+	const { name, label, size = "md", readOnly, ColorPicker, ...rest } = props;
 
 	return (
-		<FormField<T>
-			name={name}
-			label={label}
-			readOnly={readOnly}
-			{...rest}
-		>
+		<FormField<T> name={name} label={label} readOnly={readOnly} {...rest}>
 			{(field) => (
 				<Popover.Root>
 					<Popover.Trigger asChild>
@@ -65,17 +53,13 @@ export function ColorPickerField<T extends FieldValues>({
 								{ColorPicker ? (
 									<ColorPicker
 										color={field.value}
-										onChange={(color) =>
-											field.onChange(color)
-										}
+										onChange={(color) => field.onChange(color)}
 									/>
 								) : (
 									<input
 										type="color"
 										value={field.value || "#000000"}
-										onChange={(e) =>
-											field.onChange(e.target.value)
-										}
+										onChange={(e) => field.onChange(e.target.value)}
 										style={{
 											width: 200,
 											height: 200,

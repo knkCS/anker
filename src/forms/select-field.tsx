@@ -1,7 +1,4 @@
-import {
-	NativeSelect,
-	type NativeSelectFieldProps,
-} from "@chakra-ui/react";
+import { NativeSelect, type NativeSelectFieldProps } from "@chakra-ui/react";
 import type React from "react";
 import type { FieldValues } from "react-hook-form";
 import { FormField, type FormFieldProps } from "./form-field";

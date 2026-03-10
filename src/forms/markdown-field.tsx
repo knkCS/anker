@@ -1,4 +1,3 @@
-import { Box } from "@chakra-ui/react";
 import type React from "react";
 import type { FieldValues } from "react-hook-form";
 import { FormField, type FormFieldProps } from "./form-field";
@@ -38,12 +37,7 @@ export function MarkdownField<T extends FieldValues>(
 	} = props;
 
 	return (
-		<FormField<T>
-			name={name}
-			label={label}
-			readOnly={readOnly}
-			{...rest}
-		>
+		<FormField<T> name={name} label={label} readOnly={readOnly} {...rest}>
 			{(field) => {
 				if (MDEditor) {
 					if (readOnly && MDEditor.Markdown) {
@@ -62,20 +56,19 @@ export function MarkdownField<T extends FieldValues>(
 
 				// Fallback: plain textarea
 				return (
-					<Box
-						as="textarea"
+					<textarea
 						value={field.value ?? ""}
-						onChange={(
-							e: React.ChangeEvent<HTMLTextAreaElement>,
-						) => field.onChange(e.target.value)}
+						onChange={(e) => field.onChange(e.target.value)}
 						onBlur={field.onBlur}
-						p={3}
-						border="1px solid"
-						borderColor="border"
-						rounded="md"
-						w="full"
-						minH={`${minHeight}px`}
 						readOnly={readOnly}
+						style={{
+							padding: "0.75rem",
+							border: "1px solid var(--chakra-colors-border)",
+							borderRadius: "0.375rem",
+							width: "100%",
+							minHeight: `${minHeight}px`,
+							resize: "vertical",
+						}}
 					/>
 				);
 			}}

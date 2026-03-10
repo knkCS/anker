@@ -56,9 +56,7 @@ export function CheckboxField<T extends FieldValues>({
 					}
 				};
 
-				const uniqueId = isArrayMode
-					? `${name}-${String(value)}`
-					: name;
+				const uniqueId = isArrayMode ? `${name}-${String(value)}` : name;
 
 				return (
 					<Checkbox.Root

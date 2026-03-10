@@ -16,15 +16,17 @@ export const Default: Story = {
 	},
 };
 
+const InteractiveRender = () => {
+	const [value, setValue] = useState("Click to edit");
+	return (
+		<EditableHeading
+			value={value}
+			onChange={setValue}
+			onSubmit={(v) => console.log("Submitted:", v)}
+		/>
+	);
+};
+
 export const Interactive: Story = {
-	render() {
-		const [value, setValue] = useState("Click to edit");
-		return (
-			<EditableHeading
-				value={value}
-				onChange={setValue}
-				onSubmit={(v) => console.log("Submitted:", v)}
-			/>
-		);
-	},
+	render: () => <InteractiveRender />,
 };

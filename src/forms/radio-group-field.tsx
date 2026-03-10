@@ -24,14 +24,7 @@ export interface RadioGroupFieldProps<T extends FieldValues>
 export function RadioGroupField<T extends FieldValues>(
 	props: RadioGroupFieldProps<T>,
 ) {
-	const {
-		name,
-		label,
-		options,
-		radioGroupProps,
-		stackProps,
-		...rest
-	} = props;
+	const { name, label, options, radioGroupProps, stackProps, ...rest } = props;
 
 	return (
 		<FormField<T> name={name} label={label} {...rest}>

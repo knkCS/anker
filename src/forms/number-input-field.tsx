@@ -49,9 +49,7 @@ export function NumberInputField<T extends FieldValues>({
 					value={String(field.value ?? 0)}
 					onValueChange={(details) => {
 						field.onChange(
-							details.value === ""
-								? 0
-								: Number.parseFloat(details.value),
+							details.value === "" ? 0 : Number.parseFloat(details.value),
 						);
 					}}
 					id={name}
@@ -61,11 +59,7 @@ export function NumberInputField<T extends FieldValues>({
 					opacity={readOnly ? 0.8 : 1}
 					{...numberInputProps}
 				>
-					<NumberInputInput
-						name={field.name}
-						ref={ref}
-						onBlur={field.onBlur}
-					/>
+					<NumberInputInput name={field.name} ref={ref} onBlur={field.onBlur} />
 				</NumberInputRoot>
 			)}
 		</FormField>

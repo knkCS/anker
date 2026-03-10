@@ -1,6 +1,6 @@
 import type { InputProps } from "@chakra-ui/react";
 import type React from "react";
-import type { FieldValues, Path } from "react-hook-form";
+import type { FieldValues } from "react-hook-form";
 import TextInput from "../atoms/text-input/text-input";
 import { FormField, type FormFieldProps } from "./form-field";
 

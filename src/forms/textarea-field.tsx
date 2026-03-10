@@ -1,6 +1,6 @@
 import { Textarea, type TextareaProps } from "@chakra-ui/react";
 import type React from "react";
-import type { FieldValues, Path } from "react-hook-form";
+import type { FieldValues } from "react-hook-form";
 import { FormField, type FormFieldProps } from "./form-field";
 
 export interface TextareaFieldProps<T extends FieldValues>

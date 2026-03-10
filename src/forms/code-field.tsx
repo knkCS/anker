@@ -1,4 +1,3 @@
-import { Box } from "@chakra-ui/react";
 import type React from "react";
 import { useCallback } from "react";
 import type { FieldValues } from "react-hook-form";
@@ -54,12 +53,7 @@ export function CodeField<T extends FieldValues>({
 	);
 
 	return (
-		<FormField<T>
-			name={name}
-			label={label}
-			readOnly={readOnly}
-			{...rest}
-		>
+		<FormField<T> name={name} label={label} readOnly={readOnly} {...rest}>
 			{(field) =>
 				Editor ? (
 					<Editor
@@ -77,22 +71,21 @@ export function CodeField<T extends FieldValues>({
 						}}
 					/>
 				) : (
-					<Box
-						as="textarea"
+					<textarea
 						value={field.value ?? ""}
-						onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-							field.onChange(e.target.value)
-						}
+						onChange={(e) => field.onChange(e.target.value)}
 						onBlur={field.onBlur}
-						fontFamily="mono"
-						fontSize="sm"
-						p={3}
-						border="1px solid"
-						borderColor="border"
-						rounded="md"
-						w="full"
-						minH={height}
 						readOnly={readOnly}
+						style={{
+							fontFamily: "monospace",
+							fontSize: "0.875rem",
+							padding: "0.75rem",
+							border: "1px solid var(--chakra-colors-border)",
+							borderRadius: "0.375rem",
+							width: "100%",
+							minHeight: height,
+							resize: "vertical",
+						}}
 					/>
 				)
 			}
