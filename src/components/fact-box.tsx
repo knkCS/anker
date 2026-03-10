@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import React, { type MouseEventHandler } from "react";
-import { CardRoot } from "./card";
+import { Card } from "./card";
 
 export interface FactBoxAction {
 	id: number;
@@ -21,7 +21,7 @@ export interface FactBoxAction {
 	icon?: React.ReactElement;
 	onClick?: MouseEventHandler<HTMLButtonElement>;
 	onSelect?: VoidFunction;
-	childs?: FactBoxAction[];
+	items?: FactBoxAction[];
 }
 
 export interface FactBoxProps extends CardRootProps {
@@ -102,7 +102,7 @@ export const FactBox: React.FC<FactBoxProps> = (props) => {
 												<Portal>
 													<Menu.Positioner>
 														<Menu.Content>
-															{action.childs?.map((item) => (
+															{action.items?.map((item) => (
 																<Menu.Item
 																	key={item.id}
 																	onSelect={item.onSelect}
@@ -127,7 +127,7 @@ export const FactBox: React.FC<FactBoxProps> = (props) => {
 			) : null}
 			<Collapsible.Root open={show}>
 				<Collapsible.Content>
-					<CardRoot {...rest}>{rest.children}</CardRoot>
+					<Card {...rest}>{rest.children}</Card>
 				</Collapsible.Content>
 			</Collapsible.Root>
 		</Box>
