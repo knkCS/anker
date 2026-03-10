@@ -91,7 +91,7 @@ export function FormField<T extends FieldValues>({
 								<span id={helperId}>{helperText}</span>
 							))}
 						{fieldState.error && (
-							<Field.ErrorText id={errorId}>
+							<Field.ErrorText id={errorId} aria-live="polite">
 								{fieldState.error.message}
 							</Field.ErrorText>
 						)}

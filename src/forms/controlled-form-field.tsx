@@ -56,7 +56,9 @@ export const ControlledFormField: React.FC<ControlledFormFieldProps> = ({
 					<span id={helperId}>{helperText}</span>
 				))}
 			{errorMessage && (
-				<Field.ErrorText id={errorId}>{errorMessage}</Field.ErrorText>
+				<Field.ErrorText id={errorId} aria-live="polite">
+					{errorMessage}
+				</Field.ErrorText>
 			)}
 		</Field.Root>
 	);
