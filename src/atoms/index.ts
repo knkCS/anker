@@ -33,6 +33,18 @@ export {
 	CommentReplyBox,
 	type CommentReplyBoxProps,
 } from "./comment";
+
+// DataList
+export {
+	DataList,
+	DataListItem,
+	DataListItemLabel,
+	DataListItemValue,
+	type DataListItemType,
+	type DataListProps,
+	type DataListRootProps,
+} from "./data-list";
+
 // DateInput
 export { DateInput, type DateInputProps } from "./date-input";
 // DateTime
