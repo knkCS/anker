@@ -1,4 +1,6 @@
-// Tooltip
+// Accordion
+export type { AccordionItemProps, AccordionRootProps } from "./accordion";
+export { AccordionItem, AccordionRoot } from "./accordion";
 
 export type { AlertProps } from "./alert";
 // Alert
