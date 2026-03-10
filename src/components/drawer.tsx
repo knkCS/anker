@@ -63,7 +63,7 @@ export const DrawerRoot: React.FC<DrawerProps> = ({
 						</Drawer.CloseTrigger>
 
 						<Drawer.Header
-							bg="bg-subtle"
+							bg="bg-surface"
 							borderBottom="1px solid"
 							borderColor="border"
 						>
