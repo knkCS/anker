@@ -4,3 +4,4 @@ export { default as semanticTokens } from "./semantic";
 export { default as space } from "./spacing";
 export { fonts, textStyles } from "./typography";
 export { durations, easings } from "./animations";
+export { default as zIndex } from "./z-index";

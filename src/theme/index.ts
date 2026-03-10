@@ -37,6 +37,7 @@ import {
 	semanticTokens,
 	space,
 	textStyles,
+	zIndex,
 } from "./tokens";
 
 const system = createSystem(defaultConfig, {
@@ -80,6 +81,7 @@ const system = createSystem(defaultConfig, {
 			radii: Object.fromEntries(
 				Object.entries(radii).map(([k, v]) => [k, { value: v }]),
 			),
+			zIndex,
 		},
 
 		textStyles,
@@ -144,5 +146,6 @@ export {
 	semanticTokens,
 	space,
 	textStyles,
+	zIndex,
 } from "./tokens";
 export { getColor, transparentize } from "./utils";
