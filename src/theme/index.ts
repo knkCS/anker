@@ -64,6 +64,14 @@ const system = createSystem(defaultConfig, {
 			flexDirection: "column",
 			minH: "100%",
 		},
+		"*": {
+			_motionReduce: {
+				animationDuration: "0.01ms !important",
+				animationIterationCount: "1 !important",
+				transitionDuration: "0.01ms !important",
+				scrollBehavior: "auto !important",
+			},
+		},
 	},
 
 	theme: {
