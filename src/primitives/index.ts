@@ -65,6 +65,10 @@ export {
 	NumberInputScrubber,
 } from "./number-input";
 
+// PinInput
+export type { PinInputProps } from "./pin-input";
+export { PinInput } from "./pin-input";
+
 // Popover
 export type { PopoverContentProps, PopoverProps } from "./popover";
 export {
