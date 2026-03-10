@@ -71,10 +71,11 @@ export const WithBadges: Story = {
 					</TimelineConnector>
 					<TimelineContent>
 						<TimelineTitle>
-							User imported{" "}
-							<Badge colorPalette="blue">145 records</Badge>
+							User imported <Badge colorPalette="blue">145 records</Badge>
 						</TimelineTitle>
-						<Text fontSize="xs" color="muted">3 days ago</Text>
+						<Text fontSize="xs" color="muted">
+							3 days ago
+						</Text>
 					</TimelineContent>
 				</TimelineItem>
 				<TimelineItem>
@@ -85,10 +86,11 @@ export const WithBadges: Story = {
 					</TimelineConnector>
 					<TimelineContent>
 						<TimelineTitle>
-							Deleted{" "}
-							<Badge colorPalette="red">2 records</Badge>
+							Deleted <Badge colorPalette="red">2 records</Badge>
 						</TimelineTitle>
-						<Text fontSize="xs" color="muted">2 days ago</Text>
+						<Text fontSize="xs" color="muted">
+							2 days ago
+						</Text>
 					</TimelineContent>
 				</TimelineItem>
 			</TimelineRoot>

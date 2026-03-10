@@ -69,7 +69,11 @@ export {
 	TimelineTitle,
 } from "./timeline";
 // TreeView
-export type { TreeViewBranchProps, TreeViewItemProps, TreeViewRootProps } from "./tree-view";
+export type {
+	TreeViewBranchProps,
+	TreeViewItemProps,
+	TreeViewRootProps,
+} from "./tree-view";
 export {
 	TreeViewBranch,
 	TreeViewBranchContent,

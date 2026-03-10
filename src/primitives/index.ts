@@ -1,7 +1,12 @@
 // Accordion
 export type { AccordionItemProps, AccordionRootProps } from "./accordion";
 export { AccordionItem, AccordionRoot } from "./accordion";
-
+export type { AlertProps } from "./alert";
+// Alert
+export { Alert } from "./alert";
+export type { AvatarProps } from "./avatar";
+// Avatar
+export { Avatar, AvatarGroup } from "./avatar";
 // Breadcrumb
 export type { BreadcrumbLinkProps, BreadcrumbRootProps } from "./breadcrumb";
 export {
@@ -13,13 +18,6 @@ export {
 	BreadcrumbRoot,
 	BreadcrumbSeparator,
 } from "./breadcrumb";
-
-export type { AlertProps } from "./alert";
-// Alert
-export { Alert } from "./alert";
-export type { AvatarProps } from "./avatar";
-// Avatar
-export { Avatar, AvatarGroup } from "./avatar";
 export type {
 	ColorMode,
 	ColorModeProviderProps,
@@ -102,7 +100,10 @@ export type { RadioProps } from "./radio";
 export { Radio, RadioGroup } from "./radio";
 
 // SegmentedControl
-export type { SegmentedControlItem, SegmentedControlProps } from "./segmented-control";
+export type {
+	SegmentedControlItem,
+	SegmentedControlProps,
+} from "./segmented-control";
 export { SegmentedControl } from "./segmented-control";
 
 export type { SkeletonProps, SkeletonTextProps } from "./skeleton";

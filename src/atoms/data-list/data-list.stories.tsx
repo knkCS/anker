@@ -1,6 +1,11 @@
 import { Badge } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { DataList, DataListItem, DataListItemLabel, DataListItemValue } from "./data-list";
+import {
+	DataList,
+	DataListItem,
+	DataListItemLabel,
+	DataListItemValue,
+} from "./data-list";
 
 const meta = {
 	title: "Atoms/DataList",
