@@ -141,6 +141,10 @@ const semanticTokens = {
 			},
 		},
 	},
+	opacity: {
+		disabled: { value: 0.4 },
+		readOnly: { value: 0.8 },
+	},
 };
 
 export default semanticTokens;
