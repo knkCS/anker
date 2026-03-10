@@ -22,6 +22,16 @@ export {
 	type CheckboxCardProps,
 } from "./checkbox-card";
 
+// Clipboard
+export {
+	ClipboardButton,
+	type ClipboardButtonProps,
+	ClipboardInput,
+	type ClipboardInputProps,
+	ClipboardLink,
+	type ClipboardLinkProps,
+} from "./clipboard";
+
 // Comment
 export {
 	Comment,
