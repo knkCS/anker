@@ -1,3 +1,4 @@
+import { Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import type {
 	ColumnDef,
@@ -5,6 +6,7 @@ import type {
 	SortingState,
 } from "@tanstack/react-table";
 import { useState } from "react";
+import { StatusBadge } from "../../atoms/status-badge";
 import { DataTable } from "./data-table";
 
 type User = {
@@ -67,6 +69,14 @@ const sortableColumns: ColumnDef<User, unknown>[] = [
 	{ accessorKey: "status", header: "Status" },
 ];
 
+const paginatedUsers: User[] = Array.from({ length: 25 }, (_, i) => ({
+	id: String(i + 1),
+	name: `User ${String(i + 1)}`,
+	email: `user${String(i + 1)}@example.com`,
+	role: i % 3 === 0 ? "Admin" : i % 3 === 1 ? "Editor" : "Viewer",
+	status: i % 4 === 0 ? "Inactive" : "Active",
+}));
+
 const meta = {
 	title: "Components/DataTable",
 	component: DataTable,
@@ -114,4 +124,64 @@ export const Selection: Story = {
 
 export const Loading: Story = {
 	render: () => <DataTable columns={baseColumns} data={[]} loading />,
+};
+
+export const Empty: Story = {
+	render: () => (
+		<DataTable
+			columns={baseColumns}
+			data={[]}
+			emptyState={
+				<Text color="fg.muted" fontSize="sm">
+					No users found. Try adjusting your filters.
+				</Text>
+			}
+		/>
+	),
+};
+
+const PaginatedDemo = () => {
+	const [page, setPage] = useState(1);
+	const pageSize = 5;
+	const pageData = paginatedUsers.slice((page - 1) * pageSize, page * pageSize);
+	return (
+		<DataTable
+			columns={baseColumns}
+			data={pageData}
+			total={paginatedUsers.length}
+			page={page}
+			pageSize={pageSize}
+			onPageChange={setPage}
+		/>
+	);
+};
+
+export const Paginated: Story = {
+	render: () => <PaginatedDemo />,
+};
+
+const statusColors: Record<string, string> = {
+	Active: "#16a34a",
+	Inactive: "#dc2626",
+	Pending: "#ca8a04",
+};
+
+const customCellColumns: ColumnDef<User, unknown>[] = [
+	{ accessorKey: "name", header: "Name" },
+	{ accessorKey: "email", header: "Email" },
+	{ accessorKey: "role", header: "Role" },
+	{
+		accessorKey: "status",
+		header: "Status",
+		cell: ({ getValue }) => {
+			const status = getValue<string>();
+			return (
+				<StatusBadge label={status} color={statusColors[status] ?? "#6b7280"} />
+			);
+		},
+	},
+];
+
+export const CustomCells: Story = {
+	render: () => <DataTable columns={customCellColumns} data={sampleUsers} />,
 };
