@@ -1,0 +1,47 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./breadcrumb.stories";
+
+<Meta of={Stories} />
+
+# Breadcrumb
+
+Navigation breadcrumbs showing the current page's location within a hierarchy.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Custom Separator
+
+<Canvas of={Stories.WithSeparator} />
+
+Pass a `separator` prop to `BreadcrumbRoot` to replace the default chevron (e.g., `separator="/"`).
+
+## Composition
+
+Breadcrumb uses several sub-components:
+
+- **`BreadcrumbRoot`** — Container with optional `separator` prop.
+- **`BreadcrumbList`** — The ordered list wrapper.
+- **`BreadcrumbItem`** — A single breadcrumb entry.
+- **`BreadcrumbLink`** — A clickable ancestor link.
+- **`BreadcrumbCurrentLink`** — The current (non-clickable) page.
+- **`BreadcrumbSeparator`** — Custom separator between items (optional, auto-inserted by default).
+- **`BreadcrumbEllipsis`** — Collapsed items indicator for long trails.
+
+## Guidelines
+
+- **Do** use Breadcrumb for hierarchical navigation (e.g., Dashboard > Users > Edit).
+- **Don't** use Breadcrumb for flat navigation or step indicators — use `Stepper` instead.
+- Mark the current page with `BreadcrumbCurrentLink`, not a regular `BreadcrumbLink`.
+- Keep breadcrumb trails short. Use `BreadcrumbEllipsis` for deep hierarchies.
+
+## Accessibility
+
+- Renders inside a `<nav aria-label="breadcrumb">` landmark.
+- `BreadcrumbCurrentLink` sets `aria-current="page"` automatically.
+- Links are keyboard navigable with standard tab order.
+
+## Props
+
+<ArgTypes of={Stories} />
