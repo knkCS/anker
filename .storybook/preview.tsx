@@ -11,7 +11,20 @@ const withChakra = (Story: React.ComponentType) => (
 
 const preview: Preview = {
 	decorators: [withChakra],
+	tags: ["autodocs"],
 	parameters: {
+		options: {
+			storySort: {
+				order: [
+					"Introduction",
+					"Primitives",
+					"Components",
+					"Atoms",
+					"Forms",
+					"Feedback",
+				],
+			},
+		},
 		controls: {
 			matchers: {
 				color: /(background|color)$/i,
