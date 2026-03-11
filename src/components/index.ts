@@ -1,6 +1,9 @@
 // Card
 export type { CardProps } from "./card";
 export { Card } from "./card";
+// DataTable
+export type { DataTableProps } from "./data-table";
+export { DataTable } from "./data-table";
 
 // Drawer
 export type { DrawerProps } from "./drawer";
