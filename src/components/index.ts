@@ -50,13 +50,19 @@ export {
 	useStepperPrevButton,
 } from "./stepper";
 
-// Table
+// CardList (new names)
+export type { CardListProps } from "./card-list";
+export { CardList } from "./card-list";
+export type { CardListDataProps } from "./card-list-data";
+export { CardListData } from "./card-list-data";
+export type { CardListItemProps, CardListMenuItem } from "./card-list-item";
+export { CardListItem } from "./card-list-item";
+
+// Table (deprecated, re-exports from CardList)
 export type { TableProps } from "./table";
 export { Table } from "./table";
-// TableData
 export type { TableDataProps } from "./table-data";
 export { TableData } from "./table-data";
-// TableItem
 export type { TableItemProps, TableMenuItem } from "./table-item";
 export { TableItem } from "./table-item";
 // Timeline
