@@ -1,0 +1,39 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./drawer.stories";
+
+<Meta of={Stories} />
+
+# Drawer
+
+A panel that slides in from the edge of the screen for secondary content, forms, or detail views.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Guidelines
+
+- **Do** use Drawer for editing detail records, secondary forms, or content that benefits from staying in context.
+- **Don't** use Drawer for quick confirmations — use `ConfirmModal` instead.
+- Drawer is better than Modal when the content may be long or when the user needs to reference the page behind it.
+- Provide `onSave` to get the save button in the footer. Omit it for read-only drawers.
+- Use `additionalButtons` for extra actions like "Delete" or "Reset" alongside the save button.
+
+## Accessibility
+
+- Traps focus while open.
+- `Escape` key closes the drawer.
+- Close button uses `closeLabel` as `aria-label` (defaults to "Close").
+- Uses RTL-safe `insetInlineEnd` for close button positioning.
+
+## Gaps & Migration
+
+| Gap | Status | Notes |
+|-----|--------|-------|
+| Left-side placement | Not yet | Chakra supports `placement="start"` but it's not exposed as a prop. Pass it via rest props. |
+| Custom width / size variants | Not yet | Uses Chakra's default drawer sizing. Override via `size` rest prop. |
+| Cancel button in footer | Not included | Only save button shown. Use `additionalButtons` or `footerText` for cancel. |
+
+## Props
+
+<ArgTypes of={Stories} />

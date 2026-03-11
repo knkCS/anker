@@ -1,0 +1,40 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./modal.stories";
+
+<Meta of={Stories} />
+
+# Modal
+
+A dialog overlay for focused user interactions — confirmations, forms, detail views.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Guidelines
+
+- **Do** use Modal for actions requiring user focus: confirmations, multi-field forms, detail editing.
+- **Don't** use Modal for simple alerts or confirmations — use `ConfirmModal` from `@knkcs/anker/feedback` instead.
+- **Don't** nest modals. If you need a confirmation inside a modal, use `useConfirmModal`.
+- Keep modal content concise. If content exceeds the viewport, consider using a Drawer instead.
+- Provide `onSave` to get the default Cancel/Save footer. Pass `footer` for full custom control.
+
+## Accessibility
+
+- Traps focus inside the modal while open.
+- `Escape` key closes the modal.
+- Close button has a configurable `closeLabel` (defaults to "Close").
+- Uses Chakra's `Dialog` with `Portal` — renders outside the DOM hierarchy.
+
+## Gaps & Migration
+
+| Gap | Status | Notes |
+|-----|--------|-------|
+| Form integration via render prop | Not planned | Pass form content as `children` instead. Manage form state externally with React Hook Form. |
+| Nested modals | Not supported | Use `useConfirmModal` for confirmations within a modal. |
+| `onSave` async support (auto-loading) | Not yet | Set `loading` prop manually from your mutation state. |
+| Full-screen variant | Not yet | Use `size="full"` from Chakra — not exposed as a named prop. |
+
+## Props
+
+<ArgTypes of={Stories} />
