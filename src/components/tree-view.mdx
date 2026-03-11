@@ -1,0 +1,80 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./tree-view.stories";
+
+<Meta of={Stories} />
+
+# TreeView
+
+A hierarchical tree for displaying nested data — file explorers, org charts, category trees.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Data-Driven API
+
+TreeView uses Chakra's `createTreeCollection` to define the tree structure, then `TreeViewNode` to render nodes:
+
+```tsx
+import { createTreeCollection } from "@chakra-ui/react";
+import { TreeViewRoot, TreeViewTree, TreeViewNode } from "@knkcs/anker/components";
+
+const collection = createTreeCollection({
+  nodeToValue: (node) => node.id,
+  nodeToString: (node) => node.name,
+  rootNode: {
+    id: "ROOT",
+    name: "",
+    children: [
+      { id: "file-1", name: "readme.md" },
+      {
+        id: "folder-1",
+        name: "src",
+        children: [{ id: "file-2", name: "index.ts" }],
+      },
+    ],
+  },
+});
+```
+
+Then render with `TreeViewNode`:
+
+```tsx
+<TreeViewRoot collection={collection}>
+  <TreeViewTree>
+    <TreeViewNode
+      render={({ node, nodeState }) =>
+        nodeState.isBranch ? (
+          <TreeViewBranchControl>
+            <TreeViewBranchIndicator><ChevronRight /></TreeViewBranchIndicator>
+            <TreeViewBranchText>{node.name}</TreeViewBranchText>
+          </TreeViewBranchControl>
+        ) : (
+          <TreeViewItem>
+            <TreeViewItemText>{node.name}</TreeViewItemText>
+          </TreeViewItem>
+        )
+      }
+    />
+  </TreeViewTree>
+</TreeViewRoot>
+```
+
+## Guidelines
+
+- **Do** use the data-driven API with `createTreeCollection` + `TreeViewNode`. This is the correct Chakra v3 pattern.
+- **Don't** compose `TreeViewBranch` / `TreeViewItem` manually without `TreeViewNodeProvider` — it will crash with a missing context error.
+- Use `nodeState.isBranch` in the render function to differentiate folders from files.
+
+## Gaps & Migration
+
+| Gap | Status | Notes |
+|-----|--------|-------|
+| Checkbox selection | Not exported | Use Chakra's `TreeView.NodeCheckbox` directly if needed for multi-select trees. |
+| Drag-and-drop reorder | Not supported | Not available in Chakra's TreeView. |
+| Lazy loading children | Not built-in | Manage loading state externally and update the collection. |
+| Search/filter | Not built-in | Filter the collection data before passing to `createTreeCollection`. |
+
+## Props
+
+<ArgTypes of={Stories} />
