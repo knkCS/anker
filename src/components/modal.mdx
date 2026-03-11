@@ -28,12 +28,37 @@ A dialog overlay for focused user interactions — confirmations, forms, detail 
 
 ## Gaps & Migration
 
-| Gap | Status | Notes |
-|-----|--------|-------|
-| Form integration via render prop | Not planned | Pass form content as `children` instead. Manage form state externally with React Hook Form. |
-| Nested modals | Not supported | Use `useConfirmModal` for confirmations within a modal. |
-| `onSave` async support (auto-loading) | Not yet | Set `loading` prop manually from your mutation state. |
-| Full-screen variant | Not yet | Use `size="full"` from Chakra — not exposed as a named prop. |
+<table>
+  <thead>
+    <tr>
+      <th>Gap</th>
+      <th>Status</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Form integration via render prop</td>
+      <td>Not planned</td>
+      <td>Pass form content as <code>children</code> instead. Manage form state externally with React Hook Form.</td>
+    </tr>
+    <tr>
+      <td>Nested modals</td>
+      <td>Not supported</td>
+      <td>Use <code>useConfirmModal</code> for confirmations within a modal.</td>
+    </tr>
+    <tr>
+      <td><code>onSave</code> async support (auto-loading)</td>
+      <td>Not yet</td>
+      <td>Set <code>loading</code> prop manually from your mutation state.</td>
+    </tr>
+    <tr>
+      <td>Full-screen variant</td>
+      <td>Not yet</td>
+      <td>Use <code>size="full"</code> from Chakra — not exposed as a named prop.</td>
+    </tr>
+  </tbody>
+</table>
 
 ## Props
 

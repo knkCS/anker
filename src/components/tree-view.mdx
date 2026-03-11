@@ -68,12 +68,37 @@ Then render with `TreeViewNode`:
 
 ## Gaps & Migration
 
-| Gap | Status | Notes |
-|-----|--------|-------|
-| Checkbox selection | Not exported | Use Chakra's `TreeView.NodeCheckbox` directly if needed for multi-select trees. |
-| Drag-and-drop reorder | Not supported | Not available in Chakra's TreeView. |
-| Lazy loading children | Not built-in | Manage loading state externally and update the collection. |
-| Search/filter | Not built-in | Filter the collection data before passing to `createTreeCollection`. |
+<table>
+  <thead>
+    <tr>
+      <th>Gap</th>
+      <th>Status</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Checkbox selection</td>
+      <td>Not exported</td>
+      <td>Use Chakra's <code>TreeView.NodeCheckbox</code> directly if needed for multi-select trees.</td>
+    </tr>
+    <tr>
+      <td>Drag-and-drop reorder</td>
+      <td>Not supported</td>
+      <td>Not available in Chakra's TreeView.</td>
+    </tr>
+    <tr>
+      <td>Lazy loading children</td>
+      <td>Not built-in</td>
+      <td>Manage loading state externally and update the collection.</td>
+    </tr>
+    <tr>
+      <td>Search/filter</td>
+      <td>Not built-in</td>
+      <td>Filter the collection data before passing to <code>createTreeCollection</code>.</td>
+    </tr>
+  </tbody>
+</table>
 
 ## Props
 

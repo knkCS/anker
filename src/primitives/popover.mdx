@@ -11,11 +11,36 @@ Three overlay components for contextual content. Each serves a different purpose
 
 ## When to Use Which
 
-| Component | Trigger | Content | Use Case |
-|-----------|---------|---------|----------|
-| **Tooltip** | Hover/focus | Text only, brief | Icon button labels, abbreviation explanations |
-| **HoverCard** | Hover | Rich content | User profile previews, link previews |
-| **Popover** | Click | Interactive content | Menus, forms, pickers, multi-action panels |
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Trigger</th>
+      <th>Content</th>
+      <th>Use Case</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Tooltip</strong></td>
+      <td>Hover/focus</td>
+      <td>Text only, brief</td>
+      <td>Icon button labels, abbreviation explanations</td>
+    </tr>
+    <tr>
+      <td><strong>HoverCard</strong></td>
+      <td>Hover</td>
+      <td>Rich content</td>
+      <td>User profile previews, link previews</td>
+    </tr>
+    <tr>
+      <td><strong>Popover</strong></td>
+      <td>Click</td>
+      <td>Interactive content</td>
+      <td>Menus, forms, pickers, multi-action panels</td>
+    </tr>
+  </tbody>
+</table>
 
 ## Tooltip
 
@@ -50,9 +75,34 @@ Anker wraps this into simplified APIs:
 
 ## Gaps & Migration
 
-| Gap | Status | Notes |
-|-----|--------|-------|
-| Controlled open state for Tooltip | Supported | Pass `open` and `onOpenChange` via rest props. |
-| Popover form integration | Supported | Put form content inside `PopoverBody`. |
-| HoverCard delay customization | Supported | Pass `openDelay`/`closeDelay` via rest props. |
-| Tooltip on disabled buttons | Workaround | Wrap disabled button in a `<span>` — disabled elements don't fire hover events. |
+<table>
+  <thead>
+    <tr>
+      <th>Gap</th>
+      <th>Status</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Controlled open state for Tooltip</td>
+      <td>Supported</td>
+      <td>Pass <code>open</code> and <code>onOpenChange</code> via rest props.</td>
+    </tr>
+    <tr>
+      <td>Popover form integration</td>
+      <td>Supported</td>
+      <td>Put form content inside <code>PopoverBody</code>.</td>
+    </tr>
+    <tr>
+      <td>HoverCard delay customization</td>
+      <td>Supported</td>
+      <td>Pass <code>openDelay</code>/<code>closeDelay</code> via rest props.</td>
+    </tr>
+    <tr>
+      <td>Tooltip on disabled buttons</td>
+      <td>Workaround</td>
+      <td>Wrap disabled button in a <code>&lt;span&gt;</code> — disabled elements don't fire hover events.</td>
+    </tr>
+  </tbody>
+</table>

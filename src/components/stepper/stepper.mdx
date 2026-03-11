@@ -44,11 +44,32 @@ Pass `orientation="vertical"` for a vertical layout where step content appears i
 
 ## Gaps & Migration
 
-| Gap | Status | Notes |
-|-----|--------|-------|
-| Non-linear navigation (click any step) | Not yet | Steps are sequential only. Users can go back but not skip ahead. |
-| Async validation before next step | Not built-in | Validate in your `onNext` handler and conditionally call `stepper.next()`. |
-| Step error state | Not yet | No visual error indicator on individual steps. |
+<table>
+  <thead>
+    <tr>
+      <th>Gap</th>
+      <th>Status</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Non-linear navigation (click any step)</td>
+      <td>Not yet</td>
+      <td>Steps are sequential only. Users can go back but not skip ahead.</td>
+    </tr>
+    <tr>
+      <td>Async validation before next step</td>
+      <td>Not built-in</td>
+      <td>Validate in your <code>onNext</code> handler and conditionally call <code>stepper.next()</code>.</td>
+    </tr>
+    <tr>
+      <td>Step error state</td>
+      <td>Not yet</td>
+      <td>No visual error indicator on individual steps.</td>
+    </tr>
+  </tbody>
+</table>
 
 ## Props
 
