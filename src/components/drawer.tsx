@@ -10,17 +10,27 @@ import { X } from "lucide-react";
 
 export interface DrawerProps
 	extends Omit<DrawerRootProps, "open" | "onOpenChange"> {
+	/** Whether the drawer is open. */
 	open: boolean;
+	/** Called when the drawer should close. */
 	onClose(): void;
+	/** Header title content. */
 	title: string | React.ReactNode;
+	/** Text displayed in the footer area (left side). */
 	footerText?: string | React.ReactNode;
+	/** Drawer body content. */
 	children: React.ReactNode;
+	/** Label for the save button. @default "Save" */
 	saveLabel?: string;
+	/** Label for the close button. @default "Close" */
 	closeLabel?: string;
+	/** Whether the save button is disabled. */
 	saveButtonDisabled?: boolean;
 	/** Whether the save action is in progress. Shows spinner on save button. */
 	loading?: boolean;
+	/** Extra buttons rendered before the save button. */
 	additionalButtons?: React.ReactNode;
+	/** Called when the save button is clicked. If not provided, no save button is shown. */
 	onSave?(): void;
 }
 

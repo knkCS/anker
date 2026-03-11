@@ -15,11 +15,17 @@ import {
 } from "react";
 
 export interface ConfirmOptions {
+	/** Dialog title text. */
 	title: string;
+	/** Dialog body content. */
 	message: React.ReactNode;
+	/** Label for the confirm button. @default "Confirm" */
 	confirmLabel?: string;
+	/** Label for the cancel button. @default "Cancel" */
 	cancelLabel?: string;
+	/** Color palette for the confirm button. @default "red" */
 	colorPalette?: ButtonProps["colorPalette"];
+	/** Extra actions rendered before the confirm button. */
 	beforeConfirmActions?: React.ReactNode;
 }
 

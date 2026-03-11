@@ -3,19 +3,30 @@ import { Ellipsis } from "lucide-react";
 import { Children } from "react";
 
 export interface CardListMenuItem<T = string> {
+	/** Text label for the menu item. */
 	label: string;
+	/** Callback fired when the menu item is clicked. */
 	onClick: () => void;
+	/** Icon rendered before the label. */
 	icon?: React.ReactNode;
+	/** Text color override for the menu item. */
 	color?: string;
+	/** Value associated with the menu item. */
 	value?: T;
 }
 
 export interface CardListItemProps<T = string> {
+	/** Whether the item is visually selected. */
 	isActive?: boolean;
+	/** Callback fired when the row is clicked. */
 	handleItemClick?: () => void;
+	/** Callback fired when the row is double-clicked. */
 	handleItemDoubleClick?: () => void;
+	/** Menu items rendered in the row's action menu. */
 	menuItems?: CardListMenuItem<T>[];
+	/** Component rendered on the left side of the row (e.g., avatar). */
 	componentLeft?: React.ReactNode;
+	/** CardListData children to render as cells. */
 	children: React.ReactNode;
 	/** Total number of grid columns. Defaults to 12. */
 	columnCount?: number;

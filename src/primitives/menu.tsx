@@ -5,7 +5,9 @@ import { Check, ChevronRight } from "lucide-react";
 import type * as React from "react";
 
 interface MenuContentProps extends ChakraMenu.ContentProps {
+	/** Whether to render the menu content inside a portal. @default true */
 	portalled?: boolean;
+	/** Container ref for the portal. */
 	portalRef?: React.RefObject<HTMLElement | null>;
 }
 
@@ -90,6 +92,7 @@ export const MenuItemGroup = function MenuItemGroup({
 MenuItemGroup.displayName = "MenuItemGroup";
 
 export interface MenuTriggerItemProps extends ChakraMenu.ItemProps {
+	/** Icon rendered before the trigger item label. */
 	startIcon?: React.ReactNode;
 }
 

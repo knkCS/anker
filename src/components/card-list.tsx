@@ -2,9 +2,13 @@ import { Box, Flex, Grid, GridItem } from "@chakra-ui/react";
 import { Children } from "react";
 
 export interface CardListProps {
+	/** Column header labels displayed above the grid. */
 	headers: string[];
+	/** Whether rows have a left-side component slot (e.g., avatar). */
 	hasComponentLeft?: boolean;
+	/** Whether rows have a right-side menu slot. */
 	hasMenu?: boolean;
+	/** CardListItem children to render as rows. */
 	children?: React.ReactNode;
 	/** Total number of grid columns. Defaults to 12. */
 	columnCount?: number;

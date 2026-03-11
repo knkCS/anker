@@ -2,7 +2,9 @@ import { RadioGroup as ChakraRadioGroup } from "@chakra-ui/react";
 import type * as React from "react";
 
 export interface RadioProps extends ChakraRadioGroup.ItemProps {
+	/** Ref attached to the root element. */
 	rootRef?: React.RefObject<HTMLDivElement | null>;
+	/** Additional props forwarded to the hidden input element. */
 	inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 

@@ -2,9 +2,13 @@ import { Switch as ChakraSwitch } from "@chakra-ui/react";
 import type * as React from "react";
 
 export interface SwitchProps extends ChakraSwitch.RootProps {
+	/** Additional props forwarded to the hidden input element. */
 	inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+	/** Ref attached to the root label element. */
 	rootRef?: React.RefObject<HTMLLabelElement | null>;
+	/** Labels displayed inside the track for on/off states. */
 	trackLabel?: { on: React.ReactNode; off: React.ReactNode };
+	/** Labels displayed inside the thumb for on/off states. */
 	thumbLabel?: { on: React.ReactNode; off: React.ReactNode };
 }
 
