@@ -1,0 +1,39 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./pagination.stories";
+
+<Meta of={Stories} />
+
+# Pagination
+
+A page navigation control for server-paginated data. Custom component — no Chakra equivalent.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Guidelines
+
+- **Do** use Pagination for server-paginated lists with a known total item count.
+- **Don't** use for infinite scroll or client-side filtering/sorting.
+- Pair with a page-size selector (`Select` atom) when datasets are large.
+- `page` is 1-based. The component clamps it to valid range internally.
+- Use `maxVisiblePages` to control how many page buttons show before ellipsis appears. Default is 5.
+
+## Accessibility
+
+- Active page has `aria-current="page"`.
+- Previous/Next buttons have configurable `aria-label` via `previousLabel`/`nextLabel` props.
+- Disabled state is set on Previous when on page 1, on Next when on last page.
+
+## Gaps & Migration
+
+| Gap | Status | Notes |
+|-----|--------|-------|
+| `onPageSizeChange` callback | Not yet | Core had a built-in page size dropdown. Handle page size externally with a `Select`. |
+| Keyboard arrow navigation between page buttons | Not supported | Tab navigation works. |
+| "Go to page" input | Not planned | Use the page buttons or build a custom input alongside. |
+| Compact variant for mobile | Not yet | Shows full page buttons on all screen sizes. |
+
+## Props
+
+<ArgTypes of={Stories} />

@@ -1,0 +1,49 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./card-list.stories";
+
+<Meta of={Stories} />
+
+# CardList
+
+A grid-based list for displaying structured records as rows with column headers. Formerly known as `Table`.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Guidelines
+
+- **Do** use CardList for displaying lists of records with consistent column layouts (e.g., user lists, role lists).
+- **Don't** use CardList for data-heavy tables with sorting/filtering — use `DataTable` instead.
+- Use `hasComponentLeft` when rows start with an avatar or icon.
+- Use `hasMenu` when rows have a kebab/action menu on the right.
+- Provide `emptyState` for zero-result scenarios.
+
+## Composition
+
+CardList uses three components together:
+
+- **`CardList`** — The container with headers and grid layout.
+- **`CardListItem`** — A single row. Accepts `onClick`, `isSelected`, menu items, and a left component slot.
+- **`CardListData`** — A cell within a row. Uses `colSpan` for grid sizing.
+
+## Accessibility
+
+- Root element has `role="grid"` and `aria-colcount`.
+- Headers have `role="columnheader"`.
+- Rows are clickable with `role="row"`.
+
+## Gaps & Migration
+
+| Gap | Status | Notes |
+|-----|--------|-------|
+| Sorting by column | Not supported | Use `DataTable` for sortable columns. |
+| Pagination built-in | Not included | Combine with `Pagination` component below the list. |
+| Drag-and-drop reorder | Not yet | Not available in anker yet. |
+| `Table` import name | Deprecated | `Table`, `TableItem`, `TableData` still work as re-exports but will be removed. Migrate to `CardList`, `CardListItem`, `CardListData`. |
+
+## Props
+
+### CardList
+
+<ArgTypes of={Stories} />
