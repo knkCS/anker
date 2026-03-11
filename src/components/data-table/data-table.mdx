@@ -1,0 +1,60 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./data-table.stories";
+
+<Meta of={Stories} />
+
+# DataTable
+
+A data-driven table for displaying, sorting, and selecting structured records. Built on TanStack React Table.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Guidelines
+
+- **Do** use DataTable for data-heavy tables that need sorting, selection, or pagination.
+- **Don't** use DataTable for simple record lists without interactivity — use `CardList` from `@knkcs/anker/components` instead.
+- **Do** keep column definitions outside the component to avoid re-renders.
+- **Don't** mix client-side and server-side sorting. If `onSortingChange` is provided, sorting is manual (server-side) — handle it in your data-fetching logic.
+- Provide a custom `emptyState` for better UX when filters return no results.
+
+## Sorting
+
+<Canvas of={Stories.Sorting} />
+
+Click column headers to toggle sort direction. Columns must have `enableSorting: true` in their definition. Provide controlled `sorting` and `onSortingChange` props.
+
+## Selection
+
+<Canvas of={Stories.Selection} />
+
+Set `selectable` to add checkbox columns. Provide controlled `rowSelection` and `onRowSelectionChange` props. The header checkbox supports select-all and indeterminate states.
+
+## Custom Cells
+
+<Canvas of={Stories.CustomCells} />
+
+Use the `cell` property in column definitions to render custom content. Any React component works — badges, icons, formatted values.
+
+## Accessibility
+
+- Sortable column headers have `aria-sort` (`ascending`, `descending`, or `none`).
+- Sort icons use `aria-hidden="true"` — the sort state is conveyed via `aria-sort`.
+- Selection checkboxes have `aria-label` for each row and the select-all header.
+- Loading skeleton rows are marked `aria-hidden="true"`.
+
+## Gaps & Migration
+
+| Gap | Status | Notes |
+|-----|--------|-------|
+| Column filtering | Not yet | Filter UI and logic must be implemented externally. |
+| Column resizing | Not yet | Not supported by the current wrapper. |
+| Row virtualization | Not yet | For very large datasets. Consider `@tanstack/react-virtual`. |
+| Row expansion | Not yet | Expandable row detail is not implemented. |
+| Server-side sorting example | Gap | `onSortingChange` enables manual sorting, but no example docs for API integration. |
+| Drag-and-drop row reorder | Not yet | Not available in anker yet. |
+
+## Props
+
+<ArgTypes of={Stories} />
