@@ -1,0 +1,58 @@
+import { Canvas, Meta } from "@storybook/blocks";
+import * as PopoverStories from "./popover.stories";
+import * as HoverCardStories from "./hover-card.stories";
+import * as TooltipStories from "./tooltip.stories";
+
+<Meta title="Primitives/Popover, HoverCard & Tooltip" />
+
+# Popover, HoverCard & Tooltip
+
+Three overlay components for contextual content. Each serves a different purpose.
+
+## When to Use Which
+
+| Component | Trigger | Content | Use Case |
+|-----------|---------|---------|----------|
+| **Tooltip** | Hover/focus | Text only, brief | Icon button labels, abbreviation explanations |
+| **HoverCard** | Hover | Rich content | User profile previews, link previews |
+| **Popover** | Click | Interactive content | Menus, forms, pickers, multi-action panels |
+
+## Tooltip
+
+<Canvas of={TooltipStories.Default} />
+
+Short text label on hover/focus. No interactive content.
+
+## HoverCard
+
+<Canvas of={HoverCardStories.Default} />
+
+Rich preview on hover. Supports arrow, portal, and custom content.
+
+## Popover
+
+<Canvas of={PopoverStories.Default} />
+
+Interactive content on click. Supports header, body, footer, close trigger.
+
+## Common Pattern
+
+All three use the portal pattern:
+
+```
+Root → Portal → Positioner → Content (with optional Arrow)
+```
+
+Anker wraps this into simplified APIs:
+- `Tooltip` — `content` prop, renders text
+- `HoverCard` — `Trigger` + `HoverCardContent` wrapper
+- `Popover` — `Trigger` + `PopoverContent` wrapper with sub-components (Header, Body, Footer)
+
+## Gaps & Migration
+
+| Gap | Status | Notes |
+|-----|--------|-------|
+| Controlled open state for Tooltip | Supported | Pass `open` and `onOpenChange` via rest props. |
+| Popover form integration | Supported | Put form content inside `PopoverBody`. |
+| HoverCard delay customization | Supported | Pass `openDelay`/`closeDelay` via rest props. |
+| Tooltip on disabled buttons | Workaround | Wrap disabled button in a `<span>` — disabled elements don't fire hover events. |
