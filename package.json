@@ -85,7 +85,7 @@
     "react-hook-form": "^7.54.0",
     "react-i18next": "^14.0.0",
     "react-router-dom": "^6.28.0",
-    "remark-gfm": "^3.0.1",
+    "remark-gfm": "^4.0.0",
     "storybook": "^8.4.0",
     "tsup": "^8.3.0",
     "typescript": "^5.7.0",
