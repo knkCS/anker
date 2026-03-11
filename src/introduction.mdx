@@ -1,0 +1,58 @@
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Introduction" />
+
+# Anker UI Library
+
+Anker is the shared UI component library for the **knk software group**, built on Chakra UI v3, React 19, and TypeScript.
+
+## Installation
+
+```bash
+npm install @knkcs/anker
+```
+
+## Architecture
+
+The library is organized in six layers, each available as a subpath export:
+
+| Layer | Import | Description |
+|-------|--------|-------------|
+| **Theme** | `@knkcs/anker/theme` | Design tokens, color scales, semantic tokens, component recipes |
+| **Primitives** | `@knkcs/anker/primitives` | Thin wrappers around Chakra UI with consistent defaults |
+| **Components** | `@knkcs/anker/components` | Higher-level composites (Modal, Drawer, CardList, Stepper) |
+| **Atoms** | `@knkcs/anker/atoms` | Small reusable units (Persona, StatusBadge, Select, Clipboard) |
+| **Forms** | `@knkcs/anker/forms` | Form controls built on React Hook Form + Zod |
+| **Feedback** | `@knkcs/anker/feedback` | Feedback patterns (ConfirmModal with provider + hook) |
+
+## Quick Start
+
+Wrap your app with the Provider:
+
+```tsx
+import { Provider } from "@knkcs/anker/primitives";
+
+function App() {
+  return (
+    <Provider>
+      {/* your app */}
+    </Provider>
+  );
+}
+```
+
+Then import components from the appropriate layer:
+
+```tsx
+import { Modal } from "@knkcs/anker/components";
+import { InputField } from "@knkcs/anker/forms";
+import { Tooltip } from "@knkcs/anker/primitives";
+```
+
+## Key Conventions
+
+- **Icons**: Lucide React exclusively — no FontAwesome
+- **Forms**: React Hook Form + Zod — no Formik/Yup
+- **Styling**: Semantic tokens (`bg-canvas`, `accent`, `border`) — no hardcoded colors
+- **Strings**: All user-facing text is passed via props with English defaults — no i18n keys
+- **Accessibility**: ARIA attributes on all interactive components, 44x44px minimum touch targets
