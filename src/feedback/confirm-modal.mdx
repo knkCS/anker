@@ -1,0 +1,79 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./confirm-modal.stories";
+
+<Meta of={Stories} />
+
+# ConfirmModal
+
+A promise-based confirmation dialog driven by a provider + hook pattern. Wrap your app with `ConfirmModalProvider`, then call `useConfirmModal()` anywhere.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Setup
+
+Wrap your app (or a subtree) with the provider:
+
+```tsx
+import { ConfirmModalProvider } from "@knkcs/anker/feedback";
+
+function App() {
+  return (
+    <ConfirmModalProvider>
+      {/* your app */}
+    </ConfirmModalProvider>
+  );
+}
+```
+
+Then use the hook in any component:
+
+```tsx
+import { useConfirmModal } from "@knkcs/anker/feedback";
+
+function DeleteButton() {
+  const { confirm } = useConfirmModal();
+
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: "Delete item?",
+      message: "This action cannot be undone.",
+      confirmLabel: "Delete",
+      colorPalette: "red",
+    });
+    if (confirmed) {
+      // perform delete
+    }
+  };
+
+  return <Button onClick={handleDelete}>Delete</Button>;
+}
+```
+
+## Guidelines
+
+- **Do** use ConfirmModal for destructive actions (delete, discard changes, revoke access).
+- **Do** use inside modals/drawers — it renders its own portal, no nesting issues.
+- **Don't** use for informational alerts. Use `Alert` primitive instead.
+- Set `colorPalette="red"` for destructive confirmations (default).
+- Use `beforeConfirmActions` to add extra buttons (e.g., "Delete and notify").
+
+## Accessibility
+
+- Uses `role="alertdialog"` for screen reader announcement.
+- Initial focus is on the Cancel button (safe default for destructive actions).
+- `Escape` key dismisses and resolves `false`.
+
+## Gaps & Migration
+
+| Gap | Status | Notes |
+|-----|--------|-------|
+| Async confirm handler (loading state) | Not yet | `confirm()` resolves immediately. Handle loading in the caller. |
+| Custom body content (forms, checkboxes) | Partial | `message` accepts ReactNode, but no built-in form support. |
+| Multiple concurrent confirmations | Not supported | Only one confirmation dialog at a time. |
+| Non-destructive variant (info confirm) | Supported | Set `colorPalette="primary"` for non-destructive confirmation. |
+
+## Props (ConfirmOptions)
+
+<ArgTypes of={Stories} />

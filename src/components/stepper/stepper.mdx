@@ -1,0 +1,55 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./stepper.stories";
+
+<Meta of={Stories} />
+
+# Stepper
+
+A multi-step wizard for guiding users through sequential workflows — forms, onboarding, configuration.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Guidelines
+
+- **Do** use Stepper for multi-step forms or workflows where steps are sequential and progress should be visible.
+- **Don't** use Stepper for tabbed content where order doesn't matter — use Tabs instead.
+- Each step gets a `StepperStep` with a `title` (and optional `description`).
+- Step content goes inside `StepperStep` as children. Only the active step's content is visible.
+- Use the `useStepper` hook to control navigation programmatically.
+- Use `useStepperNextButton` and `useStepperPrevButton` hooks for navigation button props.
+
+## Hook API
+
+```tsx
+import { useStepper, useStepperNextButton, useStepperPrevButton } from "@knkcs/anker/components";
+
+const stepper = useStepper({ stepCount: 3 });
+const nextProps = useStepperNextButton(); // { onClick, disabled }
+const prevProps = useStepperPrevButton(); // { onClick, disabled }
+```
+
+## Vertical Orientation
+
+Pass `orientation="vertical"` for a vertical layout where step content appears inline below each step indicator.
+
+<Canvas of={Stories.Vertical} />
+
+## Accessibility
+
+- Active step uses `aria-current="step"`.
+- Steps show check icons when completed.
+- Collapsible animation on step content transitions.
+
+## Gaps & Migration
+
+| Gap | Status | Notes |
+|-----|--------|-------|
+| Non-linear navigation (click any step) | Not yet | Steps are sequential only. Users can go back but not skip ahead. |
+| Async validation before next step | Not built-in | Validate in your `onNext` handler and conditionally call `stepper.next()`. |
+| Step error state | Not yet | No visual error indicator on individual steps. |
+
+## Props
+
+<ArgTypes of={Stories} />
