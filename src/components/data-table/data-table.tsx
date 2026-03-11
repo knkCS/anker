@@ -1,12 +1,12 @@
 import { Box, Checkbox, Flex, Table, Text } from "@chakra-ui/react";
 import {
 	type ColumnDef,
-	type OnChangeFn,
-	type RowSelectionState,
-	type SortingState,
 	flexRender,
 	getCoreRowModel,
 	getSortedRowModel,
+	type OnChangeFn,
+	type RowSelectionState,
+	type SortingState,
 	useReactTable,
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
@@ -190,10 +190,7 @@ function DataTableInner<T extends Record<string, unknown>>(
 					<Table.Body>
 						{loading &&
 							Array.from({ length: LOADING_ROW_COUNT }).map((_, rowIdx) => (
-								<Table.Row
-									key={`loading-${String(rowIdx)}`}
-									aria-hidden="true"
-								>
+								<Table.Row key={`loading-${String(rowIdx)}`} aria-hidden="true">
 									{allColumns.map((_, colIdx) => (
 										<Table.Cell key={`loading-cell-${String(colIdx)}`}>
 											<Skeleton height="4" borderRadius="sm" />

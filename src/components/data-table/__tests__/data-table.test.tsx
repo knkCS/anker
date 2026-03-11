@@ -1,9 +1,9 @@
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { type Mock, describe, expect, it, vi } from "vitest";
-import { DataTable } from "../data-table";
+import { describe, expect, it, type Mock, vi } from "vitest";
 import type { DataTableProps } from "../data-table";
+import { DataTable } from "../data-table";
 
 type SampleRow = { id: string; name: string; age: number };
 
@@ -24,18 +24,14 @@ function renderWithChakra(ui: React.ReactElement) {
 
 describe("DataTable", () => {
 	it("renders column headers", () => {
-		renderWithChakra(
-			<DataTable columns={sampleColumns} data={sampleData} />,
-		);
+		renderWithChakra(<DataTable columns={sampleColumns} data={sampleData} />);
 
 		expect(screen.getByText("Name")).toBeInTheDocument();
 		expect(screen.getByText("Age")).toBeInTheDocument();
 	});
 
 	it("renders data rows", () => {
-		renderWithChakra(
-			<DataTable columns={sampleColumns} data={sampleData} />,
-		);
+		renderWithChakra(<DataTable columns={sampleColumns} data={sampleData} />);
 
 		expect(screen.getByText("Alice")).toBeInTheDocument();
 		expect(screen.getByText("Bob")).toBeInTheDocument();
@@ -46,9 +42,7 @@ describe("DataTable", () => {
 	});
 
 	it("shows empty state when no data", () => {
-		renderWithChakra(
-			<DataTable columns={sampleColumns} data={[]} />,
-		);
+		renderWithChakra(<DataTable columns={sampleColumns} data={[]} />);
 
 		expect(screen.getByText("No data available")).toBeInTheDocument();
 	});
@@ -66,9 +60,7 @@ describe("DataTable", () => {
 	});
 
 	it("shows loading state", () => {
-		renderWithChakra(
-			<DataTable columns={sampleColumns} data={[]} loading />,
-		);
+		renderWithChakra(<DataTable columns={sampleColumns} data={[]} loading />);
 
 		// Loading rows should be present, but not the empty state
 		expect(screen.queryByText("No data available")).not.toBeInTheDocument();

@@ -1,10 +1,16 @@
 // Card
 export type { CardProps } from "./card";
 export { Card } from "./card";
+// CardList (new names)
+export type { CardListProps } from "./card-list";
+export { CardList } from "./card-list";
+export type { CardListDataProps } from "./card-list-data";
+export { CardListData } from "./card-list-data";
+export type { CardListItemProps, CardListMenuItem } from "./card-list-item";
+export { CardListItem } from "./card-list-item";
 // DataTable
 export type { DataTableProps } from "./data-table";
 export { DataTable } from "./data-table";
-
 // Drawer
 export type { DrawerProps } from "./drawer";
 export { DrawerRoot } from "./drawer";
@@ -49,14 +55,6 @@ export {
 	useStepperNextButton,
 	useStepperPrevButton,
 } from "./stepper";
-
-// CardList (new names)
-export type { CardListProps } from "./card-list";
-export { CardList } from "./card-list";
-export type { CardListDataProps } from "./card-list-data";
-export { CardListData } from "./card-list-data";
-export type { CardListItemProps, CardListMenuItem } from "./card-list-item";
-export { CardListItem } from "./card-list-item";
 
 // Table (deprecated, re-exports from CardList)
 export type { TableProps } from "./table";
