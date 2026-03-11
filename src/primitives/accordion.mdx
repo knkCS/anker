@@ -1,0 +1,37 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./accordion.stories";
+
+<Meta of={Stories} />
+
+# Accordion
+
+A vertically stacked set of collapsible sections. Wraps Chakra's Accordion with a simplified API — pass `label` and `children` instead of composing nested trigger/content components.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Multiple Open
+
+<Canvas of={Stories.Multiple} />
+
+Set `multiple` on `AccordionRoot` to allow several sections open simultaneously. Without it, opening one section closes the others.
+
+## Guidelines
+
+- **Do** use Accordion for progressive disclosure — FAQ pages, settings panels, grouped form sections.
+- **Don't** use Accordion for primary navigation or critical content that users must see.
+- **Do** set `collapsible` on `AccordionRoot` if users should be able to close all sections.
+- Keep accordion content concise. If a section has complex content, consider a separate page instead.
+
+## Accessibility
+
+- Each trigger is a focusable button with `aria-expanded` and `aria-controls`.
+- Arrow keys navigate between triggers, Enter/Space toggles sections.
+- Content regions have `role="region"` with `aria-labelledby` linking to the trigger.
+
+## Props
+
+### AccordionItem
+
+<ArgTypes of={Stories} />
