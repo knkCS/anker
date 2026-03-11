@@ -1,0 +1,54 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./select.stories";
+
+<Meta of={Stories} />
+
+# Select
+
+A searchable dropdown for single or multi-value selection. Built on [chakra-react-select](https://github.com/csandman/chakra-react-select) with custom option renderers for avatars, color indicators, and icons.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Multi-Select
+
+<Canvas of={Stories.Multi} />
+
+Set `isMulti` to allow selecting multiple values. Selected items appear as tags.
+
+## Variants
+
+- **`BaseSelect`** — The primary select component. Wraps chakra-react-select with custom `SingleValue`, `MultiValue`, and `Option` renderers that display avatar, color circle, icon, and label.
+- **`CreatableSelect`** — Re-exported from chakra-react-select. Allows users to create new options on the fly.
+- **`TableMenuList` / `TableOption`** — Specialized components for rendering options as table rows with multiple columns. Use `createTableMenuComponents()` to configure.
+
+## BaseOption Shape
+
+Options must conform to the `BaseOption` interface:
+
+- `id` (required) — unique identifier, used as the option value
+- `label` (required) — display text
+- `avatar` — renders an `Avatar` with the given name
+- `color` — renders a color circle indicator
+- `icon` — renders a custom React node
+- `data` — arbitrary metadata for custom logic
+
+## Guidelines
+
+- **Do** use `BaseSelect` for most dropdown needs — it handles avatars, colors, and icons out of the box.
+- **Don't** use raw `chakra-react-select` directly — `BaseSelect` provides consistent option rendering.
+- **Do** set `menuPortalTarget` (defaults to `document.body`) to avoid z-index issues inside modals or drawers.
+- **Don't** forget that `loading` and `disabled` are the prop names (not `isLoading`/`isDisabled`).
+- Use `isClearable={false}` when a value is always required.
+
+## Accessibility
+
+- Keyboard navigable: arrow keys to browse options, Enter to select, Escape to close.
+- ARIA attributes are handled by chakra-react-select (combobox role, listbox, option roles).
+- Screen readers announce selected values and available options.
+- Multi-select tags are keyboard-removable with Backspace.
+
+## Props
+
+<ArgTypes of={Stories} />
