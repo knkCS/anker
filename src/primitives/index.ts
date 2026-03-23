@@ -59,6 +59,11 @@ export {
 	MenuTrigger,
 	MenuTriggerItem,
 } from "./menu";
+
+export type { NativeSelectProps } from "./native-select";
+// NativeSelect
+export { NativeSelect } from "./native-select";
+
 export type { NumberInputProps } from "./number-input";
 // NumberInput
 export {
