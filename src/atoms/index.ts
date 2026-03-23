@@ -15,7 +15,12 @@ export {
 } from "./actions";
 
 // Button
-export { Button, type ButtonProps, IconButton, type IconButtonProps } from "./button";
+export {
+	Button,
+	type ButtonProps,
+	IconButton,
+	type IconButtonProps,
+} from "./button";
 
 // CheckboxCard
 export {
