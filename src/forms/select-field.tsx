@@ -1,6 +1,7 @@
-import { NativeSelect, type NativeSelectFieldProps } from "@chakra-ui/react";
+import type { NativeSelectFieldProps } from "@chakra-ui/react";
 import type React from "react";
 import type { FieldValues } from "react-hook-form";
+import { NativeSelect } from "../primitives/native-select";
 import { FormField, type FormFieldProps } from "./form-field";
 
 export interface SelectFieldProps<T extends FieldValues>
@@ -34,23 +35,17 @@ export function SelectField<T extends FieldValues>({
 			{...rest}
 		>
 			{(field) => (
-				<NativeSelect.Root disabled={readOnly || disabled}>
-					<NativeSelect.Field
-						{...field}
-						value={String(field.value ?? "")}
-						id={name}
-						ref={ref}
-						{...selectProps}
-					>
-						{placeholder && (
-							<option value="" disabled>
-								{placeholder}
-							</option>
-						)}
-						{children}
-					</NativeSelect.Field>
-					<NativeSelect.Indicator />
-				</NativeSelect.Root>
+				<NativeSelect
+					disabled={readOnly || disabled}
+					placeholder={placeholder}
+					{...field}
+					value={String(field.value ?? "")}
+					id={name}
+					ref={ref}
+					{...selectProps}
+				>
+					{children}
+				</NativeSelect>
 			)}
 		</FormField>
 	);
