@@ -14,6 +14,9 @@ export {
 	type RemoveProps,
 } from "./actions";
 
+// Button
+export { Button, type ButtonProps, IconButton, type IconButtonProps } from "./button";
+
 // CheckboxCard
 export {
 	CheckboxCard,
