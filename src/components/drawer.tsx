@@ -1,5 +1,4 @@
 import {
-	Button,
 	Drawer,
 	type DrawerRootProps,
 	Flex,
@@ -7,6 +6,7 @@ import {
 	Spacer,
 } from "@chakra-ui/react";
 import { X } from "lucide-react";
+import { Button } from "../atoms/button";
 
 export interface DrawerProps
 	extends Omit<DrawerRootProps, "open" | "onOpenChange"> {

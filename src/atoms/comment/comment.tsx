@@ -1,13 +1,8 @@
-import {
-	Button,
-	type ButtonProps,
-	chakra,
-	HStack,
-	Stack,
-} from "@chakra-ui/react";
+import { chakra, HStack, Stack } from "@chakra-ui/react";
 import type React from "react";
 import { createContext, useContext } from "react";
 import { Prose } from "../../primitives/prose";
+import { Button, type ButtonProps } from "../button";
 import { RelativeDateTime } from "../datetime/relative-datetime";
 import type {
 	CommentFooterProps,

@@ -1,14 +1,13 @@
 import {
-	Button,
 	Dialog,
 	type DialogRootProps,
 	Flex,
-	IconButton,
 	Portal,
 	Separator,
 	Spacer,
 } from "@chakra-ui/react";
 import { X } from "lucide-react";
+import { Button, IconButton } from "../atoms/button";
 
 export interface ModalProps
 	extends Omit<DialogRootProps, "open" | "onOpenChange"> {

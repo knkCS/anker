@@ -1,7 +1,7 @@
-import type { IconButtonProps } from "@chakra-ui/react";
-import { Box, Circle, IconButton, Text } from "@chakra-ui/react";
+import { Box, Circle, Text } from "@chakra-ui/react";
 import { Filter as FilterIcon } from "lucide-react";
 import type React from "react";
+import { IconButton, type IconButtonProps } from "../button";
 
 export type FilterProps = Omit<
 	IconButtonProps,

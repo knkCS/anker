@@ -1,6 +1,7 @@
-import { Button, HStack, IconButton, Text } from "@chakra-ui/react";
+import { HStack, Text } from "@chakra-ui/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type React from "react";
+import { Button, IconButton } from "../atoms/button";
 
 export interface PaginationProps {
 	/** Current page (1-based). */
