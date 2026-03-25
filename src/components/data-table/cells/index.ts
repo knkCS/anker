@@ -5,6 +5,7 @@ export {
 	ColorSwatchCell,
 	type ColorSwatchCellProps,
 } from "./color-swatch-cell";
+export { CountCell, type CountCellProps } from "./count-cell";
 export { NumberCell, type NumberCellProps } from "./number-cell";
 export { SlugCell, type SlugCellProps } from "./slug-cell";
 export {
