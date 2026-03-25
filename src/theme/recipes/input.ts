@@ -26,19 +26,19 @@ export const inputSlotRecipe = defineSlotRecipe({
 			},
 			"outline-on-accent": {
 				field: {
-					bg: "white",
+					bg: { base: "white", _dark: "gray.800" },
 					borderRadius: "md",
-					color: "gray.900",
+					color: { base: "gray.900", _dark: "gray.100" },
 					borderWidth: "1px",
-					borderColor: "primary.50",
+					borderColor: { base: "primary.50", _dark: "primary.800" },
 					_placeholder: {
-						color: "gray.500",
+						color: { base: "gray.500", _dark: "gray.400" },
 					},
 					_hover: {
-						borderColor: "primary.100",
+						borderColor: { base: "primary.100", _dark: "primary.700" },
 					},
 					_focus: {
-						borderColor: "primary.200",
+						borderColor: { base: "primary.200", _dark: "primary.600" },
 						boxShadow: "0px 0px 0px 1px var(--chakra-colors-primary-200)",
 					},
 				},

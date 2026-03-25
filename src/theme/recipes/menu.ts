@@ -31,7 +31,7 @@ export const menuTheme = defineSlotRecipe({
 			px: "0.8rem",
 			fontSize: "sm",
 			fontWeight: "normal",
-			color: "black",
+			color: { base: "gray.800", _dark: "gray.100" },
 			transitionProperty: "background",
 			transitionDuration: "ultra-fast",
 			transitionTimingFunction: "ease-in",

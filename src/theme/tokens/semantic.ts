@@ -38,7 +38,7 @@ const semanticTokens = {
 			value: { base: "gray.500", _dark: "gray.400" },
 		},
 		border: {
-			value: { base: "{colors.gray.200}", _dark: "{colors.gray.700}" },
+			value: { base: "gray.200", _dark: "gray.700" },
 		},
 		accent: {
 			value: { base: "primary.500", _dark: "primary.200" },
@@ -96,13 +96,67 @@ const semanticTokens = {
 				},
 			},
 		},
-		// Static accent surface tokens
-		"bg-accent": { value: "primary.600" },
-		"bg-accent-subtle": { value: "primary.500" },
-		"bg-accent-muted": { value: "primary.400" },
-		"on-accent": { value: "white" },
-		"on-accent-muted": { value: "primary.50" },
-		"on-accent-subtle": { value: "primary.100" },
+		// Secondary color palette tokens (for colorPalette="secondary")
+		secondary: {
+			contrast: { value: { base: "white", _dark: "white" } },
+			fg: {
+				value: {
+					base: "{colors.secondary.700}",
+					_dark: "{colors.secondary.300}",
+				},
+			},
+			subtle: {
+				value: {
+					base: "{colors.secondary.100}",
+					_dark: "{colors.secondary.900}",
+				},
+			},
+			muted: {
+				value: {
+					base: "{colors.secondary.200}",
+					_dark: "{colors.secondary.800}",
+				},
+			},
+			emphasized: {
+				value: {
+					base: "{colors.secondary.300}",
+					_dark: "{colors.secondary.700}",
+				},
+			},
+			solid: {
+				value: {
+					base: "{colors.secondary.500}",
+					_dark: "{colors.secondary.500}",
+				},
+			},
+			focusRing: {
+				value: {
+					base: "{colors.secondary.500}",
+					_dark: "{colors.secondary.500}",
+				},
+			},
+			border: {
+				value: {
+					base: "{colors.secondary.500}",
+					_dark: "{colors.secondary.400}",
+				},
+			},
+		},
+		// Accent surface tokens
+		"bg-accent": { value: { base: "primary.600", _dark: "primary.400" } },
+		"bg-accent-subtle": {
+			value: { base: "primary.500", _dark: "primary.500" },
+		},
+		"bg-accent-muted": {
+			value: { base: "primary.400", _dark: "primary.600" },
+		},
+		"on-accent": { value: { base: "white", _dark: "white" } },
+		"on-accent-muted": {
+			value: { base: "primary.50", _dark: "primary.100" },
+		},
+		"on-accent-subtle": {
+			value: { base: "primary.100", _dark: "primary.200" },
+		},
 	},
 	shadows: {
 		xs: {

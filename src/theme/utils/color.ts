@@ -3,8 +3,12 @@ import { transparentize as setTransparency, toHex } from "color2k";
 type Dict = { [key: string]: unknown };
 
 /**
- * Get the color raw value from theme
- * @param theme - the theme object
+ * Get the color raw value from a theme/token dictionary.
+ *
+ * Supports both Chakra v3 system token structure (where tokens are wrapped in
+ * `{ value: "..." }`) and flat color dictionaries (e.g., `{ primary: { 500: "#2087d7" } }`).
+ *
+ * @param theme - the theme or token object
  * @param color - the color path ("green.200")
  * @param fallback - the fallback color
  */
@@ -32,6 +36,8 @@ export const transparentize =
 
 /**
  * Minimal deep-get utility (replaces `dlv` dependency).
+ *
+ * Unwraps Chakra v3 `{ value: "..." }` token wrappers automatically.
  */
 function get(obj: unknown, path: string, fallback: unknown): string {
 	const keys = path.split(".");
@@ -39,6 +45,17 @@ function get(obj: unknown, path: string, fallback: unknown): string {
 	for (const key of keys) {
 		if (current == null || typeof current !== "object") return String(fallback);
 		current = (current as Record<string, unknown>)[key];
+		// Unwrap Chakra v3 token wrapper { value: "..." }
+		if (
+			current != null &&
+			typeof current === "object" &&
+			"value" in (current as Record<string, unknown>)
+		) {
+			const val = (current as Record<string, unknown>).value;
+			if (typeof val === "string") {
+				current = val;
+			}
+		}
 	}
 	return current != null ? String(current) : String(fallback);
 }

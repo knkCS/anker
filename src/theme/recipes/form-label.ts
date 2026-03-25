@@ -12,21 +12,21 @@ export default defineRecipe({
 				_peerPlaceholderShown: {
 					fontSize: "sm",
 					top: "1.5",
-					left: "4",
+					insetInlineStart: "4",
 				},
 			},
 			md: {
 				_peerPlaceholderShown: {
 					fontSize: "md",
 					top: "2",
-					left: "4",
+					insetInlineStart: "4",
 				},
 			},
 			lg: {
 				_peerPlaceholderShown: {
 					fontSize: "lg",
 					top: "2.5",
-					left: "4",
+					insetInlineStart: "4",
 				},
 			},
 		},
@@ -40,7 +40,7 @@ export default defineRecipe({
 				transition: "all 0.12s ease-in",
 				pointerEvents: "none",
 				top: "-27px",
-				left: "0",
+				insetInlineStart: "0",
 				_peerPlaceholderShown: {
 					fontWeight: "normal",
 					color: "subtle",
@@ -49,7 +49,7 @@ export default defineRecipe({
 					fontSize: "sm",
 					fontWeight: "medium",
 					top: "-27px",
-					left: "0",
+					insetInlineStart: "0",
 					color: "muted",
 				},
 			},

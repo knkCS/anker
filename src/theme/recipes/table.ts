@@ -60,7 +60,7 @@ export const tableTheme = defineSlotRecipe({
 					borderColor: "border",
 				},
 				row: {
-					bg: "bg",
+					bg: "bg-surface",
 				},
 			},
 			striped: {

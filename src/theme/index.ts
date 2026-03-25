@@ -103,13 +103,13 @@ const system = createSystem(defaultConfig, {
 			textarea,
 			tooltip,
 			tsRadioCard,
-			tsProperty,
-			treeItem,
 			tag,
 		},
 
 		slotRecipes: {
 			card,
+			tsProperty,
+			treeItem,
 			checkbox,
 			comment,
 			dialog,

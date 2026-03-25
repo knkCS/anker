@@ -54,19 +54,19 @@ export default defineSlotRecipe({
 		},
 		treeItemContent: {},
 		treeItemLabel: {
-			color: "gray.700",
+			color: { base: "gray.700", _dark: "gray.300" },
 		},
 		treeItemActions: {
-			textAlign: "right",
-			marginLeft: "4px",
+			textAlign: "end",
+			marginInlineStart: "4px",
 		},
 		treeItemChildren: {
 			position: "relative",
-			paddingLeft: 12,
+			paddingInlineStart: 12,
 			_before: {
 				content: '""',
 				position: "absolute",
-				left: "16px",
+				insetInlineStart: "16px",
 				height: "100%",
 				width: "1px",
 				bg: { base: "gray.200", _dark: "gray.600" },

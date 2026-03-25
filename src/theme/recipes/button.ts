@@ -156,15 +156,15 @@ export const buttonTheme = defineRecipe({
 				},
 			},
 
-			// Link variant for gray colorScheme
+			// Link variant for gray colorPalette
 			"link-gray": {
-				color: "fg.muted",
+				color: "muted",
 				_hover: {
 					textDecoration: "none",
-					color: "fg.default",
+					color: "default",
 				},
 				_active: {
-					color: "fg.default",
+					color: "default",
 				},
 			},
 		},
