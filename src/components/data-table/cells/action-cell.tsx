@@ -19,8 +19,8 @@ export interface ActionCellProps {
 export const ActionCell: React.FC<ActionCellProps> = ({ actions }) => {
 	return (
 		<HStack gap={1}>
-			{actions.map((action, index) => (
-				<Tooltip key={`${action.label}-${index}`} content={action.label}>
+			{actions.map((action) => (
+				<Tooltip key={action.label} content={action.label}>
 					<IconButton
 						aria-label={action.label}
 						size="sm"
