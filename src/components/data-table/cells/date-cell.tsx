@@ -17,13 +17,16 @@ export const DateCell: React.FC<DateCellProps> = ({
 }) => {
 	if (value == null) return <span>{emptyCellValue}</span>;
 
-	const formatted = dayjs(value).format(format);
+	const parsed = dayjs(value);
+	if (!parsed.isValid()) return <span>{emptyCellValue}</span>;
+
+	const formatted = parsed.format(format);
 
 	if (showRelative) {
 		const relative = formatRelativeDateTime(value);
 		return (
-			<Tooltip content={relative}>
-				<span>{formatted}</span>
+			<Tooltip content={formatted}>
+				<span>{relative}</span>
 			</Tooltip>
 		);
 	}
