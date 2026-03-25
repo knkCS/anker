@@ -124,6 +124,7 @@ export type { SpinnerProps } from "./spinner";
 export { Spinner } from "./spinner";
 
 // Stat
+export type { StatLabelProps, StatValueTextProps } from "./stat";
 export {
 	StatDownTrend,
 	StatHelpText,

@@ -112,11 +112,19 @@ export const MenuTriggerItem = function MenuTriggerItem({
 MenuTriggerItem.displayName = "MenuTriggerItem";
 
 export const MenuRadioItemGroup = ChakraMenu.RadioItemGroup;
+MenuRadioItemGroup.displayName = "MenuRadioItemGroup";
 export const MenuContextTrigger = ChakraMenu.ContextTrigger;
+MenuContextTrigger.displayName = "MenuContextTrigger";
 export const MenuRoot = ChakraMenu.Root;
+MenuRoot.displayName = "MenuRoot";
 export const MenuSeparator = ChakraMenu.Separator;
+MenuSeparator.displayName = "MenuSeparator";
 
 export const MenuItem = ChakraMenu.Item;
+MenuItem.displayName = "MenuItem";
 export const MenuItemText = ChakraMenu.ItemText;
+MenuItemText.displayName = "MenuItemText";
 export const MenuItemCommand = ChakraMenu.ItemCommand;
+MenuItemCommand.displayName = "MenuItemCommand";
 export const MenuTrigger = ChakraMenu.Trigger;
+MenuTrigger.displayName = "MenuTrigger";

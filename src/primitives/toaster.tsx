@@ -33,7 +33,7 @@ export function createAnkerToaster(options: CreateToasterOptions = {}) {
 					{(toast) => (
 						<Toast.Root width={{ md: "sm" }}>
 							{toast.type === "loading" ? (
-								<Spinner size="sm" color="primary.solid" />
+								<Spinner size="sm" color="accent" />
 							) : (
 								<Toast.Indicator />
 							)}

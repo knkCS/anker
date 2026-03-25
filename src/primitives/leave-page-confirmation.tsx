@@ -1,4 +1,5 @@
 import { Button, ButtonGroup, Dialog, Portal } from "@chakra-ui/react";
+import type React from "react";
 import { useRef } from "react";
 
 export interface LeavePageConfirmationProps {

@@ -7,7 +7,7 @@ import {
 import type * as React from "react";
 import { InfoTip } from "./toggle-tip";
 
-interface StatLabelProps extends ChakraStat.LabelProps {
+export interface StatLabelProps extends ChakraStat.LabelProps {
 	info?: React.ReactNode;
 }
 
@@ -23,8 +23,9 @@ export const StatLabel = function StatLabel({
 		</ChakraStat.Label>
 	);
 };
+StatLabel.displayName = "StatLabel";
 
-interface StatValueTextProps extends ChakraStat.ValueTextProps {
+export interface StatValueTextProps extends ChakraStat.ValueTextProps {
 	value?: number;
 	formatOptions?: Intl.NumberFormatOptions;
 }
@@ -41,6 +42,7 @@ export const StatValueText = function StatValueText({
 		</ChakraStat.ValueText>
 	);
 };
+StatValueText.displayName = "StatValueText";
 
 export const StatUpTrend = function StatUpTrend({
 	ref,
@@ -53,6 +55,7 @@ export const StatUpTrend = function StatUpTrend({
 		</Badge>
 	);
 };
+StatUpTrend.displayName = "StatUpTrend";
 
 export const StatDownTrend = function StatDownTrend({
 	ref,
@@ -65,7 +68,11 @@ export const StatDownTrend = function StatDownTrend({
 		</Badge>
 	);
 };
+StatDownTrend.displayName = "StatDownTrend";
 
 export const StatRoot = ChakraStat.Root;
+StatRoot.displayName = "StatRoot";
 export const StatHelpText = ChakraStat.HelpText;
+StatHelpText.displayName = "StatHelpText";
 export const StatValueUnit = ChakraStat.ValueUnit;
+StatValueUnit.displayName = "StatValueUnit";

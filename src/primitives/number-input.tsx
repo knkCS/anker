@@ -25,5 +25,8 @@ export const NumberInputRoot = function NumberInput({
 NumberInputRoot.displayName = "NumberInputRoot";
 
 export const NumberInputField = ChakraNumberInput.Input;
+NumberInputField.displayName = "NumberInputField";
 export const NumberInputScrubber = ChakraNumberInput.Scrubber;
+NumberInputScrubber.displayName = "NumberInputScrubber";
 export const NumberInputLabel = ChakraNumberInput.Label;
+NumberInputLabel.displayName = "NumberInputLabel";

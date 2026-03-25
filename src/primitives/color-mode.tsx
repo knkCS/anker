@@ -90,7 +90,7 @@ export const LightMode = function LightMode({
 			display="contents"
 			className="chakra-theme light"
 			colorPalette="gray"
-			colorScheme="light"
+			data-theme="light"
 			ref={ref}
 			{...props}
 		/>
@@ -108,7 +108,7 @@ export const DarkMode = function DarkMode({
 			display="contents"
 			className="chakra-theme dark"
 			colorPalette="gray"
-			colorScheme="dark"
+			data-theme="dark"
 			ref={ref}
 			{...props}
 		/>
