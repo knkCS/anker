@@ -1,3 +1,8 @@
+export {
+	ActionCell,
+	type ActionCellAction,
+	type ActionCellProps,
+} from "./action-cell";
 export { BooleanCell, type BooleanCellProps } from "./boolean-cell";
 export { emptyCellValue, pluralize, truncateText } from "./cell-utils";
 export { CodeCell, type CodeCellProps } from "./code-cell";
