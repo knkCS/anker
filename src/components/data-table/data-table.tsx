@@ -148,8 +148,10 @@ function DataTableInner<T extends Record<string, unknown>>(
 	return (
 		<Flex direction="column" gap={4}>
 			<Box overflowX="auto">
-				{/* The custom theme extends the table recipe with additional variants
-				    (striped, hoverable) beyond Chakra's built-in types */}
+				{/* Chakra v3's Table.Root types only include built-in variants.
+				    Our custom table recipe adds "striped" and "hoverable" variants
+				    that work at runtime but require a type cast. Module augmentation
+				    for slot recipe variants is not supported in Chakra v3. */}
 				<Table.Root variant={variant as "line"}>
 					<Table.Header>
 						{table.getHeaderGroups().map((headerGroup) => (
@@ -182,11 +184,11 @@ function DataTableInner<T extends Record<string, unknown>>(
 											onKeyDown={
 												canSort
 													? (e: React.KeyboardEvent) => {
-														if (e.key === "Enter" || e.key === " ") {
-															e.preventDefault();
-															header.column.getToggleSortingHandler()?.(e);
+															if (e.key === "Enter" || e.key === " ") {
+																e.preventDefault();
+																header.column.getToggleSortingHandler()?.(e);
+															}
 														}
-													}
 													: undefined
 											}
 										>
@@ -238,11 +240,11 @@ function DataTableInner<T extends Record<string, unknown>>(
 									onKeyDown={
 										onRowClick
 											? (e: React.KeyboardEvent) => {
-												if (e.key === "Enter" || e.key === " ") {
-													e.preventDefault();
-													onRowClick(row.original);
+													if (e.key === "Enter" || e.key === " ") {
+														e.preventDefault();
+														onRowClick(row.original);
+													}
 												}
-											}
 											: undefined
 									}
 								>
