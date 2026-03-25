@@ -21,7 +21,13 @@ export const Filter = ({
 
 	return (
 		<Box position="relative">
-			<IconButton variant="ghost" cursor="pointer" ref={ref} aria-label={filterLabel} {...rest}>
+			<IconButton
+				variant="ghost"
+				cursor="pointer"
+				ref={ref}
+				aria-label={filterLabel}
+				{...rest}
+			>
 				<FilterIcon />
 			</IconButton>
 			{activeFilterCount && activeFilterCount > 0 ? (
