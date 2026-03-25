@@ -21,6 +21,7 @@ export type {
 	NumberCellProps,
 	SlugCellProps,
 	StatusBadgeCellProps,
+	SwitchCellProps,
 	TruncatedTextCellProps,
 	UrlCellProps,
 } from "./data-table";
@@ -37,6 +38,7 @@ export {
 	pluralize,
 	SlugCell,
 	StatusBadgeCell,
+	SwitchCell,
 	TruncatedTextCell,
 	truncateText,
 	UrlCell,

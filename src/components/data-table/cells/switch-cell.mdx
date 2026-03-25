@@ -1,0 +1,20 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./switch-cell.stories";
+
+<Meta of={Stories} />
+
+# SwitchCell
+
+A toggle switch cell for DataTable. Renders anker's `Switch` primitive with click propagation stopped to prevent triggering row click handlers.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Disabled
+
+<Canvas of={Stories.Disabled} />
+
+## Props
+
+<ArgTypes of={Stories} />

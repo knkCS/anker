@@ -18,6 +18,7 @@ export {
 	StatusBadgeCell,
 	type StatusBadgeCellProps,
 } from "./status-badge-cell";
+export { SwitchCell, type SwitchCellProps } from "./switch-cell";
 export {
 	TruncatedTextCell,
 	type TruncatedTextCellProps,
