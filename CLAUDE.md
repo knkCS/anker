@@ -24,6 +24,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in six layers
 | Concern | Choice |
 |---------|--------|
 | UI framework | Chakra UI v3 (recipes, slot recipes, semantic tokens) |
+| Data tables | TanStack React Table v8 (headless, generic DataTable wrapper) |
 | Icons | Lucide React (replacing FontAwesome from Core) |
 | Form state | React Hook Form (replacing Formik from Core) |
 | Validation | Zod (replacing Yup from Core) |
@@ -146,6 +147,26 @@ Additional rules:
 - Read `docs/chakra-v3-reference.md` before creating or modifying any theme recipe, token, or Chakra wrapper component
 - Never add `prefers-reduced-motion` media queries — the theme handles this globally via `_motionReduce`
 - Never import from `@chakra-ui/react` directly in atoms/components/forms if a primitives wrapper exists — use the wrapper instead
+
+## TanStack React Table Conventions
+
+This project uses TanStack React Table v8 (headless). The `DataTable` component wraps `useReactTable` and renders via Chakra's `Table.*` compound components.
+
+| Never do | Do instead |
+|----------|-----------|
+| Define `columns` inside component body without `useMemo` | Define outside component or wrap in `useMemo`/`useState` |
+| Inline data transforms: `data={items.filter(...)}` | `useMemo` on derived data for stable references |
+| Client-side sort + server-side pagination | Use `manualSorting: true` for server data |
+| Import `@tanstack/react-table` in cell components | Cells receive plain values — no TanStack coupling |
+| `accessorKey: "address.city"` for nested paths | `accessorFn: (row) => row.address.city` + explicit `id` |
+| `accessorFn` without providing `id` | Always add `id` when using `accessorFn` |
+| Mutate data arrays in place | Produce new arrays immutably |
+
+Additional rules:
+- Read `docs/react-table-reference.md` before creating or modifying DataTable, column definitions, or cell components
+- Prefer `createColumnHelper<T>()` over inline `ColumnDef` objects for full TypeScript inference
+- Cell components are plain React — they receive extracted values and return JSX, with no TanStack imports
+- Every cell must handle `null`/`undefined` → `emptyCellValue` (em-dash `—`)
 
 ## Component Scaffolding Checklist
 
