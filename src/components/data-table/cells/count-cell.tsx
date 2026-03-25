@@ -19,6 +19,7 @@ export const CountCell: React.FC<CountCellProps> = ({
 	let count: number;
 	if (countFn) {
 		count = countFn(value);
+		if (!Number.isFinite(count)) return <span>{emptyCellValue}</span>;
 	} else if (typeof value === "number") {
 		count = value;
 	} else if (Array.isArray(value)) {
