@@ -12,6 +12,7 @@ import {
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import type React from "react";
+import { useMemo } from "react";
 import { Skeleton } from "../../primitives/skeleton";
 import { Pagination } from "../pagination";
 
@@ -74,43 +75,49 @@ function DataTableInner<T extends Record<string, unknown>>(
 		getRowId,
 	} = props;
 
-	const selectionColumn: ColumnDef<T, unknown> = {
-		id: "_select",
-		header: ({ table }) => (
-			<Checkbox.Root
-				checked={
-					table.getIsAllPageRowsSelected()
-						? true
-						: table.getIsSomePageRowsSelected()
-							? "indeterminate"
-							: false
-				}
-				onCheckedChange={(details) =>
-					table.toggleAllPageRowsSelected(!!details.checked)
-				}
-				aria-label="Select all rows"
-				size="sm"
-			>
-				<Checkbox.HiddenInput />
-				<Checkbox.Control />
-			</Checkbox.Root>
-		),
-		cell: ({ row }) => (
-			<Checkbox.Root
-				checked={row.getIsSelected()}
-				onCheckedChange={(details) => row.toggleSelected(!!details.checked)}
-				aria-label={`Select row ${String(row.index + 1)}`}
-				size="sm"
-				onClick={(e) => e.stopPropagation()}
-			>
-				<Checkbox.HiddenInput />
-				<Checkbox.Control />
-			</Checkbox.Root>
-		),
-		enableSorting: false,
-	};
+	const selectionColumn = useMemo<ColumnDef<T, unknown>>(
+		() => ({
+			id: "_select",
+			header: ({ table }) => (
+				<Checkbox.Root
+					checked={
+						table.getIsAllPageRowsSelected()
+							? true
+							: table.getIsSomePageRowsSelected()
+								? "indeterminate"
+								: false
+					}
+					onCheckedChange={(details) =>
+						table.toggleAllPageRowsSelected(!!details.checked)
+					}
+					aria-label="Select all rows"
+					size="sm"
+				>
+					<Checkbox.HiddenInput />
+					<Checkbox.Control />
+				</Checkbox.Root>
+			),
+			cell: ({ row }) => (
+				<Checkbox.Root
+					checked={row.getIsSelected()}
+					onCheckedChange={(details) => row.toggleSelected(!!details.checked)}
+					aria-label={`Select row ${String(row.index + 1)}`}
+					size="sm"
+					onClick={(e) => e.stopPropagation()}
+				>
+					<Checkbox.HiddenInput />
+					<Checkbox.Control />
+				</Checkbox.Root>
+			),
+			enableSorting: false,
+		}),
+		[],
+	);
 
-	const allColumns = selectable ? [selectionColumn, ...columns] : columns;
+	const allColumns = useMemo(
+		() => (selectable ? [selectionColumn, ...columns] : columns),
+		[selectable, selectionColumn, columns],
+	);
 
 	const table = useReactTable({
 		data,
