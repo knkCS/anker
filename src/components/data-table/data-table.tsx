@@ -177,6 +177,18 @@ function DataTableInner<T extends Record<string, unknown>>(
 															: undefined
 											}
 											userSelect={canSort ? "none" : undefined}
+											tabIndex={canSort ? 0 : undefined}
+											role={canSort ? "button" : undefined}
+											onKeyDown={
+												canSort
+													? (e: React.KeyboardEvent) => {
+														if (e.key === "Enter" || e.key === " ") {
+															e.preventDefault();
+															header.column.getToggleSortingHandler()?.(e);
+														}
+													}
+													: undefined
+											}
 										>
 											<Flex alignItems="center" gap={1}>
 												{header.isPlaceholder
