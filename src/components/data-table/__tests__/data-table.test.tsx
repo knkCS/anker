@@ -107,4 +107,62 @@ describe("DataTable", () => {
 	it("has correct displayName", () => {
 		expect(DataTable.displayName).toBe("DataTable");
 	});
+
+	it("calls onSortingChange when a sortable header is clicked", async () => {
+		const handleSortingChange = vi.fn();
+		const user = userEvent.setup();
+		const sortableColumns: DataTableProps<SampleRow>["columns"] = [
+			{ accessorKey: "name", header: "Name", enableSorting: true },
+			{ accessorKey: "age", header: "Age" },
+		];
+
+		renderWithChakra(
+			<DataTable
+				columns={sortableColumns}
+				data={sampleData}
+				sorting={[]}
+				onSortingChange={handleSortingChange}
+			/>,
+		);
+
+		await user.click(screen.getByText("Name"));
+		expect(handleSortingChange).toHaveBeenCalled();
+	});
+
+	it("calls onRowSelectionChange when a row checkbox is clicked", async () => {
+		const handleSelectionChange = vi.fn();
+		const user = userEvent.setup();
+
+		renderWithChakra(
+			<DataTable
+				columns={sampleColumns}
+				data={sampleData}
+				selectable
+				rowSelection={{}}
+				onRowSelectionChange={handleSelectionChange}
+			/>,
+		);
+
+		const checkboxes = screen.getAllByRole("checkbox");
+		// First checkbox is select-all, rest are per-row
+		await user.click(checkboxes[1]);
+		expect(handleSelectionChange).toHaveBeenCalled();
+	});
+
+	it("uses getRowId for stable row identity", () => {
+		renderWithChakra(
+			<DataTable
+				columns={sampleColumns}
+				data={sampleData}
+				selectable
+				rowSelection={{ "1": true }}
+				onRowSelectionChange={vi.fn()}
+				getRowId={(row) => row.id}
+			/>,
+		);
+
+		const checkboxes = screen.getAllByRole("checkbox");
+		// Row with id="1" (Alice) should be selected
+		expect(checkboxes[1]).toBeChecked();
+	});
 });
