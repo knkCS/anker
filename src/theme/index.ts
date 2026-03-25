@@ -17,6 +17,7 @@ import {
 	modal,
 	persona,
 	popover,
+	prose,
 	separator,
 	stepper,
 	table,
@@ -98,6 +99,7 @@ const system = createSystem(defaultConfig, {
 		recipes: {
 			button,
 			container,
+			prose,
 			separator,
 			formLabel,
 			textarea,

@@ -12,6 +12,7 @@ export { modalSlotRecipe as modal } from "./modal";
 export { default as persona } from "./persona";
 export { default as popover } from "./popover";
 export { propertyTheme as tsProperty } from "./property";
+export { proseTheme as prose } from "./prose";
 export { radioCardTheme as tsRadioCard } from "./radio-card";
 export { default as separator } from "./separator";
 export { stepperTheme as stepper } from "./stepper";
