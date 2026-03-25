@@ -3,6 +3,8 @@
 # Runs typecheck and lint before any `git commit` command.
 # Exit 2 blocks the commit; stderr is shown to Claude as feedback.
 
+command -v jq >/dev/null 2>&1 || { echo "jq is required but not installed. Install with: brew install jq" >&2; exit 0; }
+
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command')
 
