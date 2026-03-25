@@ -168,10 +168,14 @@ export { Switch } from "./switch";
 // Table (Chakra v3 HTML table — not the deprecated CardList alias in components)
 export type { TableProps } from "./table";
 export { Table } from "./table";
+// Textarea
+export type { TextareaProps } from "./textarea";
+export { Textarea } from "./textarea";
 export type { CreateToasterOptions } from "./toaster";
 // Toaster
 export { createAnkerToaster, Toaster, toaster } from "./toaster";
 export type { InfoTipProps, ToggleTipProps } from "./toggle-tip";
+
 // ToggleTip
 export { InfoTip, ToggleTip } from "./toggle-tip";
 export type { TooltipProps } from "./tooltip";
