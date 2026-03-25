@@ -5,6 +5,7 @@ import {
 	getCoreRowModel,
 	getSortedRowModel,
 	type OnChangeFn,
+	type Row,
 	type RowSelectionState,
 	type SortingState,
 	useReactTable,
@@ -45,6 +46,8 @@ export interface DataTableProps<T extends Record<string, unknown>> {
 	onPageChange?: (page: number) => void;
 	/** Table variant */
 	variant?: "line" | "striped" | "hoverable";
+	/** Custom row ID extractor for stable selection across data changes. @default row index */
+	getRowId?: (originalRow: T, index: number, parent?: Row<T>) => string;
 }
 
 const LOADING_ROW_COUNT = 5;
@@ -68,6 +71,7 @@ function DataTableInner<T extends Record<string, unknown>>(
 		pageSize,
 		onPageChange,
 		variant = "line",
+		getRowId,
 	} = props;
 
 	const selectionColumn: ColumnDef<T, unknown> = {
@@ -121,6 +125,7 @@ function DataTableInner<T extends Record<string, unknown>>(
 		getSortedRowModel: getSortedRowModel(),
 		enableRowSelection: selectable,
 		manualSorting: onSortingChange !== undefined,
+		...(getRowId !== undefined ? { getRowId } : {}),
 	});
 
 	const hasPagination =
