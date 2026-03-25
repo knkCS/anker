@@ -233,6 +233,18 @@ function DataTableInner<T extends Record<string, unknown>>(
 									onClick={
 										onRowClick ? () => onRowClick(row.original) : undefined
 									}
+									tabIndex={onRowClick ? 0 : undefined}
+									role={onRowClick ? "button" : undefined}
+									onKeyDown={
+										onRowClick
+											? (e: React.KeyboardEvent) => {
+												if (e.key === "Enter" || e.key === " ") {
+													e.preventDefault();
+													onRowClick(row.original);
+												}
+											}
+											: undefined
+									}
 								>
 									{row.getVisibleCells().map((cell) => (
 										<Table.Cell key={cell.id}>
