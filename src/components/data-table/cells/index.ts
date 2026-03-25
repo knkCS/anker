@@ -7,3 +7,4 @@ export {
 	TruncatedTextCell,
 	type TruncatedTextCellProps,
 } from "./truncated-text-cell";
+export { UrlCell, type UrlCellProps } from "./url-cell";
