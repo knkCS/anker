@@ -24,6 +24,18 @@ export const buttonTheme = defineRecipe({
 				bg: "initial",
 			},
 		},
+		// WCAG 2.5.8 touch target: expand hit area to 44×44px minimum
+		// without changing visual size. The pseudo is invisible and captures
+		// pointer events beyond the button's visual bounds.
+		_after: {
+			content: '""',
+			position: "absolute",
+			top: "50%",
+			insetInlineStart: "50%",
+			minWidth: "44px",
+			minHeight: "44px",
+			transform: "translate(-50%, -50%)",
+		},
 	},
 
 	variants: {
