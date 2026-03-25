@@ -1,4 +1,5 @@
 import type React from "react";
+import { Code } from "../../../primitives/typography";
 import { emptyCellValue } from "./cell-utils";
 
 export interface SlugCellProps {
@@ -7,8 +8,6 @@ export interface SlugCellProps {
 
 export const SlugCell: React.FC<SlugCellProps> = ({ value }) => {
 	if (value == null) return <span>{emptyCellValue}</span>;
-	return (
-		<span style={{ fontFamily: "var(--chakra-fonts-mono)" }}>{value}</span>
-	);
+	return <Code>{value}</Code>;
 };
 SlugCell.displayName = "SlugCell";

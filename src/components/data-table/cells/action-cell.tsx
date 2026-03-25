@@ -1,6 +1,6 @@
-import { HStack } from "@chakra-ui/react";
 import type React from "react";
 import { IconButton, type IconButtonProps } from "../../../atoms/button";
+import { HStack } from "../../../primitives/layout";
 import { Tooltip } from "../../../primitives/tooltip";
 
 export interface ActionCellAction {

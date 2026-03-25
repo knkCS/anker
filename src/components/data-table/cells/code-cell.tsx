@@ -1,4 +1,5 @@
 import type React from "react";
+import { Code } from "../../../primitives/typography";
 import { emptyCellValue, truncateText } from "./cell-utils";
 
 export interface CodeCellProps {
@@ -13,18 +14,9 @@ export const CodeCell: React.FC<CodeCellProps> = ({
 	if (value == null) return <span>{emptyCellValue}</span>;
 	const display = truncateText(value, maxLength);
 	return (
-		<code
-			title={value}
-			style={{
-				fontFamily: "var(--chakra-fonts-mono)",
-				fontSize: "0.85em",
-				backgroundColor: "var(--chakra-colors-bg-subtle)",
-				padding: "0.1em 0.4em",
-				borderRadius: "var(--chakra-radii-sm)",
-			}}
-		>
+		<Code title={value} fontSize="0.85em">
 			{display}
-		</code>
+		</Code>
 	);
 };
 CodeCell.displayName = "CodeCell";

@@ -1,5 +1,5 @@
-import { Box, HStack } from "@chakra-ui/react";
 import type React from "react";
+import { Box, HStack } from "../../../primitives/layout";
 import { emptyCellValue } from "./cell-utils";
 
 export interface ColorSwatchCellProps {
