@@ -1,13 +1,13 @@
 import { HStack } from "@chakra-ui/react";
 import type React from "react";
-import { IconButton } from "../../../atoms/button";
+import { IconButton, type IconButtonProps } from "../../../atoms/button";
 import { Tooltip } from "../../../primitives/tooltip";
 
 export interface ActionCellAction {
 	icon: React.ElementType;
 	label: string;
 	onClick: () => void;
-	variant?: string;
+	variant?: IconButtonProps["variant"];
 	colorPalette?: string;
 	disabled?: boolean;
 }
