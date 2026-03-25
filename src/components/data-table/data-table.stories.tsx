@@ -1,10 +1,7 @@
 import { Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
-import type {
-	ColumnDef,
-	RowSelectionState,
-	SortingState,
-} from "@tanstack/react-table";
+import type { RowSelectionState, SortingState } from "@tanstack/react-table";
+import { createColumnHelper } from "@tanstack/react-table";
 import { useState } from "react";
 import { StatusBadge } from "../../atoms/status-badge";
 import { DataTable } from "./data-table";
@@ -55,18 +52,20 @@ const sampleUsers: User[] = [
 	},
 ];
 
-const baseColumns: ColumnDef<User, unknown>[] = [
-	{ accessorKey: "name", header: "Name" },
-	{ accessorKey: "email", header: "Email" },
-	{ accessorKey: "role", header: "Role" },
-	{ accessorKey: "status", header: "Status" },
+const columnHelper = createColumnHelper<User>();
+
+const baseColumns = [
+	columnHelper.accessor("name", { header: "Name" }),
+	columnHelper.accessor("email", { header: "Email" }),
+	columnHelper.accessor("role", { header: "Role" }),
+	columnHelper.accessor("status", { header: "Status" }),
 ];
 
-const sortableColumns: ColumnDef<User, unknown>[] = [
-	{ accessorKey: "name", header: "Name", enableSorting: true },
-	{ accessorKey: "email", header: "Email" },
-	{ accessorKey: "role", header: "Role", enableSorting: true },
-	{ accessorKey: "status", header: "Status" },
+const sortableColumns = [
+	columnHelper.accessor("name", { header: "Name", enableSorting: true }),
+	columnHelper.accessor("email", { header: "Email" }),
+	columnHelper.accessor("role", { header: "Role", enableSorting: true }),
+	columnHelper.accessor("status", { header: "Status" }),
 ];
 
 const paginatedUsers: User[] = Array.from({ length: 25 }, (_, i) => ({
@@ -166,20 +165,19 @@ const statusColors: Record<string, string> = {
 	Pending: "#ca8a04",
 };
 
-const customCellColumns: ColumnDef<User, unknown>[] = [
-	{ accessorKey: "name", header: "Name" },
-	{ accessorKey: "email", header: "Email" },
-	{ accessorKey: "role", header: "Role" },
-	{
-		accessorKey: "status",
+const customCellColumns = [
+	columnHelper.accessor("name", { header: "Name" }),
+	columnHelper.accessor("email", { header: "Email" }),
+	columnHelper.accessor("role", { header: "Role" }),
+	columnHelper.accessor("status", {
 		header: "Status",
-		cell: ({ getValue }) => {
-			const status = getValue<string>();
+		cell: (info) => {
+			const status = info.getValue();
 			return (
 				<StatusBadge label={status} color={statusColors[status] ?? "#6b7280"} />
 			);
 		},
-	},
+	}),
 ];
 
 export const CustomCells: Story = {
