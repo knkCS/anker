@@ -135,6 +135,10 @@ export type {
 } from "./segmented-control";
 export { SegmentedControl } from "./segmented-control";
 
+// Separator
+export type { SeparatorProps } from "./separator";
+export { Separator } from "./separator";
+
 export type { SkeletonProps, SkeletonTextProps } from "./skeleton";
 // Skeleton
 export { Skeleton, SkeletonCircle, SkeletonText } from "./skeleton";
