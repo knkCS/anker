@@ -18,6 +18,11 @@ export {
 	BreadcrumbRoot,
 	BreadcrumbSeparator,
 } from "./breadcrumb";
+
+// Checkbox
+export type { CheckboxProps } from "./checkbox";
+export { Checkbox, CheckboxGroup } from "./checkbox";
+
 export type {
 	ColorMode,
 	ColorModeProviderProps,
