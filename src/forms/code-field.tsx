@@ -76,6 +76,7 @@ export function CodeField<T extends FieldValues>({
 						onChange={(e) => field.onChange(e.target.value)}
 						onBlur={field.onBlur}
 						readOnly={readOnly}
+						aria-describedby={field["aria-describedby"]}
 						style={{
 							fontFamily: "monospace",
 							fontSize: "0.875rem",

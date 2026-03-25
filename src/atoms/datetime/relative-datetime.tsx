@@ -55,3 +55,4 @@ export const RelativeDateTime: React.FC<RelativeDateTimeProps> = (props) => {
 		</time>
 	);
 };
+RelativeDateTime.displayName = "RelativeDateTime";

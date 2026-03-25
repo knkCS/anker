@@ -3,12 +3,12 @@ import {
 	type BoxProps,
 	Heading,
 	HStack,
-	Spinner,
 	Square,
 	Stack,
 	Text,
 } from "@chakra-ui/react";
 import type React from "react";
+import { Spinner } from "../../primitives/spinner";
 
 export interface StatProps extends BoxProps {
 	/** An icon element rendered as React node (e.g., a lucide-react icon) */

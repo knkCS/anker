@@ -32,6 +32,7 @@ export function SwitchField<T extends FieldValues>({
 					disabled={disabled}
 					readOnly={readOnly}
 					opacity={readOnly ? 0.8 : 1}
+					aria-describedby={field["aria-describedby"]}
 					ref={ref}
 					{...switchProps}
 				/>

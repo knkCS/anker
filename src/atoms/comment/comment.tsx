@@ -139,3 +139,4 @@ export interface CommentActionProps extends ButtonProps {
 export const CommentAction: React.FC<CommentActionProps> = (props) => {
 	return <Button variant="outline" size="xs" {...props} />;
 };
+CommentAction.displayName = "CommentAction";

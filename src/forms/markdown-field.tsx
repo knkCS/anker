@@ -61,6 +61,7 @@ export function MarkdownField<T extends FieldValues>(
 						onChange={(e) => field.onChange(e.target.value)}
 						onBlur={field.onBlur}
 						readOnly={readOnly}
+						aria-describedby={field["aria-describedby"]}
 						style={{
 							padding: "0.75rem",
 							border: "1px solid var(--chakra-colors-border)",

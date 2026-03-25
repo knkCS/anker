@@ -1,5 +1,6 @@
 import { Box, Flex, Grid, GridItem, Menu, Portal } from "@chakra-ui/react";
 import { Ellipsis } from "lucide-react";
+import type React from "react";
 import { Children } from "react";
 
 export interface CardListMenuItem<T = string> {
@@ -46,7 +47,7 @@ export const CardListItem = <T extends string = string>({
 	return (
 		<Flex
 			role="row"
-			boxShadow={isActive ? "0 0 0 2px var(--chakra-colors-accent)" : "sm"}
+			boxShadow={isActive ? "0 0 0 2px token(colors.accent)" : "sm"}
 			bg="bg-surface"
 			borderRadius="lg"
 			alignItems="stretch"
@@ -61,6 +62,16 @@ export const CardListItem = <T extends string = string>({
 				overflow="hidden"
 				onClick={handleItemClick}
 				onDoubleClick={handleItemDoubleClick}
+				{...(handleItemClick && {
+					role: "button",
+					tabIndex: 0,
+					onKeyDown: (e: React.KeyboardEvent) => {
+						if (e.key === "Enter" || e.key === " ") {
+							e.preventDefault();
+							handleItemClick();
+						}
+					},
+				})}
 			>
 				{componentLeft && (
 					<Box
@@ -106,6 +117,7 @@ export const CardListItem = <T extends string = string>({
 						alignItems="center"
 						justifyContent="center"
 						_hover={{ opacity: 0.9 }}
+						aria-label="Row actions"
 					>
 						<Ellipsis size={20} />
 					</Menu.Trigger>

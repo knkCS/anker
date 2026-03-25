@@ -59,7 +59,12 @@ export function NumberInputField<T extends FieldValues>({
 					opacity={readOnly ? 0.8 : 1}
 					{...numberInputProps}
 				>
-					<NumberInputInput name={field.name} ref={ref} onBlur={field.onBlur} />
+					<NumberInputInput
+						name={field.name}
+						ref={ref}
+						onBlur={field.onBlur}
+						aria-describedby={field["aria-describedby"]}
+					/>
 				</NumberInputRoot>
 			)}
 		</FormField>

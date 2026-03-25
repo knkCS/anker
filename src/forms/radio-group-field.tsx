@@ -32,6 +32,7 @@ export function RadioGroupField<T extends FieldValues>(
 				<ChakraRadioGroup.Root
 					value={String(field.value ?? "")}
 					onValueChange={(e) => field.onChange(e.value)}
+					aria-describedby={field["aria-describedby"]}
 					{...radioGroupProps}
 				>
 					<Stack direction="row" {...stackProps}>

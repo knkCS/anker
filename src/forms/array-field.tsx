@@ -58,7 +58,7 @@ export function ArrayField<T extends FieldValues>(props: ArrayFieldProps<T>) {
 
 	return (
 		<FormField<T> name={name} label={label} readOnly={readOnly} {...rest}>
-			{(_field) => (
+			{(/* field */) => (
 				<Box py={4} px={4} bg="bg" rounded="md">
 					{mode === "dynamic" ? (
 						<DynamicArray

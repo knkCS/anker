@@ -32,7 +32,7 @@ export const Card = ({
 			w="full"
 			height="full"
 			maxW={maxW}
-			margin="0 auto"
+			marginInline="auto"
 			overflow="hidden"
 			{...props}
 		>

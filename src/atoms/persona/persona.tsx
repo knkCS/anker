@@ -111,6 +111,7 @@ export const PersonaAvatar = ({
 
 	return <Avatar ref={ref} name={name} size={size} {...rest} />;
 };
+PersonaAvatar.displayName = "PersonaAvatar";
 
 export const PersonaDetails = ({
 	ref,
@@ -131,6 +132,7 @@ export const PersonaDetails = ({
 		</chakra.div>
 	);
 };
+PersonaDetails.displayName = "PersonaDetails";
 
 export const PersonaLabel = ({
 	ref,
@@ -140,3 +142,4 @@ export const PersonaLabel = ({
 
 	return <chakra.span ref={ref} style={styles.label} {...props} />;
 };
+PersonaLabel.displayName = "PersonaLabel";

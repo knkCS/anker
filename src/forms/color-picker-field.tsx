@@ -1,11 +1,12 @@
-import {
-	type ButtonProps,
-	IconButton,
-	Popover,
-	Square,
-} from "@chakra-ui/react";
+import { type ButtonProps, IconButton, Square } from "@chakra-ui/react";
 import type React from "react";
 import type { FieldValues } from "react-hook-form";
+import {
+	Popover,
+	PopoverBody,
+	PopoverContent,
+	PopoverTrigger,
+} from "../primitives/popover";
 import { FormField, type FormFieldProps } from "./form-field";
 
 // react-colorful is an optional peer dependency
@@ -30,8 +31,8 @@ export function ColorPickerField<T extends FieldValues>({
 	return (
 		<FormField<T> name={name} label={label} readOnly={readOnly} {...rest}>
 			{(field) => (
-				<Popover.Root>
-					<Popover.Trigger asChild>
+				<Popover>
+					<PopoverTrigger asChild>
 						<IconButton
 							ref={ref}
 							size={size}
@@ -42,36 +43,34 @@ export function ColorPickerField<T extends FieldValues>({
 							variant="outline"
 							disabled={readOnly}
 							aria-label={`Color: ${field.value || "none"}`}
+							aria-describedby={field["aria-describedby"]}
 						>
 							<Square rounded="sm" bg={field.value} size={6} />
 						</IconButton>
-					</Popover.Trigger>
-					<Popover.Positioner>
-						<Popover.Content width="auto">
-							<Popover.Arrow />
-							<Popover.Body>
-								{ColorPicker ? (
-									<ColorPicker
-										color={field.value}
-										onChange={(color) => field.onChange(color)}
-									/>
-								) : (
-									<input
-										type="color"
-										value={field.value || "#000000"}
-										onChange={(e) => field.onChange(e.target.value)}
-										style={{
-											width: 200,
-											height: 200,
-											border: "none",
-											cursor: "pointer",
-										}}
-									/>
-								)}
-							</Popover.Body>
-						</Popover.Content>
-					</Popover.Positioner>
-				</Popover.Root>
+					</PopoverTrigger>
+					<PopoverContent width="auto" showArrow>
+						<PopoverBody>
+							{ColorPicker ? (
+								<ColorPicker
+									color={field.value}
+									onChange={(color) => field.onChange(color)}
+								/>
+							) : (
+								<input
+									type="color"
+									value={field.value || "#000000"}
+									onChange={(e) => field.onChange(e.target.value)}
+									style={{
+										width: 200,
+										height: 200,
+										border: "none",
+										cursor: "pointer",
+									}}
+								/>
+							)}
+						</PopoverBody>
+					</PopoverContent>
+				</Popover>
 			)}
 		</FormField>
 	);

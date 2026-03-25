@@ -80,6 +80,7 @@ export const Stepper = ({
 		</StepperContainer>
 	);
 };
+Stepper.displayName = "Stepper";
 
 export const StepperContainer = ({
 	ref,
@@ -114,6 +115,7 @@ export const StepperContainer = ({
 		</StylesContext.Provider>
 	);
 };
+StepperContainer.displayName = "StepperContainer";
 
 export interface StepperStepsProps extends HTMLChakraProps<"div"> {
 	orientation?: "horizontal" | "vertical";

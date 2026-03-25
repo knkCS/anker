@@ -18,7 +18,7 @@ export const Widget: React.FC<WidgetProps> = ({
 	return (
 		<Card.Root height="100%" maxW="auto" overflow="hidden" bg="bg-surface">
 			<Card.Body>
-				<Box mb="6">
+				<Box marginBlockEnd="6">
 					<Flex justifyContent="space-between" alignItems="center">
 						<Text fontWeight="semibold">{heading}</Text>
 						<Box color="subtle">{icon}</Box>

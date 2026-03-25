@@ -1,4 +1,4 @@
-import { Checkbox } from "@chakra-ui/react";
+import { Checkbox, Field } from "@chakra-ui/react";
 import type React from "react";
 import {
 	Controller,
@@ -13,6 +13,7 @@ export interface CheckboxFieldProps<T extends FieldValues> {
 	/** When provided, the field is treated as an array of checked values. */
 	value?: string | number;
 	disabled?: boolean;
+	helperText?: React.ReactNode;
 	children?: React.ReactNode;
 }
 
@@ -20,7 +21,7 @@ export function CheckboxField<T extends FieldValues>({
 	ref,
 	...props
 }: CheckboxFieldProps<T> & { ref?: React.Ref<HTMLLabelElement> }) {
-	const { name, label, value, disabled, children } = props;
+	const { name, label, value, disabled, helperText, children } = props;
 	const { control } = useFormContext<T>();
 
 	return (
@@ -59,28 +60,36 @@ export function CheckboxField<T extends FieldValues>({
 				const uniqueId = isArrayMode ? `${name}-${String(value)}` : name;
 
 				return (
-					<Checkbox.Root
-						id={uniqueId}
-						name={field.name}
-						value={isArrayMode ? String(value) : undefined}
-						invalid={!!fieldState.error}
-						ref={ref}
-						checked={isChecked}
-						onCheckedChange={handleCheckedChange}
-						onBlur={field.onBlur}
-						disabled={disabled}
-					>
-						<Checkbox.HiddenInput />
-						<Checkbox.Control>
-							<Checkbox.Indicator />
-						</Checkbox.Control>
-						{(label || children) && (
-							<Checkbox.Label>
-								{label}
-								{children}
-							</Checkbox.Label>
+					<Field.Root invalid={!!fieldState.error} disabled={disabled}>
+						<Checkbox.Root
+							id={uniqueId}
+							name={field.name}
+							value={isArrayMode ? String(value) : undefined}
+							invalid={!!fieldState.error}
+							ref={ref}
+							checked={isChecked}
+							onCheckedChange={handleCheckedChange}
+							onBlur={field.onBlur}
+							disabled={disabled}
+						>
+							<Checkbox.HiddenInput />
+							<Checkbox.Control>
+								<Checkbox.Indicator />
+							</Checkbox.Control>
+							{(label || children) && (
+								<Checkbox.Label>
+									{label}
+									{children}
+								</Checkbox.Label>
+							)}
+						</Checkbox.Root>
+						{helperText && <Field.HelperText>{helperText}</Field.HelperText>}
+						{fieldState.error && (
+							<Field.ErrorText aria-live="polite">
+								{fieldState.error.message}
+							</Field.ErrorText>
 						)}
-					</Checkbox.Root>
+					</Field.Root>
 				);
 			}}
 		/>

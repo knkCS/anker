@@ -5,13 +5,17 @@ import {
 	Collapsible,
 	Flex,
 	HStack,
-	IconButton,
-	Menu,
-	Portal,
 	Text,
 } from "@chakra-ui/react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import React, { type MouseEventHandler } from "react";
+import { IconButton } from "../atoms/button";
+import {
+	MenuContent,
+	MenuItem,
+	MenuRoot,
+	MenuTrigger,
+} from "../primitives/menu";
 import { Card } from "./card";
 
 export interface FactBoxAction {
@@ -100,8 +104,8 @@ export const FactBox: React.FC<FactBoxProps> = (props) => {
 												{action.icon}
 											</IconButton>
 										) : (
-											<Menu.Root key={action.id}>
-												<Menu.Trigger asChild>
+											<MenuRoot key={action.id}>
+												<MenuTrigger asChild>
 													<IconButton
 														aria-label={action.ariaLabel}
 														size="md"
@@ -109,25 +113,21 @@ export const FactBox: React.FC<FactBoxProps> = (props) => {
 													>
 														{action.icon}
 													</IconButton>
-												</Menu.Trigger>
-												<Portal>
-													<Menu.Positioner>
-														<Menu.Content>
-															{action.items?.map((item) => (
-																<Menu.Item
-																	key={item.id}
-																	onSelect={item.onSelect}
-																	aria-label={item.ariaLabel}
-																	value={`action-${item.id}`}
-																>
-																	{item.icon}
-																	{item.ariaLabel}
-																</Menu.Item>
-															))}
-														</Menu.Content>
-													</Menu.Positioner>
-												</Portal>
-											</Menu.Root>
+												</MenuTrigger>
+												<MenuContent>
+													{action.items?.map((item) => (
+														<MenuItem
+															key={item.id}
+															onSelect={item.onSelect}
+															aria-label={item.ariaLabel}
+															value={`action-${item.id}`}
+														>
+															{item.icon}
+															{item.ariaLabel}
+														</MenuItem>
+													))}
+												</MenuContent>
+											</MenuRoot>
 										),
 									)}
 								</ButtonGroup>

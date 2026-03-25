@@ -79,6 +79,7 @@ export function FileField<T extends FieldValues>(props: FileFieldProps<T>) {
 							}
 							multiple={multiple}
 							disabled={disabled}
+							aria-describedby={field["aria-describedby"]}
 							onChange={(e) => {
 								const files = e.target.files;
 								if (!files) return;
