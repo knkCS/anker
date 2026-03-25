@@ -1,0 +1,20 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./action-cell.stories";
+
+<Meta of={Stories} />
+
+# ActionCell
+
+Renders a horizontal row of ghost icon buttons, each wrapped in a `Tooltip`. Suitable for row-level actions such as view, edit, and delete. Use `colorPalette` to tint destructive actions.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## With Disabled Action
+
+<Canvas of={Stories.WithDisabledAction} />
+
+## Props
+
+<ArgTypes of={Stories} />

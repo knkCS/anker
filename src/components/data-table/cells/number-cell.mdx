@@ -1,0 +1,20 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./number-cell.stories";
+
+<Meta of={Stories} />
+
+# NumberCell
+
+Formats a numeric value using `toLocaleString`, with an optional `locale` override for locale-specific number formatting.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## With Locale
+
+<Canvas of={Stories.WithLocale} />
+
+## Props
+
+<ArgTypes of={Stories} />

@@ -1,0 +1,20 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./date-cell.stories";
+
+<Meta of={Stories} />
+
+# DateCell
+
+Formats a date value using Day.js. The default format is `MMM D, YYYY`. When `showRelative` is `true`, the cell displays a relative time string (e.g. "3 days ago") with the absolute date available as a tooltip.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Relative Date
+
+<Canvas of={Stories.Relative} />
+
+## Props
+
+<ArgTypes of={Stories} />

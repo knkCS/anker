@@ -1,0 +1,20 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./boolean-cell.stories";
+
+<Meta of={Stories} />
+
+# BooleanCell
+
+Renders a boolean value as a human-readable label. Defaults to "Yes" / "No" but accepts custom `trueLabel` and `falseLabel` props.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Custom Labels
+
+<Canvas of={Stories.CustomLabels} />
+
+## Props
+
+<ArgTypes of={Stories} />

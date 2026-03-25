@@ -1,0 +1,20 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./count-cell.stories";
+
+<Meta of={Stories} />
+
+# CountCell
+
+Counts items from an array, object (key count), or plain number and renders the result with a pluralised label. Accepts a custom `countFn` for non-standard shapes.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Object Count
+
+<Canvas of={Stories.ObjectCount} />
+
+## Props
+
+<ArgTypes of={Stories} />

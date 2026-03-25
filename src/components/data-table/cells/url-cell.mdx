@@ -1,0 +1,20 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./url-cell.stories";
+
+<Meta of={Stories} />
+
+# UrlCell
+
+Renders a URL as an accessible external link. By default the URL itself is used as the link text; pass a `label` prop to display a friendlier string instead.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## With Label
+
+<Canvas of={Stories.WithLabel} />
+
+## Props
+
+<ArgTypes of={Stories} />

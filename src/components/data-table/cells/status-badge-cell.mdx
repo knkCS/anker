@@ -1,0 +1,20 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./status-badge-cell.stories";
+
+<Meta of={Stories} />
+
+# StatusBadgeCell
+
+Renders a `StatusBadge` for a string status value. Pass a `colorMap` to associate each status string with a named color palette. Unknown statuses fall back to `fallbackColor` (default `"gray"`).
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Without Color Map
+
+<Canvas of={Stories.NoColorMap} />
+
+## Props
+
+<ArgTypes of={Stories} />

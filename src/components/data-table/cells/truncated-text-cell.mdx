@@ -1,0 +1,20 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./truncated-text-cell.stories";
+
+<Meta of={Stories} />
+
+# TruncatedTextCell
+
+Displays a text value, optionally truncating it to a maximum character length with a `…` suffix and a native `title` tooltip containing the full text.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## With Truncation
+
+<Canvas of={Stories.WithTruncation} />
+
+## Props
+
+<ArgTypes of={Stories} />

@@ -1,0 +1,20 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./code-cell.stories";
+
+<Meta of={Stories} />
+
+# CodeCell
+
+Renders a string value as monospace inline `<code>` text. Long values are truncated at `maxLength` (default 80) and the full value is available via the native `title` tooltip.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Short Max Length
+
+<Canvas of={Stories.ShortMax} />
+
+## Props
+
+<ArgTypes of={Stories} />
