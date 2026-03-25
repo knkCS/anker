@@ -47,33 +47,73 @@ Empty — no AI attribution in commit messages:
 
 ### 1.3 Hooks
 
-**PostEditFile — Auto-format with Biome**
+Claude Code hooks use `PreToolUse` / `PostToolUse` events with tool-name matchers. Hook commands receive event data as JSON on stdin and use exit codes to control behavior (exit 0 = allow, exit 2 = block with stderr feedback).
 
-Triggers after Claude edits any `.ts` or `.tsx` file. Runs Biome on the specific file to ensure formatting compliance.
+**Hook 1: PostToolUse — Auto-format with Biome**
+
+Triggers after Claude edits or writes any file via the `Edit` or `Write` tools. Extracts the file path from stdin JSON, checks if it's a `.ts`/`.tsx` file, and runs Biome on it.
 
 ```json
 {
   "hooks": {
-    "PostEditFile": [
+    "PostToolUse": [
       {
-        "matcher": "\\.(ts|tsx)$",
-        "command": "npx biome check --write $FILE_PATH"
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r \".tool_input.file_path\"); [[ \"$FILE\" =~ \\.(ts|tsx)$ ]] && npx biome check --write \"$FILE\" || true'"
+          }
+        ]
       }
     ]
   }
 }
 ```
 
-**PreCommit — Typecheck + lint gate**
+**Hook 2: PreToolUse — Typecheck + lint gate before git commit**
 
-Triggers before Claude creates any git commit. Blocks the commit if typecheck or lint fails.
+There is no `PreCommit` event in Claude Code. Instead, we use a `PreToolUse` hook on the `Bash` tool with a script that inspects the command. If the command is a `git commit`, the script runs typecheck and lint first. Exit code 2 blocks the commit and shows the error to Claude.
+
+Script at `.claude/hooks/pre-commit-gate.sh`:
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command')
+
+# Only gate git commit commands
+if echo "$COMMAND" | grep -qE '^git commit'; then
+  echo "Running typecheck..." >&2
+  npm run typecheck >&2 || {
+    echo "Typecheck failed — commit blocked" >&2
+    exit 2
+  }
+
+  echo "Running lint..." >&2
+  npm run lint >&2 || {
+    echo "Lint failed — commit blocked" >&2
+    exit 2
+  }
+fi
+
+exit 0
+```
+
+Hook configuration:
 
 ```json
 {
   "hooks": {
-    "PreCommit": [
+    "PreToolUse": [
       {
-        "command": "npm run typecheck && npm run lint"
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-commit-gate.sh\""
+          }
+        ]
       }
     ]
   }
@@ -99,8 +139,6 @@ A table of v2 patterns that Claude must never suggest, with their v3 replacement
 | `colorScheme` prop | `colorPalette` prop |
 | `styleConfig` in theme | `recipes` / `slotRecipes` in system theme |
 | Physical CSS props (`ml`, `mr`, `right`, `left`) | Logical CSS (`marginInlineStart`, `marginInlineEnd`, `insetInlineStart`, `insetInlineEnd`) |
-| `useBreakpointValue()` | Responsive object syntax `{ base: ..., md: ... }` |
-
 Additional rules:
 - Read `docs/chakra-v3-reference.md` before creating or modifying any theme recipe, token, or Chakra wrapper component
 - Never add `prefers-reduced-motion` media queries — the theme handles this globally via `_motionReduce`
@@ -138,7 +176,7 @@ Instructions for creating new components, organized by layer:
 5. Add export to `src/forms/index.ts`
 
 **All layers:**
-- Every exported component must have `displayName` set
+- Every exported component must have `displayName` set. For generic function components (e.g., form fields with `<T extends FieldValues>`), use the cast pattern: `(Component as { displayName?: string }).displayName = "Name"`
 - Props interfaces must be exported alongside components
 - Stories must include Default + at least one variant story
 - Use `satisfies Meta<typeof Component>` in story meta
@@ -157,7 +195,7 @@ Color palette tokens (per-palette): `{palette}.contrast`, `{palette}.fg`, `{pale
 
 **Registered recipes** (single-part): `button`, `container`, `separator`, `formLabel`, `textarea`, `tooltip`, `tsRadioCard`, `tsProperty`, `treeItem`, `tag`
 
-**Registered slot recipes** (multi-part): `card`, `checkbox`, `comment`, `dialog`, `drawer`, `field`, `input`, `menu`, `modal`, `persona`, `popover`, `stepper`, `table`, `tabs`
+**Registered slot recipes** (multi-part): `card`, `checkbox`, `comment`, `dialog`, `drawer`, `field` (inline in theme/index.ts), `input`, `menu`, `modal`, `persona`, `popover`, `stepper`, `table`, `tabs`
 
 ## 3. Chakra v3 Reference Document
 
@@ -241,6 +279,7 @@ _dark: { [$bg]: "colors.gray.800" }
 | Action | File |
 |---|---|
 | Replace | `.claude/settings.json` |
+| Create | `.claude/hooks/pre-commit-gate.sh` |
 | Edit | `CLAUDE.md` (add sections 2.1, 2.2, 2.3) |
 | Create | `docs/chakra-v3-reference.md` |
 
