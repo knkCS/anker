@@ -23,6 +23,10 @@ export {
 export type { CheckboxProps } from "./checkbox";
 export { Checkbox, CheckboxGroup } from "./checkbox";
 
+// Collapsible
+export type { CollapsibleProps } from "./collapsible";
+export { Collapsible } from "./collapsible";
+
 export type {
 	ColorMode,
 	ColorModeProviderProps,
