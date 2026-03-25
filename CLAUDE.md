@@ -27,7 +27,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in six layers
 | Icons | Lucide React (replacing FontAwesome from Core) |
 | Form state | React Hook Form (replacing Formik from Core) |
 | Validation | Zod (replacing Yup from Core) |
-| Build | tsup (esbuild-based, ESM + CJS + .d.ts) |
+| Build | tsup (esbuild-based, ESM + .d.ts) |
 | Docs | Storybook, deployed to GitHub Pages |
 | Lint/format | Biome |
 | Types | TypeScript strict mode |
@@ -45,9 +45,10 @@ src/
 ├── atoms/           # Persona, StatusBadge, SearchInput, DateTime, Select, Clipboard, DataList, etc.
 ├── forms/           # React Hook Form controls (InputField, ArrayField, etc.)
 ├── feedback/        # ConfirmModal + provider
-└── index.ts
-stories/             # Storybook stories (mirrors src/ structure)
+└── (no root index.ts — consumers use subpath imports)
 ```
+
+Note: Stories are co-located with source files inside `src/` (e.g., `src/atoms/button/button.stories.tsx`), not in a separate `stories/` directory.
 
 ## Commands
 
@@ -214,3 +215,4 @@ Consuming projects must install:
 - zod ^3.0.0
 - react-router-dom ^6.0.0
 - react-i18next >= 12
+- @tanstack/react-table ^8.0.0 (required for DataTable component)

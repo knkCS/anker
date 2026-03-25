@@ -22,6 +22,7 @@ export default defineConfig({
     "zod",
     "react-router-dom",
     "react-i18next",
+    "@tanstack/react-table",
   ],
   treeshake: true,
   sourcemap: true,
