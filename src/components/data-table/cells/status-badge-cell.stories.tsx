@@ -39,6 +39,23 @@ export const FallbackColor: Story = {
 	},
 };
 
+export const WithDetail: Story = {
+	args: {
+		value: "failed",
+		colorMap: { ...statusColorMap, failed: "red" },
+		detail: "Export timed out after 30s",
+	},
+};
+
+export const WithDetailCustomColor: Story = {
+	args: {
+		value: "pending",
+		colorMap: statusColorMap,
+		detail: "Waiting for approval",
+		detailColor: "muted",
+	},
+};
+
 export const NullValue: Story = {
 	args: {
 		value: null,
