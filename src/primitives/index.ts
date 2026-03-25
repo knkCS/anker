@@ -165,6 +165,9 @@ export {
 export type { SwitchProps } from "./switch";
 // Switch
 export { Switch } from "./switch";
+// Table (Chakra v3 HTML table — not the deprecated CardList alias in components)
+export type { TableProps } from "./table";
+export { Table } from "./table";
 export type { CreateToasterOptions } from "./toaster";
 // Toaster
 export { createAnkerToaster, Toaster, toaster } from "./toaster";
