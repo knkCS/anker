@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Edit, Eye, Trash2 } from "lucide-react";
+import { Download, Edit, Eye, Trash2 } from "lucide-react";
 import { ActionCell } from "./action-cell";
 
 const meta = {
@@ -40,6 +40,32 @@ export const EditOnly: Story = {
 				icon: Edit,
 				label: "Edit",
 				onClick: () => console.log("Edit clicked"),
+			},
+		],
+	},
+};
+
+export const WithLink: Story = {
+	args: {
+		actions: [
+			{
+				icon: Download,
+				label: "Download export",
+				href: "/api/exports/123/download",
+				download: true,
+				colorPalette: "green",
+			},
+			{
+				icon: Eye,
+				label: "View in new tab",
+				href: "https://example.com",
+				target: "_blank",
+			},
+			{
+				icon: Trash2,
+				label: "Delete",
+				colorPalette: "red",
+				onClick: () => console.log("Delete clicked"),
 			},
 		],
 	},
