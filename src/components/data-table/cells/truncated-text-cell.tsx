@@ -11,7 +11,8 @@ export const TruncatedTextCell: React.FC<TruncatedTextCellProps> = ({
 	maxLength,
 }) => {
 	if (value == null) return <span>{emptyCellValue}</span>;
-	const display = maxLength != null ? truncateText(value, maxLength) : value;
-	return <span title={value}>{display}</span>;
+	const isTruncated = maxLength != null && value.length > maxLength;
+	const display = isTruncated ? truncateText(value, maxLength) : value;
+	return <span title={isTruncated ? value : undefined}>{display}</span>;
 };
 TruncatedTextCell.displayName = "TruncatedTextCell";
