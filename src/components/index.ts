@@ -8,9 +8,39 @@ export type { CardListDataProps } from "./card-list-data";
 export { CardListData } from "./card-list-data";
 export type { CardListItemProps, CardListMenuItem } from "./card-list-item";
 export { CardListItem } from "./card-list-item";
-// DataTable
-export type { DataTableProps } from "./data-table";
-export { DataTable } from "./data-table";
+// DataTable + DataTable Cells
+export type {
+	ActionCellAction,
+	ActionCellProps,
+	BooleanCellProps,
+	CodeCellProps,
+	ColorSwatchCellProps,
+	CountCellProps,
+	DataTableProps,
+	DateCellProps,
+	NumberCellProps,
+	SlugCellProps,
+	StatusBadgeCellProps,
+	TruncatedTextCellProps,
+	UrlCellProps,
+} from "./data-table";
+export {
+	ActionCell,
+	BooleanCell,
+	CodeCell,
+	ColorSwatchCell,
+	CountCell,
+	DataTable,
+	DateCell,
+	emptyCellValue,
+	NumberCell,
+	pluralize,
+	SlugCell,
+	StatusBadgeCell,
+	TruncatedTextCell,
+	truncateText,
+	UrlCell,
+} from "./data-table";
 // Drawer
 export type { DrawerProps } from "./drawer";
 export { DrawerRoot } from "./drawer";
