@@ -9,6 +9,10 @@ export { CountCell, type CountCellProps } from "./count-cell";
 export { NumberCell, type NumberCellProps } from "./number-cell";
 export { SlugCell, type SlugCellProps } from "./slug-cell";
 export {
+	StatusBadgeCell,
+	type StatusBadgeCellProps,
+} from "./status-badge-cell";
+export {
 	TruncatedTextCell,
 	type TruncatedTextCellProps,
 } from "./truncated-text-cell";
