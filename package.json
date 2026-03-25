@@ -2,6 +2,10 @@
   "name": "@knkcs/anker",
   "version": "0.0.2",
   "description": "UI component library for the knk software group",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/knkCS/anker"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
