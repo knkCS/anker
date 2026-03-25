@@ -129,7 +129,9 @@ function DataTableInner<T extends Record<string, unknown>>(
 		onSortingChange,
 		onRowSelectionChange,
 		getCoreRowModel: getCoreRowModel(),
-		getSortedRowModel: getSortedRowModel(),
+		...(onSortingChange === undefined
+			? { getSortedRowModel: getSortedRowModel() }
+			: {}),
 		enableRowSelection: selectable,
 		manualSorting: onSortingChange !== undefined,
 		...(getRowId !== undefined ? { getRowId } : {}),
