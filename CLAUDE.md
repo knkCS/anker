@@ -122,8 +122,82 @@ interface InputFieldProps {
 Component recipes use Chakra v3's `defineRecipe` (single-part) or `defineSlotRecipe` (multi-part):
 ```tsx
 import { defineRecipe } from "@chakra-ui/react";
-export const buttonRecipe = defineRecipe({ ... });
+export const buttonTheme = defineRecipe({ ... });
 ```
+
+## Chakra v3 Anti-Patterns
+
+This project uses Chakra UI v3. Never suggest v2 patterns:
+
+| Never use (Chakra v2) | Use instead (Chakra v3) |
+|---|---|
+| `extendTheme()` | `createSystem(defaultConfig, { theme: {...} })` |
+| `useStyleConfig()` / `useMultiStyleConfig()` | `useRecipe({ key })` / `useSlotRecipe({ key })` |
+| `chakra()` factory for styled components | `defineRecipe()` / `defineSlotRecipe()` |
+| `<ChakraProvider theme={theme}>` | `<ChakraProvider value={system}>` |
+| `useColorModeValue(light, dark)` | `{ base: light, _dark: dark }` in tokens |
+| `sx` prop for theme-level styling | Recipes + semantic tokens |
+| `colorScheme` prop | `colorPalette` prop |
+| `styleConfig` in theme | `recipes` / `slotRecipes` in system theme |
+| Physical CSS props (`ml`, `mr`, `right`, `left`) | Logical CSS (`marginInlineStart`, `marginInlineEnd`, `insetInlineStart`, `insetInlineEnd`) |
+
+Additional rules:
+- Read `docs/chakra-v3-reference.md` before creating or modifying any theme recipe, token, or Chakra wrapper component
+- Never add `prefers-reduced-motion` media queries — the theme handles this globally via `_motionReduce`
+- Never import from `@chakra-ui/react` directly in atoms/components/forms if a primitives wrapper exists — use the wrapper instead
+
+## Component Scaffolding Checklist
+
+### Primitive (thin Chakra wrapper)
+1. Create `src/primitives/{name}.tsx` — wrap Chakra's namespaced API (e.g., `ChakraComponent.Root`, `.Content`, `.Trigger`)
+2. Export a simplified props interface that surfaces the most-used Chakra props
+3. Set `displayName` — e.g., `Component.displayName = "Component"`
+4. Create `src/primitives/{name}.stories.tsx` — title: `"Primitives/{Name}"`
+5. Add export to `src/primitives/index.ts` — both type and component
+6. If a recipe is needed, create `src/theme/recipes/{name}.ts` and register in `src/theme/index.ts`
+
+### Atom (small reusable UI unit)
+1. Create directory `src/atoms/{name}/`
+2. Create `src/atoms/{name}/{name}.tsx` — component with defaults, set `displayName`
+3. Create `src/atoms/{name}/index.ts` — re-export component and types
+4. Create `src/atoms/{name}/{name}.stories.tsx` — title: `"Atoms/{Name}"`
+5. Add export to `src/atoms/index.ts`
+
+### Component (higher-level composite)
+- Simple: flat file at `src/components/{name}.tsx` + `src/components/{name}.stories.tsx`
+- Complex (with hooks/subcomponents): directory at `src/components/{name}/` with `index.ts`, `{name}.tsx`, `use-{name}.tsx`, `{name}.stories.tsx`
+- Add export to `src/components/index.ts`
+
+### Form field (RHF wrapper)
+1. Create `src/forms/{name}-field.tsx` — wrap `FormField<T>` with Controller render prop
+2. Accept `FieldValues` generic, spread field props + `aria-describedby`
+3. Set `displayName` via cast: `(Component as { displayName?: string }).displayName = "Name"`
+4. Create `src/forms/{name}-field.stories.tsx` — include `FormProvider` decorator with `useForm`
+5. Add export to `src/forms/index.ts`
+
+### All layers
+- Every exported component must have `displayName` set. For generic function components (e.g., form fields with `<T extends FieldValues>`), use the cast pattern: `(Component as { displayName?: string }).displayName = "Name"`
+- Props interfaces must be exported alongside components
+- Stories must include Default + at least one variant story
+- Use `satisfies Meta<typeof Component>` in story meta
+
+## Semantic Token & Recipe Quick Reference
+
+### Available semantic tokens (use instead of hardcoded colors)
+
+**Backgrounds:** `bg-canvas`, `bg-surface`, `bg-subtle`, `bg-muted`, `bg-accent`, `bg-accent-subtle`, `bg-accent-muted`
+
+**Text:** `default`, `inverted`, `emphasized`, `muted`, `subtle`, `on-accent`, `on-accent-muted`, `on-accent-subtle`
+
+**Interactive:** `accent`, `border`, `success`, `error`
+
+**Color palette tokens** (per-palette): `{palette}.contrast`, `{palette}.fg`, `{palette}.subtle`, `{palette}.muted`, `{palette}.emphasized`, `{palette}.solid`, `{palette}.focusRing`, `{palette}.border`
+
+### Registered recipes (single-part)
+`button`, `container`, `separator`, `formLabel`, `textarea`, `tooltip`, `tsRadioCard`, `tsProperty`, `treeItem`, `tag`
+
+### Registered slot recipes (multi-part)
+`card`, `checkbox`, `comment`, `dialog`, `drawer`, `field` (inline in theme/index.ts), `input`, `menu`, `modal`, `persona`, `popover`, `stepper`, `table`, `tabs`
 
 ## Breaking Changes
 
