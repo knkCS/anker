@@ -147,18 +147,18 @@ const columns = [
 					{
 						icon: Eye,
 						label: "View",
-						onClick: () => alert(`View row ${info.row.original.id}`),
+						onClick: () => console.log(`View row ${info.row.original.id}`),
 					},
 					{
 						icon: Edit,
 						label: "Edit",
-						onClick: () => alert(`Edit row ${info.row.original.id}`),
+						onClick: () => console.log(`Edit row ${info.row.original.id}`),
 					},
 					{
 						icon: Trash2,
 						label: "Delete",
 						colorPalette: "red",
-						onClick: () => alert(`Delete row ${info.row.original.id}`),
+						onClick: () => console.log(`Delete row ${info.row.original.id}`),
 					},
 				]}
 			/>
@@ -181,5 +181,61 @@ export const AllCells: Story = {
 export const NullRow: Story = {
 	render: () => (
 		<DataTable columns={columns} data={[sampleData[sampleData.length - 1]]} />
+	),
+};
+
+export const DateCellRelative: Story = {
+	render: () => (
+		<DataTable
+			columns={[
+				columnHelper.accessor("name", { header: "Name" }),
+				columnHelper.accessor("createdAt", {
+					header: "Created (relative)",
+					cell: (info) => <DateCell value={info.getValue()} showRelative />,
+				}),
+			]}
+			data={sampleData.filter((d) => d.createdAt != null)}
+		/>
+	),
+};
+
+export const BooleanCellCustomLabels: Story = {
+	render: () => (
+		<DataTable
+			columns={[
+				columnHelper.accessor("name", { header: "Name" }),
+				columnHelper.accessor("isActive", {
+					header: "Status",
+					cell: (info) => (
+						<BooleanCell
+							value={info.getValue()}
+							trueLabel="Active"
+							falseLabel="Inactive"
+						/>
+					),
+				}),
+			]}
+			data={sampleData}
+		/>
+	),
+};
+
+export const TruncatedTextCellDemo: Story = {
+	render: () => (
+		<DataTable
+			columns={[
+				columnHelper.accessor("name", {
+					header: "Name (max 10 chars)",
+					cell: (info) => (
+						<TruncatedTextCell value={info.getValue()} maxLength={10} />
+					),
+				}),
+				columnHelper.accessor("code", {
+					header: "Code (max 20 chars)",
+					cell: (info) => <CodeCell value={info.getValue()} maxLength={20} />,
+				}),
+			]}
+			data={sampleData.filter((d) => d.name != null)}
+		/>
 	),
 };
