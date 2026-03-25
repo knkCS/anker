@@ -169,3 +169,7 @@ export type { InfoTipProps, ToggleTipProps } from "./toggle-tip";
 export { InfoTip, ToggleTip } from "./toggle-tip";
 export type { TooltipProps } from "./tooltip";
 export { Tooltip } from "./tooltip";
+
+// Typography
+export type { HeadingProps, LinkProps, TextProps } from "./typography";
+export { Code, Heading, Link, Text } from "./typography";
