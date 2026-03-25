@@ -208,11 +208,11 @@ All shadows have light/dark variants. Pattern: ambient + key shadow.
 
 | Token | Light |
 |---|---|
-| `xs` | `0px 0px 1px rgba(45,55,72,0.05), 0px 1px 2px rgba(45,55,72,0.1)` |
-| `sm` | `0px 0px 1px rgba(45,55,72,0.05), 0px 2px 4px rgba(45,55,72,0.1)` |
-| `md` | `0px 0px 1px rgba(45,55,72,0.05), 0px 4px 8px rgba(45,55,72,0.1)` |
-| `lg` | `0px 0px 1px rgba(45,55,72,0.05), 0px 8px 16px rgba(45,55,72,0.1)` |
-| `xl` | `0px 0px 1px rgba(45,55,72,0.05), 0px 16px 24px rgba(45,55,72,0.1)` |
+| `xs` | `0px 0px 1px rgba(45, 55, 72, 0.05), 0px 1px 2px rgba(45, 55, 72, 0.1)` |
+| `sm` | `0px 0px 1px rgba(45, 55, 72, 0.05), 0px 2px 4px rgba(45, 55, 72, 0.1)` |
+| `md` | `0px 0px 1px rgba(45, 55, 72, 0.05), 0px 4px 8px rgba(45, 55, 72, 0.1)` |
+| `lg` | `0px 0px 1px rgba(45, 55, 72, 0.05), 0px 8px 16px rgba(45, 55, 72, 0.1)` |
+| `xl` | `0px 0px 1px rgba(45, 55, 72, 0.05), 0px 16px 24px rgba(45, 55, 72, 0.1)` |
 
 ### Opacity tokens
 
@@ -256,8 +256,9 @@ Defined in `src/theme/index.ts` `globalCss`:
 - `body` uses `color: "default"` semantic token and `bg: { base: "white", _dark: "#000" }` (note: body background uses hardcoded `#000` for dark mode, not the `bg-canvas` semantic token)
 - `*::placeholder` has `opacity: 1` and `color: "muted"`
 - `*, *::before, *::after` and `table, td, th` inherit `borderColor: "border"` token
+- `html, body` have `height: 100%`
 - `#__next, #root, #app` are flex column containers with `minH: 100%`
-- `_motionReduce` handles `prefers-reduced-motion` globally — sets animation/transition duration to `0.01ms !important`. Never add per-component reduced-motion queries.
+- `_motionReduce` handles `prefers-reduced-motion` globally — sets `animationDuration`, `transitionDuration` to `0.01ms !important`, `animationIterationCount` to `1 !important`, and `scrollBehavior` to `auto !important`. Never add per-component reduced-motion queries.
 
 ## CSS Custom Properties Pattern
 
