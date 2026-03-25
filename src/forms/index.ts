@@ -51,12 +51,6 @@ export {
 	SearchInput,
 	type SearchInputProps,
 } from "./search-input";
-// SelectActionField
-export {
-	SelectActionField,
-	type SelectActionFieldProps,
-	type SelectActionMenuItem,
-} from "./select-action-field";
 // SelectField
 export { SelectField, type SelectFieldProps } from "./select-field";
 // SwitchField

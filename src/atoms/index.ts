@@ -123,6 +123,13 @@ export {
 	TableOption,
 } from "./select";
 
+// SplitButton
+export {
+	SplitButton,
+	type SplitButtonMenuItem,
+	type SplitButtonProps,
+} from "./split-button";
+
 // Stat
 export { Stat, type StatProps } from "./stat";
 

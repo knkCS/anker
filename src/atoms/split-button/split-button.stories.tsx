@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { SelectActionField } from "./select-action-field";
+import { SplitButton } from "./split-button";
 
 const meta = {
-	title: "Forms/SelectActionField",
-	component: SelectActionField,
-} satisfies Meta<typeof SelectActionField>;
+	title: "Atoms/SplitButton",
+	component: SplitButton,
+} satisfies Meta<typeof SplitButton>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
