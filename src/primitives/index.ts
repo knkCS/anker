@@ -177,6 +177,9 @@ export { Switch } from "./switch";
 // Table (Chakra v3 HTML table — not the deprecated CardList alias in components)
 export type { TableProps } from "./table";
 export { Table } from "./table";
+// Tabs
+export type { TabsProps } from "./tabs";
+export { Tabs } from "./tabs";
 // Textarea
 export type { TextareaProps } from "./textarea";
 export { Textarea } from "./textarea";
