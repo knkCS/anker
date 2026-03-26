@@ -72,10 +72,12 @@ export {
 	Stack,
 	VStack,
 } from "./layout";
-
 export type { LeavePageConfirmationProps } from "./leave-page-confirmation";
 // LeavePageConfirmation
 export { LeavePageConfirmation } from "./leave-page-confirmation";
+// List
+export type { ListProps } from "./list";
+export { List } from "./list";
 export type { MenuTriggerItemProps } from "./menu";
 // Menu
 export {
