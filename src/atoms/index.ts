@@ -40,6 +40,12 @@ export {
 	type ClipboardLinkProps,
 } from "./clipboard";
 
+// ColorSwatchPicker
+export {
+	ColorSwatchPicker,
+	type ColorSwatchPickerProps,
+} from "./color-swatch-picker";
+
 // Comment
 export {
 	Comment,

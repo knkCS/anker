@@ -1,0 +1,24 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./color-swatch-picker.stories";
+
+<Meta of={Stories} />
+
+# ColorSwatchPicker
+
+Preset color swatch selector with optional hex input and preview.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## With Hex Input
+
+<Canvas of={Stories.WithHexInput} />
+
+## With Preview
+
+<Canvas of={Stories.WithPreview} />
+
+## Props
+
+<ArgTypes of={Stories} />
