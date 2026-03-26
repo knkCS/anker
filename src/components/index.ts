@@ -1,3 +1,10 @@
+// BulkActionBar
+export type {
+	BulkActionBarProps,
+	BulkActionProps,
+	BulkPopoverActionProps,
+} from "./bulk-action-bar";
+export { BulkActionBar } from "./bulk-action-bar";
 // Card
 export type { CardProps } from "./card";
 export { Card } from "./card";

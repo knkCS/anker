@@ -1,0 +1,20 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./bulk-action-bar.stories";
+
+<Meta of={Stories} />
+
+# BulkActionBar
+
+Sticky bottom bar for bulk operations on selected items. Slides in when items are selected.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## With Popover Action
+
+<Canvas of={Stories.WithPopover} />
+
+## Props
+
+<ArgTypes of={Stories} />
