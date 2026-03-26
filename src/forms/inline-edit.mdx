@@ -1,0 +1,26 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./inline-edit.stories";
+
+<Meta of={Stories} />
+
+# InlineEdit
+
+Click-to-edit component for inline text editing. Supports single-line input and multi-line textarea variants.
+
+## Usage
+
+<Canvas of={Stories.Interactive} />
+
+## Textarea
+
+<Canvas of={Stories.Textarea} />
+
+## Heading Style
+
+For heading-sized inline edits (replaces the former EditableHeading):
+
+<Canvas of={Stories.HeadingStyle} />
+
+## Props
+
+<ArgTypes of={Stories} />

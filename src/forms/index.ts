@@ -23,14 +23,14 @@ export {
 } from "./date-picker-field";
 // DirtyFormGuard
 export { DirtyFormGuard, type DirtyFormGuardProps } from "./dirty-form-guard";
-// EditableHeading
-export {
-	EditableHeading,
-	type EditableHeadingProps,
-} from "./editable-heading";
 // FileField
 export { FileField, type FileFieldProps } from "./file-field";
 export { FormField, type FormFieldProps } from "./form-field";
+// InlineEdit
+export {
+	InlineEdit,
+	type InlineEditProps,
+} from "./inline-edit";
 // InputField
 export { InputField, type InputFieldProps } from "./input-field";
 // MarkdownField
