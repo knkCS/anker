@@ -1,0 +1,24 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./upload-toast-stack.stories";
+
+<Meta of={Stories} />
+
+# UploadToastStack
+
+Fixed-position toast notification showing multi-file upload progress with expandable per-file status.
+
+## Uploading
+
+<Canvas of={Stories.Uploading} />
+
+## Completed
+
+<Canvas of={Stories.AllDone} />
+
+## With Errors
+
+<Canvas of={Stories.WithErrors} />
+
+## Props
+
+<ArgTypes of={Stories} />
