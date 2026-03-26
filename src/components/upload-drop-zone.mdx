@@ -1,0 +1,24 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./upload-drop-zone.stories";
+
+<Meta of={Stories} />
+
+# UploadDropZone
+
+Drag-and-drop file selection with click-to-browse fallback. Uses native HTML5 drag/drop — no react-dropzone dependency.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Compact
+
+<Canvas of={Stories.Compact} />
+
+## With File Size Limit
+
+<Canvas of={Stories.WithMaxSize} />
+
+## Props
+
+<ArgTypes of={Stories} />

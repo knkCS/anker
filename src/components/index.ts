@@ -133,6 +133,9 @@ export {
 	TreeViewRoot,
 	TreeViewTree,
 } from "./tree-view";
+// UploadDropZone
+export type { UploadDropZoneProps } from "./upload-drop-zone";
+export { UploadDropZone } from "./upload-drop-zone";
 // Widget
 export type { WidgetProps } from "./widget";
 export { Widget } from "./widget";
