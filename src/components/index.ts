@@ -109,11 +109,13 @@ export {
 } from "./timeline";
 // TreeView
 export type {
+	TreeCollection,
 	TreeViewBranchProps,
 	TreeViewItemProps,
 	TreeViewRootProps,
 } from "./tree-view";
 export {
+	createTreeCollection,
 	TreeViewBranch,
 	TreeViewBranchContent,
 	TreeViewBranchControl,

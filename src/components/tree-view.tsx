@@ -1,4 +1,10 @@
-import { TreeView as ChakraTreeView } from "@chakra-ui/react";
+import {
+	TreeView as ChakraTreeView,
+	createTreeCollection,
+} from "@chakra-ui/react";
+
+export { createTreeCollection };
+export type { TreeCollection } from "@chakra-ui/react";
 
 // Pass-through exports for full composition
 export const TreeViewRoot = ChakraTreeView.Root;
