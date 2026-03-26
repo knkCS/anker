@@ -59,6 +59,9 @@ export { DrawerRoot } from "./drawer";
 // FactBox
 export type { FactBoxAction, FactBoxProps } from "./fact-box";
 export { FactBox } from "./fact-box";
+// InlineCreatableList
+export type { InlineCreatableListProps } from "./inline-creatable-list";
+export { InlineCreatableList } from "./inline-creatable-list";
 // LabeledSwitch
 export type { LabeledSwitchProps } from "./labeled-switch";
 export { LabeledSwitch } from "./labeled-switch";

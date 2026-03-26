@@ -1,0 +1,24 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./inline-creatable-list.stories";
+
+<Meta of={Stories} />
+
+# InlineCreatableList
+
+Togglable item list with inline creation. Supports wrap (pill buttons) and list (vertical rows) variants.
+
+## Wrap Variant
+
+<Canvas of={Stories.WrapVariant} />
+
+## List Variant
+
+<Canvas of={Stories.ListVariant} />
+
+## Empty State
+
+<Canvas of={Stories.Empty} />
+
+## Props
+
+<ArgTypes of={Stories} />
