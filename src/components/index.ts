@@ -15,6 +15,9 @@ export type { CardListDataProps } from "./card-list-data";
 export { CardListData } from "./card-list-data";
 export type { CardListItemProps, CardListMenuItem } from "./card-list-item";
 export { CardListItem } from "./card-list-item";
+// ChipPicker
+export type { ChipPickerProps } from "./chip-picker";
+export { ChipPicker } from "./chip-picker";
 // DataTable + DataTable Cells
 export type {
 	ActionCellAction,

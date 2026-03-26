@@ -1,0 +1,20 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./chip-picker.stories";
+
+<Meta of={Stories} />
+
+# ChipPicker
+
+Relationship assignment widget. Shows assigned items as removable chips with a popover to add unassigned items.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Searchable
+
+<Canvas of={Stories.Searchable} />
+
+## Props
+
+<ArgTypes of={Stories} />
