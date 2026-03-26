@@ -7,6 +7,9 @@ export { Alert } from "./alert";
 export type { AvatarProps } from "./avatar";
 // Avatar
 export { Avatar, AvatarGroup } from "./avatar";
+// Badge
+export type { BadgeProps } from "./badge";
+export { Badge } from "./badge";
 // Breadcrumb
 export type { BreadcrumbLinkProps, BreadcrumbRootProps } from "./breadcrumb";
 export {
