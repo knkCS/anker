@@ -1,4 +1,4 @@
-import { Box, Stack, Text } from "@chakra-ui/react";
+import { Badge, Box, Stack, Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Plus, Settings } from "lucide-react";
 import { Button } from "../atoms/button";
@@ -14,7 +14,7 @@ type Story = StoryObj<typeof meta>;
 
 export const ReadOnly: Story = {
 	args: {
-		label: "Image",
+		label: "Type",
 		children: <Text fontSize="sm">Product Image</Text>,
 	},
 };
@@ -23,50 +23,83 @@ export const WithAction: Story = {
 	args: {
 		label: "Tags",
 		actionIcon: <Plus size={14} />,
-		onAction: () => console.log("action triggered"),
-		children: <Text fontSize="sm">Design, Electronics</Text>,
+		onAction: () => console.log("Open tag modal"),
+		children: (
+			<Stack direction="row" gap={1} flexWrap="wrap">
+				<Badge colorPalette="blue">Design</Badge>
+				<Badge colorPalette="green">Electronics</Badge>
+			</Stack>
+		),
 	},
 };
 
 export const TwoSlotEdit: Story = {
 	args: {
-		label: "Settings",
+		label: "Labels",
 		actionIcon: <Settings size={14} />,
 		editContent: (
-			<Box p={2} bg="bg.subtle" rounded="md">
-				Edit form goes here
-			</Box>
+			<Stack gap={2} p={2} bg="bg.subtle" rounded="md">
+				<Text fontSize="sm" fontWeight="medium">
+					Select labels:
+				</Text>
+				<Stack direction="row" gap={1} flexWrap="wrap">
+					<Badge colorPalette="blue" cursor="pointer">
+						Design
+					</Badge>
+					<Badge colorPalette="gray" cursor="pointer">
+						Marketing
+					</Badge>
+					<Badge colorPalette="gray" cursor="pointer">
+						Engineering
+					</Badge>
+				</Stack>
+			</Stack>
 		),
-		children: <Text fontSize="sm">Default configuration</Text>,
+		children: (
+			<Stack direction="row" gap={1} flexWrap="wrap">
+				<Badge colorPalette="blue">Design</Badge>
+			</Stack>
+		),
 	},
 };
 
-export const RenderProp: Story = {
-	args: {
-		label: "Status",
-		actionIcon: <Settings size={14} />,
-		editContent: <Box />,
-		children: ({
-			isEditing,
-			setEditing,
-		}: {
-			isEditing: boolean;
-			setEditing: (v: boolean) => void;
-		}) => (
+const RenderPropDemo = () => (
+	<SidebarSection label="Status" actionIcon={<Settings size={14} />}>
+		{({ isEditing, setEditing }) => (
 			<Box>
 				<Text fontSize="sm" mb={2}>
-					{isEditing ? "Editing" : "Viewing"}
+					{isEditing ? "Pick a new status:" : "Published"}
 				</Text>
-				<Button
-					size="xs"
-					variant="outline"
-					onClick={() => setEditing(!isEditing)}
-				>
-					{isEditing ? "Cancel" : "Edit"}
-				</Button>
+				{isEditing && (
+					<Stack direction="row" gap={1} mb={2}>
+						<Button
+							size="xs"
+							variant="outline"
+							onClick={() => setEditing(false)}
+						>
+							Draft
+						</Button>
+						<Button
+							size="xs"
+							colorPalette="green"
+							onClick={() => setEditing(false)}
+						>
+							Published
+						</Button>
+					</Stack>
+				)}
+				{!isEditing && (
+					<Button size="xs" variant="outline" onClick={() => setEditing(true)}>
+						Change status
+					</Button>
+				)}
 			</Box>
-		),
-	},
+		)}
+	</SidebarSection>
+);
+
+export const RenderProp: Story = {
+	render: () => <RenderPropDemo />,
 };
 
 export const EmptyState: Story = {
@@ -80,7 +113,7 @@ export const EmptyState: Story = {
 export const StackedSections: Story = {
 	render() {
 		return (
-			<Box borderBottomWidth="1px" borderColor="border">
+			<Box maxW="280px">
 				<Box borderBottomWidth="1px" borderColor="border">
 					<SidebarSection label="Author">
 						<Text fontSize="sm">Jane Doe</Text>
@@ -90,12 +123,11 @@ export const StackedSections: Story = {
 					<SidebarSection
 						label="Tags"
 						actionIcon={<Plus size={14} />}
-						onAction={() => console.log("add tag")}
+						onAction={() => console.log("Add tag")}
 					>
 						<Stack direction="row" gap={1} flexWrap="wrap">
-							<Text fontSize="sm">Design</Text>
-							<Text fontSize="sm">·</Text>
-							<Text fontSize="sm">Electronics</Text>
+							<Badge colorPalette="blue">Design</Badge>
+							<Badge colorPalette="green">Electronics</Badge>
 						</Stack>
 					</SidebarSection>
 				</Box>
