@@ -1,0 +1,24 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./selectable-card.stories";
+
+<Meta of={Stories} />
+
+# SelectableCard
+
+Card with hover-visible checkbox for multi-select grid views. Click the card body to navigate, click the checkbox to toggle selection.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Selected
+
+<Canvas of={Stories.Selected} />
+
+## Grid Multi-Select
+
+<Canvas of={Stories.Grid} />
+
+## Props
+
+<ArgTypes of={Stories} />

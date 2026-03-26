@@ -58,6 +58,14 @@ export { Modal } from "./modal";
 // Pagination
 export type { PaginationProps } from "./pagination";
 export { Pagination } from "./pagination";
+// SelectableCard
+export type {
+	SelectableCardBodyProps,
+	SelectableCardFooterProps,
+	SelectableCardProps,
+	SelectableCardThumbnailProps,
+} from "./selectable-card";
+export { SelectableCard } from "./selectable-card";
 // SidebarSection
 export type { SidebarSectionProps } from "./sidebar-section";
 export { SidebarSection } from "./sidebar-section";
