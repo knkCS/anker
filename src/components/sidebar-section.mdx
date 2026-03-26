@@ -1,0 +1,32 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./sidebar-section.stories";
+
+<Meta of={Stories} />
+
+# SidebarSection
+
+Lightweight metadata panel slot for sidebar layouts. Uppercase label, optional action button, content area with display/edit mode toggle.
+
+## Read-only
+
+<Canvas of={Stories.ReadOnly} />
+
+## With Action
+
+<Canvas of={Stories.WithAction} />
+
+## Edit Mode
+
+<Canvas of={Stories.TwoSlotEdit} />
+
+## Empty State
+
+<Canvas of={Stories.EmptyState} />
+
+## Stacked
+
+<Canvas of={Stories.StackedSections} />
+
+## Props
+
+<ArgTypes of={Stories} />

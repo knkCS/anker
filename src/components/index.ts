@@ -58,6 +58,9 @@ export { Modal } from "./modal";
 // Pagination
 export type { PaginationProps } from "./pagination";
 export { Pagination } from "./pagination";
+// SidebarSection
+export type { SidebarSectionProps } from "./sidebar-section";
+export { SidebarSection } from "./sidebar-section";
 // Stepper
 export type {
 	StepperContentProps,
