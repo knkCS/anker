@@ -122,5 +122,6 @@ export const tagTheme = defineRecipe({
 	},
 	defaultVariants: {
 		size: "lg",
+		colorPalette: "primary" as never,
 	},
 });
