@@ -8,16 +8,19 @@ export const buttonTheme = defineRecipe({
 		transitionProperty: "common",
 		transitionDuration: "normal",
 		_focusVisible: {
-			boxShadow: "none",
-			outlineOffset: "2px",
-			outlineWidth: "2px",
-			outlineStyle: "solid",
-			outlineColor: "primary.600",
+			boxShadow: "focus-ring",
+			outline: "none",
+		},
+		_active: {
+			transform: "scale(0.98)",
 		},
 		_disabled: {
 			opacity: 0.4,
 			cursor: "not-allowed",
 			boxShadow: "none",
+			_active: {
+				transform: "none",
+			},
 		},
 		_hover: {
 			_disabled: {
