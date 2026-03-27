@@ -1,5 +1,6 @@
-import { Box, Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { Box } from "../../primitives/layout";
+import { Text } from "../../primitives/typography";
 import { CheckboxCard, CheckboxCardGroup } from "./checkbox-card";
 
 const meta = {

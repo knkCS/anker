@@ -1,5 +1,5 @@
-import { Badge } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { Badge } from "../../primitives/badge";
 import {
 	DataList,
 	DataListItem,

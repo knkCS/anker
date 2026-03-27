@@ -1,5 +1,5 @@
-import { HStack, Stack } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { HStack, Stack } from "./layout";
 import { Progress, ProgressCircle } from "./progress";
 
 const meta = {

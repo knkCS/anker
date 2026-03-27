@@ -1,5 +1,6 @@
-import { HStack, Stack, Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { HStack, Stack } from "../../primitives/layout";
+import { Text } from "../../primitives/typography";
 import { ClipboardButton, ClipboardInput, ClipboardLink } from "./clipboard";
 
 const meta = {

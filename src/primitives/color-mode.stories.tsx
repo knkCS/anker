@@ -1,4 +1,3 @@
-import { Stack, Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import {
 	ColorModeButton,
@@ -6,6 +5,8 @@ import {
 	DarkMode,
 	LightMode,
 } from "./color-mode";
+import { Stack } from "./layout";
+import { Text } from "./typography";
 
 const meta = {
 	title: "Primitives/ColorMode",

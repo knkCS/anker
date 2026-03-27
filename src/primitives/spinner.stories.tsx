@@ -1,5 +1,5 @@
-import { HStack } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { HStack } from "./layout";
 import { Spinner } from "./spinner";
 
 const meta = {

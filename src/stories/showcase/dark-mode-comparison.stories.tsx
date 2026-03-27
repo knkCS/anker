@@ -1,13 +1,3 @@
-import {
-	Box,
-	Flex,
-	Grid,
-	Heading,
-	HStack,
-	Separator,
-	Stack,
-	Text,
-} from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Moon, Sun, Users } from "lucide-react";
 import { Button } from "../../atoms/button/button";
@@ -18,7 +8,10 @@ import { StatusBadge } from "../../atoms/status-badge/status-badge";
 import { Card } from "../../components/card";
 import { Widget } from "../../components/widget";
 import { DarkMode, LightMode } from "../../primitives/color-mode";
+import { Box, Flex, Grid, HStack, Stack } from "../../primitives/layout";
 import { Progress } from "../../primitives/progress";
+import { Separator } from "../../primitives/separator";
+import { Heading, Text } from "../../primitives/typography";
 
 const meta = {
 	title: "Showcase/Dark Mode Comparison",

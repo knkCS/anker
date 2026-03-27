@@ -1,5 +1,5 @@
-import { HStack } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { HStack } from "../../primitives/layout";
 import { TypeBadge } from "./type-badge";
 
 const meta = {

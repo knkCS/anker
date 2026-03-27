@@ -1,5 +1,5 @@
-import { HStack } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { HStack } from "../../primitives/layout";
 import { Collapse } from "./collapse";
 import { Edit } from "./edit";
 import { Filter } from "./filter";

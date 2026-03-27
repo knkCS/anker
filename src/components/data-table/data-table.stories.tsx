@@ -1,9 +1,9 @@
-import { Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import type { RowSelectionState, SortingState } from "@tanstack/react-table";
 import { createColumnHelper } from "@tanstack/react-table";
 import { useState } from "react";
 import { StatusBadge } from "../../atoms/status-badge";
+import { Text } from "../../primitives/typography";
 import { DataTable } from "./data-table";
 
 type User = {

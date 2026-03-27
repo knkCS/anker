@@ -1,12 +1,3 @@
-import {
-	Box,
-	Flex,
-	Heading,
-	HStack,
-	Separator,
-	Stack,
-	Text,
-} from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Bell, Settings, Shield, User } from "lucide-react";
 import { useState } from "react";
@@ -17,6 +8,9 @@ import { Modal } from "../../components/modal";
 import { InputField } from "../../forms/input-field";
 import { SelectField } from "../../forms/select-field";
 import { TextareaField } from "../../forms/textarea-field";
+import { Box, Flex, HStack, Stack } from "../../primitives/layout";
+import { Separator } from "../../primitives/separator";
+import { Heading, Text } from "../../primitives/typography";
 
 interface SettingsFormValues {
 	name: string;

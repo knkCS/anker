@@ -1,5 +1,6 @@
-import { Stack, Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { Stack } from "../../primitives/layout";
+import { Text } from "../../primitives/typography";
 import { RelativeDateTime } from "./relative-datetime";
 
 const meta = {

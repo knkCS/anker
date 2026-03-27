@@ -1,5 +1,7 @@
-import { Button, Flex, Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { Button } from "../../atoms/button/button";
+import { Flex } from "../../primitives/layout";
+import { Text } from "../../primitives/typography";
 import { Stepper, StepperCompleted, StepperStep } from "./stepper";
 import { useStepperNextButton, useStepperPrevButton } from "./use-stepper";
 

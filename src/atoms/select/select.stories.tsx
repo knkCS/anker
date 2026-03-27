@@ -1,6 +1,6 @@
-import { Box } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
+import { Box } from "../../primitives/layout";
 import { BaseSelect } from "./base-select";
 import type { BaseOption } from "./types";
 

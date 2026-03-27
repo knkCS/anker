@@ -1,13 +1,3 @@
-import {
-	Box,
-	Flex,
-	Grid,
-	GridItem,
-	Heading,
-	HStack,
-	Stack,
-	Text,
-} from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import {
 	Activity,
@@ -33,7 +23,16 @@ import {
 	useStepperPrevButton,
 } from "../../components/stepper/use-stepper";
 import { Widget } from "../../components/widget";
+import {
+	Box,
+	Flex,
+	Grid,
+	GridItem,
+	HStack,
+	Stack,
+} from "../../primitives/layout";
 import { Progress } from "../../primitives/progress";
+import { Heading, Text } from "../../primitives/typography";
 
 const meta = {
 	title: "Showcase/Dashboard",
