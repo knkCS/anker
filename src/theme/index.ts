@@ -152,6 +152,9 @@ export type CustomTheme = typeof system;
 
 export default system;
 
+export { createAnkerTheme } from "./create-theme";
+export type { ThemePreset } from "./presets";
+export { defaultPreset } from "./presets";
 // Re-export all tokens and utilities for consumer overrides
 export {
 	colors,
