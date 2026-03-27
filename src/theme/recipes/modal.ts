@@ -1,7 +1,7 @@
 import { defineSlotRecipe } from "@chakra-ui/react";
 
 export const modalSlotRecipe = defineSlotRecipe({
-	slots: ["header", "closeButton", "dialog"],
+	slots: ["header", "closeButton", "dialog", "backdrop"],
 	base: {
 		header: {
 			px: "6",
@@ -11,6 +11,9 @@ export const modalSlotRecipe = defineSlotRecipe({
 			roundedTop: "md",
 		},
 		closeButton: {},
+		backdrop: {
+			backdropFilter: "blur(4px)",
+		},
 	},
 	variants: {
 		size: {
