@@ -1,14 +1,4 @@
-import {
-	Box,
-	Button,
-	ButtonGroup,
-	Grid,
-	GridItem,
-	IconButton,
-	Input,
-	Stack,
-	Text,
-} from "@chakra-ui/react";
+import { Button, ButtonGroup, IconButton, Input } from "@chakra-ui/react";
 import { Plus, Trash2 } from "lucide-react";
 import React from "react";
 import {
@@ -16,6 +6,8 @@ import {
 	useFieldArray,
 	useFormContext,
 } from "react-hook-form";
+import { Box, Grid, GridItem, Stack } from "../primitives/layout";
+import { Text } from "../primitives/typography";
 import { FormField, type FormFieldProps } from "./form-field";
 
 export interface ArrayFieldProps<T extends FieldValues>

@@ -1,4 +1,4 @@
-import { Field, HStack, Text } from "@chakra-ui/react";
+import { Field } from "@chakra-ui/react";
 import type React from "react";
 import { useId } from "react";
 import {
@@ -8,6 +8,8 @@ import {
 	type Path,
 	useFormContext,
 } from "react-hook-form";
+import { HStack } from "../primitives/layout";
+import { Text } from "../primitives/typography";
 
 export interface FormFieldProps<T extends FieldValues> {
 	name: Path<T>;

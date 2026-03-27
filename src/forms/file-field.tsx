@@ -1,8 +1,10 @@
-import { Box, Button, Flex, Text } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import { Upload } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect } from "react";
 import type { FieldValues } from "react-hook-form";
+import { Box, Flex } from "../primitives/layout";
+import { Text } from "../primitives/typography";
 import { FormField, type FormFieldProps } from "./form-field";
 
 // react-dropzone is an optional peer dependency

@@ -1,12 +1,8 @@
-import {
-	RadioGroup as ChakraRadioGroup,
-	type RadioGroupRootProps,
-	Stack,
-	type StackProps,
-} from "@chakra-ui/react";
+import type { RadioGroupRootProps } from "@chakra-ui/react";
 import type React from "react";
 import type { FieldValues } from "react-hook-form";
-import { Radio } from "../primitives/radio";
+import { Stack, type StackProps } from "../primitives/layout";
+import { Radio, RadioGroup } from "../primitives/radio";
 import { FormField, type FormFieldProps } from "./form-field";
 
 export interface RadioOption {
@@ -29,7 +25,7 @@ export function RadioGroupField<T extends FieldValues>(
 	return (
 		<FormField<T> name={name} label={label} {...rest}>
 			{(field) => (
-				<ChakraRadioGroup.Root
+				<RadioGroup
 					value={String(field.value ?? "")}
 					onValueChange={(e) => field.onChange(e.value)}
 					aria-describedby={field["aria-describedby"]}
@@ -42,7 +38,7 @@ export function RadioGroupField<T extends FieldValues>(
 							</Radio>
 						))}
 					</Stack>
-				</ChakraRadioGroup.Root>
+				</RadioGroup>
 			)}
 		</FormField>
 	);
