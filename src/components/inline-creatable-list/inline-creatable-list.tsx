@@ -1,8 +1,9 @@
-import { Box, Flex, Stack, Text } from "@chakra-ui/react";
 import { Plus } from "lucide-react";
 import type * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import { TextInput } from "../../atoms/text-input";
+import { Box, Flex, Stack } from "../../primitives/layout";
+import { Text } from "../../primitives/typography";
 
 export interface InlineCreatableListProps<T> {
 	items: T[];

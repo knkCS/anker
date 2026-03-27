@@ -1,5 +1,5 @@
-import { Text, type TextProps } from "@chakra-ui/react";
 import { Tooltip } from "../primitives/tooltip";
+import { Text, type TextProps } from "../primitives/typography";
 
 export interface CardListDataProps extends TextProps {
 	/** Cell content. Strings are shown in a tooltip on overflow. */

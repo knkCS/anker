@@ -1,5 +1,5 @@
-import { Stack } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { Stack } from "../primitives/layout";
 import { LabeledSwitch } from "./labeled-switch";
 
 const meta = {

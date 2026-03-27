@@ -1,8 +1,9 @@
-import { Box, HStack, Stack, Text } from "@chakra-ui/react";
 import { Upload } from "lucide-react";
 import type React from "react";
 import { useRef, useState } from "react";
 import { Button } from "../atoms/button";
+import { Box, HStack, Stack } from "../primitives/layout";
+import { Text } from "../primitives/typography";
 
 export interface UploadDropZoneProps {
 	onFiles: (files: File[]) => void;

@@ -1,6 +1,8 @@
-import { Box, Circle, Text } from "@chakra-ui/react";
+import { Circle } from "@chakra-ui/react";
 import { Filter as FilterIcon } from "lucide-react";
 import type React from "react";
+import { Box } from "../../primitives/layout";
+import { Text } from "../../primitives/typography";
 import { IconButton, type IconButtonProps } from "../button";
 
 export type FilterProps = Omit<

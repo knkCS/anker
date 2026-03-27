@@ -1,6 +1,7 @@
-import { Button, Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
+import { Button } from "../atoms/button/button";
+import { Text } from "../primitives/typography";
 import { Modal } from "./modal";
 
 const meta = {

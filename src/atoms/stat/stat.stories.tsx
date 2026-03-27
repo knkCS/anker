@@ -1,6 +1,6 @@
-import { HStack } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { BarChart3, DollarSign, Users } from "lucide-react";
+import { HStack } from "../../primitives/layout";
 import { Stat } from "./stat";
 
 const meta = {

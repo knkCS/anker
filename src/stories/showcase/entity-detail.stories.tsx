@@ -1,13 +1,3 @@
-import {
-	Box,
-	Flex,
-	Grid,
-	GridItem,
-	Heading,
-	HStack,
-	Stack,
-	Text,
-} from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import {
 	Building,
@@ -35,6 +25,15 @@ import {
 	TimelineRoot,
 	TimelineTitle,
 } from "../../components/timeline";
+import {
+	Box,
+	Flex,
+	Grid,
+	GridItem,
+	HStack,
+	Stack,
+} from "../../primitives/layout";
+import { Heading, Text } from "../../primitives/typography";
 
 const contactDetails = [
 	{ label: "Email", value: "sarah.mitchell@knkcs.com" },

@@ -1,5 +1,5 @@
-import { Button, Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { Button } from "../atoms/button/button";
 import {
 	Popover,
 	PopoverBody,
@@ -8,6 +8,7 @@ import {
 	PopoverHeader,
 	PopoverTrigger,
 } from "./popover";
+import { Text } from "./typography";
 
 const meta = {
 	title: "Primitives/Popover",

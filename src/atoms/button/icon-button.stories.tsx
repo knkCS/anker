@@ -1,6 +1,6 @@
-import { HStack } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Plus, Settings, Trash, X } from "lucide-react";
+import { HStack } from "../../primitives/layout";
 import { IconButton } from "./icon-button";
 
 const meta = {

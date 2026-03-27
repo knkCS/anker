@@ -1,5 +1,5 @@
-import { Box, Flex, Grid, GridItem } from "@chakra-ui/react";
 import { Children } from "react";
+import { Box, Flex, Grid, GridItem } from "../primitives/layout";
 
 export interface CardListProps {
 	/** Column header labels displayed above the grid. */

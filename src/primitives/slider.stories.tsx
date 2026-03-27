@@ -1,5 +1,5 @@
-import { Stack } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { Stack } from "./layout";
 import { Slider } from "./slider";
 
 const meta = {

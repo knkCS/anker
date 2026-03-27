@@ -1,5 +1,6 @@
-import { Button, Stack } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { Button } from "../atoms/button/button";
+import { Stack } from "./layout";
 import { Toaster, toaster } from "./toaster";
 
 const meta = {

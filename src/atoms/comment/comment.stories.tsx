@@ -1,6 +1,6 @@
-import { Box } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Avatar } from "../../primitives/avatar";
+import { Box } from "../../primitives/layout";
 import { Comment, CommentAction } from "./comment";
 import { CommentReplyBox } from "./comment-reply-box";
 

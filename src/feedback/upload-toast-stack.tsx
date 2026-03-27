@@ -1,4 +1,3 @@
-import { Box, Flex, HStack, Stack, Text } from "@chakra-ui/react";
 import {
 	AlertCircle,
 	Check,
@@ -9,8 +8,10 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { IconButton } from "../atoms/button";
+import { Box, Flex, HStack, Stack } from "../primitives/layout";
 import { Progress } from "../primitives/progress";
 import { Spinner } from "../primitives/spinner";
+import { Text } from "../primitives/typography";
 
 export interface UploadFileStatus {
 	id: string;

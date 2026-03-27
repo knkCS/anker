@@ -1,7 +1,9 @@
-import { Badge, Box, Stack, Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Plus, Settings } from "lucide-react";
 import { Button } from "../atoms/button";
+import { Badge } from "../primitives/badge";
+import { Box, Stack } from "../primitives/layout";
+import { Text } from "../primitives/typography";
 import { SidebarSection } from "./sidebar-section";
 
 const meta = {

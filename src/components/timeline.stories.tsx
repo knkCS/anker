@@ -1,6 +1,7 @@
-import { Badge, Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { CheckCircle, Edit, Plus, Trash2 } from "lucide-react";
+import { Badge } from "../primitives/badge";
+import { Text } from "../primitives/typography";
 import {
 	TimelineConnector,
 	TimelineContent,

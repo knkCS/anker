@@ -1,5 +1,5 @@
-import { Badge, type BadgeProps } from "@chakra-ui/react";
 import type React from "react";
+import { Badge, type BadgeProps } from "../../primitives/badge";
 
 export interface TypeBadgeProps extends Omit<BadgeProps, "children"> {
 	/** Display name for the badge. */

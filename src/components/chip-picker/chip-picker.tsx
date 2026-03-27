@@ -1,15 +1,16 @@
-import { Box, Flex, Text } from "@chakra-ui/react";
 import { Plus, X } from "lucide-react";
 import type * as React from "react";
 import { useState } from "react";
 import { IconButton } from "../../atoms/button";
 import { TextInput } from "../../atoms/text-input";
+import { Box, Flex } from "../../primitives/layout";
 import {
 	Popover,
 	PopoverBody,
 	PopoverContent,
 	PopoverTrigger,
 } from "../../primitives/popover";
+import { Text } from "../../primitives/typography";
 
 export interface ChipPickerProps<T> {
 	assigned: T[];

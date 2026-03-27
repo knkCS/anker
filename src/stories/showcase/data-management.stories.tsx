@@ -1,13 +1,4 @@
-import {
-	Box,
-	Flex,
-	Heading,
-	HStack,
-	Separator,
-	Stack,
-	Table,
-	Text,
-} from "@chakra-ui/react";
+import { Table } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Download, Inbox, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -22,6 +13,9 @@ import { DrawerRoot } from "../../components/drawer";
 import { Pagination } from "../../components/pagination";
 import { InputField } from "../../forms/input-field";
 import { SelectField } from "../../forms/select-field";
+import { Box, Flex, HStack, Stack } from "../../primitives/layout";
+import { Separator } from "../../primitives/separator";
+import { Heading, Text } from "../../primitives/typography";
 
 // ------------------------------------------------------------------ types ---
 

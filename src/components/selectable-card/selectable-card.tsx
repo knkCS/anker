@@ -1,6 +1,6 @@
-import { Box, Flex } from "@chakra-ui/react";
 import type React from "react";
 import { Checkbox } from "../../primitives/checkbox";
+import { Box, Flex } from "../../primitives/layout";
 
 export interface SelectableCardProps {
 	/** Whether the card is currently selected. */

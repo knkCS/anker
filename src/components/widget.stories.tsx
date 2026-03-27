@@ -1,6 +1,6 @@
-import { Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { BarChart3, Users } from "lucide-react";
+import { Text } from "../primitives/typography";
 import { Widget } from "./widget";
 
 const meta = {

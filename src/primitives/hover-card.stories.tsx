@@ -1,6 +1,7 @@
-import { Box, Link, Stack, Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { HoverCard } from "./hover-card";
+import { Box, Stack } from "./layout";
+import { Link, Text } from "./typography";
 
 const meta = {
 	title: "Primitives/HoverCard",

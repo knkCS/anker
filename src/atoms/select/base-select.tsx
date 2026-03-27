@@ -1,4 +1,4 @@
-import { Circle, HStack, Text } from "@chakra-ui/react";
+import { Circle } from "@chakra-ui/react";
 import {
 	type ActionMeta,
 	chakraComponents,
@@ -14,6 +14,8 @@ import {
 } from "chakra-react-select";
 import type React from "react";
 import { Avatar } from "../../primitives/avatar";
+import { HStack } from "../../primitives/layout";
+import { Text } from "../../primitives/typography";
 import type { BaseOption } from "./types";
 
 export interface BaseSelectProps<T extends BaseOption>

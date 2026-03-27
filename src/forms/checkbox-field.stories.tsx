@@ -1,6 +1,6 @@
-import { Stack } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { FormProvider, useForm } from "react-hook-form";
+import { Stack } from "../primitives/layout";
 import { CheckboxField } from "./checkbox-field";
 
 const meta = {

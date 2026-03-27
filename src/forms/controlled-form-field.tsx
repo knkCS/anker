@@ -1,6 +1,7 @@
-import { Field, HStack } from "@chakra-ui/react";
+import { Field } from "@chakra-ui/react";
 import type React from "react";
 import { useId } from "react";
+import { HStack } from "../primitives/layout";
 
 export interface ControlledFormFieldProps {
 	name: string;

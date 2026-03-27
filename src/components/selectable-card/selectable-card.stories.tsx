@@ -1,7 +1,9 @@
-import { Badge, Box, Grid as ChakraGrid, Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { FileText } from "lucide-react";
 import { useState } from "react";
+import { Badge } from "../../primitives/badge";
+import { Box, Grid as ChakraGrid } from "../../primitives/layout";
+import { Text } from "../../primitives/typography";
 import { SelectableCard } from "./selectable-card";
 
 const meta = {

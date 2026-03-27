@@ -1,5 +1,5 @@
-import { Text } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { Text } from "../primitives/typography";
 import { CardList } from "./card-list";
 
 const meta = {

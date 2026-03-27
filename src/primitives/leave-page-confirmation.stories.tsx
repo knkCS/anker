@@ -1,6 +1,6 @@
-import { Button } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
+import { Button } from "../atoms/button/button";
 import { LeavePageConfirmation } from "./leave-page-confirmation";
 
 const meta = {

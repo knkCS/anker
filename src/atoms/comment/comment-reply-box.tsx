@@ -1,6 +1,8 @@
-import { Box, Button, ButtonGroup, Flex, Textarea } from "@chakra-ui/react";
+import { Button, ButtonGroup } from "@chakra-ui/react";
 import type React from "react";
 import { useRef, useState } from "react";
+import { Box, Flex } from "../../primitives/layout";
+import { Textarea } from "../../primitives/textarea";
 
 export interface CommentReplyBoxProps {
 	onReply: (value: string) => Promise<void>;

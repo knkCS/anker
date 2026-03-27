@@ -1,5 +1,5 @@
-import { Box } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { Box } from "../../primitives/layout";
 import DateInput from "./date-input";
 
 const meta = {

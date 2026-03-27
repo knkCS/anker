@@ -1,4 +1,3 @@
-import { Box, Table } from "@chakra-ui/react";
 import {
 	chakraComponents,
 	type GroupBase,
@@ -7,6 +6,8 @@ import {
 } from "chakra-react-select";
 import type React from "react";
 import { useMemo } from "react";
+import { Box } from "../../primitives/layout";
+import { Table } from "../../primitives/table";
 import type { BaseOption } from "./types";
 
 export interface TableMenuColumn {
