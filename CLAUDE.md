@@ -12,7 +12,7 @@ Anker is the shared UI component library for the knk software group, extracted a
 
 Single npm package (`@knkcs/anker`) with subpath exports organized in six layers:
 
-1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, and 24 component recipes. Consumers use `<Provider>` (defaults to anker's system).
+1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 24 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
 2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
 3. **`/components`** — Higher-level composites: Card, Drawer, Modal, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox. 13 components.
 4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, SearchInput, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc. 16 component groups.
@@ -40,6 +40,8 @@ src/
 ├── theme/           # Design tokens + recipes
 │   ├── tokens/      # colors, semantic, shadows, spacing, radii, typography, animations, z-index
 │   ├── recipes/     # Chakra component recipes (24 files)
+│   ├── presets/     # Theme personality presets (ThemePreset, defaultPreset)
+│   ├── create-theme.ts  # createAnkerTheme() factory
 │   └── utils/       # Color manipulation helpers
 ├── primitives/      # Chakra wrappers (accordion, alert, avatar, breadcrumb, hover-card, menu, pin-input, popover, progress, segmented-control, skeleton, slider, spinner, tooltip, etc.)
 ├── components/      # Card, Drawer, Modal, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox
@@ -127,6 +129,41 @@ import { defineRecipe } from "@chakra-ui/react";
 export const buttonTheme = defineRecipe({ ... });
 ```
 
+### Theme Preset System
+
+Consumers can create customized theme systems via `createAnkerTheme()`:
+```tsx
+import { createAnkerTheme } from "@knkcs/anker/theme";
+import type { ThemePreset } from "@knkcs/anker/theme";
+
+const custom: ThemePreset = {
+  name: "editorial",
+  fonts: { heading: "Georgia, serif" },
+  radii: { sm: "0", md: "0", lg: "0", xl: "0", "2xl": "0" },
+};
+
+<Provider system={createAnkerTheme(custom)}>
+```
+
+Presets override token layers (colors, semanticTokens, textStyles, fonts, radii, durations, easings). All component recipes and structural defaults are preserved. The default export from `@knkcs/anker/theme` is equivalent to `createAnkerTheme()` with no arguments.
+
+Preset files live in `src/theme/presets/`. The `ThemePreset` interface is in `src/theme/presets/types.ts`.
+
+### Button Variant Defaults
+
+The button and tag recipes default `colorPalette` to `"primary"`. This means:
+- `<Button variant="solid">` renders primary blue by default
+- Override with `colorPalette="secondary"` or `colorPalette="gray"` when needed
+- The `primary` variant is **deprecated** — use `variant="solid"` instead (they are now equivalent)
+
+### Component Visual Polish
+
+Several component recipes include built-in visual polish:
+- **Button**: `boxShadow: "focus-ring"` on focus (primary-tinted glow), `scale(0.98)` on active press
+- **Card**: Elevated variant lifts 1px + deepens shadow on hover
+- **Tooltip**: `slideUp` entrance animation (150ms ease-out)
+- **Modal**: `backdropFilter: blur(4px)` frosted glass overlay
+
 ## Chakra v3 Anti-Patterns
 
 This project uses Chakra UI v3. Never suggest v2 patterns:
@@ -176,7 +213,7 @@ Additional rules:
 3. Set `displayName` — e.g., `Component.displayName = "Component"`
 4. Create `src/primitives/{name}.stories.tsx` — title: `"Primitives/{Name}"`
 5. Add export to `src/primitives/index.ts` — both type and component
-6. If a recipe is needed, create `src/theme/recipes/{name}.ts` and register in `src/theme/index.ts`
+6. If a recipe is needed, create `src/theme/recipes/{name}.ts` and register in `src/theme/create-theme.ts` (which `index.ts` delegates to)
 
 ### Atom (small reusable UI unit)
 1. Create directory `src/atoms/{name}/`
@@ -213,6 +250,16 @@ Additional rules:
 
 **Interactive:** `accent`, `border`, `success`, `error`
 
+**Shadows:** `xs`, `sm`, `md`, `lg`, `xl`, `2xl` (diffused hero-level), `focus-ring` (primary-tinted glow for focus states)
+
+**Motion durations:** `fast` (150ms), `normal` (200ms), `slow` (300ms), `slower` (400ms), `entrance` (250ms), `exit` (200ms)
+
+**Motion easings:** `ease-in`, `ease-out`, `ease-in-out`, `spring` (overshoot for micro-interactions)
+
+**Global keyframes:** `fadeIn`, `fadeOut`, `slideUp`, `slideDown`, `scaleIn` — registered in globalCss, use in recipes as `animation: "slideUp 150ms ease-out"`
+
+**Text style presets:** `7xl`–`xs` (size scale) + `display` (hero headings), `caption` (small muted), `overline` (uppercase labels)
+
 **Color palette tokens** (per-palette): `{palette}.contrast`, `{palette}.fg`, `{palette}.subtle`, `{palette}.muted`, `{palette}.emphasized`, `{palette}.solid`, `{palette}.focusRing`, `{palette}.border`
 
 ### Registered recipes (single-part)
@@ -224,6 +271,8 @@ Additional rules:
 ## Breaking Changes
 
 - **FactBox**: The `childs` prop on `FactBoxAction` has been renamed to `items`
+- **Button**: Default `colorPalette` is now `"primary"` — `variant="solid"` buttons render blue instead of black/gray. Use `colorPalette="gray"` to restore the old appearance.
+- **Button `primary` variant**: Deprecated — use `variant="solid"` instead (equivalent behavior). Will be removed in a future major release.
 
 ## Peer Dependencies
 
