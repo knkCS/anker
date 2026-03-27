@@ -34,6 +34,7 @@ import {
 	durations,
 	easings,
 	fonts,
+	keyframes,
 	radii,
 	semanticTokens,
 	space,
@@ -43,6 +44,11 @@ import {
 
 const system = createSystem(defaultConfig, {
 	globalCss: {
+		"@keyframes fadeIn": keyframes.fadeIn,
+		"@keyframes fadeOut": keyframes.fadeOut,
+		"@keyframes slideUp": keyframes.slideUp,
+		"@keyframes slideDown": keyframes.slideDown,
+		"@keyframes scaleIn": keyframes.scaleIn,
 		body: {
 			color: "default",
 			bg: { base: "white", _dark: "#000" },
@@ -152,6 +158,7 @@ export {
 	durations,
 	easings,
 	fonts,
+	keyframes,
 	radii,
 	semanticTokens,
 	space,

@@ -1,4 +1,4 @@
-export { durations, easings } from "./animations";
+export { durations, easings, keyframes } from "./animations";
 export { default as colors } from "./colors";
 export { default as radii } from "./radii";
 export { default as semanticTokens } from "./semantic";
