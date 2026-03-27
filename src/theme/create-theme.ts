@@ -51,9 +51,10 @@ import {
  * @example
  * ```tsx
  * import { createAnkerTheme } from "@knkcs/anker/theme";
- * import { vibrant } from "@knkcs/anker/theme/presets";
+ * import type { ThemePreset } from "@knkcs/anker/theme";
  *
- * <Provider system={createAnkerTheme(vibrant)}>
+ * const myPreset: ThemePreset = { name: "custom", radii: { md: "0" } };
+ * <Provider system={createAnkerTheme(myPreset)}>
  * ```
  */
 export function createAnkerTheme(preset?: ThemePreset) {
