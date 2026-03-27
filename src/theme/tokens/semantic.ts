@@ -194,6 +194,19 @@ const semanticTokens = {
 					"0px 0px 1px rgba(13, 14, 20, 1), 0px 16px 24px rgba(13, 14, 20, 0.9)",
 			},
 		},
+		"2xl": {
+			value: {
+				base: "0px 0px 1px rgba(45, 55, 72, 0.04), 0px 24px 48px rgba(45, 55, 72, 0.12)",
+				_dark:
+					"0px 0px 1px rgba(13, 14, 20, 1), 0px 24px 48px rgba(13, 14, 20, 0.9)",
+			},
+		},
+		"focus-ring": {
+			value: {
+				base: "0 0 0 3px rgba(32, 135, 215, 0.4)",
+				_dark: "0 0 0 3px rgba(32, 135, 215, 0.6)",
+			},
+		},
 	},
 	opacity: {
 		disabled: { value: 0.4 },
