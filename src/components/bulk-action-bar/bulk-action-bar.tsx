@@ -1,12 +1,14 @@
-import { Collapsible, Flex, HStack, Text } from "@chakra-ui/react";
 import { X } from "lucide-react";
 import type React from "react";
 import { Button, IconButton } from "../../atoms/button";
+import { Collapsible } from "../../primitives/collapsible";
+import { Flex, HStack } from "../../primitives/layout";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "../../primitives/popover";
+import { Text } from "../../primitives/typography";
 
 export interface BulkActionBarProps {
 	/** Number of currently selected items. */

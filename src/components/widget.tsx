@@ -1,5 +1,7 @@
-import { Box, Card, Flex, Text } from "@chakra-ui/react";
+import { Card } from "@chakra-ui/react";
 import type React from "react";
+import { Box, Flex } from "../primitives/layout";
+import { Text } from "../primitives/typography";
 
 export interface WidgetProps {
 	heading: string;

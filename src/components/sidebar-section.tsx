@@ -1,8 +1,9 @@
-import { Box, Flex, Text } from "@chakra-ui/react";
 import { X } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { IconButton } from "../atoms/button";
+import { Box, Flex } from "../primitives/layout";
+import { Text } from "../primitives/typography";
 
 export interface SidebarSectionProps {
 	label: string;

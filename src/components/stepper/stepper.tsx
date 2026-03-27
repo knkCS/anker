@@ -1,5 +1,4 @@
 import {
-	Collapsible,
 	chakra,
 	type HTMLChakraProps,
 	type SystemStyleObject,
@@ -7,6 +6,7 @@ import {
 } from "@chakra-ui/react";
 import { Check } from "lucide-react";
 import React, { createContext, useContext } from "react";
+import { Collapsible } from "../../primitives/collapsible";
 import {
 	StepperProvider,
 	type UseStepperProps,

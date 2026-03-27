@@ -1,12 +1,7 @@
-import {
-	Drawer,
-	type DrawerRootProps,
-	Flex,
-	Portal,
-	Spacer,
-} from "@chakra-ui/react";
+import { Drawer, type DrawerRootProps, Portal } from "@chakra-ui/react";
 import { X } from "lucide-react";
 import { Button } from "../atoms/button";
+import { Flex, Spacer } from "../primitives/layout";
 
 export interface DrawerProps
 	extends Omit<DrawerRootProps, "open" | "onOpenChange"> {

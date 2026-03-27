@@ -1,6 +1,7 @@
-import { Box, Flex, Text } from "@chakra-ui/react";
 import type React from "react";
+import { Box, Flex } from "../primitives/layout";
 import { Switch, type SwitchProps } from "../primitives/switch";
+import { Text } from "../primitives/typography";
 
 export interface LabeledSwitchProps extends SwitchProps {
 	name: string;

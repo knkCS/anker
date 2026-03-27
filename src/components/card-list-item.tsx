@@ -1,7 +1,8 @@
-import { Box, Flex, Grid, GridItem, Menu, Portal } from "@chakra-ui/react";
+import { Menu, Portal } from "@chakra-ui/react";
 import { Ellipsis } from "lucide-react";
 import type React from "react";
 import { Children } from "react";
+import { Box, Flex, Grid, GridItem } from "../primitives/layout";
 
 export interface CardListMenuItem<T = string> {
 	/** Text label for the menu item. */

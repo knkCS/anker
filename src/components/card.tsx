@@ -1,9 +1,6 @@
-import {
-	type CardRootProps,
-	Card as ChakraCard,
-	Heading,
-} from "@chakra-ui/react";
+import { type CardRootProps, Card as ChakraCard } from "@chakra-ui/react";
 import type React from "react";
+import { Heading } from "../primitives/typography";
 
 export interface CardProps extends Omit<CardRootProps, "title"> {
 	maxW?: CardRootProps["maxW"];

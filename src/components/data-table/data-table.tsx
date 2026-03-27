@@ -1,4 +1,4 @@
-import { Box, Checkbox, Flex, Table, Text } from "@chakra-ui/react";
+import { Checkbox } from "@chakra-ui/react";
 import {
 	type ColumnDef,
 	flexRender,
@@ -13,7 +13,10 @@ import {
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import type React from "react";
 import { useMemo } from "react";
+import { Box, Flex } from "../../primitives/layout";
 import { Skeleton } from "../../primitives/skeleton";
+import { Table } from "../../primitives/table";
+import { Text } from "../../primitives/typography";
 import { Pagination } from "../pagination";
 
 export interface DataTableProps<T extends Record<string, unknown>> {

@@ -1,21 +1,16 @@
-import {
-	Box,
-	ButtonGroup,
-	type CardRootProps,
-	Collapsible,
-	Flex,
-	HStack,
-	Text,
-} from "@chakra-ui/react";
+import { ButtonGroup, type CardRootProps } from "@chakra-ui/react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import React, { type MouseEventHandler } from "react";
 import { IconButton } from "../atoms/button";
+import { Collapsible } from "../primitives/collapsible";
+import { Box, Flex, HStack } from "../primitives/layout";
 import {
 	MenuContent,
 	MenuItem,
 	MenuRoot,
 	MenuTrigger,
 } from "../primitives/menu";
+import { Text } from "../primitives/typography";
 import { Card } from "./card";
 
 export interface FactBoxAction {
