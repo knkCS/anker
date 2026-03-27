@@ -27,9 +27,11 @@ import {
 	Stepper,
 	StepperCompleted,
 	StepperStep,
+} from "../../components/stepper/stepper";
+import {
 	useStepperNextButton,
 	useStepperPrevButton,
-} from "../../components/stepper/stepper";
+} from "../../components/stepper/use-stepper";
 import { Widget } from "../../components/widget";
 import { Progress } from "../../primitives/progress";
 
