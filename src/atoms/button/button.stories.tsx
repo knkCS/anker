@@ -88,3 +88,17 @@ export const Loading: Story = {
 		);
 	},
 };
+
+export const SolidDefaultsPrimary: Story = {
+	render: () => (
+		<HStack gap={4}>
+			<Button variant="solid">Primary (default)</Button>
+			<Button variant="solid" colorPalette="secondary">
+				Secondary override
+			</Button>
+			<Button variant="solid" colorPalette="gray">
+				Gray override
+			</Button>
+		</HStack>
+	),
+};

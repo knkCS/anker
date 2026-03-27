@@ -98,7 +98,12 @@ export const CommentReplyBox = ({
 						>
 							{cancelLabel}
 						</Button>
-						<Button type="submit" variant="solid" loading={isSubmitting}>
+						<Button
+							type="submit"
+							variant="solid"
+							colorPalette="primary"
+							loading={isSubmitting}
+						>
 							{replyLabel}
 						</Button>
 					</ButtonGroup>

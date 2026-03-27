@@ -16,5 +16,6 @@ export const tooltipTheme = defineRecipe({
 		boxShadow: "md",
 		maxW: "xs",
 		zIndex: "tooltip",
+		animation: "slideUp 150ms ease-out",
 	},
 });

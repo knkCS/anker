@@ -5,6 +5,8 @@ export const cardSlotRecipe = defineSlotRecipe({
 	base: {
 		root: {
 			bg: { base: "white", _dark: "gray.800" },
+			transitionProperty: "box-shadow, transform",
+			transitionDuration: "normal",
 		},
 	},
 	variants: {
@@ -12,6 +14,10 @@ export const cardSlotRecipe = defineSlotRecipe({
 			elevated: {
 				root: {
 					boxShadow: "md",
+					_hover: {
+						boxShadow: "lg",
+						transform: "translateY(-1px)",
+					},
 				},
 			},
 			flat: {

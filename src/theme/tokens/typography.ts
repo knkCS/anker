@@ -58,4 +58,24 @@ export const textStyles = {
 		fontSize: "xs",
 		lineHeight: "1.125rem", // 18px
 	},
+	// Additional semantic presets
+	display: {
+		fontSize: "6xl",
+		lineHeight: "4.5rem",
+		letterSpacing: "-0.03em",
+		fontWeight: "bold",
+	},
+	caption: {
+		fontSize: "xs",
+		lineHeight: "1rem",
+		letterSpacing: "0.01em",
+		color: "muted",
+	},
+	overline: {
+		fontSize: "xs",
+		lineHeight: "1rem",
+		letterSpacing: "0.08em",
+		fontWeight: "semibold",
+		textTransform: "uppercase" as const,
+	},
 };

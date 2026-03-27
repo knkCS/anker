@@ -55,7 +55,11 @@ export const LeavePageConfirmation: React.FC<LeavePageConfirmationProps> = (
 							<Dialog.Body>{message}</Dialog.Body>
 							<Dialog.Footer>
 								<ButtonGroup>
-									<Button variant="solid" onClick={onConfirmLeave}>
+									<Button
+										variant="solid"
+										colorPalette="primary"
+										onClick={onConfirmLeave}
+									>
 										{confirmLabel}
 									</Button>
 									<Button

@@ -17,7 +17,7 @@ const StepperControls = () => {
 	return (
 		<Flex gap={4} mt={4}>
 			<Button variant="outline" {...prevProps} />
-			<Button variant="solid" colorPalette="primary" {...nextProps} />
+			<Button variant="solid" {...nextProps} />
 		</Flex>
 	);
 };

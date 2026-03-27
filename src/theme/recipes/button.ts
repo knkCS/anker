@@ -8,16 +8,19 @@ export const buttonTheme = defineRecipe({
 		transitionProperty: "common",
 		transitionDuration: "normal",
 		_focusVisible: {
-			boxShadow: "none",
-			outlineOffset: "2px",
-			outlineWidth: "2px",
-			outlineStyle: "solid",
-			outlineColor: "primary.600",
+			boxShadow: "focus-ring",
+			outline: "none",
+		},
+		_active: {
+			transform: "scale(0.98)",
 		},
 		_disabled: {
 			opacity: 0.4,
 			cursor: "not-allowed",
 			boxShadow: "none",
+			_active: {
+				transform: "none",
+			},
 		},
 		_hover: {
 			_disabled: {
@@ -98,7 +101,9 @@ export const buttonTheme = defineRecipe({
 				},
 			},
 
-			// Primary: solid style locked to the primary color palette
+			// @deprecated Use variant="solid" instead — solid now defaults to
+			// colorPalette="primary". This variant will be removed in a future
+			// major release.
 			primary: {
 				bg: "primary.500",
 				color: "white",
@@ -185,5 +190,6 @@ export const buttonTheme = defineRecipe({
 	defaultVariants: {
 		size: "lg",
 		variant: "solid",
+		colorPalette: "primary" as never,
 	},
 });
