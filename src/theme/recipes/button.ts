@@ -98,7 +98,9 @@ export const buttonTheme = defineRecipe({
 				},
 			},
 
-			// Primary: solid style locked to the primary color palette
+			// @deprecated Use variant="solid" instead — solid now defaults to
+			// colorPalette="primary". This variant will be removed in a future
+			// major release.
 			primary: {
 				bg: "primary.500",
 				color: "white",
@@ -185,5 +187,6 @@ export const buttonTheme = defineRecipe({
 	defaultVariants: {
 		size: "lg",
 		variant: "solid",
+		colorPalette: "primary" as never,
 	},
 });
