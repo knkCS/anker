@@ -99,7 +99,6 @@ export const DrawerRoot: React.FC<DrawerProps> = ({
 									<Button
 										size="sm"
 										variant="solid"
-										colorPalette="primary"
 										onClick={onSave}
 										disabled={saveButtonDisabled || loading}
 										loading={loading}

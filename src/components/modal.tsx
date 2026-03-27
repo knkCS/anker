@@ -59,7 +59,6 @@ export const Modal: React.FC<ModalProps> = ({
 			</Button>
 			<Button
 				variant="solid"
-				colorPalette="primary"
 				onClick={onSave}
 				disabled={saveDisabled || loading}
 				loading={loading}
