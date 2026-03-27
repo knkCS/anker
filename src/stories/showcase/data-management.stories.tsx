@@ -1,4 +1,3 @@
-import { Table } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Download, Inbox, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -15,6 +14,7 @@ import { InputField } from "../../forms/input-field";
 import { SelectField } from "../../forms/select-field";
 import { Box, Flex, HStack, Stack } from "../../primitives/layout";
 import { Separator } from "../../primitives/separator";
+import { Table } from "../../primitives/table";
 import { Heading, Text } from "../../primitives/typography";
 
 // ------------------------------------------------------------------ types ---
