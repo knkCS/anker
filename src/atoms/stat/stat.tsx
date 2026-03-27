@@ -1,14 +1,8 @@
-import {
-	Box,
-	type BoxProps,
-	Heading,
-	HStack,
-	Square,
-	Stack,
-	Text,
-} from "@chakra-ui/react";
+import { Square } from "@chakra-ui/react";
 import type React from "react";
+import { Box, type BoxProps, HStack, Stack } from "../../primitives/layout";
 import { Spinner } from "../../primitives/spinner";
+import { Heading, Text } from "../../primitives/typography";
 
 export interface StatProps extends BoxProps {
 	/** An icon element rendered as React node (e.g., a lucide-react icon) */

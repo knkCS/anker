@@ -1,6 +1,7 @@
-import { chakra, HStack, Stack } from "@chakra-ui/react";
+import { chakra } from "@chakra-ui/react";
 import type React from "react";
 import { createContext, useContext } from "react";
+import { HStack, Stack } from "../../primitives/layout";
 import { Prose } from "../../primitives/prose";
 import { Button, type ButtonProps } from "../button";
 import { RelativeDateTime } from "../datetime/relative-datetime";

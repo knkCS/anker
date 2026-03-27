@@ -1,6 +1,6 @@
-import { HStack } from "@chakra-ui/react";
 import { ChevronDown, Plus } from "lucide-react";
 import type React from "react";
+import { HStack } from "../../primitives/layout";
 import {
 	MenuContent,
 	MenuItem,

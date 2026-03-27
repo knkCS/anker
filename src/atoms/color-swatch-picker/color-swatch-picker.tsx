@@ -1,6 +1,6 @@
-import { Box, Flex, HStack, Stack } from "@chakra-ui/react";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { Box, Flex, HStack, Stack } from "../../primitives/layout";
 import { TextInput } from "../text-input";
 
 const DEFAULT_PRESETS = [

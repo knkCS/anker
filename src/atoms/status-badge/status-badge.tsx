@@ -1,7 +1,7 @@
-import { Badge } from "@chakra-ui/react";
 import { readableColor } from "color2k";
 import type React from "react";
 import { useMemo } from "react";
+import { Badge } from "../../primitives/badge";
 
 export interface StatusBadgeProps {
 	/** The display label for the badge */

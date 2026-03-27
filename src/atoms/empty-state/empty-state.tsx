@@ -1,5 +1,6 @@
-import { Heading, Stack, Text } from "@chakra-ui/react";
 import type React from "react";
+import { Stack } from "../../primitives/layout";
+import { Heading, Text } from "../../primitives/typography";
 
 export interface EmptyStateProps {
 	/** Main heading text. */

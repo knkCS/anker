@@ -1,5 +1,5 @@
-import { Box } from "@chakra-ui/react";
 import type React from "react";
+import { Box } from "../../primitives/layout";
 
 export interface ActionProps extends React.HTMLAttributes<HTMLButtonElement> {
 	cursor?: string;

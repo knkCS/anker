@@ -1,6 +1,6 @@
-import { Text, type TextProps } from "@chakra-ui/react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Tooltip } from "../../primitives/tooltip";
+import { Text, type TextProps } from "../../primitives/typography";
 
 export interface TextOverflowProps extends TextProps {}
 
