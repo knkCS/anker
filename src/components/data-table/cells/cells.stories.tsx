@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { Edit, Eye, Trash2 } from "lucide-react";
+import { Copy, Edit, Eye, Trash2 } from "lucide-react";
+import { MemoryRouter } from "react-router-dom";
 import { DataTable } from "../data-table";
 import { ActionCell } from "./action-cell";
 import { BooleanCell } from "./boolean-cell";
@@ -8,6 +9,8 @@ import { CodeCell } from "./code-cell";
 import { ColorSwatchCell } from "./color-swatch-cell";
 import { CountCell } from "./count-cell";
 import { DateCell } from "./date-cell";
+import { LinkCell } from "./link-cell";
+import { MenuCell } from "./menu-cell";
 import { NumberCell } from "./number-cell";
 import { SlugCell } from "./slug-cell";
 import { StatusBadgeCell } from "./status-badge-cell";
@@ -22,6 +25,7 @@ interface SampleRow {
 	slug: string | null;
 	code: string | null;
 	url: string | null;
+	path: string | null;
 	color: string | null;
 	amount: number | null;
 	status: string | null;
@@ -37,6 +41,7 @@ const sampleData: SampleRow[] = [
 		slug: "my-content-slug",
 		code: "SELECT * FROM users WHERE id = 1;",
 		url: "https://example.com/page",
+		path: "/items/1",
 		color: "#2087d7",
 		amount: 1234567.89,
 		status: "published",
@@ -50,6 +55,7 @@ const sampleData: SampleRow[] = [
 		slug: "another-slug",
 		code: "const x = 42;",
 		url: "https://knkcs.de",
+		path: "/items/2",
 		color: "#e9580c",
 		amount: 99,
 		status: "draft",
@@ -63,6 +69,7 @@ const sampleData: SampleRow[] = [
 		slug: "third-entry",
 		code: "npm install @knkcs/anker",
 		url: "https://github.com/knkcs",
+		path: "/items/3",
 		color: "#16a34a",
 		amount: 0,
 		status: "archived",
@@ -76,6 +83,7 @@ const sampleData: SampleRow[] = [
 		slug: null,
 		code: null,
 		url: null,
+		path: null,
 		color: null,
 		amount: null,
 		status: null,
@@ -138,6 +146,43 @@ const columns = [
 		header: "Created",
 		cell: (info) => <DateCell value={info.getValue()} showRelative />,
 	}),
+	columnHelper.accessor("path", {
+		header: "Link",
+		cell: (info) => (
+			<LinkCell to={info.getValue()} label={info.row.original.name} />
+		),
+	}),
+	columnHelper.display({
+		id: "menu",
+		header: "Menu",
+		cell: (info) => (
+			<MenuCell
+				actions={[
+					{
+						icon: Eye,
+						label: "View",
+						onClick: () => console.log(`View row ${info.row.original.id}`),
+					},
+					{
+						icon: Edit,
+						label: "Edit",
+						onClick: () => console.log(`Edit row ${info.row.original.id}`),
+					},
+					{
+						icon: Copy,
+						label: "Duplicate",
+						onClick: () => console.log(`Duplicate row ${info.row.original.id}`),
+					},
+					{
+						icon: Trash2,
+						label: "Delete",
+						colorPalette: "red",
+						onClick: () => console.log(`Delete row ${info.row.original.id}`),
+					},
+				]}
+			/>
+		),
+	}),
 	columnHelper.display({
 		id: "actions",
 		header: "Actions",
@@ -169,6 +214,13 @@ const columns = [
 const meta = {
 	title: "Components/DataTable/Cells",
 	component: DataTable,
+	decorators: [
+		(Story) => (
+			<MemoryRouter>
+				<Story />
+			</MemoryRouter>
+		),
+	],
 } satisfies Meta<typeof DataTable>;
 
 export default meta;

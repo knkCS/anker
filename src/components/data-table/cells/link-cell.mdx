@@ -1,0 +1,26 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./link-cell.stories";
+
+<Meta of={Stories} />
+
+# LinkCell
+
+Renders a router-aware link for in-app navigation using react-router-dom. Composes Chakra's `Link` (styling) with react-router-dom's `Link` (routing) via `asChild`. For external URLs, use `UrlCell` instead. Stops event propagation to avoid triggering `onRowClick`.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Without Label
+
+When no `label` is provided, the route path is displayed as the link text.
+
+<Canvas of={Stories.WithoutLabel} />
+
+## Null Value
+
+<Canvas of={Stories.NullValue} />
+
+## Props
+
+<ArgTypes of={Stories} />

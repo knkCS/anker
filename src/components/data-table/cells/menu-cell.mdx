@@ -1,0 +1,32 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./menu-cell.stories";
+
+<Meta of={Stories} />
+
+# MenuCell
+
+Renders row actions as a dropdown menu or inline icon buttons based on a configurable threshold. When the number of actions exceeds `menuThreshold` (default 1), all actions collapse into a three-dot dropdown. Stops event propagation to avoid triggering `onRowClick`.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## Multiple Actions (Dropdown)
+
+<Canvas of={Stories.MultipleActions} />
+
+## With Destructive Action
+
+<Canvas of={Stories.WithDestructiveAction} />
+
+## Custom Threshold
+
+<Canvas of={Stories.CustomThreshold} />
+
+## In a DataTable
+
+<Canvas of={Stories.InTable} />
+
+## Props
+
+<ArgTypes of={Stories} />
