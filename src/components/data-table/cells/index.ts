@@ -12,6 +12,11 @@ export {
 } from "./color-swatch-cell";
 export { CountCell, type CountCellProps } from "./count-cell";
 export { DateCell, type DateCellProps } from "./date-cell";
+export {
+	MenuCell,
+	type MenuCellAction,
+	type MenuCellProps,
+} from "./menu-cell";
 export { NumberCell, type NumberCellProps } from "./number-cell";
 export { SlugCell, type SlugCellProps } from "./slug-cell";
 export {
