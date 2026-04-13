@@ -34,12 +34,15 @@ export interface MenuCellProps {
 	menuThreshold?: number;
 	/** Override the default menu trigger icon (Ellipsis) */
 	menuIcon?: React.ElementType;
+	/** Accessible label for the menu trigger button. @default "Actions" */
+	triggerLabel?: string;
 }
 
 export const MenuCell: React.FC<MenuCellProps> = ({
 	actions,
 	menuThreshold = 1,
 	menuIcon: MenuIcon = Ellipsis,
+	triggerLabel = "Actions",
 }) => {
 	if (actions.length === 0) return null;
 
@@ -50,7 +53,7 @@ export const MenuCell: React.FC<MenuCellProps> = ({
 			<MenuRoot>
 				<MenuTrigger asChild>
 					<IconButton
-						aria-label="Actions"
+						aria-label={triggerLabel}
 						size="sm"
 						variant="ghost"
 						onClick={(e: React.MouseEvent) => e.stopPropagation()}
