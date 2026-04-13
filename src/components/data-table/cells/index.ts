@@ -12,6 +12,7 @@ export {
 } from "./color-swatch-cell";
 export { CountCell, type CountCellProps } from "./count-cell";
 export { DateCell, type DateCellProps } from "./date-cell";
+export { LinkCell, type LinkCellProps } from "./link-cell";
 export {
 	MenuCell,
 	type MenuCellAction,
