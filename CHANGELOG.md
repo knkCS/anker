@@ -2,6 +2,12 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] — 2026-04-30
+
+### Added
+
+- `<AuthCard>` — a layout primitive for centered-card auth screens (Login, Register, LoggedOut, etc.). Provides slots for logo, topbar-right content, eyebrow, title, subtitle, footer, and body. Two width presets (`md` 440px, `lg` 480px). Optional dot-grid background and topbar can be hidden for embedded or printable contexts.
+
 ## [1.0.0] — 2026-04-30
 
 First stable release. Adopts the refined design-system value set across all token layers.

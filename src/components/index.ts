@@ -1,3 +1,6 @@
+// AuthCard
+export type { AuthCardProps } from "./auth-card";
+export { AuthCard } from "./auth-card";
 // BulkActionBar
 export type {
 	BulkActionBarProps,
