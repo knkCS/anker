@@ -61,6 +61,7 @@ export function createAnkerTheme(preset?: ThemePreset) {
 	const fonts = {
 		heading: preset?.fonts?.heading ?? baseFonts.heading,
 		body: preset?.fonts?.body ?? baseFonts.body,
+		mono: preset?.fonts?.mono ?? baseFonts.mono,
 	};
 
 	const colors = preset?.colors
@@ -135,6 +136,7 @@ export function createAnkerTheme(preset?: ThemePreset) {
 				fonts: {
 					heading: { value: fonts.heading },
 					body: { value: fonts.body },
+					mono: { value: fonts.mono },
 				},
 				spacing: Object.fromEntries(
 					Object.entries(space).map(([k, v]) => [k, { value: v }]),

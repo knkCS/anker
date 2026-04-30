@@ -36,7 +36,7 @@ export interface ThemePreset {
 	>;
 
 	/** Override font families */
-	fonts?: { heading?: string; body?: string };
+	fonts?: { heading?: string; body?: string; mono?: string };
 
 	/** Override border radii */
 	radii?: Record<string, string>;
