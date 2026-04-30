@@ -161,50 +161,47 @@ const semanticTokens = {
 	shadows: {
 		xs: {
 			value: {
-				base: "0px 0px 1px rgba(45, 55, 72, 0.05), 0px 1px 2px rgba(45, 55, 72, 0.1)",
-				_dark:
-					"0px 0px 1px rgba(13, 14, 20, 1), 0px 1px 2px rgba(13, 14, 20, 0.9)",
+				base: "0 1px 2px rgba(0, 0, 0, 0.04)",
+				_dark: "0 1px 2px rgba(0, 0, 0, 0.4)",
 			},
 		},
 		sm: {
 			value: {
-				base: "0px 0px 1px rgba(45, 55, 72, 0.05), 0px 2px 4px rgba(45, 55, 72, 0.1)",
-				_dark:
-					"0px 0px 1px rgba(13, 14, 20, 1), 0px 2px 4px rgba(13, 14, 20, 0.9)",
+				base: "0 1px 2px rgba(0, 0, 0, 0.06)",
+				_dark: "0 1px 2px rgba(0, 0, 0, 0.5)",
 			},
 		},
 		md: {
 			value: {
-				base: "0px 0px 1px rgba(45, 55, 72, 0.05), 0px 4px 8px rgba(45, 55, 72, 0.1)",
+				base: "0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04)",
 				_dark:
-					"0px 0px 1px rgba(13, 14, 20, 1), 0px 4px 8px rgba(13, 14, 20, 0.9)",
+					"0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.3)",
 			},
 		},
 		lg: {
 			value: {
-				base: "0px 0px 1px rgba(45, 55, 72, 0.05), 0px 8px 16px rgba(45, 55, 72, 0.1)",
+				base: "0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04)",
 				_dark:
-					"0px 0px 1px rgba(13, 14, 20, 1), 0px 8px 16px rgba(13, 14, 20, 0.9)",
+					"0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.3)",
 			},
 		},
 		xl: {
 			value: {
-				base: "0px 0px 1px rgba(45, 55, 72, 0.05), 0px 16px 24px rgba(45, 55, 72, 0.1)",
+				base: "0 20px 25px -5px rgba(0, 0, 0, 0.10), 0 8px 10px -6px rgba(0, 0, 0, 0.04)",
 				_dark:
-					"0px 0px 1px rgba(13, 14, 20, 1), 0px 16px 24px rgba(13, 14, 20, 0.9)",
+					"0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.3)",
 			},
 		},
 		"2xl": {
 			value: {
-				base: "0px 0px 1px rgba(45, 55, 72, 0.04), 0px 24px 48px rgba(45, 55, 72, 0.12)",
-				_dark:
-					"0px 0px 1px rgba(13, 14, 20, 1), 0px 24px 48px rgba(13, 14, 20, 0.9)",
+				base: "0 25px 50px -12px rgba(0, 0, 0, 0.18)",
+				_dark: "0 25px 50px -12px rgba(0, 0, 0, 0.7)",
 			},
 		},
 		"focus-ring": {
 			value: {
-				base: "0 0 0 3px rgba(32, 135, 215, 0.4)",
-				_dark: "0 0 0 3px rgba(32, 135, 215, 0.6)",
+				base: "0 0 0 3px rgba(19, 71, 136, 0.18)",
+				_dark: "0 0 0 3px rgba(47, 111, 191, 0.4)",
 			},
 		},
 	},
