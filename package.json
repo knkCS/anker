@@ -37,7 +37,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "CLAUDE-ANKER.md"
   ],
   "scripts": {
     "dev": "storybook dev -p 6006",
