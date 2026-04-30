@@ -1,7 +1,13 @@
 // src/components/sidebar/sidebar.tsx
-import React, { useRef, useState } from "react";
+import React from "react";
 import { Button } from "../../atoms/button";
 import { Box, Flex } from "../../primitives/layout";
+import {
+	MenuContent,
+	MenuItem,
+	MenuRoot,
+	MenuTrigger,
+} from "../../primitives/menu";
 import { Heading, Text } from "../../primitives/typography";
 
 // Root
@@ -175,16 +181,13 @@ const SidebarItem = ({ icon, children, asChild, active }: SidebarItemProps) => {
 };
 SidebarItem.displayName = "Sidebar.Item";
 
-// UserMenu — simple state-based dropdown (avoids Zag/Ark state machine incompatibility in jsdom)
+// UserMenu
 export interface SidebarUserMenuProps {
 	user: { name?: string; email?: string };
 	children: React.ReactNode;
 }
 
 const SidebarUserMenu = ({ user, children }: SidebarUserMenuProps) => {
-	const [open, setOpen] = useState(false);
-	const containerRef = useRef<HTMLDivElement>(null);
-
 	const initials = (user.name ?? user.email ?? "")
 		.split(/\s+/)
 		.slice(0, 2)
@@ -192,69 +195,51 @@ const SidebarUserMenu = ({ user, children }: SidebarUserMenuProps) => {
 		.join("");
 
 	return (
-		<Box position="relative" ref={containerRef}>
-			<Button
-				data-testid="sidebar-user-menu-trigger"
-				variant="ghost"
-				size="md"
-				w="full"
-				justifyContent="flex-start"
-				px="2"
-				onClick={() => setOpen((v) => !v)}
-				aria-haspopup="menu"
-				aria-expanded={open}
-			>
-				<Flex align="center" gap="2" w="full">
-					<Flex
-						align="center"
-						justify="center"
-						w="32px"
-						h="32px"
-						borderRadius="full"
-						bg="primary.700"
-						color="white"
-						fontSize="xs"
-						fontWeight="semibold"
-						flexShrink={0}
-					>
-						{initials || "?"}
-					</Flex>
-					<Box textAlign="start" flex="1" minW="0">
-						<Text
-							fontSize="sm"
-							fontWeight="medium"
-							color="default"
-							lineClamp={1}
-						>
-							{user.name ?? user.email}
-						</Text>
-						{user.email && user.name && (
-							<Text fontSize="xs" color="muted" lineClamp={1}>
-								{user.email}
-							</Text>
-						)}
-					</Box>
-				</Flex>
-			</Button>
-			{open && (
-				<Box
-					role="menu"
-					position="absolute"
-					bottom="100%"
-					left="0"
-					right="0"
-					bg="bg-surface"
-					borderWidth="1px"
-					borderColor="border"
-					borderRadius="md"
-					shadow="md"
-					py="1"
-					zIndex="dropdown"
+		<MenuRoot>
+			<MenuTrigger asChild>
+				<Button
+					data-testid="sidebar-user-menu-trigger"
+					variant="ghost"
+					size="md"
+					w="full"
+					justifyContent="flex-start"
+					px="2"
 				>
-					{children}
-				</Box>
-			)}
-		</Box>
+					<Flex align="center" gap="2" w="full">
+						<Flex
+							align="center"
+							justify="center"
+							w="32px"
+							h="32px"
+							borderRadius="full"
+							bg="primary.700"
+							color="white"
+							fontSize="xs"
+							fontWeight="semibold"
+							flexShrink={0}
+						>
+							{initials || "?"}
+						</Flex>
+						<Box textAlign="start" flex="1" minW="0">
+							<Text
+								fontSize="sm"
+								fontWeight="medium"
+								color="default"
+								lineClamp={1}
+							>
+								{user.name ?? user.email}
+							</Text>
+							{user.email && user.name && (
+								<Text fontSize="xs" color="muted" lineClamp={1}>
+									{user.email}
+								</Text>
+							)}
+						</Box>
+					</Flex>
+				</Button>
+			</MenuTrigger>
+			<MenuContent portalled={false}>{children}</MenuContent>
+		</MenuRoot>
 	);
 };
 SidebarUserMenu.displayName = "Sidebar.UserMenu";
@@ -267,25 +252,25 @@ export interface SidebarUserMenuItemProps {
 }
 
 const SidebarUserMenuItem = ({
-	asChild: _asChild,
+	asChild,
 	onClick,
 	children,
 }: SidebarUserMenuItemProps) => {
+	if (asChild) {
+		const child = React.Children.only(children) as React.ReactElement;
+		return (
+			<MenuItem value="link" onClick={onClick}>
+				{React.cloneElement(child, {})}
+			</MenuItem>
+		);
+	}
 	return (
-		<Button
-			role="menuitem"
-			variant="ghost"
-			w="full"
-			justifyContent="flex-start"
-			px="3"
-			py="2"
-			fontSize="sm"
-			fontWeight="normal"
-			borderRadius="0"
+		<MenuItem
+			value={typeof children === "string" ? children : "item"}
 			onClick={onClick}
 		>
 			{children}
-		</Button>
+		</MenuItem>
 	);
 };
 SidebarUserMenuItem.displayName = "Sidebar.UserMenuItem";

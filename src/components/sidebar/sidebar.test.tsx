@@ -1,7 +1,6 @@
 // src/components/sidebar/sidebar.test.tsx
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Sidebar } from "./sidebar";
 
@@ -158,7 +157,6 @@ describe("Sidebar", () => {
 	});
 
 	it("opens the user menu on click and renders Sidebar.UserMenuItem children", async () => {
-		const user = userEvent.setup();
 		renderWithChakra(
 			<Sidebar>
 				<Sidebar.Body />
@@ -170,14 +168,13 @@ describe("Sidebar", () => {
 				</Sidebar.Footer>
 			</Sidebar>,
 		);
-		await user.click(screen.getByTestId("sidebar-user-menu-trigger"));
+		fireEvent.click(screen.getByTestId("sidebar-user-menu-trigger"));
 		expect(await screen.findByText("Personal Settings")).toBeInTheDocument();
 		expect(screen.getByText("Sign out")).toBeInTheDocument();
 	});
 
 	it("Sidebar.UserMenuItem onClick fires", async () => {
 		const onClick = vi.fn();
-		const user = userEvent.setup();
 		renderWithChakra(
 			<Sidebar>
 				<Sidebar.Body />
@@ -190,8 +187,8 @@ describe("Sidebar", () => {
 				</Sidebar.Footer>
 			</Sidebar>,
 		);
-		await user.click(screen.getByTestId("sidebar-user-menu-trigger"));
-		await user.click(await screen.findByText("Sign out"));
+		fireEvent.click(screen.getByTestId("sidebar-user-menu-trigger"));
+		fireEvent.click(await screen.findByText("Sign out"));
 		expect(onClick).toHaveBeenCalledOnce();
 	});
 });
