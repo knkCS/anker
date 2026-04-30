@@ -2,6 +2,15 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] — 2026-04-30
+
+### Added
+
+- `<Sidebar>` — compound primitive for the app shell sidebar (240px). Subcomponents: `Header`, `Logo`, `Slot`, `Body`, `Section`, `Item` (with `asChild` and `active`), `Footer`, `UserMenu`, `UserMenuItem`. Cross-product nav surface; consumers slot their own logo, org-switcher, language switcher, etc.
+- `<PageHeader>` — per-page imperative header with breadcrumbs, title, optional subtitle, optional eyebrow, and an actions slot.
+- `<Toolbar>` — compound primitive for list-page toolbars. Subcomponents: `Search`, `Filters`, `FilterChip` (with `active`), `Right`, `Count`. Pages compose what they need; bulk-action mode is the existing `<BulkActionBar>` (no changes).
+- `<ContextRail>` — collapsible right-rail chrome (44 ↔ 360px) with viewport-aware default and `localStorage` persistence via `storageKey`. Subcomponents `Header`, `Section`, `Footer` exported for consumer use.
+
 ## [1.1.0] — 2026-04-30
 
 ### Added
