@@ -54,6 +54,16 @@ import { InputField, ArrayField, FormField } from "@knkcs/anker/forms";
 import { ConfirmModalProvider, useConfirmModal } from "@knkcs/anker/feedback";
 ```
 
+## Using with Claude Code
+
+If your consumer project uses Claude Code, add this line to your root `CLAUDE.md` to import anker's design-system rules automatically:
+
+```
+@node_modules/@knkcs/anker/CLAUDE-ANKER.md
+```
+
+Claude will then follow anker's design principles, token rules, and component conventions when assisting with your code.
+
 ## Brand Colors
 
 The theme includes both **UI-optimized color scales** (primary, secondary, gray) and **exact brand guideline colors** from the knk Brand Guidelines (October 2021).
