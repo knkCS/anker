@@ -105,16 +105,16 @@ export const buttonTheme = defineRecipe({
 			// colorPalette="primary". This variant will be removed in a future
 			// major release.
 			primary: {
-				bg: "primary.500",
+				bg: "primary.700",
 				color: "white",
 				_hover: {
-					bg: "primary.600",
+					bg: "primary.800",
 					_disabled: {
-						bg: "primary.500",
+						bg: "primary.700",
 					},
 				},
 				_active: {
-					bg: "primary.700",
+					bg: "primary.900",
 				},
 			},
 
@@ -154,7 +154,7 @@ export const buttonTheme = defineRecipe({
 			ghost: {
 				_hover: {
 					bg: "transparent",
-					color: "primary.500",
+					color: "primary.700",
 				},
 				_active: {
 					bg: "gray.200",
