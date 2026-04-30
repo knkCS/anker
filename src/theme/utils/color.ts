@@ -6,7 +6,7 @@ type Dict = { [key: string]: unknown };
  * Get the color raw value from a theme/token dictionary.
  *
  * Supports both Chakra v3 system token structure (where tokens are wrapped in
- * `{ value: "..." }`) and flat color dictionaries (e.g., `{ primary: { 500: "#2087d7" } }`).
+ * `{ value: "..." }`) and flat color dictionaries (e.g., `{ primary: { 500: "#2f6fbf" } }`).
  *
  * @param theme - the theme or token object
  * @param color - the color path ("green.200")
