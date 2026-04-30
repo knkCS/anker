@@ -70,16 +70,17 @@ The theme includes both **UI-optimized color scales** (primary, secondary, gray)
 
 | Token | HEX | Use |
 |-------|-----|-----|
-| `primary.500` | `#2087d7` | UI blue — buttons, links, focus rings |
-| `secondary.500` | `#e9580c` | UI orange — matches brand orange |
-| `brand.blue` | `#004576` | Exact brand blue — logos, headers, branding |
-| `brand.navy` | `#0f395d` | Dark blue variant |
+| `primary.700` | `#134788` | **Action anchor** — buttons, links, focus rings (via the `accent` semantic token) |
+| `primary.800` | `#0f395d` | Hover on primary; equals `brand.navy` |
+| `secondary.600` | `#e9580c` | Brand orange anchor — reserved for branded moments, not standard CTAs |
+| `brand.blue` | `#004576` | Exact brand-guideline blue — logos, headers, branding |
+| `brand.navy` | `#0f395d` | Dark blue variant — equals `primary.800` |
 | `brand.light-blue` | `#6fa7d1` | Light blue variant |
-| `brand.orange` | `#e9580c` | Brand orange (same as secondary.500) |
+| `brand.orange` | `#e9580c` | Brand orange (same as `secondary.600`) |
 | `brand.gold` | `#f4b235` | Brand gold accent |
 | `brand.light-gray` | `#f2f2f2` | Brand neutral background |
 
-The UI primary blue intentionally differs from the brand guideline blue. The brand blue (`#004576`) is a deep navy designed for print materials; the UI blue (`#2087d7`) is brighter for web accessibility and matches the existing Core application.
+The UI primary anchor (`primary.700` = `#134788`) is intentionally one step lighter than the brand-guideline blue (`brand.blue` = `#004576`), which reads as too heavy as a CTA on white surfaces. The brand-guideline navy (`#0f395d`, `brand.navy`) lives at `primary.800` and is used for hover states on primary actions. See `docs/design-system.md` for the full palette and semantic-token reference.
 
 ## Notable Component Props
 
