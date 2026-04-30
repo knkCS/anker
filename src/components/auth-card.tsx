@@ -14,7 +14,11 @@ export interface AuthCardProps {
 	hideBackground?: boolean;
 	/** Small uppercase eyebrow above the title. */
 	eyebrow?: React.ReactNode;
-	/** Card title (h3, 24px, semibold, default color). */
+	/**
+	 * Card title. Accepts a string or inline element — the component wraps
+	 * it in an `<h3>` (semantic heading, 24px, semibold, default color).
+	 * Avoid passing block elements (e.g. `<div>`) or pre-built headings.
+	 */
 	title?: React.ReactNode;
 	/** Subtitle below title (14px, muted color, centered). */
 	subtitle?: React.ReactNode;
@@ -61,7 +65,7 @@ export const AuthCard = ({
 						justify="space-between"
 						px="8"
 						py="4"
-						bg="rgba(255,255,255,0.85)"
+						bg="bg-surface/85"
 						backdropFilter="blur(4px)"
 						borderBottom="1px solid"
 						borderColor="border"
@@ -111,7 +115,7 @@ export const AuthCard = ({
 							</Text>
 						)}
 
-						<Box>{children}</Box>
+						{children}
 
 						{footer && (
 							<Box
