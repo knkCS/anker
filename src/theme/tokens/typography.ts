@@ -79,4 +79,29 @@ export const textStyles = {
 		fontWeight: "semibold",
 		textTransform: "uppercase" as const,
 	},
+	bodyLg: {
+		fontSize: "lg",
+		fontWeight: "normal",
+		lineHeight: "1.5", // unitless multiplier — scales with fontSize
+	},
+	body: {
+		fontSize: "md",
+		fontWeight: "normal",
+		lineHeight: "1.5",
+	},
+	bodySm: {
+		fontSize: "sm",
+		fontWeight: "normal",
+		lineHeight: "1.45",
+	},
+	mono: {
+		fontFamily: "mono",
+		fontSize: "md",
+		lineHeight: "1.5",
+	},
+	monoSm: {
+		fontFamily: "mono",
+		fontSize: "xs",
+		lineHeight: "1.45",
+	},
 };
