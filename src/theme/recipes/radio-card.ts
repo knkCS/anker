@@ -12,10 +12,10 @@ export const radioCardTheme = defineRecipe({
 			borderColor: { base: "gray.300", _dark: "gray.600" },
 		},
 		_checked: {
-			borderColor: { base: "primary.500", _dark: "primary.200" },
+			borderColor: { base: "primary.700", _dark: "primary.300" },
 			boxShadow: {
-				base: "0px 0px 0px 1px var(--chakra-colors-primary-500)",
-				_dark: "0px 0px 0px 1px var(--chakra-colors-primary-200)",
+				base: "0px 0px 0px 1px var(--chakra-colors-primary-700)",
+				_dark: "0px 0px 0px 1px var(--chakra-colors-primary-300)",
 			},
 		},
 	},
