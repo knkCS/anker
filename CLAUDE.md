@@ -88,6 +88,10 @@ The knk Brand Guidelines (October 2021) define six brand colors. The theme inclu
 
 ## Patterns
 
+### Design System
+
+The full visual language — palettes, semantic tokens, typography, spacing, radii, motion — lives in `docs/design-system.md`. The token implementation lives in `src/theme/tokens/`. When making styling decisions, consult `docs/design-system.md` first; the rules in `CLAUDE-ANKER.md` (shipped to npm consumers) are a condensed version of the same source.
+
 ### Component File Structure
 
 Each component follows this pattern:
