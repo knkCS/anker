@@ -125,19 +125,19 @@ const semanticTokens = {
 			},
 			solid: {
 				value: {
-					base: "{colors.secondary.500}",
+					base: "{colors.secondary.600}",
 					_dark: "{colors.secondary.500}",
 				},
 			},
 			focusRing: {
 				value: {
-					base: "{colors.secondary.500}",
+					base: "{colors.secondary.600}",
 					_dark: "{colors.secondary.500}",
 				},
 			},
 			border: {
 				value: {
-					base: "{colors.secondary.500}",
+					base: "{colors.secondary.600}",
 					_dark: "{colors.secondary.400}",
 				},
 			},
