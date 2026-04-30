@@ -41,7 +41,7 @@ const semanticTokens = {
 			value: { base: "gray.200", _dark: "gray.700" },
 		},
 		accent: {
-			value: { base: "primary.500", _dark: "primary.200" },
+			value: { base: "primary.700", _dark: "primary.300" },
 		},
 		success: {
 			value: { base: "green.600", _dark: "green.200" },
@@ -79,19 +79,19 @@ const semanticTokens = {
 			},
 			solid: {
 				value: {
-					base: "{colors.primary.500}",
+					base: "{colors.primary.700}",
 					_dark: "{colors.primary.500}",
 				},
 			},
 			focusRing: {
 				value: {
-					base: "{colors.primary.500}",
+					base: "{colors.primary.700}",
 					_dark: "{colors.primary.500}",
 				},
 			},
 			border: {
 				value: {
-					base: "{colors.primary.500}",
+					base: "{colors.primary.700}",
 					_dark: "{colors.primary.400}",
 				},
 			},
@@ -143,12 +143,12 @@ const semanticTokens = {
 			},
 		},
 		// Accent surface tokens
-		"bg-accent": { value: { base: "primary.600", _dark: "primary.400" } },
+		"bg-accent": { value: { base: "primary.700", _dark: "primary.400" } },
 		"bg-accent-subtle": {
-			value: { base: "primary.500", _dark: "primary.500" },
+			value: { base: "primary.700", _dark: "primary.500" },
 		},
 		"bg-accent-muted": {
-			value: { base: "primary.400", _dark: "primary.600" },
+			value: { base: "primary.500", _dark: "primary.600" },
 		},
 		"on-accent": { value: { base: "white", _dark: "white" } },
 		"on-accent-muted": {
