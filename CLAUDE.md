@@ -69,8 +69,8 @@ npm run test         # Run tests
 
 The knk Brand Guidelines (October 2021) define six brand colors. The theme includes these as exact `brand.*` tokens (`brand.blue`, `brand.navy`, `brand.light-blue`, `brand.orange`, `brand.gold`, `brand.light-gray`) alongside the UI-optimized `primary`/`secondary`/`gray` scales.
 
-- **UI primary blue** (`primary.500: #2087d7`) is intentionally brighter than brand blue (`brand.blue: #004576`) for web accessibility
-- **UI secondary orange** (`secondary.500: #e9580c`) matches the brand orange exactly
+- **UI primary blue** is anchored at `primary.700: #134788` (used for action surfaces, links, focus rings via the `accent` semantic token). The brand-guideline navy `#0f395d` lives at `primary.800` (= `brand.navy`); the brand-guideline blue `#004576` (`brand.blue`) is intentionally NOT in the primary scale — it reads as too heavy as a CTA.
+- **UI secondary orange** is anchored at `secondary.600: #e9580c`, matching the brand orange exactly. Reserved for branded moments (empty states, onboarding) — not standard CTAs.
 - Use `brand.*` tokens for branding elements (logos, headers, about pages), use `primary.*`/`secondary.*` for interactive UI (buttons, links, focus rings)
 
 ## Design Principles
