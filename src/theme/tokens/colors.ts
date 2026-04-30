@@ -12,9 +12,11 @@
  * owned by anker (rather than inheriting Chakra's defaults), so consumers
  * get stable status colors regardless of Chakra version.
  *
- * NOTE: The brand-guideline blue (#004576) lives at `primary.800`. The
- * action anchor (`primary.700` = #134788) is one step lighter for web
- * legibility — the original navy is too heavy as a CTA.
+ * NOTE: `primary.800` (#0f395d) matches `brand.navy` exactly. The
+ * brand-guideline blue (`brand.blue` = #004576) is intentionally NOT in
+ * the `primary` scale — the action anchor (`primary.700` = #134788) is
+ * calibrated for web legibility instead, since #004576 reads as too
+ * heavy as a CTA on white surfaces.
  */
 const colors = {
 	primary: {
