@@ -42,7 +42,7 @@ const sampleData: SampleRow[] = [
 		code: "SELECT * FROM users WHERE id = 1;",
 		url: "https://example.com/page",
 		path: "/items/1",
-		color: "#2087d7",
+		color: "#134788",
 		amount: 1234567.89,
 		status: "published",
 		createdAt: "2025-11-15T10:30:00Z",

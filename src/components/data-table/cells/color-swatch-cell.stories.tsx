@@ -5,7 +5,7 @@ const meta = {
 	title: "Components/DataTable/Cells/ColorSwatchCell",
 	component: ColorSwatchCell,
 	args: {
-		value: "#2087d7",
+		value: "#134788",
 	},
 } satisfies Meta<typeof ColorSwatchCell>;
 
