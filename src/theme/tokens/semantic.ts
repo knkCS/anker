@@ -4,50 +4,54 @@
  * These map abstract names (bg-canvas, accent, border, etc.) to raw color
  * scale values, with automatic light/dark mode variants.
  *
- * Shadows are consolidated here from the legacy `foundations/shadows.ts`
- * (static strings) and `foundations/tokens.ts` (responsive token objects).
- * Only the token-based system is kept.
+ * Cross-token references must use {colors.X} brace syntax so Chakra v3
+ * emits them as `var(--chakra-colors-X)` references. Bare strings like
+ * `"gray.50"` are stored verbatim into the CSS custom property and yield
+ * invalid CSS at runtime.
  */
 const semanticTokens = {
 	colors: {
 		"bg-canvas": {
-			value: { base: "gray.50", _dark: "gray.900" },
+			value: { base: "{colors.gray.50}", _dark: "{colors.gray.900}" },
 		},
 		"bg-surface": {
-			value: { base: "white", _dark: "gray.800" },
+			value: { base: "{colors.white}", _dark: "{colors.gray.800}" },
 		},
 		"bg-subtle": {
-			value: { base: "gray.50", _dark: "gray.700" },
+			value: { base: "{colors.gray.50}", _dark: "{colors.gray.700}" },
 		},
 		"bg-muted": {
-			value: { base: "gray.100", _dark: "gray.600" },
+			value: { base: "{colors.gray.100}", _dark: "{colors.gray.600}" },
 		},
 		default: {
-			value: { base: "gray.900", _dark: "white" },
+			value: { base: "{colors.gray.900}", _dark: "{colors.white}" },
 		},
 		inverted: {
-			value: { base: "white", _dark: "gray.900" },
+			value: { base: "{colors.white}", _dark: "{colors.gray.900}" },
 		},
 		emphasized: {
-			value: { base: "gray.700", _dark: "gray.100" },
+			value: { base: "{colors.gray.700}", _dark: "{colors.gray.100}" },
 		},
 		muted: {
-			value: { base: "gray.600", _dark: "gray.300" },
+			value: { base: "{colors.gray.600}", _dark: "{colors.gray.300}" },
 		},
 		subtle: {
-			value: { base: "gray.500", _dark: "gray.400" },
+			value: { base: "{colors.gray.500}", _dark: "{colors.gray.400}" },
 		},
 		border: {
-			value: { base: "gray.200", _dark: "gray.700" },
+			value: { base: "{colors.gray.200}", _dark: "{colors.gray.700}" },
+		},
+		"border-muted": {
+			value: { base: "{colors.gray.100}", _dark: "{colors.gray.800}" },
 		},
 		accent: {
-			value: { base: "primary.700", _dark: "primary.300" },
+			value: { base: "{colors.primary.700}", _dark: "{colors.primary.300}" },
 		},
 		success: {
-			value: { base: "green.600", _dark: "green.200" },
+			value: { base: "{colors.green.600}", _dark: "{colors.green.200}" },
 		},
 		error: {
-			value: { base: "red.600", _dark: "red.200" },
+			value: { base: "{colors.red.600}", _dark: "{colors.red.200}" },
 		},
 		// Color palette tokens for colorPalette="primary" (required by Chakra v3
 		// for solid/subtle/outline/ghost button variants and other components)
@@ -147,19 +151,21 @@ const semanticTokens = {
 			},
 		},
 		// Accent surface tokens
-		"bg-accent": { value: { base: "primary.700", _dark: "primary.400" } },
+		"bg-accent": {
+			value: { base: "{colors.primary.700}", _dark: "{colors.primary.400}" },
+		},
 		"bg-accent-subtle": {
-			value: { base: "primary.700", _dark: "primary.500" },
+			value: { base: "{colors.primary.700}", _dark: "{colors.primary.500}" },
 		},
 		"bg-accent-muted": {
-			value: { base: "primary.500", _dark: "primary.600" },
+			value: { base: "{colors.primary.500}", _dark: "{colors.primary.600}" },
 		},
 		"on-accent": { value: { base: "white", _dark: "white" } },
 		"on-accent-muted": {
-			value: { base: "primary.50", _dark: "primary.100" },
+			value: { base: "{colors.primary.50}", _dark: "{colors.primary.100}" },
 		},
 		"on-accent-subtle": {
-			value: { base: "primary.100", _dark: "primary.200" },
+			value: { base: "{colors.primary.100}", _dark: "{colors.primary.200}" },
 		},
 	},
 	shadows: {

@@ -2,6 +2,17 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] — 2026-05-01
+
+### Fixed
+
+- **Semantic color tokens now resolve to CSS variables.** Every top-level token (`bg-canvas`, `bg-surface`, `bg-subtle`, `bg-muted`, `default`, `inverted`, `emphasized`, `muted`, `subtle`, `border`, `accent`, `success`, `error`, `bg-accent*`, `on-accent*`) was declared with bare scale strings like `"gray.50"`. Chakra v3 stored those verbatim into the emitted CSS variable, so `--chakra-colors-bg-canvas` evaluated to the literal text `gray.50` — invalid CSS. Consumer styles fell back to `transparent` (for `bg`) and `currentColor` (for `border`), making sidebars look white and borders look near-black. References are now wrapped as `{colors.gray.50}` so Chakra emits proper `var(--chakra-colors-gray-50)` references. Visual regression test added.
+- **`Sidebar.Item` now renders the `icon` prop when used with `asChild`.** The previous implementation computed `iconEl` but did not pass it as a child to `React.cloneElement`, so every `<Sidebar.Item asChild>` link rendered without its icon. Fixed by injecting `iconEl` as the first child while preserving the original child content. Test added.
+
+### Added
+
+- `border-muted` semantic token (`gray.100` / `gray.800`) — referenced by `Sidebar.Header` / `Sidebar.Footer` separators since 1.2.0 but never defined; previously fell back to `currentColor` (near-black).
+
 ## [1.2.0] — 2026-04-30
 
 ### Added
