@@ -127,6 +127,43 @@ describe("Sidebar", () => {
 		expect(link.textContent).toContain("Users");
 	});
 
+	it("Sidebar.Item asChild applies active styling as inline CSS variables", () => {
+		// Regression: prior versions passed Chakra prop shorthand (bg="primary.50",
+		// borderRadius="md", color="primary.700") through `style={...}`, which
+		// the browser silently dropped — active items were visually identical to
+		// inactive ones. Styles must be CSS-var references to survive inline.
+		renderWithChakra(
+			<Sidebar>
+				<Sidebar.Body>
+					<Sidebar.Section label="Identity">
+						<Sidebar.Item active asChild icon={<span>i</span>}>
+							<a href="/users" data-testid="active-link">
+								Users
+							</a>
+						</Sidebar.Item>
+						<Sidebar.Item asChild icon={<span>i</span>}>
+							<a href="/oauth" data-testid="inactive-link">
+								OAuth
+							</a>
+						</Sidebar.Item>
+					</Sidebar.Section>
+				</Sidebar.Body>
+			</Sidebar>,
+		);
+		const active = screen.getByTestId("active-link");
+		const inactive = screen.getByTestId("inactive-link");
+		// Active state: primary.700 color + bg-surface background + inset shadow
+		expect(active.style.color).toContain("var(--chakra-colors-primary-700)");
+		expect(active.style.background).toContain(
+			"var(--chakra-colors-bg-surface)",
+		);
+		expect(active.style.boxShadow).toContain("var(--chakra-colors-border)");
+		// Inactive: transparent bg, no shadow
+		expect(inactive.style.background).toBe("transparent");
+		expect(inactive.style.boxShadow).toBe("");
+		expect(inactive.style.color).toContain("var(--chakra-colors-default)");
+	});
+
 	it("Sidebar.Item active=true exposes data-active attribute", () => {
 		renderWithChakra(
 			<Sidebar>

@@ -2,6 +2,16 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.4.0] — 2026-05-01
+
+### Fixed
+
+- **`Sidebar.Item` active-state styling now actually applies under `asChild`.** Previously the styling object used Chakra prop shorthand (`bg="primary.50"`, `borderRadius="md"`, `color="primary.700"`, `px="3"` …) and was passed through `React.cloneElement(..., { style: ... })`. Browsers silently drop those properties — they only resolve through Chakra components, not as inline DOM CSS. Result: active and inactive nav items rendered visually identical, and inactive items lost their padding too. Style values are now plain CSS using Chakra's emitted CSS variables (`var(--chakra-colors-primary-700)`, `var(--chakra-spacing-3)`, `var(--chakra-radii-sm)`, …). Test added asserting the active link has primary.700 color, bg-surface background, and an inset border shadow as inline style.
+
+### Changed
+
+- **`Sidebar.Item` active appearance updated to match the design handoff.** Active background is now `bg-surface` (white) with an inset 1px border (`var(--chakra-colors-border)`) and a subtle drop shadow, replacing the previous flat `primary.50` chip. Adds a 3px × 14px rounded indicator pill in `primary.700` at the trailing edge of the row, matching the handoff spec.
+
 ## [1.3.0] — 2026-05-01
 
 ### Fixed

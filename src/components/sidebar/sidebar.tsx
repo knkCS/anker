@@ -126,35 +126,56 @@ export interface SidebarItemProps {
 }
 
 const SidebarItem = ({ icon, children, asChild, active }: SidebarItemProps) => {
-	const dataProps = {
-		"data-testid": "sidebar-item",
-		"data-active": active ? "true" : "false",
-	};
-
-	const styleProps = {
-		display: "flex" as const,
+	// Styles must be plain CSS so they survive `style={...}` inline styling on
+	// the cloned asChild element (e.g. <NavLink>). Chakra prop shorthand like
+	// `bg="primary.50"` or `borderRadius="md"` is silently dropped by the
+	// browser when applied as inline CSS — it only resolves through Chakra
+	// components. We reference Chakra's emitted CSS variables directly.
+	const itemStyle: React.CSSProperties = {
+		display: "flex",
 		alignItems: "center",
-		gap: "2",
-		px: "3",
-		py: "2",
-		borderRadius: "md",
-		fontSize: "sm",
-		fontWeight: "medium",
-		color: active ? "primary.700" : "default",
-		bg: active ? "primary.50" : "transparent",
-		position: "relative" as const,
+		gap: "var(--chakra-spacing-2)",
+		paddingInline: "var(--chakra-spacing-3)",
+		paddingBlock: "var(--chakra-spacing-2)",
+		borderRadius: "var(--chakra-radii-sm)",
+		fontSize: "var(--chakra-font-sizes-sm)",
+		fontWeight: active
+			? "var(--chakra-font-weights-medium)"
+			: "var(--chakra-font-weights-normal)",
+		color: active
+			? "var(--chakra-colors-primary-700)"
+			: "var(--chakra-colors-default)",
+		background: active ? "var(--chakra-colors-bg-surface)" : "transparent",
+		boxShadow: active
+			? "inset 0 0 0 1px var(--chakra-colors-border), 0 1px 2px rgba(0,0,0,0.04)"
+			: undefined,
+		position: "relative",
 		textDecoration: "none",
 	};
 
 	const iconEl = icon ? (
-		<Box display="inline-flex" alignItems="center">
+		<Box display="inline-flex" alignItems="center" flexShrink={0}>
 			{icon}
 		</Box>
 	) : null;
 
+	// Right-tab indicator on active items, matching the design handoff
+	// (3px × 14px primary.700 pill at the trailing edge of the row).
+	const activeTab = active ? (
+		<span
+			aria-hidden="true"
+			style={{
+				width: 3,
+				height: 14,
+				background: "var(--chakra-colors-primary-700)",
+				borderRadius: 999,
+				flexShrink: 0,
+				marginInlineStart: "auto",
+			}}
+		/>
+	) : null;
+
 	if (asChild) {
-		// Clone the single child, merging our style props and prepending the
-		// icon as the first rendered child while keeping the original content.
 		const child = React.Children.only(children) as React.ReactElement<
 			React.HTMLAttributes<HTMLElement> & {
 				href?: string;
@@ -168,19 +189,25 @@ const SidebarItem = ({ icon, children, asChild, active }: SidebarItemProps) => {
 			{
 				"data-active": active ? "true" : "false",
 				style: {
-					...styleProps,
+					...itemStyle,
 					...(child.props.style as React.CSSProperties | undefined),
 				},
 			},
 			iconEl,
 			child.props.children,
+			activeTab,
 		);
 	}
 
 	return (
-		<Box {...dataProps} {...styleProps}>
+		<Box
+			data-testid="sidebar-item"
+			data-active={active ? "true" : "false"}
+			style={itemStyle}
+		>
 			{iconEl}
 			{children}
+			{activeTab}
 		</Box>
 	);
 };
