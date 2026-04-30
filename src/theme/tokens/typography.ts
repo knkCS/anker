@@ -5,8 +5,9 @@
  * `foundations/text-styles.ts` into a single module.
  */
 export const fonts = {
-	heading: "InterVariable, -apple-system, system-ui, sans-serif",
-	body: "InterVariable, -apple-system, system-ui, sans-serif",
+	heading: "'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif",
+	body: "'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif",
+	mono: "'JetBrains Mono', ui-monospace, SFMono-Regular, monospace",
 };
 
 export const textStyles = {
