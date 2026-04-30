@@ -21,6 +21,13 @@ export { CardListItem } from "./card-list-item";
 // ChipPicker
 export type { ChipPickerProps } from "./chip-picker";
 export { ChipPicker } from "./chip-picker";
+// ContextRail
+export type {
+	ContextRailHeaderProps,
+	ContextRailProps,
+	ContextRailSectionProps,
+} from "./context-rail/context-rail";
+export { ContextRail } from "./context-rail/context-rail";
 // DataTable + DataTable Cells
 export type {
 	ActionCellAction,
@@ -76,6 +83,9 @@ export { LabeledSwitch } from "./labeled-switch";
 // Modal
 export type { ModalProps } from "./modal";
 export { Modal } from "./modal";
+// PageHeader
+export type { PageHeaderBreadcrumb, PageHeaderProps } from "./page-header";
+export { PageHeader } from "./page-header";
 // Pagination
 export type { PaginationProps } from "./pagination";
 export { Pagination } from "./pagination";
@@ -87,6 +97,16 @@ export type {
 	SelectableCardThumbnailProps,
 } from "./selectable-card";
 export { SelectableCard } from "./selectable-card";
+// Sidebar (compound)
+export type {
+	SidebarItemProps,
+	SidebarLogoProps,
+	SidebarProps,
+	SidebarSectionProps as SidebarNavSectionProps,
+	SidebarUserMenuItemProps,
+	SidebarUserMenuProps,
+} from "./sidebar/sidebar";
+export { Sidebar } from "./sidebar/sidebar";
 // SidebarSection
 export type { SidebarSectionProps } from "./sidebar-section";
 export { SidebarSection } from "./sidebar-section";
@@ -139,6 +159,12 @@ export {
 	TimelineSeparator,
 	TimelineTitle,
 } from "./timeline";
+// Toolbar (compound)
+export type {
+	ToolbarFilterChipProps,
+	ToolbarSearchProps,
+} from "./toolbar";
+export { Toolbar } from "./toolbar";
 // TreeView
 export type {
 	TreeCollection,
