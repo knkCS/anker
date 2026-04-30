@@ -107,6 +107,26 @@ describe("Sidebar", () => {
 		expect(link.getAttribute("href")).toBe("/users");
 	});
 
+	it("Sidebar.Item asChild renders the icon inside the cloned element", () => {
+		renderWithChakra(
+			<Sidebar>
+				<Sidebar.Body>
+					<Sidebar.Section label="Identity">
+						<Sidebar.Item asChild icon={<span data-testid="nav-icon">i</span>}>
+							<a href="/users" data-testid="link">
+								Users
+							</a>
+						</Sidebar.Item>
+					</Sidebar.Section>
+				</Sidebar.Body>
+			</Sidebar>,
+		);
+		const link = screen.getByTestId("link");
+		const icon = screen.getByTestId("nav-icon");
+		expect(link).toContainElement(icon);
+		expect(link.textContent).toContain("Users");
+	});
+
 	it("Sidebar.Item active=true exposes data-active attribute", () => {
 		renderWithChakra(
 			<Sidebar>

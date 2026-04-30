@@ -153,23 +153,28 @@ const SidebarItem = ({ icon, children, asChild, active }: SidebarItemProps) => {
 	) : null;
 
 	if (asChild) {
-		// Clone the single child, merging our style props onto it.
-		// We do NOT override data-testid — the child's own props win.
-		// We set data-active from our side.
+		// Clone the single child, merging our style props and prepending the
+		// icon as the first rendered child while keeping the original content.
 		const child = React.Children.only(children) as React.ReactElement<
 			React.HTMLAttributes<HTMLElement> & {
 				href?: string;
 				"data-testid"?: string;
 				"data-active"?: string;
+				children?: React.ReactNode;
 			}
 		>;
-		return React.cloneElement(child, {
-			"data-active": active ? "true" : "false",
-			style: {
-				...styleProps,
-				...(child.props.style as React.CSSProperties | undefined),
+		return React.cloneElement(
+			child,
+			{
+				"data-active": active ? "true" : "false",
+				style: {
+					...styleProps,
+					...(child.props.style as React.CSSProperties | undefined),
+				},
 			},
-		});
+			iconEl,
+			child.props.children,
+		);
 	}
 
 	return (
