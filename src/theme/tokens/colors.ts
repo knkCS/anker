@@ -13,17 +13,17 @@
  */
 const colors = {
 	primary: {
-		"50": { value: "#f1f7fe" },
-		"100": { value: "#e2effc" },
-		"200": { value: "#bfddf8" },
-		"300": { value: "#87c1f2" },
-		"400": { value: "#48a3e8" },
-		"500": { value: "#2087d7" },
-		"600": { value: "#126ab7" },
-		"700": { value: "#105595" },
-		"800": { value: "#11497b" },
-		"900": { value: "#143e66" },
-		"950": { value: "#0d2744" },
+		"50": { value: "#eff6fc" },
+		"100": { value: "#d9eafa" },
+		"200": { value: "#b8d6f5" },
+		"300": { value: "#88baeb" },
+		"400": { value: "#5995dc" },
+		"500": { value: "#2f6fbf" },
+		"600": { value: "#1c5aa8" },
+		"700": { value: "#134788" },
+		"800": { value: "#0f395d" },
+		"900": { value: "#0a2740" },
+		"950": { value: "#061a2c" },
 	},
 	secondary: {
 		"50": { value: "#FEF0E6" },
