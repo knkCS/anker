@@ -47,7 +47,7 @@ export default defineSlotRecipe({
 		treeItemIcon: {
 			width: "45px",
 			height: "22px",
-			color: "primary.600",
+			color: "primary.700",
 			"&[aria-leaf=true],&[data-leaf]": {
 				color: "gray.400",
 			},

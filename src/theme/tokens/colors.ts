@@ -1,41 +1,49 @@
 /**
  * Raw color scales for the design system.
  *
- * `primary` is the UI blue (optimized for web contrast/readability),
- * `secondary` is the brand orange (anchored to brand guideline #e9580c),
- * `gray` is a blue-tinted gray scale, and `brand` contains the exact
- * hex values from the knk Brand Guidelines (October 2021) for use in
- * branding elements like headers, logos, and about pages.
+ * `primary` is the UI blue (anchored at step 700 = #134788 — used for
+ * action surfaces, links, focus rings). `secondary` is the brand orange
+ * (anchored at step 600 = #e9580c — matches the brand guideline exactly).
+ * `gray` is a blue-tinted neutral scale (~80% of UI pixels). `brand`
+ * contains the exact hex values from the knk Brand Guidelines (October
+ * 2021) for branding contexts like logos, headers, and about pages.
  *
- * NOTE: The primary UI blue (#2087d7) intentionally differs from the brand
- * guideline blue (#004576). The brand blue is a deep navy designed for print;
- * the UI blue is brighter for web accessibility and matches the existing Core app.
+ * `success`, `warning`, `danger`, `info` are explicit status palettes
+ * owned by anker (rather than inheriting Chakra's defaults), so consumers
+ * get stable status colors regardless of Chakra version.
+ *
+ * NOTE: `primary.800` (#0f395d) matches `brand.navy` exactly. The
+ * brand-guideline blue (`brand.blue` = #004576) is intentionally NOT in
+ * the `primary` scale — the action anchor (`primary.700` = #134788) is
+ * calibrated for web legibility instead, since #004576 reads as too
+ * heavy as a CTA on white surfaces.
  */
 const colors = {
 	primary: {
-		"50": { value: "#f1f7fe" },
-		"100": { value: "#e2effc" },
-		"200": { value: "#bfddf8" },
-		"300": { value: "#87c1f2" },
-		"400": { value: "#48a3e8" },
-		"500": { value: "#2087d7" },
-		"600": { value: "#126ab7" },
-		"700": { value: "#105595" },
-		"800": { value: "#11497b" },
-		"900": { value: "#143e66" },
-		"950": { value: "#0d2744" },
+		"50": { value: "#eff6fc" },
+		"100": { value: "#d9eafa" },
+		"200": { value: "#b8d6f5" },
+		"300": { value: "#88baeb" },
+		"400": { value: "#5995dc" },
+		"500": { value: "#2f6fbf" },
+		"600": { value: "#1c5aa8" },
+		"700": { value: "#134788" },
+		"800": { value: "#0f395d" },
+		"900": { value: "#0a2740" },
+		"950": { value: "#061a2c" },
 	},
 	secondary: {
-		"50": { value: "#FEF0E6" },
-		"100": { value: "#FCD9BF" },
-		"200": { value: "#F9B888" },
-		"300": { value: "#F59651" },
-		"400": { value: "#F27726" },
-		"500": { value: "#e9580c" },
-		"600": { value: "#C54A0A" },
-		"700": { value: "#9A3A08" },
-		"800": { value: "#6F2A06" },
-		"900": { value: "#441A03" },
+		"50": { value: "#fff5ed" },
+		"100": { value: "#ffe6d4" },
+		"200": { value: "#ffc8a8" },
+		"300": { value: "#ffa170" },
+		"400": { value: "#ff7c41" },
+		"500": { value: "#f25f1c" },
+		"600": { value: "#e9580c" },
+		"700": { value: "#b73806" },
+		"800": { value: "#912e0d" },
+		"900": { value: "#762a0e" },
+		"950": { value: "#411208" },
 	},
 	// Exact brand guideline colors for branding elements (headers, logos, about pages).
 	// See: knk Brand Guidelines, October 2021
@@ -59,6 +67,35 @@ const colors = {
 		"700": { value: "#334155" },
 		"800": { value: "#1e293b" },
 		"900": { value: "#0f172a" },
+		"950": { value: "#020617" },
+	},
+	success: {
+		"50": { value: "#ecfdf5" },
+		"100": { value: "#d1fae5" },
+		"500": { value: "#10b981" },
+		"600": { value: "#059669" },
+		"700": { value: "#047857" },
+	},
+	warning: {
+		"50": { value: "#fffbeb" },
+		"100": { value: "#fef3c7" },
+		"500": { value: "#f59e0b" },
+		"600": { value: "#d97706" },
+		"700": { value: "#b45309" },
+	},
+	danger: {
+		"50": { value: "#fef2f2" },
+		"100": { value: "#fee2e2" },
+		"500": { value: "#ef4444" },
+		"600": { value: "#dc2626" },
+		"700": { value: "#b91c1c" },
+	},
+	info: {
+		"50": { value: "#eff6fc" },
+		"100": { value: "#d9eafa" },
+		"500": { value: "#2f6fbf" },
+		"600": { value: "#1c5aa8" },
+		"700": { value: "#134788" },
 	},
 };
 

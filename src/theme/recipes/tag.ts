@@ -12,7 +12,7 @@ export const tagTheme = defineRecipe({
 			outlineOffset: "2px",
 			outlineWidth: "2px",
 			outlineStyle: "solid",
-			outlineColor: "primary.600",
+			outlineColor: "primary.700",
 		},
 		_disabled: {
 			opacity: 0.4,
@@ -55,7 +55,7 @@ export const tagTheme = defineRecipe({
 			ghost: {
 				_hover: {
 					bg: "transparent",
-					color: "primary.500",
+					color: "primary.700",
 				},
 				_active: {
 					bg: "transparent",

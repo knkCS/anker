@@ -15,8 +15,8 @@ export const inputSlotRecipe = defineSlotRecipe({
 					bg: { base: "white", _dark: "gray.800" },
 					_hover: { borderColor: { base: "gray.300", _dark: "gray.600" } },
 					_focus: {
-						borderColor: { base: "primary.500", _dark: "primary.200" },
-						boxShadow: "0px 0px 0px 1px var(--chakra-colors-primary-500)",
+						borderColor: { base: "primary.700", _dark: "primary.300" },
+						boxShadow: "0px 0px 0px 1px var(--chakra-colors-primary-700)",
 					},
 				},
 				addon: {
@@ -63,16 +63,16 @@ export const inputSlotRecipe = defineSlotRecipe({
 					boxShadow: "none",
 					padding: 0,
 					minHeight: "auto",
-					color: "primary.500",
+					color: "primary.700",
 					textDecoration: "underline",
 					cursor: "pointer",
 					_hover: {
-						color: "primary.600",
+						color: "primary.800",
 						textDecoration: "underline",
 					},
 					_focus: {
 						boxShadow: "none",
-						color: "primary.600",
+						color: "primary.800",
 					},
 				},
 			},

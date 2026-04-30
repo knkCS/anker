@@ -70,9 +70,9 @@ export const buttonTheme = defineRecipe({
     },
     variant: {
       primary: {
-        bg: "primary.500",
+        bg: "primary.700",
         color: "white",
-        _hover: { bg: "primary.600" },
+        _hover: { bg: "primary.800" },
       },
       secondary: {
         bg: { base: "white", _dark: "gray.800" },
@@ -80,7 +80,7 @@ export const buttonTheme = defineRecipe({
         borderColor: "gray.200",
       },
       ghost: {
-        _hover: { bg: "transparent", color: "primary.500" },
+        _hover: { bg: "transparent", color: "primary.700" },
       },
     },
   },
@@ -166,17 +166,20 @@ const styles = useStyles();
 
 ### Color scales
 
-**primary** (UI blue — `#2087d7` at 500, brighter than brand blue for web accessibility):
-50 `#f1f7fe` · 100 `#e2effc` · 200 `#bfddf8` · 300 `#87c1f2` · 400 `#48a3e8` · 500 `#2087d7` · 600 `#126ab7` · 700 `#105595` · 800 `#11497b` · 900 `#143e66` · 950 `#0d2744`
+**primary** (UI blue — anchored at `#134788` at step 700; the action color across the system, exposed via the `accent` semantic token):
+50 `#eff6fc` · 100 `#d9eafa` · 200 `#b8d6f5` · 300 `#88baeb` · 400 `#5995dc` · 500 `#2f6fbf` · 600 `#1c5aa8` · **700 `#134788`** · 800 `#0f395d` · 900 `#0a2740` · 950 `#061a2c`
 
-**secondary** (brand orange — matches brand guideline `#e9580c`):
-50 `#FEF0E6` · 100 `#FCD9BF` · 200 `#F9B888` · 300 `#F59651` · 400 `#F27726` · 500 `#e9580c` · 600 `#C54A0A` · 700 `#9A3A08` · 800 `#6F2A06` · 900 `#441A03`
+**secondary** (brand orange — anchored at `#e9580c` at step 600; reserved for branded moments, not standard CTAs):
+50 `#fff5ed` · 100 `#ffe6d4` · 200 `#ffc8a8` · 300 `#ffa170` · 400 `#ff7c41` · 500 `#f25f1c` · **600 `#e9580c`** · 700 `#b73806` · 800 `#912e0d` · 900 `#762a0e` · 950 `#411208`
 
-**gray** (blue-tinted):
-50 `#f8fafc` · 100 `#f1f5f9` · 200 `#e2e8f0` · 300 `#cbd5e1` · 400 `#94a3b8` · 500 `#64748b` · 600 `#475569` · 700 `#334155` · 800 `#1e293b` · 900 `#0f172a`
+**gray** (blue-tinted, the workhorse — ~80% of UI pixels):
+50 `#f8fafc` · 100 `#f1f5f9` · 200 `#e2e8f0` · 300 `#cbd5e1` · 400 `#94a3b8` · 500 `#64748b` · 600 `#475569` · 700 `#334155` · 800 `#1e293b` · 900 `#0f172a` · 950 `#020617`
 
 **brand** (exact knk Brand Guidelines, October 2021 — use for logos, headers, about pages):
-blue `#004576` · navy `#0f395d` · light-blue `#6fa7d1` · orange `#e9580c` · gold `#f4b235` · light-gray `#f2f2f2`
+blue `#004576` · navy `#0f395d` (= `primary.800`) · light-blue `#6fa7d1` · orange `#e9580c` (= `secondary.600`) · gold `#f4b235` · light-gray `#f2f2f2`
+
+**Status palettes** (anker-owned 5-step subsets — `50/100/500/600/700`):
+`success` (greens) · `warning` (ambers) · `danger` (reds) · `info` (matches the primary blue scale; `info.700` = `primary.700`)
 
 ### Semantic color tokens
 
@@ -192,27 +195,31 @@ blue `#004576` · navy `#0f395d` · light-blue `#6fa7d1` · orange `#e9580c` · 
 | `muted` | `gray.600` | `gray.300` | Muted text |
 | `subtle` | `gray.500` | `gray.400` | Subtle text |
 | `border` | `gray.200` | `gray.700` | Default borders |
-| `accent` | `primary.500` | `primary.200` | Accent color |
+| `accent` | `primary.700` | `primary.300` | Accent color (action) |
 | `success` | `green.600` | `green.200` | Success indicators |
 | `error` | `red.600` | `red.200` | Error indicators |
 
-**Accent surface tokens** (static, no dark variant):
-`bg-accent` (`primary.600`) · `bg-accent-subtle` (`primary.500`) · `bg-accent-muted` (`primary.400`) · `on-accent` (`white`) · `on-accent-muted` (`primary.50`) · `on-accent-subtle` (`primary.100`)
+**Accent surface tokens:**
+`bg-accent` (`primary.700` light / `primary.400` dark) · `bg-accent-subtle` (`primary.700` light / `primary.500` dark) · `bg-accent-muted` (`primary.500` light / `primary.600` dark) · `on-accent` (`white`) · `on-accent-muted` (`primary.50`) · `on-accent-subtle` (`primary.100`)
+
+Note: `primary.solid` and `primary.focusRing` use `primary.700` in light and `primary.500` in dark — this asymmetry is intentional (see `src/theme/tokens/semantic.ts` and `docs/design-system.md` §3.1). Do not "fix" it back to symmetry.
 
 **Color palette tokens** (per-palette, used by components with `colorPalette` prop):
 `{palette}.contrast` · `{palette}.fg` · `{palette}.subtle` · `{palette}.muted` · `{palette}.emphasized` · `{palette}.solid` · `{palette}.focusRing` · `{palette}.border`
 
 ### Shadow tokens
 
-All shadows have light/dark variants. Pattern: ambient + key shadow.
+All shadows have light/dark variants. Refined as of 1.0 — softer rgba(0,0,0,…) values; dark-mode alphas raised to remain visible on dark surfaces.
 
 | Token | Light |
 |---|---|
-| `xs` | `0px 0px 1px rgba(45, 55, 72, 0.05), 0px 1px 2px rgba(45, 55, 72, 0.1)` |
-| `sm` | `0px 0px 1px rgba(45, 55, 72, 0.05), 0px 2px 4px rgba(45, 55, 72, 0.1)` |
-| `md` | `0px 0px 1px rgba(45, 55, 72, 0.05), 0px 4px 8px rgba(45, 55, 72, 0.1)` |
-| `lg` | `0px 0px 1px rgba(45, 55, 72, 0.05), 0px 8px 16px rgba(45, 55, 72, 0.1)` |
-| `xl` | `0px 0px 1px rgba(45, 55, 72, 0.05), 0px 16px 24px rgba(45, 55, 72, 0.1)` |
+| `xs` | `0 1px 2px rgba(0, 0, 0, 0.04)` |
+| `sm` | `0 1px 2px rgba(0, 0, 0, 0.06)` |
+| `md` | `0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04)` |
+| `lg` | `0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04)` |
+| `xl` | `0 20px 25px -5px rgba(0, 0, 0, 0.10), 0 8px 10px -6px rgba(0, 0, 0, 0.04)` |
+| `2xl` | `0 25px 50px -12px rgba(0, 0, 0, 0.18)` |
+| `focus-ring` | `0 0 0 3px rgba(19, 71, 136, 0.18)` (primary.700 at 18% alpha) |
 
 ### Opacity tokens
 
@@ -224,7 +231,7 @@ All shadows have light/dark variants. Pattern: ambient + key shadow.
 
 ### Border radii
 
-`sm` → `0.375rem` · `md` → `0.5rem` · `lg` → `0.75rem` · `xl` → `1rem` · `2xl` → `1.25rem`
+`sm` → `0.25rem` (4px) · `md` → `0.375rem` (6px) · `lg` → `0.5rem` (8px) · `xl` → `0.75rem` (12px) · `2xl` → `1rem` (16px). Default radius for buttons, inputs, and small cards is `md`.
 
 ### Z-index scale
 
@@ -238,9 +245,13 @@ All shadows have light/dark variants. Pattern: ambient + key shadow.
 
 ### Typography
 
-**Font family:** `InterVariable, -apple-system, system-ui, sans-serif` (both heading and body)
+**Font families** (consumers load via Google Fonts — anker ships only the stack, not the font files):
+- `heading` / `body`: `'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif`
+- `mono`: `'JetBrains Mono', ui-monospace, SFMono-Regular, monospace`
 
-**Text styles:** `7xl` through `xs` — each defines `fontSize`, `lineHeight`, and optional `letterSpacing` (negative tracking on 4xl+)
+**Text styles:**
+- Numeric scale: `7xl` through `xs` — `fontSize` + `lineHeight` (+ negative `letterSpacing` on 4xl+)
+- Named: `display`, `bodyLg`, `body`, `bodySm`, `caption`, `overline`, `mono`, `monoSm` — see `src/theme/tokens/typography.ts`
 
 ## Dark Mode
 

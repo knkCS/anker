@@ -5,8 +5,9 @@
  * `foundations/text-styles.ts` into a single module.
  */
 export const fonts = {
-	heading: "InterVariable, -apple-system, system-ui, sans-serif",
-	body: "InterVariable, -apple-system, system-ui, sans-serif",
+	heading: "'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif",
+	body: "'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif",
+	mono: "'JetBrains Mono', ui-monospace, SFMono-Regular, monospace",
 };
 
 export const textStyles = {
@@ -77,5 +78,30 @@ export const textStyles = {
 		letterSpacing: "0.08em",
 		fontWeight: "semibold",
 		textTransform: "uppercase" as const,
+	},
+	bodyLg: {
+		fontSize: "lg",
+		fontWeight: "normal",
+		lineHeight: "1.5", // unitless multiplier — scales with fontSize
+	},
+	body: {
+		fontSize: "md",
+		fontWeight: "normal",
+		lineHeight: "1.5",
+	},
+	bodySm: {
+		fontSize: "sm",
+		fontWeight: "normal",
+		lineHeight: "1.45",
+	},
+	mono: {
+		fontFamily: "mono",
+		fontSize: "md",
+		lineHeight: "1.5",
+	},
+	monoSm: {
+		fontFamily: "mono",
+		fontSize: "xs",
+		lineHeight: "1.45",
 	},
 };

@@ -69,7 +69,7 @@ const projects = [
 		name: "CMS Core Migration",
 		progress: 82,
 		status: "In Progress",
-		color: "#2087d7",
+		color: "#134788",
 	},
 	{
 		name: "Design System Rollout",
@@ -81,7 +81,7 @@ const projects = [
 		name: "API Gateway Upgrade",
 		progress: 47,
 		status: "In Progress",
-		color: "#2087d7",
+		color: "#134788",
 	},
 	{ name: "Security Audit", progress: 15, status: "Blocked", color: "#e9580c" },
 ];
@@ -101,7 +101,7 @@ const activities = [
 		icon: <Users size={16} />,
 		description: "3 new users joined the team",
 		timeAgo: "14 min ago",
-		iconColor: "#2087d7",
+		iconColor: "#134788",
 	},
 	{
 		icon: <AlertTriangle size={16} />,
