@@ -77,6 +77,10 @@ const semanticTokens = {
 					_dark: "{colors.primary.700}",
 				},
 			},
+			// solid + focusRing intentionally keep dark at step 500 (not 700)
+			// so the action color stays visible on dark canvas. This breaks the
+			// "same step both modes" pattern that held before the 1.0 anchor
+			// shift. Do not "fix" the asymmetry — see design-system spec §5.2.
 			solid: {
 				value: {
 					base: "{colors.primary.700}",
