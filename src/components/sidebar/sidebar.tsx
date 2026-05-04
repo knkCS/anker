@@ -1,6 +1,7 @@
 // src/components/sidebar/sidebar.tsx
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button, IconButton } from "../../atoms/button";
 import { Box, Flex } from "../../primitives/layout";
 import {
@@ -277,22 +278,22 @@ const SidebarItem = ({
 	// Right-tab indicator on active items, matching the design handoff
 	// (3px × 14px primary.700 pill at the trailing edge of the row).
 	// Hidden when collapsed (no room).
-	const activeTab = active && !collapsed ? (
-		<span
-			aria-hidden="true"
-			style={{
-				width: 3,
-				height: 14,
-				background: "var(--chakra-colors-primary-700)",
-				borderRadius: 999,
-				flexShrink: 0,
-				marginInlineStart: "auto",
-			}}
-		/>
-	) : null;
+	const activeTab =
+		active && !collapsed ? (
+			<span
+				aria-hidden="true"
+				style={{
+					width: 3,
+					height: 14,
+					background: "var(--chakra-colors-primary-700)",
+					borderRadius: 999,
+					flexShrink: 0,
+					marginInlineStart: "auto",
+				}}
+			/>
+		) : null;
 
-	const tooltipLabel =
-		label || (typeof children === "string" ? children : "");
+	const tooltipLabel = label || (typeof children === "string" ? children : "");
 
 	const wrapTooltip = (node: React.ReactElement) =>
 		collapsed && tooltipLabel ? (

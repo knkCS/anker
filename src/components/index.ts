@@ -106,7 +106,7 @@ export type {
 	SidebarUserMenuItemProps,
 	SidebarUserMenuProps,
 } from "./sidebar/sidebar";
-export { Sidebar } from "./sidebar/sidebar";
+export { Sidebar, useSidebarContext } from "./sidebar/sidebar";
 // SidebarSection
 export type { SidebarSectionProps } from "./sidebar-section";
 export { SidebarSection } from "./sidebar-section";

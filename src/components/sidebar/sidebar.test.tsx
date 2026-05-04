@@ -414,7 +414,10 @@ describe("Sidebar", () => {
 			<Sidebar defaultCollapsed>
 				<Sidebar.Body>
 					<Sidebar.Section label="Identity">
-						<Sidebar.Item icon={<span data-testid="icon">i</span>} label="Users">
+						<Sidebar.Item
+							icon={<span data-testid="icon">i</span>}
+							label="Users"
+						>
 							Users
 						</Sidebar.Item>
 					</Sidebar.Section>
@@ -441,7 +444,9 @@ describe("Sidebar", () => {
 			<Sidebar defaultCollapsed>
 				<Sidebar.Body />
 				<Sidebar.Footer>
-					<Sidebar.UserMenu user={{ name: "Jana Schmid", email: "jana@knk.de" }}>
+					<Sidebar.UserMenu
+						user={{ name: "Jana Schmid", email: "jana@knk.de" }}
+					>
 						<Sidebar.UserMenuItem>Sign out</Sidebar.UserMenuItem>
 					</Sidebar.UserMenu>
 				</Sidebar.Footer>

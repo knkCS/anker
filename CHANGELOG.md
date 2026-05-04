@@ -2,6 +2,14 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.8.0] — 2026-05-04
+
+### Added
+
+- `<Sidebar>` becomes collapsible. New props `storageKey?: string` and `defaultCollapsed?: boolean` mirror the `<ContextRail>` API. Toggle button in the top-right of the sidebar; viewport `< 1440px` collapses by default; localStorage persistence via `storageKey`. Collapsed width 64px (icon rail), expanded 240px.
+- Subcomponents adapt automatically: `<Sidebar.Logo>` shows first-letter only, `<Sidebar.Section>` hides its label, `<Sidebar.Item>` becomes icon-only with hover tooltip (new optional `label?: string` prop overrides the tooltip text), `<Sidebar.UserMenu>` shows avatar-only.
+- New `useSidebarContext()` hook (`{ collapsed, toggle }`) so consumer-rendered children inside `<Sidebar.Slot>` can render compact variants.
+
 ## [1.7.0] — 2026-05-04
 
 ### Changed
