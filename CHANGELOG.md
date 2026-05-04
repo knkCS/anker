@@ -2,6 +2,13 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.6.0] — 2026-05-04
+
+### Added
+
+- `<ContextRail.Section>` is now collapsible. New `defaultOpen?: boolean` prop (default `true`) and `action?: ReactNode` slot rendered next to the title. Clicking the section header toggles open/closed; clicking inside the `action` slot does not toggle. Section root gains a 1px bottom border in `border-muted` to match the design handoff. Header is a real button with `aria-expanded`; the chevron icon rotates 90° when open.
+- `<ContextRail.Header>` gains a 1px bottom border in `border` to visually separate it from the first section.
+
 ## [1.5.0] — 2026-05-04
 
 ### Fixed
