@@ -32,7 +32,7 @@ SidebarRoot.displayName = "Sidebar";
 
 // Header / Body / Footer
 const SidebarHeader = ({ children }: { children: React.ReactNode }) => (
-	<Box p="4" borderBottomWidth="1px" borderBottomColor="border-muted">
+	<Box p="4" borderBottomWidth="1px" borderBottomColor="border">
 		{children}
 	</Box>
 );
@@ -46,7 +46,7 @@ const SidebarBody = ({ children }: { children?: React.ReactNode }) => (
 SidebarBody.displayName = "Sidebar.Body";
 
 const SidebarFooter = ({ children }: { children: React.ReactNode }) => (
-	<Box p="3" borderTopWidth="1px" borderTopColor="border-muted">
+	<Box p="3" borderTopWidth="1px" borderTopColor="border">
 		{children}
 	</Box>
 );
