@@ -81,6 +81,9 @@ function DataTableInner<T extends Record<string, unknown>>(
 	const selectionColumn = useMemo<ColumnDef<T, unknown>>(
 		() => ({
 			id: "_select",
+			size: 40,
+			minSize: 40,
+			maxSize: 40,
 			header: ({ table }) => (
 				<Checkbox.Root
 					checked={
@@ -162,6 +165,7 @@ function DataTableInner<T extends Record<string, unknown>>(
 								{headerGroup.headers.map((header) => {
 									const canSort = header.column.getCanSort();
 									const sorted = header.column.getIsSorted();
+									const isSelectCol = header.column.id === "_select";
 
 									return (
 										<Table.ColumnHeader
@@ -192,6 +196,11 @@ function DataTableInner<T extends Record<string, unknown>>(
 																header.column.getToggleSortingHandler()?.(e);
 															}
 														}
+													: undefined
+											}
+											style={
+												isSelectCol
+													? { width: header.column.getSize() }
 													: undefined
 											}
 										>
@@ -252,7 +261,14 @@ function DataTableInner<T extends Record<string, unknown>>(
 									}
 								>
 									{row.getVisibleCells().map((cell) => (
-										<Table.Cell key={cell.id}>
+										<Table.Cell
+											key={cell.id}
+											style={
+												cell.column.id === "_select"
+													? { width: cell.column.getSize() }
+													: undefined
+											}
+										>
 											{flexRender(
 												cell.column.columnDef.cell,
 												cell.getContext(),

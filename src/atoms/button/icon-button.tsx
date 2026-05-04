@@ -7,8 +7,17 @@ export type { IconButtonProps };
 
 export const IconButton = ({
 	ref,
+	colorPalette = "primary",
 	...props
 }: IconButtonProps & { ref?: React.Ref<HTMLButtonElement> }) => {
-	return <ChakraIconButton size="md" variant="ghost" ref={ref} {...props} />;
+	return (
+		<ChakraIconButton
+			size="md"
+			variant="ghost"
+			colorPalette={colorPalette}
+			ref={ref}
+			{...props}
+		/>
+	);
 };
 IconButton.displayName = "IconButton";

@@ -22,12 +22,14 @@ export type ButtonProps = Omit<ChakraButtonProps, "variant"> & {
 
 export const Button = ({
 	ref,
+	colorPalette = "primary",
 	...props
 }: ButtonProps & { ref?: React.Ref<HTMLButtonElement> }) => {
 	return (
 		<ChakraButton
 			size="md"
 			variant={"secondary" as ChakraButtonProps["variant"]}
+			colorPalette={colorPalette}
 			ref={ref}
 			{...(props as ChakraButtonProps)}
 		/>
