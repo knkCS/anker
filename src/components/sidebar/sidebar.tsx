@@ -1,6 +1,7 @@
 // src/components/sidebar/sidebar.tsx
-import React from "react";
-import { Button } from "../../atoms/button";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Button, IconButton } from "../../atoms/button";
 import { Box, Flex } from "../../primitives/layout";
 import {
 	MenuContent,
@@ -8,26 +9,107 @@ import {
 	MenuRoot,
 	MenuTrigger,
 } from "../../primitives/menu";
+import { Tooltip } from "../../primitives/tooltip";
 import { Heading, Text } from "../../primitives/typography";
+
+const COLLAPSED_WIDTH = "64px";
+const EXPANDED_WIDTH = "240px";
+const COLLAPSE_BREAKPOINT = 1440;
+
+interface SidebarContextValue {
+	collapsed: boolean;
+	toggle: () => void;
+}
+
+const SidebarContext = React.createContext<SidebarContextValue | null>(null);
+
+export function useSidebarContext(): SidebarContextValue {
+	const ctx = React.useContext(SidebarContext);
+	if (!ctx) {
+		throw new Error("useSidebarContext must be used inside <Sidebar>");
+	}
+	return ctx;
+}
+
+function getInitialCollapsed(
+	storageKey: string | undefined,
+	defaultCollapsed: boolean | undefined,
+): boolean {
+	if (typeof window === "undefined") return defaultCollapsed ?? false;
+	if (storageKey) {
+		const stored = window.localStorage.getItem(storageKey);
+		if (stored === "true") return true;
+		if (stored === "false") return false;
+	}
+	if (defaultCollapsed !== undefined) return defaultCollapsed;
+	return window.innerWidth < COLLAPSE_BREAKPOINT;
+}
 
 // Root
 export interface SidebarProps {
+	storageKey?: string;
+	defaultCollapsed?: boolean;
 	children: React.ReactNode;
 }
 
-const SidebarRoot = ({ children }: SidebarProps) => (
-	<Flex
-		data-testid="sidebar"
-		direction="column"
-		w="240px"
-		minH="100vh"
-		bg="bg-canvas"
-		borderRightWidth="1px"
-		borderRightColor="border"
-	>
-		{children}
-	</Flex>
-);
+const SidebarRoot = ({
+	storageKey,
+	defaultCollapsed,
+	children,
+}: SidebarProps) => {
+	const [collapsed, setCollapsed] = useState(() =>
+		getInitialCollapsed(storageKey, defaultCollapsed),
+	);
+
+	useEffect(() => {
+		if (storageKey) {
+			window.localStorage.setItem(storageKey, String(collapsed));
+		}
+	}, [collapsed, storageKey]);
+
+	const ctx = useMemo<SidebarContextValue>(
+		() => ({
+			collapsed,
+			toggle: () => setCollapsed((c) => !c),
+		}),
+		[collapsed],
+	);
+
+	return (
+		<SidebarContext.Provider value={ctx}>
+			<Flex
+				data-testid="sidebar"
+				data-collapsed={collapsed ? "true" : "false"}
+				direction="column"
+				w={collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
+				minH="100vh"
+				bg="bg-canvas"
+				borderRightWidth="1px"
+				borderRightColor="border"
+				transition="width 250ms ease-out"
+				overflow="hidden"
+				position="relative"
+			>
+				<Flex justify="flex-end" px="2" pt="2">
+					<IconButton
+						data-testid="sidebar-toggle"
+						aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+						variant="ghost"
+						size="sm"
+						onClick={() => setCollapsed((c) => !c)}
+					>
+						{collapsed ? (
+							<PanelLeftOpen size={16} />
+						) : (
+							<PanelLeftClose size={16} />
+						)}
+					</IconButton>
+				</Flex>
+				{children}
+			</Flex>
+		</SidebarContext.Provider>
+	);
+};
 SidebarRoot.displayName = "Sidebar";
 
 // Header / Body / Footer
@@ -58,31 +140,49 @@ export interface SidebarLogoProps {
 	subtitle?: string;
 }
 
-const SidebarLogo = ({ wordmark, subtitle }: SidebarLogoProps) => (
-	<Box mb={subtitle ? "3" : "0"}>
-		<Heading
-			as="span"
-			fontSize="lg"
-			fontWeight="bold"
-			color="primary.700"
-			letterSpacing="tight"
-		>
-			{wordmark}
-		</Heading>
-		{subtitle && (
-			<Text
-				fontSize="2xs"
-				fontWeight="semibold"
-				letterSpacing="wider"
-				textTransform="uppercase"
-				color="muted"
-				mt="0.5"
+const SidebarLogo = ({ wordmark, subtitle }: SidebarLogoProps) => {
+	const { collapsed } = useSidebarContext();
+	if (collapsed) {
+		return (
+			<Box>
+				<Heading
+					as="span"
+					fontSize="lg"
+					fontWeight="bold"
+					color="primary.700"
+					letterSpacing="tight"
+				>
+					{wordmark.charAt(0)}
+				</Heading>
+			</Box>
+		);
+	}
+	return (
+		<Box mb={subtitle ? "3" : "0"}>
+			<Heading
+				as="span"
+				fontSize="lg"
+				fontWeight="bold"
+				color="primary.700"
+				letterSpacing="tight"
 			>
-				{subtitle}
-			</Text>
-		)}
-	</Box>
-);
+				{wordmark}
+			</Heading>
+			{subtitle && (
+				<Text
+					fontSize="2xs"
+					fontWeight="semibold"
+					letterSpacing="wider"
+					textTransform="uppercase"
+					color="muted"
+					mt="0.5"
+				>
+					{subtitle}
+				</Text>
+			)}
+		</Box>
+	);
+};
 SidebarLogo.displayName = "Sidebar.Logo";
 
 // Slot
@@ -97,24 +197,29 @@ export interface SidebarSectionProps {
 	children: React.ReactNode;
 }
 
-const SidebarSection = ({ label, children }: SidebarSectionProps) => (
-	<Box mb="4" px="3">
-		<Text
-			fontSize="2xs"
-			fontWeight="semibold"
-			letterSpacing="wider"
-			textTransform="uppercase"
-			color="muted"
-			px="2"
-			mb="1"
-		>
-			{label}
-		</Text>
-		<Flex direction="column" gap="0.5">
-			{children}
-		</Flex>
-	</Box>
-);
+const SidebarSection = ({ label, children }: SidebarSectionProps) => {
+	const { collapsed } = useSidebarContext();
+	return (
+		<Box mb="4" px="3">
+			{!collapsed && (
+				<Text
+					fontSize="2xs"
+					fontWeight="semibold"
+					letterSpacing="wider"
+					textTransform="uppercase"
+					color="muted"
+					px="2"
+					mb="1"
+				>
+					{label}
+				</Text>
+			)}
+			<Flex direction="column" gap="0.5">
+				{children}
+			</Flex>
+		</Box>
+	);
+};
 SidebarSection.displayName = "Sidebar.Section";
 
 // Item — nav link with active state
@@ -123,9 +228,18 @@ export interface SidebarItemProps {
 	children: React.ReactNode;
 	asChild?: boolean;
 	active?: boolean;
+	label?: string; // NEW — overrides children for tooltip text when collapsed
 }
 
-const SidebarItem = ({ icon, children, asChild, active }: SidebarItemProps) => {
+const SidebarItem = ({
+	icon,
+	children,
+	asChild,
+	active,
+	label,
+}: SidebarItemProps) => {
+	const { collapsed } = useSidebarContext();
+
 	// Styles must be plain CSS so they survive `style={...}` inline styling on
 	// the cloned asChild element (e.g. <NavLink>). Chakra prop shorthand like
 	// `bg="primary.50"` or `borderRadius="md"` is silently dropped by the
@@ -134,6 +248,7 @@ const SidebarItem = ({ icon, children, asChild, active }: SidebarItemProps) => {
 	const itemStyle: React.CSSProperties = {
 		display: "flex",
 		alignItems: "center",
+		justifyContent: collapsed ? "center" : "flex-start",
 		gap: "var(--chakra-spacing-2)",
 		paddingInline: "var(--chakra-spacing-3)",
 		paddingBlock: "var(--chakra-spacing-2)",
@@ -161,7 +276,8 @@ const SidebarItem = ({ icon, children, asChild, active }: SidebarItemProps) => {
 
 	// Right-tab indicator on active items, matching the design handoff
 	// (3px × 14px primary.700 pill at the trailing edge of the row).
-	const activeTab = active ? (
+	// Hidden when collapsed (no room).
+	const activeTab = active && !collapsed ? (
 		<span
 			aria-hidden="true"
 			style={{
@@ -175,6 +291,18 @@ const SidebarItem = ({ icon, children, asChild, active }: SidebarItemProps) => {
 		/>
 	) : null;
 
+	const tooltipLabel =
+		label || (typeof children === "string" ? children : "");
+
+	const wrapTooltip = (node: React.ReactElement) =>
+		collapsed && tooltipLabel ? (
+			<Tooltip content={tooltipLabel} positioning={{ placement: "right" }}>
+				{node}
+			</Tooltip>
+		) : (
+			node
+		);
+
 	if (asChild) {
 		const child = React.Children.only(children) as React.ReactElement<
 			React.HTMLAttributes<HTMLElement> & {
@@ -184,7 +312,7 @@ const SidebarItem = ({ icon, children, asChild, active }: SidebarItemProps) => {
 				children?: React.ReactNode;
 			}
 		>;
-		return React.cloneElement(
+		const cloned = React.cloneElement(
 			child,
 			{
 				"data-active": active ? "true" : "false",
@@ -194,21 +322,22 @@ const SidebarItem = ({ icon, children, asChild, active }: SidebarItemProps) => {
 				},
 			},
 			iconEl,
-			child.props.children,
+			collapsed ? null : child.props.children,
 			activeTab,
 		);
+		return wrapTooltip(cloned);
 	}
 
-	return (
+	return wrapTooltip(
 		<Box
 			data-testid="sidebar-item"
 			data-active={active ? "true" : "false"}
 			style={itemStyle}
 		>
 			{iconEl}
-			{children}
+			{!collapsed && children}
 			{activeTab}
-		</Box>
+		</Box>,
 	);
 };
 SidebarItem.displayName = "Sidebar.Item";
@@ -220,6 +349,7 @@ export interface SidebarUserMenuProps {
 }
 
 const SidebarUserMenu = ({ user, children }: SidebarUserMenuProps) => {
+	const { collapsed } = useSidebarContext();
 	const initials = (user.name ?? user.email ?? "")
 		.split(/\s+/)
 		.slice(0, 2)
@@ -234,10 +364,10 @@ const SidebarUserMenu = ({ user, children }: SidebarUserMenuProps) => {
 					variant="ghost"
 					size="md"
 					w="full"
-					justifyContent="flex-start"
+					justifyContent={collapsed ? "center" : "flex-start"}
 					px="2"
 				>
-					<Flex align="center" gap="2" w="full">
+					<Flex align="center" gap="2" w={collapsed ? "auto" : "full"}>
 						<Flex
 							align="center"
 							justify="center"
@@ -252,21 +382,23 @@ const SidebarUserMenu = ({ user, children }: SidebarUserMenuProps) => {
 						>
 							{initials || "?"}
 						</Flex>
-						<Box textAlign="start" flex="1" minW="0">
-							<Text
-								fontSize="sm"
-								fontWeight="medium"
-								color="default"
-								lineClamp={1}
-							>
-								{user.name ?? user.email}
-							</Text>
-							{user.email && user.name && (
-								<Text fontSize="xs" color="muted" lineClamp={1}>
-									{user.email}
+						{!collapsed && (
+							<Box textAlign="start" flex="1" minW="0">
+								<Text
+									fontSize="sm"
+									fontWeight="medium"
+									color="default"
+									lineClamp={1}
+								>
+									{user.name ?? user.email}
 								</Text>
-							)}
-						</Box>
+								{user.email && user.name && (
+									<Text fontSize="xs" color="muted" lineClamp={1}>
+										{user.email}
+									</Text>
+								)}
+							</Box>
+						)}
 					</Flex>
 				</Button>
 			</MenuTrigger>
