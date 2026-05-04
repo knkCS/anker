@@ -210,4 +210,15 @@ describe("ContextRail", () => {
 		expect(root).toBeInTheDocument();
 		expect(root).toHaveStyle({ borderBottomWidth: "1px" });
 	});
+
+	it("Header has a bottom border", () => {
+		const { container } = renderWithChakra(
+			<ContextRail>
+				<ContextRail.Header title="User" />
+			</ContextRail>,
+		);
+		const header = container.querySelector("h2")?.parentElement as HTMLElement;
+		expect(header).toBeInTheDocument();
+		expect(header).toHaveStyle({ borderBottomWidth: "1px" });
+	});
 });

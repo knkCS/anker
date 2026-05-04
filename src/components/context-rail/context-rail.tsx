@@ -96,7 +96,7 @@ const ContextRailHeader = ({
 	title,
 	onClose: _onClose,
 }: ContextRailHeaderProps) => (
-	<Box mb="4">
+	<Box mb="4" pb="3" borderBottomWidth="1px" borderBottomColor="border">
 		{eyebrow && (
 			<Text
 				fontSize="2xs"
