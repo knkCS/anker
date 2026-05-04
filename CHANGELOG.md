@@ -2,6 +2,16 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.7.0] — 2026-05-04
+
+### Changed
+
+- **`<Button>` and `<IconButton>` now default `colorPalette="primary"`.** Previously, `<Button variant="solid">` without an explicit `colorPalette` rendered gray.900 (near-black) — a subtle source of bugs across consumers. Pass `colorPalette="gray"` (or another palette) to opt out. Visual change: any button using `variant="solid"` without an explicit `colorPalette` will now render in the brand primary color instead of gray.
+
+### Fixed
+
+- **`<DataTable>` `__select` column is now 40px wide** instead of TanStack Table's 150px default. The checkbox-only column no longer steals space from data columns.
+
 ## [1.6.0] — 2026-05-04
 
 ### Added
