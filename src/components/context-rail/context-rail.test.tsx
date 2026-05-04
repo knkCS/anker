@@ -184,7 +184,7 @@ describe("ContextRail", () => {
 					id="s1"
 					label="Details"
 					action={
-						<button data-testid="action" onClick={onAction}>
+						<button type="button" data-testid="action" onClick={onAction}>
 							Manage
 						</button>
 					}
@@ -206,7 +206,9 @@ describe("ContextRail", () => {
 				</ContextRail.Section>
 			</ContextRail>,
 		);
-		const root = container.querySelector('[data-section-id="s1"]') as HTMLElement;
+		const root = container.querySelector(
+			'[data-section-id="s1"]',
+		) as HTMLElement;
 		expect(root).toBeInTheDocument();
 		expect(root).toHaveStyle({ borderBottomWidth: "1px" });
 	});

@@ -150,7 +150,7 @@ const ContextRailSection = ({
 			<Flex w="full" align="center" gap="2">
 				<Flex
 					as="button"
-					type="button"
+					{...({ type: "button" } as object)}
 					onClick={() => setOpen((o) => !o)}
 					aria-expanded={open}
 					flex="1"
