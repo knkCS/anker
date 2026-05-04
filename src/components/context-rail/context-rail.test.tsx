@@ -1,8 +1,8 @@
 // src/components/context-rail/context-rail.test.tsx
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ContextRail } from "./context-rail";
 
 function renderWithChakra(ui: React.ReactElement) {
@@ -150,5 +150,64 @@ describe("ContextRail", () => {
 		expect(
 			screen.getByRole("button", { name: "Open detail" }),
 		).toBeInTheDocument();
+	});
+
+	it("Section is open by default and toggles closed on header click", () => {
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.Section id="s1" label="Details">
+					<span data-testid="body">visible</span>
+				</ContextRail.Section>
+			</ContextRail>,
+		);
+		expect(screen.getByTestId("body")).toBeInTheDocument();
+		fireEvent.click(screen.getByRole("button", { name: /Details/i }));
+		expect(screen.queryByTestId("body")).not.toBeInTheDocument();
+	});
+
+	it("Section respects defaultOpen={false}", () => {
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.Section id="s1" label="Details" defaultOpen={false}>
+					<span data-testid="body">hidden</span>
+				</ContextRail.Section>
+			</ContextRail>,
+		);
+		expect(screen.queryByTestId("body")).not.toBeInTheDocument();
+	});
+
+	it("Section action slot does not toggle the section when clicked", () => {
+		const onAction = vi.fn();
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.Section
+					id="s1"
+					label="Details"
+					action={
+						<button data-testid="action" onClick={onAction}>
+							Manage
+						</button>
+					}
+				>
+					<span data-testid="body">body</span>
+				</ContextRail.Section>
+			</ContextRail>,
+		);
+		fireEvent.click(screen.getByTestId("action"));
+		expect(onAction).toHaveBeenCalledOnce();
+		expect(screen.getByTestId("body")).toBeInTheDocument();
+	});
+
+	it("Section root has bottom border", () => {
+		const { container } = renderWithChakra(
+			<ContextRail>
+				<ContextRail.Section id="s1" label="Details">
+					<span>body</span>
+				</ContextRail.Section>
+			</ContextRail>,
+		);
+		const root = container.querySelector('[data-section-id="s1"]') as HTMLElement;
+		expect(root).toBeInTheDocument();
+		expect(root).toHaveStyle({ borderBottomWidth: "1px" });
 	});
 });

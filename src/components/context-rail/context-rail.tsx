@@ -1,5 +1,5 @@
 // src/components/context-rail/context-rail.tsx
-import { PanelRightClose, PanelRightOpen } from "lucide-react";
+import { ChevronRight, PanelRightClose, PanelRightOpen } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { IconButton } from "../../atoms/button";
@@ -127,6 +127,8 @@ export interface ContextRailSectionProps {
 	id: string;
 	icon?: React.ReactNode;
 	label: string;
+	defaultOpen?: boolean;
+	action?: React.ReactNode;
 	children: React.ReactNode;
 }
 
@@ -134,22 +136,66 @@ const ContextRailSection = ({
 	id,
 	icon,
 	label,
+	defaultOpen = true,
+	action,
 	children,
-}: ContextRailSectionProps) => (
-	<Box mb="4" data-section-id={id}>
-		<Flex align="center" gap="2" mb="2">
-			{icon && (
-				<Box display="inline-flex" alignItems="center" color="muted">
-					{icon}
-				</Box>
-			)}
-			<Heading as="h3" fontSize="sm" fontWeight="semibold" color="default">
-				{label}
-			</Heading>
-		</Flex>
-		<Box>{children}</Box>
-	</Box>
-);
+}: ContextRailSectionProps) => {
+	const [open, setOpen] = useState(defaultOpen);
+	return (
+		<Box
+			data-section-id={id}
+			borderBottomWidth="1px"
+			borderBottomColor="border-muted"
+		>
+			<Flex w="full" align="center" gap="2">
+				<Flex
+					as="button"
+					type="button"
+					onClick={() => setOpen((o) => !o)}
+					aria-expanded={open}
+					flex="1"
+					align="center"
+					gap="2"
+					px="0"
+					py="3"
+					bg="transparent"
+					border="none"
+					cursor="pointer"
+					textAlign="left"
+					_hover={{ bg: "bg-subtle" }}
+				>
+					<Box
+						display="inline-flex"
+						alignItems="center"
+						color="muted"
+						transform={open ? "rotate(90deg)" : "none"}
+						transition="transform 120ms ease-out"
+					>
+						<ChevronRight size={12} aria-hidden />
+					</Box>
+					{icon && (
+						<Box display="inline-flex" alignItems="center" color="muted">
+							{icon}
+						</Box>
+					)}
+					<Heading
+						as="h3"
+						fontSize="2xs"
+						fontWeight="semibold"
+						letterSpacing="wider"
+						textTransform="uppercase"
+						color="muted"
+						flex="1"
+					>
+						{label}
+					</Heading>
+				</Flex>
+				{action && <Box py="3">{action}</Box>}
+			</Flex>
+			{open && <Box pb="3">{children}</Box>}
+		</Box>
+	);
+};
 ContextRailSection.displayName = "ContextRail.Section";
 
 // Footer
