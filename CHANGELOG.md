@@ -2,6 +2,12 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.5.0] — 2026-05-04
+
+### Fixed
+
+- **`Sidebar.Header` and `Sidebar.Footer` separators now use `border` instead of `border-muted`**, matching the design handoff. Both bands previously rendered a `gray.100` (`#f1f5f9`) border that was barely distinguishable from the `bg-canvas` (`gray.50`) sidebar surface — the right column edge already used `border` (`gray.200`), so the contrast inside the sidebar was inconsistent with the column edge.
+
 ## [1.4.0] — 2026-05-01
 
 ### Fixed
