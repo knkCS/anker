@@ -335,6 +335,9 @@ describe("Sidebar", () => {
 		});
 		renderWithChakra(
 			<Sidebar storageKey="test.sidebar.toggle">
+				<Sidebar.Header>
+					<Sidebar.Logo wordmark="Odon" />
+				</Sidebar.Header>
 				<Sidebar.Body>body</Sidebar.Body>
 			</Sidebar>,
 		);

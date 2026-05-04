@@ -2,6 +2,12 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.8.1] — 2026-05-04
+
+### Fixed
+
+- `<Sidebar>` collapse toggle now sits inline with `<Sidebar.Logo>` instead of in a separate row above it. Expanded: logo left, toggle right (same row). Collapsed: logo "O" top, toggle below (stacked). Cleaner header chrome.
+
 ## [1.8.0] — 2026-05-04
 
 ### Added
