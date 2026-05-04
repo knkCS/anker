@@ -2,10 +2,19 @@
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { Sidebar } from "./sidebar";
+import { Sidebar, useSidebarContext } from "./sidebar";
 
 function renderWithChakra(ui: React.ReactElement) {
 	return render(<ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>);
+}
+
+// Helper: render with sidebar forced expanded (innerWidth > 1440)
+function renderExpanded(ui: React.ReactElement) {
+	Object.defineProperty(window, "innerWidth", {
+		configurable: true,
+		value: 1600,
+	});
+	return renderWithChakra(ui);
 }
 
 describe("Sidebar", () => {
@@ -19,7 +28,7 @@ describe("Sidebar", () => {
 	});
 
 	it("renders Sidebar.Logo wordmark and subtitle", () => {
-		renderWithChakra(
+		renderExpanded(
 			<Sidebar>
 				<Sidebar.Header>
 					<Sidebar.Logo wordmark="Odon" subtitle="Identity Provider" />
@@ -32,7 +41,7 @@ describe("Sidebar", () => {
 	});
 
 	it("renders Sidebar.Logo without subtitle when omitted", () => {
-		renderWithChakra(
+		renderExpanded(
 			<Sidebar>
 				<Sidebar.Header>
 					<Sidebar.Logo wordmark="Odon" />
@@ -59,7 +68,7 @@ describe("Sidebar", () => {
 	});
 
 	it("renders Sidebar.Section label and children", () => {
-		renderWithChakra(
+		renderExpanded(
 			<Sidebar>
 				<Sidebar.Body>
 					<Sidebar.Section label="Identity">
@@ -73,7 +82,7 @@ describe("Sidebar", () => {
 	});
 
 	it("renders Sidebar.Item with icon and children", () => {
-		renderWithChakra(
+		renderExpanded(
 			<Sidebar>
 				<Sidebar.Body>
 					<Sidebar.Section label="Identity">
@@ -89,7 +98,7 @@ describe("Sidebar", () => {
 	});
 
 	it("Sidebar.Item with asChild forwards to its child element", () => {
-		renderWithChakra(
+		renderExpanded(
 			<Sidebar>
 				<Sidebar.Body>
 					<Sidebar.Section label="Identity">
@@ -108,7 +117,7 @@ describe("Sidebar", () => {
 	});
 
 	it("Sidebar.Item asChild renders the icon inside the cloned element", () => {
-		renderWithChakra(
+		renderExpanded(
 			<Sidebar>
 				<Sidebar.Body>
 					<Sidebar.Section label="Identity">
@@ -132,7 +141,7 @@ describe("Sidebar", () => {
 		// borderRadius="md", color="primary.700") through `style={...}`, which
 		// the browser silently dropped — active items were visually identical to
 		// inactive ones. Styles must be CSS-var references to survive inline.
-		renderWithChakra(
+		renderExpanded(
 			<Sidebar>
 				<Sidebar.Body>
 					<Sidebar.Section label="Identity">
@@ -165,7 +174,7 @@ describe("Sidebar", () => {
 	});
 
 	it("Sidebar.Item active=true exposes data-active attribute", () => {
-		renderWithChakra(
+		renderExpanded(
 			<Sidebar>
 				<Sidebar.Body>
 					<Sidebar.Section label="Identity">
@@ -183,7 +192,7 @@ describe("Sidebar", () => {
 	});
 
 	it("Sidebar.Item without active prop has no data-active='true' attribute", () => {
-		renderWithChakra(
+		renderExpanded(
 			<Sidebar>
 				<Sidebar.Body>
 					<Sidebar.Section label="Identity">
@@ -197,7 +206,7 @@ describe("Sidebar", () => {
 	});
 
 	it("renders Sidebar.UserMenu with user name and email", () => {
-		renderWithChakra(
+		renderExpanded(
 			<Sidebar>
 				<Sidebar.Body />
 				<Sidebar.Footer>
@@ -214,7 +223,7 @@ describe("Sidebar", () => {
 	});
 
 	it("opens the user menu on click and renders Sidebar.UserMenuItem children", async () => {
-		renderWithChakra(
+		renderExpanded(
 			<Sidebar>
 				<Sidebar.Body />
 				<Sidebar.Footer>
@@ -232,7 +241,7 @@ describe("Sidebar", () => {
 
 	it("Sidebar.UserMenuItem onClick fires", async () => {
 		const onClick = vi.fn();
-		renderWithChakra(
+		renderExpanded(
 			<Sidebar>
 				<Sidebar.Body />
 				<Sidebar.Footer>
@@ -247,5 +256,200 @@ describe("Sidebar", () => {
 		fireEvent.click(screen.getByTestId("sidebar-user-menu-trigger"));
 		fireEvent.click(await screen.findByText("Sign out"));
 		expect(onClick).toHaveBeenCalledOnce();
+	});
+
+	// ── New tests: collapse state, viewport heuristic, storage, toggle ──
+
+	it("Sidebar starts expanded by default at wide viewport", () => {
+		// jsdom default innerWidth is 1024, so without storage this would
+		// collapse via heuristic. Set viewport wider than the breakpoint.
+		Object.defineProperty(window, "innerWidth", {
+			configurable: true,
+			value: 1600,
+		});
+		renderWithChakra(
+			<Sidebar>
+				<Sidebar.Body>body</Sidebar.Body>
+			</Sidebar>,
+		);
+		expect(screen.getByTestId("sidebar")).toHaveAttribute(
+			"data-collapsed",
+			"false",
+		);
+	});
+
+	it("Sidebar honors defaultCollapsed prop when no stored value", () => {
+		Object.defineProperty(window, "innerWidth", {
+			configurable: true,
+			value: 1600,
+		});
+		renderWithChakra(
+			<Sidebar defaultCollapsed>
+				<Sidebar.Body>body</Sidebar.Body>
+			</Sidebar>,
+		);
+		expect(screen.getByTestId("sidebar")).toHaveAttribute(
+			"data-collapsed",
+			"true",
+		);
+	});
+
+	it("Sidebar collapses by default below the 1440px breakpoint", () => {
+		Object.defineProperty(window, "innerWidth", {
+			configurable: true,
+			value: 1280,
+		});
+		renderWithChakra(
+			<Sidebar>
+				<Sidebar.Body>body</Sidebar.Body>
+			</Sidebar>,
+		);
+		expect(screen.getByTestId("sidebar")).toHaveAttribute(
+			"data-collapsed",
+			"true",
+		);
+	});
+
+	it("Sidebar reads stored value from localStorage when storageKey is set", () => {
+		Object.defineProperty(window, "innerWidth", {
+			configurable: true,
+			value: 1600,
+		});
+		window.localStorage.setItem("test.sidebar.collapsed", "true");
+		renderWithChakra(
+			<Sidebar storageKey="test.sidebar.collapsed">
+				<Sidebar.Body>body</Sidebar.Body>
+			</Sidebar>,
+		);
+		expect(screen.getByTestId("sidebar")).toHaveAttribute(
+			"data-collapsed",
+			"true",
+		);
+		window.localStorage.removeItem("test.sidebar.collapsed");
+	});
+
+	it("Sidebar toggle button flips state and writes to localStorage", () => {
+		Object.defineProperty(window, "innerWidth", {
+			configurable: true,
+			value: 1600,
+		});
+		renderWithChakra(
+			<Sidebar storageKey="test.sidebar.toggle">
+				<Sidebar.Body>body</Sidebar.Body>
+			</Sidebar>,
+		);
+		expect(screen.getByTestId("sidebar")).toHaveAttribute(
+			"data-collapsed",
+			"false",
+		);
+		fireEvent.click(screen.getByTestId("sidebar-toggle"));
+		expect(screen.getByTestId("sidebar")).toHaveAttribute(
+			"data-collapsed",
+			"true",
+		);
+		expect(window.localStorage.getItem("test.sidebar.toggle")).toBe("true");
+		window.localStorage.removeItem("test.sidebar.toggle");
+	});
+
+	it("useSidebarContext throws when used outside Sidebar", () => {
+		// Suppress the React error boundary log:
+		const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+		function Probe() {
+			useSidebarContext();
+			return null;
+		}
+		expect(() => render(<Probe />)).toThrow(/useSidebarContext/);
+		spy.mockRestore();
+	});
+
+	// ── Task 3: Logo compact mode ──
+
+	it("Sidebar.Logo shows compact form when collapsed", () => {
+		Object.defineProperty(window, "innerWidth", {
+			configurable: true,
+			value: 1600,
+		});
+		renderWithChakra(
+			<Sidebar defaultCollapsed>
+				<Sidebar.Header>
+					<Sidebar.Logo wordmark="Odon" subtitle="Identity Provider" />
+				</Sidebar.Header>
+				<Sidebar.Body />
+			</Sidebar>,
+		);
+		// First letter rendered, full wordmark and subtitle absent
+		expect(screen.getByText("O")).toBeInTheDocument();
+		expect(screen.queryByText("Odon")).not.toBeInTheDocument();
+		expect(screen.queryByText("Identity Provider")).not.toBeInTheDocument();
+	});
+
+	// ── Task 4: Section label hidden when collapsed ──
+
+	it("Sidebar.Section hides its label when collapsed", () => {
+		Object.defineProperty(window, "innerWidth", {
+			configurable: true,
+			value: 1600,
+		});
+		renderWithChakra(
+			<Sidebar defaultCollapsed>
+				<Sidebar.Body>
+					<Sidebar.Section label="Identity">
+						<span data-testid="item">A</span>
+					</Sidebar.Section>
+				</Sidebar.Body>
+			</Sidebar>,
+		);
+		expect(screen.queryByText("Identity")).not.toBeInTheDocument();
+		expect(screen.getByTestId("item")).toBeInTheDocument();
+	});
+
+	// ── Task 5: Item icon-only with tooltip when collapsed ──
+
+	it("Sidebar.Item shows icon-only with tooltip when collapsed", async () => {
+		Object.defineProperty(window, "innerWidth", {
+			configurable: true,
+			value: 1600,
+		});
+		renderWithChakra(
+			<Sidebar defaultCollapsed>
+				<Sidebar.Body>
+					<Sidebar.Section label="Identity">
+						<Sidebar.Item icon={<span data-testid="icon">i</span>} label="Users">
+							Users
+						</Sidebar.Item>
+					</Sidebar.Section>
+				</Sidebar.Body>
+			</Sidebar>,
+		);
+		// Icon present
+		expect(screen.getByTestId("icon")).toBeInTheDocument();
+		// Visible label hidden in collapsed mode (text "Users" not rendered as item content)
+		// Note: getByText would match the tooltip content if portal-rendered;
+		// assert via the rendered item box not containing "Users" text:
+		const item = screen.getByTestId("sidebar-item");
+		expect(item.textContent).not.toContain("Users");
+	});
+
+	// ── Task 6: UserMenu avatar-only when collapsed ──
+
+	it("Sidebar.UserMenu shows avatar only when collapsed", () => {
+		Object.defineProperty(window, "innerWidth", {
+			configurable: true,
+			value: 1600,
+		});
+		renderWithChakra(
+			<Sidebar defaultCollapsed>
+				<Sidebar.Body />
+				<Sidebar.Footer>
+					<Sidebar.UserMenu user={{ name: "Jana Schmid", email: "jana@knk.de" }}>
+						<Sidebar.UserMenuItem>Sign out</Sidebar.UserMenuItem>
+					</Sidebar.UserMenu>
+				</Sidebar.Footer>
+			</Sidebar>,
+		);
+		// Initials present, name and email NOT rendered in trigger
+		expect(screen.getByText("JS")).toBeInTheDocument();
+		expect(screen.queryByText("Jana Schmid")).not.toBeInTheDocument();
+		expect(screen.queryByText("jana@knk.de")).not.toBeInTheDocument();
 	});
 });
