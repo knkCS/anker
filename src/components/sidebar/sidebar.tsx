@@ -91,21 +91,6 @@ const SidebarRoot = ({
 				overflow="hidden"
 				position="relative"
 			>
-				<Flex justify="flex-end" px="2" pt="2">
-					<IconButton
-						data-testid="sidebar-toggle"
-						aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-						variant="ghost"
-						size="sm"
-						onClick={() => setCollapsed((c) => !c)}
-					>
-						{collapsed ? (
-							<PanelLeftOpen size={16} />
-						) : (
-							<PanelLeftClose size={16} />
-						)}
-					</IconButton>
-				</Flex>
 				{children}
 			</Flex>
 		</SidebarContext.Provider>
@@ -142,10 +127,23 @@ export interface SidebarLogoProps {
 }
 
 const SidebarLogo = ({ wordmark, subtitle }: SidebarLogoProps) => {
-	const { collapsed } = useSidebarContext();
+	const { collapsed, toggle } = useSidebarContext();
+
+	const toggleButton = (
+		<IconButton
+			data-testid="sidebar-toggle"
+			aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+			variant="ghost"
+			size="sm"
+			onClick={toggle}
+		>
+			{collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+		</IconButton>
+	);
+
 	if (collapsed) {
 		return (
-			<Box>
+			<Flex direction="column" align="center" gap="2">
 				<Heading
 					as="span"
 					fontSize="lg"
@@ -155,33 +153,44 @@ const SidebarLogo = ({ wordmark, subtitle }: SidebarLogoProps) => {
 				>
 					{wordmark.charAt(0)}
 				</Heading>
-			</Box>
+				{toggleButton}
+			</Flex>
 		);
 	}
+
 	return (
-		<Box mb={subtitle ? "3" : "0"}>
-			<Heading
-				as="span"
-				fontSize="lg"
-				fontWeight="bold"
-				color="primary.700"
-				letterSpacing="tight"
-			>
-				{wordmark}
-			</Heading>
-			{subtitle && (
-				<Text
-					fontSize="2xs"
-					fontWeight="semibold"
-					letterSpacing="wider"
-					textTransform="uppercase"
-					color="muted"
-					mt="0.5"
+		<Flex
+			direction="row"
+			align="center"
+			justify="space-between"
+			gap="2"
+			w="full"
+		>
+			<Box mb={subtitle ? "0" : "0"}>
+				<Heading
+					as="span"
+					fontSize="lg"
+					fontWeight="bold"
+					color="primary.700"
+					letterSpacing="tight"
 				>
-					{subtitle}
-				</Text>
-			)}
-		</Box>
+					{wordmark}
+				</Heading>
+				{subtitle && (
+					<Text
+						fontSize="2xs"
+						fontWeight="semibold"
+						letterSpacing="wider"
+						textTransform="uppercase"
+						color="muted"
+						mt="0.5"
+					>
+						{subtitle}
+					</Text>
+				)}
+			</Box>
+			{toggleButton}
+		</Flex>
 	);
 };
 SidebarLogo.displayName = "Sidebar.Logo";
