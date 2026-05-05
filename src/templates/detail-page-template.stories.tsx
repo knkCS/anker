@@ -53,11 +53,18 @@ export const Default: Story = {
 					</Tabs.Root>
 				}
 			>
-				<Card title="Identity">
-					<Text color="muted">
-						Identity card content (avatar, persona block, role).
-					</Text>
-				</Card>
+				{/*
+				 * The body is rendered flush against the canvas. Add internal
+				 * padding inside `children` if cards/tables need breathing room
+				 * — here we wrap in a `<Box px="8" pt="6">`.
+				 */}
+				<Box px="8" pt="6">
+					<Card title="Identity">
+						<Text color="muted">
+							Identity card content (avatar, persona block, role).
+						</Text>
+					</Card>
+				</Box>
 			</DetailPageTemplate>
 		</AppShell>
 	),
