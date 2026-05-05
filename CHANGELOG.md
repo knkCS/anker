@@ -2,6 +2,13 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.9.1] — 2026-05-05
+
+### Fixed
+
+- **`<AppShell>` rail slot now shows descendant-registered content.** In 1.9.0, `<AppShell>` consumed its own slot store via `useSlotValue("rail")` at the same level it provided that store, so `useContext` resolved to the parent context (null) and any content registered through `usePageRail(...)` was dropped on the floor. AppShell is now split into an outer Provider and an inner Renderer so the Renderer's `useContext` resolves to the live store. The page-actions slot was unaffected (page templates that read it are descendants of AppShell, so their context lookup already worked).
+- **Rail precedence is now defined and documented.** Content registered by a descendant via `usePageRail` wins over the static `rail` prop. The `rail` prop becomes a fallback for the column when no descendant has registered content. The rail column is reserved (third grid track added) when *either* a `rail` prop is supplied *or* a descendant has registered rail content; omit both to drop the column entirely. No breaking changes — solutions that only used the `rail` prop continue to work identically.
+
 ## [1.9.0] — 2026-05-05
 
 ### Added

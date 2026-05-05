@@ -94,24 +94,43 @@ templates) stay decoupled across React commit boundaries. See
 ### Composition example
 
 ```tsx
-import { AppShell } from "@knkcs/anker/templates";
+import { AppShell, usePageRail } from "@knkcs/anker/templates";
 import { Sidebar, ContextRail } from "@knkcs/anker/components";
 
 export default function Layout({ children }) {
   return (
-    <AppShell
-      sidebar={<MyAppSidebar />}
-      rail={<ContextRail storageKey="myapp-rail" />}
-    >
+    <AppShell sidebar={<MyAppSidebar />}>
       {children}
     </AppShell>
   );
 }
+
+// Inside any descendant of <AppShell>:
+function UsersPage() {
+  usePageRail(
+    <ContextRail>
+      <ContextRail.Header eyebrow="OVERVIEW" title="Users" />
+      <ContextRail.Section id="stats" label="Stats">
+        42 total users
+      </ContextRail.Section>
+    </ContextRail>,
+  );
+  return <IndexPageTemplate title="Users">…</IndexPageTemplate>;
+}
 ```
 
-If the rail column is omitted entirely (`rail` not passed, or `null`),
-AppShell drops the third grid column and the main column expands to fill
-the freed space. This is the right shape for solutions that don't have a
+### Rail precedence
+
+When both a `rail` prop *and* a descendant `usePageRail(content)` are
+present, **registered slot content wins** and the `rail` prop acts as a
+fallback. Rationale: a descendant explicitly registering content is
+signaling "show this here", which should trump the static prop.
+
+The rail column is reserved (the third grid track is added) when *either*
+a `rail` prop is supplied *or* a descendant has registered rail content
+via `usePageRail`. Omit both (or pass `rail={null}`) and AppShell drops
+the third grid column entirely — the main column expands to fill the
+freed space. This is the right shape for solutions that don't have a
 contextual side panel.
 
 ---
@@ -1157,10 +1176,14 @@ This section enumerates the `@knkcs/anker/templates` exports.
 | Prop      | Type        | Required | Notes                                          |
 |-----------|-------------|----------|------------------------------------------------|
 | `sidebar` | `ReactNode` | yes      | Typically `<Sidebar>` from `/components`       |
-| `rail`    | `ReactNode` | no       | Pass `null` / omit to drop the rail column     |
+| `rail`    | `ReactNode` | no       | Fallback for the rail column. `usePageRail` registration wins. |
 | `children`| `ReactNode` | yes      | Page content                                   |
 
 Exposes hooks: `usePageActions(node)`, `usePageRail(node)`.
+
+Rail precedence: descendant `usePageRail(content)` wins over the `rail`
+prop. The column is reserved when *either* a prop is supplied *or* a
+descendant registers content; omit both to drop the third grid track.
 
 ### 13.2 `<IndexPageTemplate>`
 
