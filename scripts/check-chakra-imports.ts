@@ -72,7 +72,7 @@ const EXEMPT_FILE_PATTERNS = [
 	/src\/feedback\/confirm-modal\.tsx$/, // Wraps Dialog compound with Chakra Button
 ];
 
-const SCAN_DIRS = ["src/atoms", "src/components", "src/forms", "src/feedback", "src/stories"];
+const SCAN_DIRS = ["src/atoms", "src/components", "src/forms", "src/feedback", "src/stories", "src/templates"];
 const CHAKRA_IMPORT_RE = /import\s+\{([^}]+)\}\s+from\s+["']@chakra-ui\/react["']/g;
 const TYPE_IMPORT_RE = /import\s+type\s+\{[^}]+\}\s+from\s+["']@chakra-ui\/react["']/g;
 
