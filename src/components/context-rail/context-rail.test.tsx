@@ -223,4 +223,57 @@ describe("ContextRail", () => {
 		expect(header).toBeInTheDocument();
 		expect(header).toHaveStyle({ borderBottomWidth: "1px" });
 	});
+
+	describe("dev-mode warnings", () => {
+		let warnSpy: ReturnType<typeof vi.spyOn>;
+		let originalNodeEnv: string | undefined;
+
+		beforeEach(() => {
+			originalNodeEnv = process.env.NODE_ENV;
+			process.env.NODE_ENV = "development";
+			warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+		});
+
+		afterEach(() => {
+			warnSpy.mockRestore();
+			process.env.NODE_ENV = originalNodeEnv;
+		});
+
+		it("warns once when ContextRail.Header is rendered outside <ContextRail>", () => {
+			renderWithChakra(<ContextRail.Header title="User" />);
+			expect(warnSpy).toHaveBeenCalledTimes(1);
+			expect(warnSpy.mock.calls[0]?.[0]).toContain("ContextRail.Header");
+			expect(warnSpy.mock.calls[0]?.[0]).toContain(
+				"was rendered outside <ContextRail>",
+			);
+		});
+
+		it("warns when ContextRail.Section is rendered outside <ContextRail>", () => {
+			renderWithChakra(
+				<ContextRail.Section id="x" label="Details">
+					<span>body</span>
+				</ContextRail.Section>,
+			);
+			expect(warnSpy).toHaveBeenCalledTimes(1);
+			expect(warnSpy.mock.calls[0]?.[0]).toContain("ContextRail.Section");
+		});
+
+		it("does NOT warn when children are wrapped in <ContextRail>", () => {
+			renderWithChakra(
+				<ContextRail>
+					<ContextRail.Header title="User" />
+					<ContextRail.Section id="x" label="Details">
+						<span>body</span>
+					</ContextRail.Section>
+				</ContextRail>,
+			);
+			expect(warnSpy).not.toHaveBeenCalled();
+		});
+
+		it("does NOT warn in production env", () => {
+			process.env.NODE_ENV = "production";
+			renderWithChakra(<ContextRail.Header title="User" />);
+			expect(warnSpy).not.toHaveBeenCalled();
+		});
+	});
 });

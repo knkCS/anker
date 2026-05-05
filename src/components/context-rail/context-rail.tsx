@@ -1,7 +1,7 @@
 // src/components/context-rail/context-rail.tsx
 import { ChevronRight, PanelRightClose, PanelRightOpen } from "lucide-react";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { IconButton } from "../../atoms/button";
 import { Box, Flex } from "../../primitives/layout";
 import { Heading, Text } from "../../primitives/typography";
@@ -9,6 +9,42 @@ import { Heading, Text } from "../../primitives/typography";
 const COLLAPSED_WIDTH = "44px";
 const EXPANDED_WIDTH = "360px";
 const COLLAPSE_BREAKPOINT = 1440;
+
+/**
+ * Internal context that signals "I am a `<ContextRail>` Root". Used by
+ * `<ContextRail.Header>` and `<ContextRail.Section>` to detect when they
+ * are rendered outside the Root and emit a dev-mode warning.
+ *
+ * The value is intentionally minimal — presence is the signal.
+ */
+const RailRootContext = createContext<boolean>(false);
+
+/**
+ * Dev-mode helper: warn once per component-mount when a rail child is
+ * rendered without a `<ContextRail>` Root ancestor. No-op in production.
+ */
+function isDevMode(): boolean {
+	// `process` is a Node global; bundlers (Vite, tsup) replace
+	// `process.env.NODE_ENV` at build time, so this works in both Node
+	// (vitest, SSR) and browser bundles. We avoid `@types/node` by
+	// reaching through `globalThis`.
+	const proc = (globalThis as { process?: { env?: { NODE_ENV?: string } } })
+		.process;
+	return proc?.env?.NODE_ENV !== "production";
+}
+
+function useWarnIfOutsideRailRoot(componentName: string) {
+	const insideRoot = useContext(RailRootContext);
+	const warnedRef = useRef(false);
+	useEffect(() => {
+		if (!insideRoot && !warnedRef.current && isDevMode()) {
+			warnedRef.current = true;
+			console.warn(
+				`${componentName} was rendered outside <ContextRail>. Wrap rail content in <ContextRail> to get column width, collapse toggle, inner padding, and persistence. See docs/page-patterns.md.`,
+			);
+		}
+	}, [insideRoot, componentName]);
+}
 
 function getInitialCollapsed(storageKey?: string): boolean {
 	if (typeof window === "undefined") return false;
@@ -37,49 +73,48 @@ const ContextRailRoot = ({ storageKey, children }: ContextRailProps) => {
 	}, [collapsed, storageKey]);
 
 	return (
-		<Box
-			data-testid="context-rail"
-			data-collapsed={collapsed ? "true" : "false"}
-			w={collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
-			minH="100vh"
-			bg="bg-surface"
-			borderLeftWidth="1px"
-			borderLeftColor="border"
-			transition="width 250ms ease-out"
-			overflow="hidden"
-			position="relative"
-		>
-			{collapsed ? (
-				<Flex direction="column" align="center" pt="3" gap="3">
-					<IconButton
-						data-testid="context-rail-toggle"
-						aria-label="Expand context rail"
-						variant="ghost"
-						size="sm"
-						onClick={() => setCollapsed(false)}
-					>
-						<PanelRightOpen size={16} />
-					</IconButton>
-				</Flex>
-			) : (
-				<Flex direction="column" h="full">
-					<Flex justify="flex-end" px="3" pt="3">
+		<RailRootContext.Provider value={true}>
+			<Box
+				data-testid="context-rail"
+				data-collapsed={collapsed ? "true" : "false"}
+				w={collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
+				minH="100vh"
+				transition="width 250ms ease-out"
+				overflow="hidden"
+				position="relative"
+			>
+				{collapsed ? (
+					<Flex direction="column" align="center" pt="3" gap="3">
 						<IconButton
 							data-testid="context-rail-toggle"
-							aria-label="Collapse context rail"
+							aria-label="Expand context rail"
 							variant="ghost"
 							size="sm"
-							onClick={() => setCollapsed(true)}
+							onClick={() => setCollapsed(false)}
 						>
-							<PanelRightClose size={16} />
+							<PanelRightOpen size={16} />
 						</IconButton>
 					</Flex>
-					<Box flex="1" overflowY="auto" px="4" pb="4">
-						{children}
-					</Box>
-				</Flex>
-			)}
-		</Box>
+				) : (
+					<Flex direction="column" h="full">
+						<Flex justify="flex-end" px="3" pt="3">
+							<IconButton
+								data-testid="context-rail-toggle"
+								aria-label="Collapse context rail"
+								variant="ghost"
+								size="sm"
+								onClick={() => setCollapsed(true)}
+							>
+								<PanelRightClose size={16} />
+							</IconButton>
+						</Flex>
+						<Box flex="1" overflowY="auto" px="4" pb="4">
+							{children}
+						</Box>
+					</Flex>
+				)}
+			</Box>
+		</RailRootContext.Provider>
 	);
 };
 ContextRailRoot.displayName = "ContextRail";
@@ -88,38 +123,36 @@ ContextRailRoot.displayName = "ContextRail";
 export interface ContextRailHeaderProps {
 	eyebrow?: React.ReactNode;
 	title: React.ReactNode;
-	onClose?: () => void;
 }
 
-const ContextRailHeader = ({
-	eyebrow,
-	title,
-	onClose: _onClose,
-}: ContextRailHeaderProps) => (
-	<Box mb="4" pb="3" borderBottomWidth="1px" borderBottomColor="border">
-		{eyebrow && (
-			<Text
-				fontSize="2xs"
+const ContextRailHeader = ({ eyebrow, title }: ContextRailHeaderProps) => {
+	useWarnIfOutsideRailRoot("ContextRail.Header");
+	return (
+		<Box mb="4" pb="3" borderBottomWidth="1px" borderBottomColor="border">
+			{eyebrow && (
+				<Text
+					fontSize="2xs"
+					fontWeight="semibold"
+					letterSpacing="wider"
+					textTransform="uppercase"
+					color="muted"
+					mb="1"
+				>
+					{eyebrow}
+				</Text>
+			)}
+			<Heading
+				as="h2"
+				fontSize="lg"
 				fontWeight="semibold"
-				letterSpacing="wider"
-				textTransform="uppercase"
-				color="muted"
-				mb="1"
+				color="default"
+				letterSpacing="-0.01em"
 			>
-				{eyebrow}
-			</Text>
-		)}
-		<Heading
-			as="h2"
-			fontSize="lg"
-			fontWeight="semibold"
-			color="default"
-			letterSpacing="-0.01em"
-		>
-			{title}
-		</Heading>
-	</Box>
-);
+				{title}
+			</Heading>
+		</Box>
+	);
+};
 ContextRailHeader.displayName = "ContextRail.Header";
 
 // Section
@@ -140,6 +173,7 @@ const ContextRailSection = ({
 	action,
 	children,
 }: ContextRailSectionProps) => {
+	useWarnIfOutsideRailRoot("ContextRail.Section");
 	const [open, setOpen] = useState(defaultOpen);
 	return (
 		<Box
