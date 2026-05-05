@@ -2,6 +2,17 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.9.3] — 2026-05-05
+
+### Fixed
+
+- **`<AppShell>` main + rail columns now render on `bg-surface` (white) with 1px column dividers; page-template bodies no longer force `bg-canvas`. Restores the handoff visual design.** In 1.9.0–1.9.2 the main and rail columns inherited the grid's `bg-canvas` (gray), making them visually indistinguishable from the sidebar; the only structural separator was the PageHeader's bottom border, which left content in `<DetailHeader>` and the rail column appearing to overlap with no hard boundary. AppShell now sets `bg="bg-surface"` and a `borderLeftWidth="1px" borderColor="border"` divider on both the main column (`gridColumn="2"`) and the rail column (`gridColumn="3"`), matching odon's pre-anker hand-rolled `AppLayout`. The sidebar continues to inherit the grid's `bg-canvas` (gray) — the surface contrast is what produces the column separation.
+- **Page-template bodies no longer force `bg-canvas`.** `<IndexPageTemplate>`, `<DetailPageTemplate>`, `<SettingsPageTemplate>`, and `<DashboardPageTemplate>` previously set `bg="bg-canvas"` on their outer `<Flex>`, which overrode any surface treatment AppShell applied to its main column. The templates now inherit their parent's surface — `bg-surface` when rendered inside `<AppShell>`, or whatever the surrounding wrapper provides in stories / standalone tests. Visual-only change; no public API impact.
+
+### Documentation
+
+- **`docs/page-patterns.md` §2 — "Column surfaces" subsection added.** Documents the anker visual contract: sidebar = `bg-canvas`, main + rail = `bg-surface`, with a 1px `border` divider between each column. Consumers should not override.
+
 ## [1.9.2] — 2026-05-05
 
 ### Changed

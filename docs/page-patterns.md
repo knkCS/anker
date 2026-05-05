@@ -119,6 +119,30 @@ function UsersPage() {
 }
 ```
 
+### Column surfaces
+
+Each column has a defined surface and a 1px divider separates them. This is
+the anker visual contract — consumers should not override.
+
+| Column   | Surface          | Token         | Left divider |
+|----------|------------------|---------------|--------------|
+| Sidebar  | gray (page frame) | `bg-canvas`   | —            |
+| Main     | white (content)   | `bg-surface`  | 1px `border` against sidebar |
+| Rail     | white (content)   | `bg-surface`  | 1px `border` against main |
+
+The sidebar inherits the grid's `bg-canvas`. The main column (`gridColumn="2"`)
+and the rail column (`gridColumn="3"`) sit on `bg-surface` with a
+`borderLeftWidth="1px" borderColor="border"` against the column to their left.
+This produces the structural separation that makes the `<PageHeader>` and
+`<DetailHeader>` content in the main column distinct from the rail content
+without relying on header borders alone.
+
+Page templates (`<IndexPageTemplate>`, `<DetailPageTemplate>`,
+`<SettingsPageTemplate>`, `<DashboardPageTemplate>`) inherit the main column's
+`bg-surface` — they no longer set their own background. This means a template
+rendered standalone (e.g. in a Storybook story without an `<AppShell>` parent)
+inherits whatever surface its wrapper provides.
+
 ### Rail precedence
 
 When both a `rail` prop *and* a descendant `usePageRail(content)` are

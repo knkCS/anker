@@ -252,11 +252,27 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 			<Box gridColumn="1" minW="0">
 				{sidebar}
 			</Box>
-			<Flex gridColumn="2" direction="column" minW="0" minH="100vh">
+			<Flex
+				data-testid="app-shell-main"
+				gridColumn="2"
+				direction="column"
+				minW="0"
+				minH="100vh"
+				bg="bg-surface"
+				borderLeftWidth="1px"
+				borderColor="border"
+			>
 				{children}
 			</Flex>
 			{showRailColumn ? (
-				<Box gridColumn="3" minW="0">
+				<Box
+					data-testid="app-shell-rail"
+					gridColumn="3"
+					minW="0"
+					bg="bg-surface"
+					borderLeftWidth="1px"
+					borderColor="border"
+				>
 					{renderedRail}
 				</Box>
 			) : null}
