@@ -2,6 +2,17 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.9.2] — 2026-05-05
+
+### Changed
+
+- **`<DetailPageTemplate>` now renders its body flush by default; the `flush` prop has been removed.** Previously the body wrapper applied `px="8" pt="6"` by default and accepted a `flush` opt-out — asymmetric with `<IndexPageTemplate>` (always flush) and a source of double-padding when children were `<Card>` (which has its own `p="6"`). Detail pages now match the index template's body shape: full-bleed by default, consumers add internal padding inside `children` (e.g. `<Box px="8" pt="6">`) when they need it. **Breaking change** for the small number of consumers passing `flush` explicitly — drop the prop. Consumers that previously relied on the implicit padded body should wrap their `children` in `<Box px="8" pt="6">`.
+
+### Documentation
+
+- **`docs/page-patterns.md` — rail-header contract.** Section 4 (ContextRail) now documents the rail-header contract: rail content MUST start with `<ContextRail.Header>` so the rail's top has a structural element matching the PageHeader's height. Without it the PageHeader's bottom border doesn't visually align with anything in the rail column. Adds a "Common rail mistakes" callout.
+- **`docs/page-patterns.md` — body tabs vs. sidebar sub-sections.** Sections 3 (Sidebar IA) and 11.2 (DetailPageTemplate) now include a clear "When to use" callout: body tabs for multiple views of the same entity (one page header), sidebar sub-sections for distinct destinations (one page header per item). Don't mix the two in the same view.
+
 ## [1.9.1] — 2026-05-05
 
 ### Fixed

@@ -233,6 +233,28 @@ The order is: most-personal first, most-administrative last. This
 matches the user's likely path of investigation when looking for a
 setting.
 
+### Body tabs vs. sidebar sub-sections — when to choose which
+
+> **Body tabs vs sidebar sub-sections — when to choose which:**
+>
+> - Use **body tabs** (DetailPageTemplate `tabs` slot) when the page
+>   presents *multiple views of the same entity* — e.g. a user with
+>   Profile / Security / Sessions / API Keys tabs. The user is exploring
+>   one record; the URL stays at `/users/123/<tab>` and the page chrome
+>   stays the same.
+>
+> - Use **sidebar sub-sections** when the items are *distinct
+>   destinations* — e.g. an Admin section with Users / OAuth Clients /
+>   Webhooks / Audit Log as separate index pages. Each is a top-level
+>   navigation target with its own page header.
+>
+> **Rule of thumb:** if the page header (title, breadcrumb, identity
+> card) stays the same across the items, they're tabs. If each item has
+> its own page header, they're sub-section nav.
+>
+> Don't mix the two in the same view — both UIs competing for the user's
+> eye is more noise than signal. Pick one based on the rule above.
+
 ---
 
 ## 4. ContextRail patterns
@@ -322,6 +344,40 @@ covering the table.
 When the rail is collapsed, only a thin 44px column with the
 expand-toggle remains. Section content is hidden. Tooltips on the
 toggle hint at what's hidden.
+
+### Rail-header contract
+
+> **Rail-header contract (required for alignment):** rail content MUST
+> start with `<ContextRail.Header>` (eyebrow + title) so the rail's top
+> has a structural element matching the PageHeader's height in the page
+> column. Without it, the PageHeader's bottom border (which is inside
+> the page-content column) doesn't visually align with anything in the
+> rail column, and the rail appears to float above the page divider.
+>
+> Example:
+>
+> ```tsx
+> usePageRail(
+>   <ContextRail>
+>     <ContextRail.Header eyebrow="WORKSPACE" title="Overview" />
+>     <ContextRail.Section …>…</ContextRail.Section>
+>   </ContextRail>,
+> );
+> ```
+
+### Common rail mistakes
+
+1. **Missing `<ContextRail.Header>`.** The #1 cause of misalignment
+   between the PageHeader bottom border and the rail content. Always
+   start a rail with `<ContextRail.Header>` — see the rail-header
+   contract above.
+2. **Rendering a rail on a settings/form page.** Rails compete with
+   form fields for the user's attention; settings should be read
+   top-to-bottom. See "When to hide" above.
+3. **Stuffing primary actions in the rail.** Primary actions belong in
+   the PageHeader's `actions` slot (via `usePageActions` or the
+   `actions` prop). The rail is for at-a-glance information, not the
+   page's main verbs.
 
 ---
 
@@ -747,6 +803,26 @@ or list, optionally filtered.
 **When to use.** Any "single entity" page: a single user, a single
 OAuth client, a single audit event detail, a single webhook config.
 
+> **Body tabs vs sidebar sub-sections — when to choose which:**
+>
+> - Use **body tabs** (DetailPageTemplate `tabs` slot) when the page
+>   presents *multiple views of the same entity* — e.g. a user with
+>   Profile / Security / Sessions / API Keys tabs. The user is exploring
+>   one record; the URL stays at `/users/123/<tab>` and the page chrome
+>   stays the same.
+>
+> - Use **sidebar sub-sections** when the items are *distinct
+>   destinations* — e.g. an Admin section with Users / OAuth Clients /
+>   Webhooks / Audit Log as separate index pages. Each is a top-level
+>   navigation target with its own page header.
+>
+> **Rule of thumb:** if the page header (title, breadcrumb, identity
+> card) stays the same across the items, they're tabs. If each item has
+> its own page header, they're sub-section nav.
+>
+> Don't mix the two in the same view — both UIs competing for the user's
+> eye is more noise than signal. Pick one based on the rule above.
+
 **Composition.**
 
 ```
@@ -756,7 +832,8 @@ OAuth client, a single audit event detail, a single webhook config.
 │ Tabs (optional)                       │
 ├───────────────────────────────────────┤
 │ children  (identity Card · panes …)   │
-│   px="8" pt="6" by default            │
+│   flush — add internal padding in     │
+│   children if you need it             │
 └───────────────────────────────────────┘
 ```
 
@@ -767,13 +844,13 @@ OAuth client, a single audit event detail, a single webhook config.
 | `breadcrumbs`, `title`, `subtitle`, `eyebrow` | … | … | Same as IndexPageTemplate            |
 | `actions`     | `ReactNode` | reads `usePageActions` | —                                         |
 | `tabs`        | `ReactNode` | —       | Recommended for entities with multiple aspects       |
-| `children`    | `ReactNode` | —       | Body — typically an identity Card + tab content      |
-| `flush`       | `boolean`   | `false` | When `true`, removes the default `px="8" pt="6"`     |
+| `children`    | `ReactNode` | —       | Body, flush. Add internal padding in `children`.     |
 
 **Escape hatches.**
 
-- `flush={true}` removes the default body padding. Use for code-editor
-  pages or full-bleed media viewers.
+- The body is rendered flush (no padding). If you need a padded body
+  (e.g. cards that shouldn't sit against the page edges), wrap children
+  in `<Box px="8" pt="6">`. This matches `IndexPageTemplate`.
 - The identity-Card-then-tabs pattern is a convention, not a
   requirement. A detail page without tabs is fine — render the body
   however the entity demands.
@@ -1205,8 +1282,7 @@ descendant registers content; omit both to drop the third grid track.
 | `title`       | `ReactNode` | yes      |                                                |
 | `breadcrumbs`, `subtitle`, `eyebrow`, `actions` | … | no |                                |
 | `tabs`        | `ReactNode` | no       |                                                |
-| `flush`       | `boolean`   | no       | `true` removes default body padding            |
-| `children`    | `ReactNode` | yes      | Body, padded by default                        |
+| `children`    | `ReactNode` | yes      | Body, flush                                    |
 
 ### 13.4 `<SettingsPageTemplate>`
 

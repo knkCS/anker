@@ -37,17 +37,10 @@ export interface DetailPageTemplateProps
 	tabs?: ReactNode;
 	/**
 	 * Page body — the entity's identity card, tab bodies, edit forms, etc.
-	 * Rendered with horizontal padding (`px="8"`) and top padding (`pt="6"`)
-	 * so cards inside don't sit flush against the page edges. Override by
-	 * passing a `<Box px="0" pt="0">…</Box>` if you need a flush layout.
+	 * Rendered flush against the canvas. Add internal padding inside
+	 * `children` if you need it.
 	 */
 	children: ReactNode;
-	/**
-	 * When `true`, removes the default `px="8" pt="6"` padding around
-	 * `children`. Use for detail pages whose body is itself a full-bleed
-	 * surface (e.g. a code editor). @default false
-	 */
-	flush?: boolean;
 }
 
 export function DetailPageTemplate({
@@ -58,7 +51,6 @@ export function DetailPageTemplate({
 	actions,
 	tabs,
 	children,
-	flush = false,
 }: DetailPageTemplateProps) {
 	const registered = useRegisteredPageActions();
 	const resolvedActions = actions ?? registered;
@@ -78,7 +70,7 @@ export function DetailPageTemplate({
 				actions={resolvedActions}
 			/>
 			{tabs ? <Box>{tabs}</Box> : null}
-			<Box flex="1" minH="0" px={flush ? "0" : "8"} pt={flush ? "0" : "6"}>
+			<Box flex="1" minH="0">
 				{children}
 			</Box>
 		</Flex>
