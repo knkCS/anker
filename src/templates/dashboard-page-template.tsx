@@ -62,7 +62,6 @@ export function DashboardPageTemplate({
 			direction="column"
 			flex="1"
 			minH="0"
-			bg="bg-canvas"
 		>
 			<PageHeader
 				breadcrumbs={breadcrumbs}

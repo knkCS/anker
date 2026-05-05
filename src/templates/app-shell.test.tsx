@@ -3,10 +3,20 @@ import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { describe, expect, it } from "vitest";
+import { createAnkerTheme } from "../theme/create-theme";
 import { AppShell, usePageRail } from "./app-shell";
 
 function renderWithChakra(ui: ReactElement) {
 	return render(<ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>);
+}
+
+// Use the anker theme so semantic tokens (`bg-surface`, `border`, …) actually
+// resolve to `var(--chakra-colors-…)` references in computed styles. The
+// surrounding tests use `defaultSystem` because they only need layout / DOM
+// presence assertions; the column-surface tests below check token resolution.
+function renderWithAnkerTheme(ui: ReactElement) {
+	const system = createAnkerTheme();
+	return render(<ChakraProvider value={system}>{ui}</ChakraProvider>);
 }
 
 function RailRegistrar() {
@@ -77,5 +87,37 @@ describe("AppShell", () => {
 			"data-rail",
 			"true",
 		);
+	});
+
+	it("main column renders on the surface with a left divider", () => {
+		// Visual contract: the main column sits on `bg-surface` (white) with a
+		// 1px divider against the gray sidebar. Sidebar inherits the grid's
+		// `bg-canvas`. See docs/page-patterns.md §2 "Column surfaces".
+		renderWithAnkerTheme(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<div>main</div>
+			</AppShell>,
+		);
+		const main = screen.getByTestId("app-shell-main");
+		expect(main).toBeInTheDocument();
+		expect(main).toHaveStyle({ borderLeftWidth: "1px" });
+		const cs = window.getComputedStyle(main);
+		expect(cs.background).toContain("--chakra-colors-bg-surface");
+	});
+
+	it("rail column renders on the surface with a left divider", () => {
+		renderWithAnkerTheme(
+			<AppShell
+				sidebar={<div data-testid="sb" />}
+				rail={<div data-testid="rail">rail</div>}
+			>
+				<div>main</div>
+			</AppShell>,
+		);
+		const rail = screen.getByTestId("app-shell-rail");
+		expect(rail).toBeInTheDocument();
+		expect(rail).toHaveStyle({ borderLeftWidth: "1px" });
+		const cs = window.getComputedStyle(rail);
+		expect(cs.background).toContain("--chakra-colors-bg-surface");
 	});
 });

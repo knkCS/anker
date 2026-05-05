@@ -81,7 +81,6 @@ export function IndexPageTemplate({
 			direction="column"
 			flex="1"
 			minH="0"
-			bg="bg-canvas"
 		>
 			<PageHeader
 				breadcrumbs={breadcrumbs}
