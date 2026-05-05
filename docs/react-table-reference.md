@@ -92,7 +92,9 @@ Acceptable for simple cases but gives weaker type inference.
 
 ## Cell Components
 
-Anker provides 11 reusable cell components in `src/components/data-table/cells/`. They are **plain React components with zero TanStack coupling** — they receive pre-extracted values and render UI.
+Anker provides 16 reusable cell components in `src/components/data-table/cells/`. They are **plain React components with zero TanStack coupling** — they receive pre-extracted values and render UI.
+
+> **Rule:** cells from `@knkcs/anker/components/data-table/cells` are the contract — never inline cell JSX from primitives unless no cell fits. If no cell fits, file an issue and propose a new cell. See `docs/page-patterns.md` §11.13 for the cell-mapping guide.
 
 ### Pattern: cells receive values, not TanStack context
 
@@ -113,17 +115,29 @@ Cells never import from `@tanstack/react-table`. The `info.getValue()` call happ
 
 | Cell | Value type | Use case |
 |------|-----------|----------|
-| `TruncatedTextCell` | `string` | General text with optional truncation |
-| `NumberCell` | `number \| string` | Locale-aware number formatting |
+| `ActionCell` | N/A (uses `actions` prop) | Row action icon buttons |
 | `BooleanCell` | `boolean` | Yes/No labels (configurable) |
-| `SlugCell` | `string` | Monospace identifiers |
 | `CodeCell` | `string` | Monospace with background |
-| `UrlCell` | `string` | Clickable external link |
 | `ColorSwatchCell` | `string` | Color circle + hex value |
 | `CountCell` | `array \| object \| number` | "N items" with pluralization |
-| `StatusBadgeCell` | `string` | Colored status badge |
-| `ActionCell` | N/A (uses `actions` prop) | Row action icon buttons |
 | `DateCell` | `string \| Date \| number` | Formatted date, optional relative tooltip |
+| `DeviceCell` | `string` (User-Agent) | "Chrome on macOS" + UA tooltip + optional badge |
+| `IdentityCell` | `string` (name) | Avatar + name + optional sub-text (person reference) |
+| `LinkCell` | `string` | Clickable internal link (anker `Link` primitive) |
+| `MenuCell` | N/A (uses `actions` prop) | Row overflow menu |
+| `NumberCell` | `number \| string` | Locale-aware number formatting |
+| `SlugCell` | `string` | Monospace identifiers |
+| `StatusBadgeCell` | `string` | Colored status badge; supports `detail` line and `tooltip` |
+| `SwitchCell` | `boolean` | Inline toggle bound to a row value |
+| `TruncatedTextCell` | `string` | General text with optional truncation; supports `subText` |
+| `UrlCell` | `string` | Clickable external link |
+
+The library also exports two non-cell helpers used by `DeviceCell`:
+
+| Export | Purpose |
+|---|---|
+| `parseUserAgent(ua)` | `{ browser, os }` from a UA string |
+| `formatUserAgent(ua)` | `"Chrome on macOS"` style label |
 
 ### Null handling
 
@@ -289,17 +303,23 @@ src/components/data-table/
 │   └── data-table.test.tsx # Rendering, empty state, loading, pagination
 └── cells/
     ├── cell-utils.ts       # emptyCellValue, truncateText, pluralize
+    ├── user-agent.ts       # parseUserAgent, formatUserAgent (used by DeviceCell)
     ├── index.ts            # Cell barrel
     ├── cells.stories.tsx   # All cells in a DataTable demo
-    ├── truncated-text-cell.tsx
-    ├── number-cell.tsx
+    ├── action-cell.tsx
     ├── boolean-cell.tsx
-    ├── slug-cell.tsx
     ├── code-cell.tsx
-    ├── url-cell.tsx
     ├── color-swatch-cell.tsx
     ├── count-cell.tsx
+    ├── date-cell.tsx
+    ├── device-cell.tsx
+    ├── identity-cell.tsx
+    ├── link-cell.tsx
+    ├── menu-cell.tsx
+    ├── number-cell.tsx
+    ├── slug-cell.tsx
     ├── status-badge-cell.tsx
-    ├── action-cell.tsx
-    └── date-cell.tsx
+    ├── switch-cell.tsx
+    ├── truncated-text-cell.tsx
+    └── url-cell.tsx
 ```

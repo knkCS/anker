@@ -32,7 +32,8 @@ export const WithSubText: Story = {
 
 export const TruncationWithSubText: Story = {
 	args: {
-		value: "A long description that may need to be truncated if it exceeds the limit",
+		value:
+			"A long description that may need to be truncated if it exceeds the limit",
 		maxLength: 30,
 		subText: "Owner: jane@example.com",
 	},
