@@ -20,8 +20,8 @@
 // that need padded content should wrap children in a `<Box px="8" py="6">`.
 
 import type { ReactNode } from "react";
-import { Box, Flex } from "../primitives/layout";
 import { PageHeader, type PageHeaderProps } from "../components/page-header";
+import { Box, Flex } from "../primitives/layout";
 import { useRegisteredPageActions } from "./app-shell";
 
 export interface IndexPageTemplateProps

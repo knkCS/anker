@@ -234,9 +234,7 @@ export function AppShell({ sidebar, rail, children }: AppShellProps) {
 			<Grid
 				data-testid="app-shell"
 				data-rail={showRailColumn ? "true" : "false"}
-				templateColumns={
-					showRailColumn ? "auto 1fr auto" : "auto 1fr"
-				}
+				templateColumns={showRailColumn ? "auto 1fr auto" : "auto 1fr"}
 				minH="100vh"
 				bg="bg-canvas"
 			>

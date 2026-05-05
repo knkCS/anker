@@ -5,8 +5,8 @@ import { useState } from "react";
 import { Button } from "../atoms/button";
 import { Sidebar } from "../components/sidebar/sidebar";
 import { Toolbar } from "../components/toolbar";
-import { Tabs } from "../primitives/tabs";
 import { Box } from "../primitives/layout";
+import { Tabs } from "../primitives/tabs";
 import { Heading, Text } from "../primitives/typography";
 import { AppShell } from "./app-shell";
 import { IndexPageTemplate } from "./index-page-template";
@@ -35,7 +35,13 @@ const SampleSidebar = () => (
 
 const FakeTable = () => (
 	<Box px="8" py="6" bg="bg-canvas">
-		<Box bg="bg-surface" borderRadius="md" borderWidth="1px" borderColor="border" p="6">
+		<Box
+			bg="bg-surface"
+			borderRadius="md"
+			borderWidth="1px"
+			borderColor="border"
+			p="6"
+		>
 			<Text color="muted">[ DataTable goes here ]</Text>
 		</Box>
 	</Box>
@@ -112,8 +118,8 @@ export const NoToolbar: Story = {
 						No toolbar
 					</Heading>
 					<Text color="muted">
-						Some index pages don't need a search/filter toolbar (small
-						lists, fixed-set indexes).
+						Some index pages don't need a search/filter toolbar (small lists,
+						fixed-set indexes).
 					</Text>
 				</Box>
 			</IndexPageTemplate>

@@ -18,8 +18,8 @@
 // thin so consumers can compose those freely under `children`.
 
 import type { ReactNode } from "react";
-import { Box, Flex } from "../primitives/layout";
 import { PageHeader, type PageHeaderProps } from "../components/page-header";
+import { Box, Flex } from "../primitives/layout";
 import { useRegisteredPageActions } from "./app-shell";
 
 export interface DetailPageTemplateProps

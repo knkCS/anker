@@ -12,27 +12,24 @@
 // AppShell + slot hooks
 export type { AppShellProps } from "./app-shell";
 export { AppShell, usePageActions, usePageRail } from "./app-shell";
-
-// Authenticated page templates
-export type { IndexPageTemplateProps } from "./index-page-template";
-export { IndexPageTemplate } from "./index-page-template";
-export type { DetailPageTemplateProps } from "./detail-page-template";
-export { DetailPageTemplate } from "./detail-page-template";
-export type { SettingsPageTemplateProps } from "./settings-page-template";
-export { SettingsPageTemplate } from "./settings-page-template";
-export type { DashboardPageTemplateProps } from "./dashboard-page-template";
-export { DashboardPageTemplate } from "./dashboard-page-template";
-
 // Unauthenticated / chromeless templates
 export type { AuthPageTemplateProps } from "./auth-page-template";
 export { AuthPageTemplate } from "./auth-page-template";
-export type { MarketingPageTemplateProps } from "./marketing-page-template";
-export { MarketingPageTemplate } from "./marketing-page-template";
-
+export type { DashboardPageTemplateProps } from "./dashboard-page-template";
+export { DashboardPageTemplate } from "./dashboard-page-template";
+export type { DetailPageTemplateProps } from "./detail-page-template";
+export { DetailPageTemplate } from "./detail-page-template";
 // Status / system pages
 export type { ErrorPageProps } from "./error-page";
 export { ErrorPage } from "./error-page";
+// Authenticated page templates
+export type { IndexPageTemplateProps } from "./index-page-template";
+export { IndexPageTemplate } from "./index-page-template";
 export type { LoadingPageProps } from "./loading-page";
 export { LoadingPage } from "./loading-page";
 export type { MaintenancePageProps } from "./maintenance-page";
 export { MaintenancePage } from "./maintenance-page";
+export type { MarketingPageTemplateProps } from "./marketing-page-template";
+export { MarketingPageTemplate } from "./marketing-page-template";
+export type { SettingsPageTemplateProps } from "./settings-page-template";
+export { SettingsPageTemplate } from "./settings-page-template";

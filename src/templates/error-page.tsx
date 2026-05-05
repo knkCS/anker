@@ -93,13 +93,7 @@ export function ErrorPage({
 					{title}
 				</Heading>
 				{description && (
-					<Text
-						fontSize="md"
-						color="muted"
-						lineHeight="1.6"
-						maxW="lg"
-						mb="8"
-					>
+					<Text fontSize="md" color="muted" lineHeight="1.6" maxW="lg" mb="8">
 						{description}
 					</Text>
 				)}

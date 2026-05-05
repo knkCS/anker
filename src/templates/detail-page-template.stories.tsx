@@ -1,9 +1,9 @@
 // src/templates/detail-page-template.stories.tsx
 import type { Meta, StoryObj } from "@storybook/react";
-import { Sidebar } from "../components/sidebar/sidebar";
 import { Card } from "../components/card";
-import { Tabs } from "../primitives/tabs";
+import { Sidebar } from "../components/sidebar/sidebar";
 import { Box } from "../primitives/layout";
+import { Tabs } from "../primitives/tabs";
 import { Text } from "../primitives/typography";
 import { AppShell } from "./app-shell";
 import { DetailPageTemplate } from "./detail-page-template";

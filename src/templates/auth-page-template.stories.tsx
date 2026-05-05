@@ -46,7 +46,7 @@ export const Login: Story = {
 		),
 		footer: (
 			<Text fontSize="xs">
-				No account? <a href="#">Create one</a>
+				No account? <a href="/register">Create one</a>
 			</Text>
 		),
 	},

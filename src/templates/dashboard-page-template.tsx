@@ -22,8 +22,8 @@
 // insights — calm surfaces, dense info, clear hierarchy.
 
 import type { ReactNode } from "react";
-import { Box, Flex, Grid } from "../primitives/layout";
 import { PageHeader, type PageHeaderProps } from "../components/page-header";
+import { Box, Flex, Grid } from "../primitives/layout";
 import { useRegisteredPageActions } from "./app-shell";
 
 export interface DashboardPageTemplateProps

@@ -18,8 +18,8 @@
 // organization settings, identity-provider settings, admin → general.
 
 import type { ReactNode } from "react";
-import { Box, Flex } from "../primitives/layout";
 import { PageHeader, type PageHeaderProps } from "../components/page-header";
+import { Box, Flex } from "../primitives/layout";
 import { useRegisteredPageActions } from "./app-shell";
 
 export interface SettingsPageTemplateProps
@@ -74,7 +74,10 @@ export function SettingsPageTemplate({
 			/>
 			<Box>{tabs}</Box>
 			<Box flex="1" minH="0" px="8" pt="6">
-				<Box maxW={maxBodyWidth} marginInline={maxBodyWidth === "full" ? "0" : "auto"}>
+				<Box
+					maxW={maxBodyWidth}
+					marginInline={maxBodyWidth === "full" ? "0" : "auto"}
+				>
 					{children}
 				</Box>
 			</Box>

@@ -27,7 +27,9 @@ const SampleSidebar = () => (
 				<Sidebar.Item icon={<Users size={16} />} active>
 					Users
 				</Sidebar.Item>
-				<Sidebar.Item icon={<Building2 size={16} />}>Organizations</Sidebar.Item>
+				<Sidebar.Item icon={<Building2 size={16} />}>
+					Organizations
+				</Sidebar.Item>
 			</Sidebar.Section>
 		</Sidebar.Body>
 	</Sidebar>
@@ -66,8 +68,8 @@ const RegisteringChild = () => {
 				Demo page
 			</Heading>
 			<Text color="muted">
-				This child registers page-actions and rail content via the AppShell
-				slot store.
+				This child registers page-actions and rail content via the AppShell slot
+				store.
 			</Text>
 		</Box>
 	);
@@ -96,8 +98,8 @@ export const NoRail: Story = {
 					No rail variant
 				</Heading>
 				<Text color="muted">
-					When `rail` is omitted (or null), the right column is dropped from
-					the grid entirely.
+					When `rail` is omitted (or null), the right column is dropped from the
+					grid entirely.
 				</Text>
 			</Box>
 		</AppShell>
