@@ -1,0 +1,24 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./identity-cell.stories";
+
+<Meta of={Stories} />
+
+# IdentityCell
+
+Renders an avatar plus a primary name with optional secondary text — the canonical "person" cell for users, members, requesters, and similar references. Avatar size defaults to `sm` to match DataTable row density. Initials are auto-derived from `name` when `avatarFallback` is omitted. Null/undefined `name` falls back to `emptyCellValue`.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+## With Image
+
+<Canvas of={Stories.WithImage} />
+
+## Name Only
+
+<Canvas of={Stories.NameOnly} />
+
+## Props
+
+<ArgTypes of={Stories} />
