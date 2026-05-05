@@ -65,10 +65,36 @@ The full human-facing spec lives at the anker GitHub Pages docs site (linked fro
 
 ---
 
+## Page templates
+
+anker ships canonical page-level templates under `@knkcs/anker/templates`. **Use templates before composing primitives manually.** They guarantee visual parity across knkCMS solutions — module federation will assemble multiple solutions into one browser frame, and inconsistent page chrome will look broken.
+
+Available templates:
+
+| Template | Use for |
+|---|---|
+| `<AppShell>` | Authenticated chrome (sidebar · main · rail). Provides `usePageActions(node)` and `usePageRail(node)` hooks. |
+| `<IndexPageTemplate>` | List pages — header + optional tabs + toolbar + DataTable |
+| `<DetailPageTemplate>` | Single-entity pages — header + optional tabs + body |
+| `<SettingsPageTemplate>` | Tabbed settings pages with form Cards |
+| `<DashboardPageTemplate>` | Widget-grid overview pages |
+| `<AuthPageTemplate>` | Login, register, MFA, verify — centered card, no shell |
+| `<MarketingPageTemplate>` | Unauthenticated landing pages |
+| `<ErrorPage>` | 404 / 500 / 403 |
+| `<LoadingPage>` | Initial app boot |
+| `<MaintenancePage>` | Service-down screens |
+
+**Rule:** if a template doesn't fit your page, file an issue — don't reinvent the layout.
+
+Full spec with composition diagrams, slot tables, and authoring rules: `docs/page-patterns.md` in the anker repo (linked from the GitHub Pages docs site).
+
+---
+
 ## Pointers
 
-- Full spec: anker GitHub Pages docs site (`/design-system`)
+- Full spec: anker GitHub Pages docs site (`/design-system`, `/page-patterns`)
 - Components: `node_modules/@knkcs/anker/dist/{primitives,components,atoms,forms,feedback}`
+- Templates: `import { AppShell, IndexPageTemplate, … } from "@knkcs/anker/templates"`
 - Theme entry: `import system from "@knkcs/anker/theme"`
 - Provider entry: `import { Provider } from "@knkcs/anker/primitives"`
 - Anker development rules (for working *on* anker, not consuming it): `node_modules/@knkcs/anker/CLAUDE.md` is **not** included in the package; see the anker GitHub repo
