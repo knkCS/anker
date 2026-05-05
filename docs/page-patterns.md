@@ -369,6 +369,42 @@ When the rail is collapsed, only a thin 44px column with the
 expand-toggle remains. Section content is hidden. Tooltips on the
 toggle hint at what's hidden.
 
+### Rail Root contract (required)
+
+> **Rail Root contract (required):** rail content MUST be wrapped in
+> `<ContextRail>` (the Root). The Root provides the column width
+> (360px expanded / 44px collapsed), the collapse toggle button, inner
+> padding, and persistence (`storageKey` prop). Using
+> `<ContextRail.Header>` or `<ContextRail.Section>` inside a fragment
+> renders without errors — but you'll be missing all of those features.
+>
+> **Correct:**
+>
+> ```tsx
+> usePageRail(
+>   <ContextRail storageKey="rail-users-overview">
+>     <ContextRail.Header eyebrow="WORKSPACE" title="Overview" />
+>     <ContextRail.Section …>…</ContextRail.Section>
+>   </ContextRail>
+> );
+> ```
+>
+> **Incorrect (silent failure mode):**
+>
+> ```tsx
+> usePageRail(
+>   <>
+>     <ContextRail.Header eyebrow="WORKSPACE" title="Overview" />
+>     <ContextRail.Section …>…</ContextRail.Section>
+>   </>
+> );
+> // ❌ no width, no collapse, no padding
+> ```
+>
+> In development, anker logs a `console.warn` once per mount when
+> `<ContextRail.Header>` or `<ContextRail.Section>` is rendered outside
+> a `<ContextRail>` Root. The warning is silenced in production.
+
 ### Rail-header contract
 
 > **Rail-header contract (required for alignment):** rail content MUST
@@ -391,14 +427,19 @@ toggle hint at what's hidden.
 
 ### Common rail mistakes
 
-1. **Missing `<ContextRail.Header>`.** The #1 cause of misalignment
+1. **Missing `<ContextRail>` Root wrapper.** Rendering
+   `<ContextRail.Header>` / `<ContextRail.Section>` inside a fragment
+   silently strips the column width, collapse toggle, padding, and
+   persistence. See the Rail Root contract above. anker emits a
+   dev-mode `console.warn` when this happens.
+2. **Missing `<ContextRail.Header>`.** The #1 cause of misalignment
    between the PageHeader bottom border and the rail content. Always
    start a rail with `<ContextRail.Header>` — see the rail-header
    contract above.
-2. **Rendering a rail on a settings/form page.** Rails compete with
+3. **Rendering a rail on a settings/form page.** Rails compete with
    form fields for the user's attention; settings should be read
    top-to-bottom. See "When to hide" above.
-3. **Stuffing primary actions in the rail.** Primary actions belong in
+4. **Stuffing primary actions in the rail.** Primary actions belong in
    the PageHeader's `actions` slot (via `usePageActions` or the
    `actions` prop). The rail is for at-a-glance information, not the
    page's main verbs.

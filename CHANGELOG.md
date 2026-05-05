@@ -2,6 +2,23 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.9.4] — 2026-05-05
+
+Doc clarification on `<ContextRail>` Root wrapper requirement; dev-mode warning when Header/Section is rendered outside Root; de-duped styling between AppShell rail column and ContextRail Root; removed dead `onClose` prop on Header.
+
+### Documentation
+
+- **`docs/page-patterns.md` §4 — Rail Root contract.** Adds an explicit "Rail Root contract (required)" subsection documenting that rail content MUST be wrapped in `<ContextRail>` (the Root) to get the column width, collapse toggle, inner padding, and persistence. Using `<ContextRail.Header>` / `<ContextRail.Section>` inside a fragment renders without errors but silently strips all of those features — a trap the first consumer (odon) fell into. The "Common rail mistakes" callout now leads with this as mistake #1.
+
+### Changed
+
+- **`<ContextRail>` Root no longer sets `bg="bg-surface"` / `borderLeftWidth="1px"` / `borderLeftColor="border"`.** That column-level styling now lives exclusively on `<AppShell>`'s rail column (added in 1.9.3), which is the source of truth and applies even when the rail content is something other than `<ContextRail>`. Eliminates the double-style. Visual contract unchanged for consumers using `<ContextRail>` inside `<AppShell>` — the surface and divider come from the column. Storybook stories now wrap `<ContextRail>` in an equivalent column wrapper so the visual still matches in isolation.
+- **Dev-mode warning when `<ContextRail.Header>` / `<ContextRail.Section>` is rendered outside `<ContextRail>`.** A small private `RailRootContext` is provided by the Root; children consume it on mount and, in `process.env.NODE_ENV !== 'production'`, log a single `console.warn` per mount with a clear message pointing at `docs/page-patterns.md`. No throw, no behavior change in production. Pure DX nudge so future consumers don't repeat odon's silent-failure bug.
+
+### Removed
+
+- **`<ContextRail.Header>` `onClose?: () => void` prop.** Dead since the component was added — the implementation only destructured it as `_onClose` and never wired it up. The Root already provides a collapse toggle; a separate "close" button on the Header would be redundant. **Technically a breaking change to the type, but no consumer ever passed the prop** — removing rather than wiring it up keeps the API surface honest.
+
 ## [1.9.3] — 2026-05-05
 
 ### Fixed
