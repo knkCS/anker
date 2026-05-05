@@ -12,6 +12,7 @@ export {
 } from "./color-swatch-cell";
 export { CountCell, type CountCellProps } from "./count-cell";
 export { DateCell, type DateCellProps } from "./date-cell";
+export { DeviceCell, type DeviceCellProps } from "./device-cell";
 export { IdentityCell, type IdentityCellProps } from "./identity-cell";
 export { LinkCell, type LinkCellProps } from "./link-cell";
 export {
@@ -31,3 +32,4 @@ export {
 	type TruncatedTextCellProps,
 } from "./truncated-text-cell";
 export { UrlCell, type UrlCellProps } from "./url-cell";
+export { formatUserAgent, parseUserAgent } from "./user-agent";

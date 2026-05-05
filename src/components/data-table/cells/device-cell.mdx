@@ -1,0 +1,28 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./device-cell.stories";
+
+<Meta of={Stories} />
+
+# DeviceCell
+
+Renders a User-Agent string as a human-readable browser + OS label ("Chrome on macOS"). The raw UA is displayed below in muted text and is also available via a hover tooltip — useful for sessions, devices, and login-history columns. An optional `badge` slot to the right of the primary line marks affordances like "Current session". Null/empty UA falls back to `emptyCellValue`.
+
+The internal `parseUserAgent` matcher recognises Chrome, Safari, Firefox, Edge, and Opera on macOS, iOS, Windows, Android, and Linux. Unknown browsers render as "Unknown" with no OS suffix.
+
+## Usage
+
+<Canvas of={Stories.ChromeOnMac} />
+
+## With Badge
+
+<Canvas of={Stories.WithBadge} />
+
+## Other browsers / platforms
+
+<Canvas of={Stories.SafariOnIOS} />
+<Canvas of={Stories.EdgeOnWindows} />
+<Canvas of={Stories.FirefoxOnLinux} />
+
+## Props
+
+<ArgTypes of={Stories} />
