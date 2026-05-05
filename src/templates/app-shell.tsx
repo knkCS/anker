@@ -185,15 +185,13 @@ export interface AppShellProps {
 	 */
 	sidebar: ReactNode;
 	/**
-	 * Context rail element. Pass an instance of `<ContextRail>` to enable the
-	 * rail column. Pass `null` (or omit) to disable the column entirely (no
-	 * grid track is reserved). Pages can still register rail content via
-	 * `usePageRail` — when the rail column is disabled, registered content is
-	 * dropped silently.
+	 * Context rail element. Acts as a *fallback* for the rail column: it
+	 * renders when no descendant has registered rail content via
+	 * `usePageRail`. Registered content always wins over the prop.
 	 *
-	 * Tip: pass an _empty_ `<ContextRail>` if you want the column to exist
-	 * (so child pages can populate it via `usePageRail`) without rendering
-	 * any default content.
+	 * The rail column is enabled — and a grid track is reserved — when *either*
+	 * a `rail` prop is supplied *or* a descendant has registered rail content.
+	 * Omit both (or pass `null`) to drop the rail column entirely.
 	 */
 	rail?: ReactNode;
 	/** Page content. */
@@ -208,49 +206,61 @@ export interface AppShellProps {
  * AppShell is layout-only — it does not render a PageHeader, and it does not
  * inject any business chrome. Pages compose `<IndexPageTemplate>`,
  * `<DetailPageTemplate>`, etc. inside `children`.
+ *
+ * Rail precedence: content registered by a descendant via `usePageRail` wins
+ * over the static `rail` prop. The prop is the fallback when no descendant
+ * has registered content. Rationale: a descendant explicitly registering
+ * content is signaling "show this here", which should trump the static prop.
  */
 export function AppShell({ sidebar, rail, children }: AppShellProps) {
+	// AppShell is split into an outer Provider and an inner Renderer so the
+	// renderer's `useContext(SlotStoreContext)` resolves to *our* store rather
+	// than the parent context. (A naive single component that both provides
+	// and consumes the context at the same level reads the parent context —
+	// the Provider only takes effect for descendants.)
 	const store = useMemo(() => createSlotStore(), []);
-	const railNode = useSlotValue("rail");
-
-	// The rail column is enabled when the consumer passed a `rail` element.
-	// We use the consumer-supplied element as a *container* for the
-	// dynamically-registered rail content: anything registered via
-	// `usePageRail` is appended into that container at render time. This
-	// keeps the framing chrome (collapse toggle, scrolling, borders) under
-	// the consumer's control while letting pages contribute body content.
-	//
-	// Implementation note: we render `rail` as-is and tee its `children`
-	// across (a) whatever the consumer passed and (b) whatever a page
-	// registered via `usePageRail`. The simplest, escape-hatch-friendly
-	// behavior is: if a page has registered rail content, render that;
-	// otherwise render the consumer's `rail` as-is. Consumers that want
-	// "default + page-specific" content can wire that themselves.
-	const showRailColumn = rail !== undefined && rail !== null;
-	const renderedRail = railNode ?? rail;
-
 	return (
 		<SlotStoreContext.Provider value={store}>
-			<Grid
-				data-testid="app-shell"
-				data-rail={showRailColumn ? "true" : "false"}
-				templateColumns={showRailColumn ? "auto 1fr auto" : "auto 1fr"}
-				minH="100vh"
-				bg="bg-canvas"
-			>
-				<Box gridColumn="1" minW="0">
-					{sidebar}
-				</Box>
-				<Flex gridColumn="2" direction="column" minW="0" minH="100vh">
-					{children}
-				</Flex>
-				{showRailColumn ? (
-					<Box gridColumn="3" minW="0">
-						{renderedRail}
-					</Box>
-				) : null}
-			</Grid>
+			<AppShellInner sidebar={sidebar} rail={rail}>
+				{children}
+			</AppShellInner>
 		</SlotStoreContext.Provider>
 	);
 }
 AppShell.displayName = "AppShell";
+
+function AppShellInner({ sidebar, rail, children }: AppShellProps) {
+	const railNode = useSlotValue("rail");
+
+	// Precedence: registered rail content wins, fall back to the `rail` prop.
+	// The rail column is enabled when *either* the consumer passed a `rail`
+	// element *or* a descendant registered content via `usePageRail`.
+	const renderedRail = railNode ?? rail;
+	const showRailColumn =
+		renderedRail !== undefined &&
+		renderedRail !== null &&
+		renderedRail !== false;
+
+	return (
+		<Grid
+			data-testid="app-shell"
+			data-rail={showRailColumn ? "true" : "false"}
+			templateColumns={showRailColumn ? "auto 1fr auto" : "auto 1fr"}
+			minH="100vh"
+			bg="bg-canvas"
+		>
+			<Box gridColumn="1" minW="0">
+				{sidebar}
+			</Box>
+			<Flex gridColumn="2" direction="column" minW="0" minH="100vh">
+				{children}
+			</Flex>
+			{showRailColumn ? (
+				<Box gridColumn="3" minW="0">
+					{renderedRail}
+				</Box>
+			) : null}
+		</Grid>
+	);
+}
+AppShellInner.displayName = "AppShellInner";

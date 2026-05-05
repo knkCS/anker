@@ -113,3 +113,15 @@ export const WithSlotRegistration: Story = {
 		</AppShell>
 	),
 };
+
+// Demonstrates descendant-driven rail content with no `rail` prop on AppShell.
+// The rail column appears purely because the child called `usePageRail(...)`.
+// This is the common shape for solutions where each route owns its own rail
+// content and there's no app-wide default.
+export const DescendantDrivenRail: Story = {
+	render: () => (
+		<AppShell sidebar={<SampleSidebar />}>
+			<RegisteringChild />
+		</AppShell>
+	),
+};
