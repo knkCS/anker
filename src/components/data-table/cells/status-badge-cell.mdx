@@ -15,6 +15,12 @@ Renders a `StatusBadge` for a string status value. Pass a `colorMap` to associat
 
 <Canvas of={Stories.NoColorMap} />
 
+## With Tooltip
+
+The optional `tooltip` prop wraps the badge in `<Tooltip>` from `@knkcs/anker/primitives`. Use it for status descriptions, full metadata payloads, or any "expand on hover" affordance that doesn't fit on the badge label.
+
+<Canvas of={Stories.WithTooltip} />
+
 ## Props
 
 <ArgTypes of={Stories} />
