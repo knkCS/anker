@@ -287,6 +287,7 @@ Consumers can build a customized system via `createAnkerTheme(preset)`. The pres
 - knk Brand Guidelines (October 2021) — print/InDesign source
 - `docs/chakra-v3-reference.md` — v3 patterns this repo enforces
 - `docs/react-table-reference.md` — TanStack Table patterns
+- **`docs/page-patterns.md`** — see for layout/template patterns (AppShell, IndexPageTemplate, etc.). This document defines the visual language; `page-patterns.md` defines the page-level contract on top of it.
 - `CLAUDE.md` — anker development rules
 - `CLAUDE-ANKER.md` — design-system rules for AI-assisted consumers
 

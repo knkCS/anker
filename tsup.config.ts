@@ -8,6 +8,7 @@ export default defineConfig({
     "atoms/index": "src/atoms/index.ts",
     "forms/index": "src/forms/index.ts",
     "feedback/index": "src/feedback/index.ts",
+    "templates/index": "src/templates/index.ts",
   },
   format: ["esm"],
   dts: true,

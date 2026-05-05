@@ -2,6 +2,30 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.9.0] — 2026-05-05
+
+### Added
+
+- **`@knkcs/anker/templates`** — new entrypoint that ships the canonical page-level layouts every knkCMS solution should use:
+  - `<AppShell>` — sidebar / main / rail composition with built-in slot store. Exposes `usePageActions(node)` and `usePageRail(node)` hooks that any descendant can call to register content into the page chrome. The slot store uses `useSyncExternalStore` so producers and consumers stay decoupled across React commit boundaries (no flicker on route changes).
+  - `<IndexPageTemplate>` — list pages: PageHeader + optional Tabs + Toolbar + flush body.
+  - `<DetailPageTemplate>` — single-entity pages: PageHeader + optional Tabs + padded body. `flush` prop available for full-bleed bodies.
+  - `<SettingsPageTemplate>` — tabbed settings pages: PageHeader + Tabs (required) + readability-constrained body (`maxBodyWidth="3xl"` by default).
+  - `<DashboardPageTemplate>` — widget-grid overview pages: PageHeader + 12-column responsive grid.
+  - `<AuthPageTemplate>` — pre-auth screens: thin wrapper around `<AuthCard>`, surfaced under templates so consumers have one entry point.
+  - `<MarketingPageTemplate>` — full-bleed landing-page chrome with hero + features + footer.
+  - `<ErrorPage>` — 404 / 500 / 403 / generic failures.
+  - `<LoadingPage>` — initial app-boot loading screen.
+  - `<MaintenancePage>` — service-down screens with optional ETA.
+- **`docs/page-patterns.md`** — comprehensive page-pattern specification (~1500 lines). Defines app-shell composition, sidebar IA, rail variants, PageHeader and Toolbar anatomy, modal patterns, form patterns, empty/loading/error states, the full template catalog (with composition diagrams, slot tables, escape hatches, authoring rules), and the slot-mechanism rationale. Source-of-truth contract for solution authors.
+- **README "Setup for consumers"** — comprehensive section covering install, provider tree, fonts (Inter Tight + JetBrains Mono), theme customization via `createAnkerTheme(preset)`, the `@`-import for `CLAUDE-ANKER.md`, opt-out paths for sidebar / dark mode / confirm modal / i18n, and a hello-world example wiring AppShell + IndexPageTemplate.
+- **`CLAUDE-ANKER.md` "Page templates" section** — lists the available templates and the rule "Use templates before composing primitives". Adds `@knkcs/anker/templates` to the Pointers list.
+- **`docs/design-system.md` cross-reference** — references section now points to `page-patterns.md` for layout/template patterns.
+
+### Build
+
+- `tsup.config.ts` and `package.json` `exports` field gain a `./templates` entry. The `check-chakra-imports` script now scans `src/templates` to enforce the same Chakra-import discipline used elsewhere.
+
 ## [1.8.1] — 2026-05-04
 
 ### Fixed
