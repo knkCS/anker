@@ -1227,6 +1227,81 @@ Operators serve this from a static asset or fallback handler.
 
 ---
 
+### 11.13 DataTable cells
+
+**Rule.** Cells from `@knkcs/anker/components/data-table/cells` are
+the contract — **never inline cell JSX from primitives unless no cell
+fits**. If no cell fits, file an issue and propose a new cell. Inline
+`<Badge>`, `<Box>`, `<Text>`, `<Tooltip>` compositions in column
+files are the kind of drift the cells library was built to prevent;
+they fragment the visual language across solutions and silently miss
+later improvements (a11y fixes, dark-mode tweaks, density updates).
+
+**Why it matters.** Module federation will assemble multiple knkCMS
+solutions (Odon, Core, Template, MAS, Aufgabenmanagement, …) into a
+single browser frame. Tables are the single most common surface in
+the platform. Visually divergent rows — even by 1–2px of padding or
+a slightly different muted color — read as broken to operators.
+
+**Available cells.** Anker ships 16 cells today. All live behind one
+import path:
+
+```tsx
+import {
+  ActionCell, BooleanCell, CodeCell, ColorSwatchCell, CountCell,
+  DateCell, DeviceCell, IdentityCell, LinkCell, MenuCell, NumberCell,
+  SlugCell, StatusBadgeCell, SwitchCell, TruncatedTextCell, UrlCell,
+} from "@knkcs/anker/components/data-table/cells";
+```
+
+| Cell | Use case |
+|---|---|
+| `ActionCell` | Row action icon buttons (edit / delete / download) |
+| `BooleanCell` | Yes/No labels with configurable strings |
+| `CodeCell` | Monospace inline code (SQL, JSON snippets) |
+| `ColorSwatchCell` | Color circle + hex value |
+| `CountCell` | "N items" / "1 item" with pluralization |
+| `DateCell` | Formatted date with optional relative-time tooltip |
+| `DeviceCell` | User-Agent → "Chrome on macOS" + UA tooltip + optional badge |
+| `IdentityCell` | Avatar + primary name + optional sub-text (person reference) |
+| `LinkCell` | Internal Link via the anker `Link` primitive |
+| `MenuCell` | Row overflow menu (`⋯`) |
+| `NumberCell` | Locale-aware number formatting |
+| `SlugCell` | Monospace identifiers (KSUID, slug, handle) |
+| `StatusBadgeCell` | Colored status badge; supports `detail` and `tooltip` |
+| `SwitchCell` | Inline toggle bound to a row value |
+| `TruncatedTextCell` | General text with optional truncation; supports `subText` |
+| `UrlCell` | External clickable link |
+
+**Mapping examples.** Common column patterns and the cell to reach
+for:
+
+| Column intent | Reach for |
+|---|---|
+| Status / state pill | `StatusBadgeCell` (use `tooltip` for descriptions; `detail` for error-line under the badge) |
+| Timestamp | `DateCell` |
+| Mono ID / KSUID | `SlugCell` (small / inline) or `CodeCell` (block-y) |
+| Per-row actions | `ActionCell` (small set) or `MenuCell` (overflow) |
+| Person reference (user, member, requester, author) | `IdentityCell` |
+| Device / User-Agent | `DeviceCell` |
+| Primary value with creation date / context line | `TruncatedTextCell` with `subText` |
+| Yes/No flag | `BooleanCell` |
+| Numeric quantity | `NumberCell` |
+| Colored swatch (theme color, brand color) | `ColorSwatchCell` |
+| "N rows / N items" | `CountCell` |
+| Internal navigation link | `LinkCell` |
+| External URL | `UrlCell` |
+| Inline toggle | `SwitchCell` |
+| Long free text | `TruncatedTextCell` (set `maxLength`) |
+
+All cells share the same null-handling contract: a null / undefined
+value renders the `emptyCellValue` em-dash (`"—"`).
+
+**Full slot / prop tables.** See [`docs/react-table-reference.md`](./react-table-reference.md)
+for prop tables, value-type signatures, and the file map.
+
+---
+
 ## 12. Slot mechanism
 
 `<AppShell>` exposes two write-side hooks for descendant components to

@@ -15,6 +15,14 @@ Displays a text value, optionally truncating it to a maximum character length wi
 
 <Canvas of={Stories.WithTruncation} />
 
+## With Sub-text
+
+The optional `subText` prop renders a smaller muted line below the primary value — useful for "name + creation date", "target + ID", and similar two-line cells. Sub-text is `lineClamp={1}` and is not affected by `maxLength`.
+
+<Canvas of={Stories.WithSubText} />
+
+<Canvas of={Stories.TruncationWithSubText} />
+
 ## Props
 
 <ArgTypes of={Stories} />

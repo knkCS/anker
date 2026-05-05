@@ -23,6 +23,22 @@ export const WithTruncation: Story = {
 	},
 };
 
+export const WithSubText: Story = {
+	args: {
+		value: "service-account-key",
+		subText: "Created 2 days ago",
+	},
+};
+
+export const TruncationWithSubText: Story = {
+	args: {
+		value:
+			"A long description that may need to be truncated if it exceeds the limit",
+		maxLength: 30,
+		subText: "Owner: jane@example.com",
+	},
+};
+
 export const NullValue: Story = {
 	args: {
 		value: null,

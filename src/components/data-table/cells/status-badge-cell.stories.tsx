@@ -56,6 +56,23 @@ export const WithDetailCustomColor: Story = {
 	},
 };
 
+export const WithTooltip: Story = {
+	args: {
+		value: "metadata",
+		colorMap: { metadata: "blue" },
+		tooltip: "Click the row to inspect the full payload",
+	},
+};
+
+export const WithTooltipAndDetail: Story = {
+	args: {
+		value: "failed",
+		colorMap: { ...statusColorMap, failed: "red" },
+		detail: "Export timed out after 30s",
+		tooltip: "Retried 3 times before giving up",
+	},
+};
+
 export const NullValue: Story = {
 	args: {
 		value: null,

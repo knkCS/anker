@@ -1,6 +1,7 @@
 import type React from "react";
 import { StatusBadge } from "../../../atoms/status-badge";
 import { VStack } from "../../../primitives/layout";
+import { Tooltip } from "../../../primitives/tooltip";
 import { Text } from "../../../primitives/typography";
 import { emptyCellValue } from "./cell-utils";
 
@@ -13,6 +14,12 @@ export interface StatusBadgeCellProps {
 	detail?: string | null;
 	/** Color for the detail text. @default "fg.error" */
 	detailColor?: string;
+	/**
+	 * Optional tooltip content shown on hover/focus over the badge. Useful
+	 * for status descriptions, full JSON payloads, or contextual hints that
+	 * don't fit on the badge label.
+	 */
+	tooltip?: React.ReactNode;
 }
 
 export const StatusBadgeCell: React.FC<StatusBadgeCellProps> = ({
@@ -21,10 +28,19 @@ export const StatusBadgeCell: React.FC<StatusBadgeCellProps> = ({
 	fallbackColor = "gray",
 	detail,
 	detailColor = "fg.error",
+	tooltip,
 }) => {
 	if (value == null) return <span>{emptyCellValue}</span>;
 	const color = colorMap?.[value] ?? fallbackColor;
-	const badge = <StatusBadge label={value} color={color} />;
+	let badge: React.ReactNode = <StatusBadge label={value} color={color} />;
+
+	if (tooltip != null) {
+		badge = (
+			<Tooltip content={tooltip} showArrow>
+				<span>{badge}</span>
+			</Tooltip>
+		);
+	}
 
 	if (detail) {
 		return (
@@ -37,6 +53,6 @@ export const StatusBadgeCell: React.FC<StatusBadgeCellProps> = ({
 		);
 	}
 
-	return badge;
+	return <>{badge}</>;
 };
 StatusBadgeCell.displayName = "StatusBadgeCell";

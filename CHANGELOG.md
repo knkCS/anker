@@ -2,6 +2,27 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.10.0] — 2026-05-05
+
+Two new cells (`IdentityCell`, `DeviceCell`); `subText` prop on `TruncatedTextCell`; `tooltip` prop on `StatusBadgeCell`; cell library hoisted in docs.
+
+### Added
+
+- **`IdentityCell`** (`@knkcs/anker/components/data-table/cells`) — avatar + primary name + optional sub-text. The canonical "person" cell for users, members, requesters, and similar references in DataTables. Initials are auto-derived from `name` when `avatarFallback` is omitted; `size` defaults to `"sm"` to match table density. Null `name` falls back to `emptyCellValue` like every other cell. Closes #97.
+- **`DeviceCell`** (`@knkcs/anker/components/data-table/cells`) — User-Agent string → "Chrome on macOS" label, with the raw UA shown muted below and reachable via hover tooltip. Optional `badge` slot to mark "Current" sessions or similar affordances. Internal `parseUserAgent` / `formatUserAgent` helpers cover Chrome, Safari, Firefox, Edge, and Opera on macOS, iOS, Windows, Android, and Linux; both are exported so solutions can reuse the same parser outside table contexts. Replaces odon's hand-rolled `web/src/utils/user-agent.ts` plus inline session-row JSX. Closes #98.
+- **`TruncatedTextCell` `subText` prop** — optional secondary line rendered below the primary value in smaller muted text (`lineClamp={1}`). Primary value still respects `maxLength`. Backwards compatible; consumers that don't pass `subText` see no change. Replaces inline `<Stack><Text/><Text/></Stack>` compositions for "name + creation date" / "target + ID" patterns. Closes #99.
+- **`StatusBadgeCell` `tooltip` prop** — optional `ReactNode` that wraps the rendered Badge in `<Tooltip>` from `@knkcs/anker/primitives`. Use for status descriptions, full metadata payloads, or any "expand on hover" affordance that doesn't fit on the badge label. Composes cleanly with the existing `detail` prop. Backwards compatible. Closes #100.
+
+### Documentation
+
+- **`docs/page-patterns.md` §11.13 — DataTable cells.** New section that surfaces the cell library: states the rule (cells are the contract; file an issue before hand-rolling), lists all 16 cells with one-line use cases, and gives a mapping guide for common column intents (status → `StatusBadgeCell`, timestamp → `DateCell`, mono ID → `SlugCell`/`CodeCell`, action button → `ActionCell`, person reference → `IdentityCell`, device/UA → `DeviceCell`, primary + sub text → `TruncatedTextCell` with `subText`). Links out to the full slot/prop tables in `docs/react-table-reference.md`.
+- **`CLAUDE-ANKER.md` — DataTable cells.** New compact section right after "Page templates" that bakes the cells contract into the rules file consumers `@`-import. AI sessions working on solution code now see cells as a first-class option alongside templates and primitives. Includes the import path and pointers to the deeper docs.
+- **`docs/react-table-reference.md` — Cell components.** Bumped from "11 cells" (stale; main was already at 14) to "16 cells" (14 existing + `IdentityCell` + `DeviceCell`). Cell table sorted alphabetically; new `subText` (TruncatedTextCell) and `tooltip` (StatusBadgeCell) props called out. The rule from §11.13 is repeated at the top of the cells section so this doc remains self-contained. File map updated with `device-cell.tsx`, `identity-cell.tsx`, and `user-agent.ts`.
+
+### Discoverability
+
+The first consumer (odon) used **zero** cells in its initial DataTable rollouts — every column file pulled `Badge`, `Box`, `Text`, `Tooltip` from primitives and hand-rolled cell content. The library existed but wasn't surfaced anywhere AI sessions or new contributors would see it. This release fixes the discoverability gap on three sides: the page-patterns spec, the AI rules file, and the React Table reference all now lead with cells.
+
 ## [1.9.4] — 2026-05-05
 
 Doc clarification on `<ContextRail>` Root wrapper requirement; dev-mode warning when Header/Section is rendered outside Root; de-duped styling between AppShell rail column and ContextRail Root; removed dead `onClose` prop on Header.
