@@ -2,6 +2,15 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.10.2] — 2026-05-05
+
+`colorPalette` prop on `IdentityCell` (forwards to underlying Avatar); `icon` prop on `StatusBadgeCell` (renders before label inside the badge).
+
+### Added
+
+- **`IdentityCell` `colorPalette` prop** — optional `string` forwarded to the underlying `Avatar` primitive (e.g. `"primary"`, `"secondary"`). Tints the fallback initials circle with the chosen palette so consumers can match their app's accent color instead of the default neutral-gray. Backwards compatible: omitting the prop preserves the current look. Restores odon's pre-anker `UserAvatar` "dark blue circles" appearance.
+- **`StatusBadgeCell` `icon` prop** — optional `React.ReactNode` rendered inline before the label inside the Badge with a small gap. Use a `lucide-react` glyph (or any icon component) to mark statuses like 2FA "On" / "Off". Backwards compatible: omitting `icon` keeps the current label-only badge. Composes with `detail` and `tooltip`. Restores odon's pre-anker `MfaBadge` icon affordance.
+
 ## [1.10.1] — 2026-05-06
 
 ### Fixed

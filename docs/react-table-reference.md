@@ -122,12 +122,12 @@ Cells never import from `@tanstack/react-table`. The `info.getValue()` call happ
 | `CountCell` | `array \| object \| number` | "N items" with pluralization |
 | `DateCell` | `string \| Date \| number` | Formatted date, optional relative tooltip |
 | `DeviceCell` | `string` (User-Agent) | "Chrome on macOS" + UA tooltip + optional badge |
-| `IdentityCell` | `string` (name) | Avatar + name + optional sub-text (person reference) |
+| `IdentityCell` | `string` (name) | Avatar + name + optional sub-text (person reference); supports `colorPalette` to tint the avatar |
 | `LinkCell` | `string` | Clickable internal link (anker `Link` primitive) |
 | `MenuCell` | N/A (uses `actions` prop) | Row overflow menu |
 | `NumberCell` | `number \| string` | Locale-aware number formatting |
 | `SlugCell` | `string` | Monospace identifiers |
-| `StatusBadgeCell` | `string` | Colored status badge; supports `detail` line and `tooltip` |
+| `StatusBadgeCell` | `string` | Colored status badge; supports `detail` line, `tooltip`, and `icon` (rendered before the label) |
 | `SwitchCell` | `boolean` | Inline toggle bound to a row value |
 | `TruncatedTextCell` | `string` | General text with optional truncation; supports `subText` |
 | `UrlCell` | `string` | Clickable external link |
