@@ -102,3 +102,22 @@ export const SolidDefaultsPrimary: Story = {
 		</HStack>
 	),
 };
+
+// Outline variant resolves hover/active backgrounds via the active
+// `colorPalette`. Hover each button to verify the tint follows the palette.
+export const OutlineColorPalettes: Story = {
+	render: () => (
+		<HStack gap={4}>
+			<Button variant="outline">Primary (default)</Button>
+			<Button variant="outline" colorPalette="red">
+				Deactivate account
+			</Button>
+			<Button variant="outline" colorPalette="green">
+				Approve
+			</Button>
+			<Button variant="outline" colorPalette="gray">
+				Neutral
+			</Button>
+		</HStack>
+	),
+};

@@ -136,17 +136,21 @@ export const buttonTheme = defineRecipe({
 				},
 			},
 
-			// Outline: white background with subtle hover/active states
+			// Outline: white background with subtle hover/active states.
+			// Uses the `colorPalette` semantic tokens so the hover/active tints
+			// follow whichever palette the consumer set on the Button (e.g.
+			// `colorPalette="red"` -> red-tinted hover). Defaults to the
+			// `primary` palette via the recipe's `defaultVariants`.
 			outline: {
 				bg: { base: "white", _dark: "gray.800" },
 				_hover: {
-					bg: { base: "gray.50", _dark: "gray.700/40" },
+					bg: { base: "colorPalette.50", _dark: "colorPalette.900/40" },
 				},
 				_checked: {
-					bg: { base: "gray.100", _dark: "gray.700" },
+					bg: { base: "colorPalette.100", _dark: "colorPalette.800" },
 				},
 				_active: {
-					bg: { base: "gray.100", _dark: "gray.700" },
+					bg: { base: "colorPalette.100", _dark: "colorPalette.800" },
 				},
 			},
 
