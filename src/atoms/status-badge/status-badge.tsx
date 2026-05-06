@@ -8,10 +8,12 @@ export interface StatusBadgeProps {
 	label: string;
 	/** The background color for the badge (hex format, e.g. "#ff0000") */
 	color: string;
+	/** Optional icon rendered inline before the label inside the badge. */
+	icon?: React.ReactNode;
 }
 
 export const StatusBadge: React.FC<StatusBadgeProps> = (props) => {
-	const { label, color } = props;
+	const { label, color, icon } = props;
 
 	const textColor = useMemo(() => {
 		try {
@@ -28,7 +30,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = (props) => {
 			rounded="base"
 			px={2}
 			marginInlineStart={1}
+			gap={1}
 		>
+			{icon}
 			{label}
 		</Badge>
 	);

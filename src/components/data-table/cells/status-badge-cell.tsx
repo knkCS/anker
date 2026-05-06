@@ -20,6 +20,11 @@ export interface StatusBadgeCellProps {
 	 * don't fit on the badge label.
 	 */
 	tooltip?: React.ReactNode;
+	/**
+	 * Optional icon rendered inline before the label inside the badge (e.g.
+	 * a `lucide-react` glyph). A small gap separates it from the label.
+	 */
+	icon?: React.ReactNode;
 }
 
 export const StatusBadgeCell: React.FC<StatusBadgeCellProps> = ({
@@ -29,10 +34,13 @@ export const StatusBadgeCell: React.FC<StatusBadgeCellProps> = ({
 	detail,
 	detailColor = "fg.error",
 	tooltip,
+	icon,
 }) => {
 	if (value == null) return <span>{emptyCellValue}</span>;
 	const color = colorMap?.[value] ?? fallbackColor;
-	let badge: React.ReactNode = <StatusBadge label={value} color={color} />;
+	let badge: React.ReactNode = (
+		<StatusBadge label={value} color={color} icon={icon} />
+	);
 
 	if (tooltip != null) {
 		badge = (
