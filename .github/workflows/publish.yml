@@ -21,6 +21,7 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
+      - run: npm run verify-exports
       - run: npm run test
       - run: npm publish --provenance --access public
         env:
