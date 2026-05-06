@@ -92,7 +92,7 @@ Full spec with composition diagrams, slot tables, and authoring rules: `docs/pag
 
 ## DataTable cells
 
-anker ships 16 reusable cell components for `<DataTable>` columns under `@knkcs/anker/components/data-table/cells`. **Use cells before composing primitives.** Inline `<Badge>` / `<Box>` / `<Text>` / `<Tooltip>` cell content fragments the visual language and silently misses later improvements (a11y, dark mode, density).
+anker ships 16 reusable cell components for `<DataTable>` columns. They are exported from `@knkcs/anker/components` (the same import path as `DataTable`, `Card`, `Modal`, etc.). **Use cells before composing primitives.** Inline `<Badge>` / `<Box>` / `<Text>` / `<Tooltip>` cell content fragments the visual language and silently misses later improvements (a11y, dark mode, density).
 
 **Rule:** cells are the contract — if no cell fits, file an issue and propose a new cell. Don't hand-roll.
 
@@ -115,7 +115,11 @@ anker ships 16 reusable cell components for `<DataTable>` columns under `@knkcs/
 | `TruncatedTextCell` | text (+ optional `subText`, `maxLength`) |
 | `UrlCell` | external URL |
 
-Import path: `@knkcs/anker/components/data-table/cells`.
+Import path: `@knkcs/anker/components`.
+
+```ts
+import { IdentityCell, StatusBadgeCell, DateCell } from "@knkcs/anker/components";
+```
 
 Full slot/prop tables: `docs/react-table-reference.md`. Mapping guide for common column intents: `docs/page-patterns.md` §11.13.
 
