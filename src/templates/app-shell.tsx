@@ -249,7 +249,16 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 			minH="100vh"
 			bg="bg-canvas"
 		>
-			<Box gridColumn="1" minW="0">
+			<Box
+				data-testid="app-shell-sidebar"
+				gridColumn="1"
+				minW="0"
+				position="sticky"
+				top="0"
+				alignSelf="start"
+				maxH="100vh"
+				overflowY="auto"
+			>
 				{sidebar}
 			</Box>
 			<Flex
@@ -269,6 +278,11 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 					data-testid="app-shell-rail"
 					gridColumn="3"
 					minW="0"
+					position="sticky"
+					top="0"
+					alignSelf="start"
+					maxH="100vh"
+					overflowY="auto"
 					bg="bg-surface"
 					borderLeftWidth="1px"
 					borderColor="border"

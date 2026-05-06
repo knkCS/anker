@@ -105,6 +105,31 @@ describe("AppShell", () => {
 		expect(cs.background).toContain("--chakra-colors-bg-surface");
 	});
 
+	it("sidebar column is sticky to the viewport top", () => {
+		// Regression: previously the sidebar scrolled away with the grid when
+		// the main column overflowed the viewport. The sidebar must stay put.
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb">sidebar</div>}>
+				<div>main</div>
+			</AppShell>,
+		);
+		const sidebarCol = screen.getByTestId("app-shell-sidebar");
+		expect(sidebarCol).toHaveStyle({ position: "sticky", top: "0" });
+	});
+
+	it("rail column is sticky to the viewport top", () => {
+		renderWithChakra(
+			<AppShell
+				sidebar={<div data-testid="sb" />}
+				rail={<div data-testid="rail">rail</div>}
+			>
+				<div>main</div>
+			</AppShell>,
+		);
+		const railCol = screen.getByTestId("app-shell-rail");
+		expect(railCol).toHaveStyle({ position: "sticky", top: "0" });
+	});
+
 	it("rail column renders on the surface with a left divider", () => {
 		renderWithAnkerTheme(
 			<AppShell
