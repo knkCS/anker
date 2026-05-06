@@ -15,6 +15,12 @@ export interface IdentityCellProps {
 	avatarFallback?: string;
 	/** Avatar size; defaults to "sm" to match table density. */
 	size?: "sm" | "md";
+	/**
+	 * Optional Chakra `colorPalette` forwarded to the underlying `Avatar`
+	 * primitive (e.g. `"primary"`, `"secondary"`). Tints the fallback circle
+	 * with the chosen palette. Omit for the default neutral-gray look.
+	 */
+	colorPalette?: string;
 }
 
 function deriveInitials(name: string): string {
@@ -30,12 +36,19 @@ export const IdentityCell: React.FC<IdentityCellProps> = ({
 	avatarSrc,
 	avatarFallback,
 	size = "sm",
+	colorPalette,
 }) => {
 	if (name == null) return <span>{emptyCellValue}</span>;
 	const initials = avatarFallback ?? deriveInitials(name);
 	return (
 		<HStack gap={2} align="center">
-			<Avatar size={size} name={name} src={avatarSrc} fallback={initials} />
+			<Avatar
+				size={size}
+				name={name}
+				src={avatarSrc}
+				fallback={initials}
+				colorPalette={colorPalette}
+			/>
 			<VStack align="start" gap={0}>
 				<Text fontSize="sm" fontWeight="semibold" lineClamp={1}>
 					{name}
