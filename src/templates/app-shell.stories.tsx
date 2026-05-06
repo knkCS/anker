@@ -125,3 +125,34 @@ export const DescendantDrivenRail: Story = {
 		</AppShell>
 	),
 };
+
+// Long-scrolling main content. Use this story to verify that the sidebar and
+// rail columns stay sticky at the top of the viewport while the main column
+// scrolls underneath them.
+export const StickyColumnsWithLongContent: Story = {
+	render: () => (
+		<AppShell sidebar={<SampleSidebar />} rail={<SampleRail />}>
+			<Box px="8" py="6">
+				<Heading as="h1" size="lg" mb="2">
+					Long page
+				</Heading>
+				<Text color="muted" mb="6">
+					Scroll the main column — the sidebar and rail should stay put.
+				</Text>
+				{Array.from({ length: 60 }).map((_, i) => (
+					<Box
+						// biome-ignore lint/suspicious/noArrayIndexKey: static demo content
+						key={i}
+						py="4"
+						borderBottomWidth="1px"
+						borderColor="border"
+					>
+						<Text>
+							Row {i + 1} — filler content to force the page to scroll.
+						</Text>
+					</Box>
+				))}
+			</Box>
+		</AppShell>
+	),
+};
