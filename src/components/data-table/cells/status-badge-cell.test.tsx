@@ -49,4 +49,27 @@ describe("StatusBadgeCell", () => {
 		expect(screen.getByText("failed")).toBeInTheDocument();
 		expect(screen.getByText("Export timed out")).toBeInTheDocument();
 	});
+
+	it("renders the icon before the label inside the badge when provided", () => {
+		renderWithChakra(
+			<StatusBadgeCell
+				value="On"
+				icon={<svg data-testid="badge-icon" aria-hidden="true" />}
+			/>,
+		);
+		const icon = screen.getByTestId("badge-icon");
+		const badge = screen.getByText("On");
+		expect(icon).toBeInTheDocument();
+		expect(badge).toBeInTheDocument();
+		// The icon lives inside the Badge element that holds the label text,
+		// and precedes the label in document order.
+		expect(badge.contains(icon)).toBe(true);
+		expect(badge.firstChild).toBe(icon);
+	});
+
+	it("renders without an icon by default (backwards compatible)", () => {
+		renderWithChakra(<StatusBadgeCell value="published" />);
+		expect(screen.queryByTestId("badge-icon")).not.toBeInTheDocument();
+		expect(screen.getByText("published")).toBeInTheDocument();
+	});
 });

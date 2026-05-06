@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { StatusBadgeCell } from "./status-badge-cell";
 
 const statusColorMap: Record<string, string> = {
@@ -70,6 +71,31 @@ export const WithTooltipAndDetail: Story = {
 		colorMap: { ...statusColorMap, failed: "red" },
 		detail: "Export timed out after 30s",
 		tooltip: "Retried 3 times before giving up",
+	},
+};
+
+export const WithIconOn: Story = {
+	args: {
+		value: "On",
+		colorMap: { On: "green", Off: "gray" },
+		icon: <Eye size={12} />,
+	},
+};
+
+export const WithIconOff: Story = {
+	args: {
+		value: "Off",
+		colorMap: { On: "green", Off: "gray" },
+		icon: <EyeOff size={12} />,
+	},
+};
+
+export const WithIconAndTooltip: Story = {
+	args: {
+		value: "Verified",
+		colorMap: { Verified: "green" },
+		icon: <ShieldCheck size={12} />,
+		tooltip: "Account 2FA is enabled",
 	},
 };
 

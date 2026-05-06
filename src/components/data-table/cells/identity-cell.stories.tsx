@@ -45,6 +45,22 @@ export const SizeMd: Story = {
 	},
 };
 
+export const ColorPalettePrimary: Story = {
+	args: {
+		name: "Jane Doe",
+		subText: "jane@example.com",
+		colorPalette: "primary",
+	},
+};
+
+export const ColorPaletteSecondary: Story = {
+	args: {
+		name: "Jane Doe",
+		subText: "jane@example.com",
+		colorPalette: "secondary",
+	},
+};
+
 export const NullName: Story = {
 	args: {
 		name: null,
