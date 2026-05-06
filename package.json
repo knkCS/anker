@@ -1,6 +1,6 @@
 {
   "name": "@knkcs/anker",
-  "version": "1.10.2",
+  "version": "1.10.3",
   "description": "UI component library for the knk software group",
   "repository": {
     "type": "git",
@@ -54,7 +54,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepublishOnly": "npm run build"
+    "verify-exports": "tsx scripts/verify-exports.ts",
+    "verify-exports:self-test": "tsx scripts/verify-exports.ts --self-test",
+    "prepublishOnly": "npm run build && npm run verify-exports"
   },
   "peerDependencies": {
     "@chakra-ui/react": "^3.0.0",

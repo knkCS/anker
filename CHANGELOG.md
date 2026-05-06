@@ -2,6 +2,12 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.10.3] — 2026-05-05
+
+### CI
+
+- **`verify-exports` script** asserts every source-side export of a tsup entry appears in the built `.d.ts`. Catches missing-bundle-export bugs (e.g. the 1.10.0 `IdentityCell`/`DeviceCell` incident where the cells barrel exported the symbols but `src/components/index.ts` didn't re-export them, so the published tarball had no declarations for them and consumers got "module has no exported member"). Walks each tsup entry's source via the TypeScript compiler API, recursively gathers the transitive named-export closure (treating `index.ts`/`index.tsx` files as barrels that widen, leaf `.tsx` files as strict named-list filters), then parses the corresponding `dist/<entry>/index.d.ts` and reports any missing symbols. Wired into `prepublishOnly`, the `CI` workflow, and the `Publish` workflow — every step that previously claimed "build is fine" now also proves the artifact contains what the source advertises. Run locally with `npm run verify-exports`; run the script's own unit tests with `npm run verify-exports:self-test`.
+
 ## [1.10.2] — 2026-05-05
 
 `colorPalette` prop on `IdentityCell` (forwards to underlying Avatar); `icon` prop on `StatusBadgeCell` (renders before label inside the badge).
