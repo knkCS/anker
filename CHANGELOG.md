@@ -2,6 +2,13 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.10.4] — 2026-05-05
+
+### Fixed
+
+- **Outline button hover now respects `colorPalette`.** Previously the `outline` variant hard-coded `gray.50`/`gray.700` for `_hover`, `_checked`, and `_active`, so a `<Button colorPalette="red" variant="outline">` showed a gray hover background instead of a red-tinted one. The variant now uses the `colorPalette.50`/`colorPalette.100` and `colorPalette.900/40`/`colorPalette.800` semantic tokens so the tint follows the active palette (red outline → light red hover, primary outline → light primary hover, gray outline → light gray hover — matching previous default behavior). The `secondary` variant is intentionally unchanged: it is meant to be a neutral gray outline regardless of the consumer's `colorPalette`.
+- **AppShell sidebar and rail columns are now sticky.** `position: sticky` with `top: 0`, `align-self: start`, `max-height: 100vh`, and `overflow-y: auto` keeps the sidebar and rail in place while the main column scrolls. Previously the entire grid scrolled when the main content overflowed the viewport, so the navigation disappeared on long pages.
+
 ## [1.10.3] — 2026-05-05
 
 ### CI
