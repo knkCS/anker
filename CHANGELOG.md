@@ -2,6 +2,12 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.10.1] — 2026-05-06
+
+### Fixed
+
+- `IdentityCell`, `DeviceCell`, `parseUserAgent`, `formatUserAgent` are now actually exported from the `@knkcs/anker/components` bundle. The 1.10.0 release shipped them in the source tree but forgot to re-export them from `src/components/index.ts` (the tsup entry), so the published tarball was missing the new symbols. **Use 1.10.1 — 1.10.0 is broken.**
+
 ## [1.10.0] — 2026-05-05
 
 Two new cells (`IdentityCell`, `DeviceCell`); `subText` prop on `TruncatedTextCell`; `tooltip` prop on `StatusBadgeCell`; cell library hoisted in docs.
