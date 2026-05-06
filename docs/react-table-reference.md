@@ -92,9 +92,9 @@ Acceptable for simple cases but gives weaker type inference.
 
 ## Cell Components
 
-Anker provides 16 reusable cell components in `src/components/data-table/cells/`. They are **plain React components with zero TanStack coupling** — they receive pre-extracted values and render UI.
+Anker provides 16 reusable cell components. The source lives under `src/components/data-table/cells/` and each cell is re-exported from the components barrel — consumers import them from `@knkcs/anker/components` (the same path as `DataTable`, `Card`, `Modal`, etc.). Cells are **plain React components with zero TanStack coupling** — they receive pre-extracted values and render UI.
 
-> **Rule:** cells from `@knkcs/anker/components/data-table/cells` are the contract — never inline cell JSX from primitives unless no cell fits. If no cell fits, file an issue and propose a new cell. See `docs/page-patterns.md` §11.13 for the cell-mapping guide.
+> **Rule:** cells from `@knkcs/anker/components` are the contract — never inline cell JSX from primitives unless no cell fits. If no cell fits, file an issue and propose a new cell. See `docs/page-patterns.md` §11.13 for the cell-mapping guide.
 
 ### Pattern: cells receive values, not TanStack context
 

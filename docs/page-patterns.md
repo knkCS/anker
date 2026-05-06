@@ -1229,9 +1229,8 @@ Operators serve this from a static asset or fallback handler.
 
 ### 11.13 DataTable cells
 
-**Rule.** Cells from `@knkcs/anker/components/data-table/cells` are
-the contract — **never inline cell JSX from primitives unless no cell
-fits**. If no cell fits, file an issue and propose a new cell. Inline
+**Rule.** Cells from `@knkcs/anker/components` are the contract — **never
+inline cell JSX from primitives unless no cell fits**. If no cell fits, file an issue and propose a new cell. Inline
 `<Badge>`, `<Box>`, `<Text>`, `<Tooltip>` compositions in column
 files are the kind of drift the cells library was built to prevent;
 they fragment the visual language across solutions and silently miss
@@ -1243,15 +1242,16 @@ single browser frame. Tables are the single most common surface in
 the platform. Visually divergent rows — even by 1–2px of padding or
 a slightly different muted color — read as broken to operators.
 
-**Available cells.** Anker ships 16 cells today. All live behind one
-import path:
+**Available cells.** Anker ships 16 cells today. All exported from the
+same path as `DataTable` itself (`Card`, `Modal`, etc. — one path for
+every component-level export):
 
 ```tsx
 import {
   ActionCell, BooleanCell, CodeCell, ColorSwatchCell, CountCell,
   DateCell, DeviceCell, IdentityCell, LinkCell, MenuCell, NumberCell,
   SlugCell, StatusBadgeCell, SwitchCell, TruncatedTextCell, UrlCell,
-} from "@knkcs/anker/components/data-table/cells";
+} from "@knkcs/anker/components";
 ```
 
 | Cell | Use case |
