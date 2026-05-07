@@ -124,24 +124,24 @@ function UsersPage() {
 Each column has a defined surface and a 1px divider separates them. This is
 the anker visual contract — consumers should not override.
 
-| Column   | Surface          | Token         | Left divider |
-|----------|------------------|---------------|--------------|
-| Sidebar  | gray (page frame) | `bg-canvas`   | —            |
-| Main     | white (content)   | `bg-surface`  | 1px `border` against sidebar |
-| Rail     | white (content)   | `bg-surface`  | 1px `border` against main |
+| Column   | Surface           | Token        | Left divider |
+|----------|-------------------|--------------|--------------|
+| Sidebar  | gray (page frame) | `bg-canvas`  | —            |
+| Main     | gray (page frame) | `bg-canvas`  | 1px `border` against sidebar |
+| Rail     | white (content)   | `bg-surface` | 1px `border` against main |
 
-The sidebar inherits the grid's `bg-canvas`. The main column (`gridColumn="2"`)
-and the rail column (`gridColumn="3"`) sit on `bg-surface` with a
-`borderLeftWidth="1px" borderColor="border"` against the column to their left.
-This produces the structural separation that makes the `<PageHeader>` and
-`<DetailHeader>` content in the main column distinct from the rail content
-without relying on header borders alone.
+The sidebar and main columns share `bg-canvas` for a consistent calm
+page background — Cards (with `bg-surface`/white) sit on the canvas and
+stand out clearly. The rail column stays on `bg-surface` so detail-rail
+content reads as a separate workspace, not a continuation of the main
+content. The `borderLeftWidth="1px" borderColor="border"` between
+columns provides structural separation independent of background.
 
 Page templates (`<IndexPageTemplate>`, `<DetailPageTemplate>`,
-`<SettingsPageTemplate>`, `<DashboardPageTemplate>`) inherit the main column's
-`bg-surface` — they no longer set their own background. This means a template
-rendered standalone (e.g. in a Storybook story without an `<AppShell>` parent)
-inherits whatever surface its wrapper provides.
+`<SettingsPageTemplate>`, `<DashboardPageTemplate>`) inherit the main
+column's `bg-canvas` — they do not set their own background. This means
+a template rendered standalone (e.g. in a Storybook story without an
+`<AppShell>` parent) inherits whatever surface its wrapper provides.
 
 ### Rail precedence
 

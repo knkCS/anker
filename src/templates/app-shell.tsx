@@ -267,7 +267,7 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 				direction="column"
 				minW="0"
 				minH="100vh"
-				bg="bg-surface"
+				bg="bg-canvas"
 				borderLeftWidth="1px"
 				borderColor="border"
 			>
