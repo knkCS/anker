@@ -43,6 +43,20 @@ export interface SettingsPageTemplateProps
 	 * Pass `"full"` to disable the constraint entirely.
 	 */
 	maxBodyWidth?: string;
+	/**
+	 * Padding applied to the body between the tab strip and the page
+	 * content. Defaults to `"default"` (`px="8" pt="6"`) which aligns
+	 * Card-wrapped forms with the PageHeader's horizontal inset.
+	 *
+	 * Pass `"none"` to render the body flush — useful when a settings tab
+	 * embeds a full-width `<DataTable>` that should extend edge-to-edge.
+	 * When using `"none"`, tabs that still need padding (e.g. form-Card
+	 * tabs) should wrap their own content in `<Box px="8" py="6">`.
+	 * Avoid negative-margin workarounds (`mx="-8"`).
+	 *
+	 * @default "default"
+	 */
+	bodyPadding?: "default" | "none";
 }
 
 export function SettingsPageTemplate({
@@ -54,9 +68,12 @@ export function SettingsPageTemplate({
 	tabs,
 	children,
 	maxBodyWidth = "3xl",
+	bodyPadding = "default",
 }: SettingsPageTemplateProps) {
 	const registered = useRegisteredPageActions();
 	const resolvedActions = actions ?? registered;
+	const bodyPx = bodyPadding === "none" ? "0" : "8";
+	const bodyPt = bodyPadding === "none" ? "0" : "6";
 	return (
 		<Flex
 			data-testid="settings-page-template"
@@ -72,7 +89,7 @@ export function SettingsPageTemplate({
 				actions={resolvedActions}
 			/>
 			<Box>{tabs}</Box>
-			<Box flex="1" minH="0" px="8" pt="6">
+			<Box flex="1" minH="0" px={bodyPx} pt={bodyPt}>
 				<Box
 					maxW={maxBodyWidth}
 					marginInline={maxBodyWidth === "full" ? "0" : "auto"}

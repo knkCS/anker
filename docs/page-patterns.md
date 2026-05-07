@@ -582,16 +582,40 @@ behaves naturally.
 
 ### Content alignment: flush vs. padded
 
-Tab content can be either:
+`SettingsPageTemplate` applies body padding by default (`px="8" pt="6"`)
+to align Card-wrapped forms with the `<PageHeader>`'s horizontal inset.
+`IndexPageTemplate` and `DetailPageTemplate` render the body flush (no
+padding) — DataTables extend edge-to-edge without any consumer-side
+workarounds.
 
-- **Flush** — content extends edge-to-edge of the page body. Use for
-  index-page tabs whose body is a `<DataTable>` (the tables already
-  span full-width).
-- **Padded** — content is wrapped in `<Box px="8" py="6">`. Use for
-  settings-page tabs whose body is form Cards.
+When a `SettingsPageTemplate` tab body is a `<DataTable>` (or any other
+component that must render flush to the page edges), pass
+`bodyPadding="none"`:
 
-The page templates do not apply padding inside the `tabs` slot. The tab
-content's own children determine the padding strategy.
+```tsx
+<SettingsPageTemplate
+  title={...}
+  tabs={...}
+  bodyPadding="none"
+  maxBodyWidth="full"
+>
+  <Tabs.Content value="general">
+    {/* form-Card tabs still need padding — add your own */}
+    <Box px="8" py="6">
+      <Card>...</Card>
+    </Box>
+  </Tabs.Content>
+  <Tabs.Content value="members">
+    <DataTable ... />  {/* renders flush */}
+  </Tabs.Content>
+</SettingsPageTemplate>
+```
+
+When tabs in the same page mix flush and padded content, set
+`bodyPadding="none"` at the template level and let each tab apply its
+own `<Box px="8" py="6">` for the padded ones. Avoid negative margins
+(`mx="-8"`) — they couple consumers to the template's exact spacing and
+break silently if the template's padding ever changes.
 
 ### `<Tabs.Root>` wrapping conventions
 
@@ -948,12 +972,15 @@ organization settings, IDP settings, admin → general.
 | `tabs`        | `ReactNode` | —       | **Required**                                         |
 | `children`    | `ReactNode` | —       | Body — typically Card-wrapped forms or DataLists     |
 | `maxBodyWidth` | `string`   | `"3xl"` | `"full"` to disable the constraint                   |
+| `bodyPadding` | `"default" \| "none"` | `"default"` | Pass `"none"` to render the body flush — for tabs whose content is a DataTable. See §7 "Content alignment: flush vs. padded". |
 
 **Escape hatches.**
 
-- `maxBodyWidth="full"` disables the readability constraint. Use when a
-  settings tab needs a full-width DataTable (rare — that's an index
-  page in disguise).
+- `maxBodyWidth="full"` disables the readability constraint.
+- `bodyPadding="none"` removes the template's `px="8" pt="6"` so
+  DataTable tabs render edge-to-edge. Combine with `maxBodyWidth="full"`
+  for a true full-bleed table. Tabs that still need padding should wrap
+  their content in `<Box px="8" py="6">` directly.
 - A single-tab settings page is a sign you should be using
   DetailPageTemplate instead. Use SettingsPageTemplate only when there
   are ≥ 2 tabs.
