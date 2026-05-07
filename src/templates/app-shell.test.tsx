@@ -89,10 +89,11 @@ describe("AppShell", () => {
 		);
 	});
 
-	it("main column renders on the surface with a left divider", () => {
-		// Visual contract: the main column sits on `bg-surface` (white) with a
-		// 1px divider against the gray sidebar. Sidebar inherits the grid's
-		// `bg-canvas`. See docs/page-patterns.md §2 "Column surfaces".
+	it("main column shares bg-canvas with the sidebar and has a left divider", () => {
+		// Visual contract: the main column sits on `bg-canvas` (gray) — same
+		// as the sidebar — with a 1px divider against the sidebar. Cards
+		// (bg-surface white) provide content surface contrast against the
+		// canvas. See docs/page-patterns.md §2 "Column surfaces".
 		renderWithAnkerTheme(
 			<AppShell sidebar={<div data-testid="sb" />}>
 				<div>main</div>
@@ -102,7 +103,7 @@ describe("AppShell", () => {
 		expect(main).toBeInTheDocument();
 		expect(main).toHaveStyle({ borderLeftWidth: "1px" });
 		const cs = window.getComputedStyle(main);
-		expect(cs.background).toContain("--chakra-colors-bg-surface");
+		expect(cs.background).toContain("--chakra-colors-bg-canvas");
 	});
 
 	it("sidebar column is sticky to the viewport top", () => {
