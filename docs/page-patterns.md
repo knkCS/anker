@@ -1420,6 +1420,29 @@ value renders the `emptyCellValue` em-dash (`"—"`).
 **Full slot / prop tables.** See [`docs/react-table-reference.md`](./react-table-reference.md)
 for prop tables, value-type signatures, and the file map.
 
+#### Card composition
+
+`<Card>` wraps `children` in a `<ChakraCard.Body>` which has built-in padding (~24px on all sides). Pass content directly — do **not** wrap in your own `<Box p="N">`, which doubles the padding.
+
+```tsx
+// ✓ Correct
+<Card title="General">
+  <Stack gap="4">
+    <FormField .../>
+    <FormField .../>
+  </Stack>
+</Card>
+
+// ✗ Wrong — doubles the padding
+<Card title="General">
+  <Box p="6">
+    <Stack gap="4">...</Stack>
+  </Box>
+</Card>
+```
+
+If you need a flush body (e.g. a `<DataTable>` inside a Card), file an issue — anker should add a `bodyPadding="none"` prop rather than having every consumer hand-roll the workaround.
+
 ---
 
 ## 12. Slot mechanism
