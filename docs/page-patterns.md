@@ -1678,6 +1678,33 @@ These rules are the contract for solution authors.
 
 ---
 
+## 14. Primitives
+
+#### DescriptionList
+
+For label/value lists (read-only metadata blocks, identity summaries, etc.) use `<DescriptionList>` rather than hand-rolling `<Flex justify="space-between">` rows. Two orientations:
+
+- `horizontal` (default) — label muted on left, value on right. Single-line per row. Use inside a Card body or under a settings form.
+- `vertical` — label above value. Use as building block inside a `<Grid>` for stat-tile layouts.
+
+```tsx
+<DescriptionList>
+  <DescriptionList.Row label="Email">{user.email}</DescriptionList.Row>
+  <DescriptionList.Row label="ID" mono>{user.id}</DescriptionList.Row>
+</DescriptionList>
+
+<Grid templateColumns="repeat(3, 1fr)" gap="6">
+  <DescriptionList orientation="vertical">
+    <DescriptionList.Row label="Status">Active</DescriptionList.Row>
+  </DescriptionList>
+  ...
+</Grid>
+```
+
+Don't use `<DescriptionList>` for editable form fields — pair `<TextInput>` with explicit labels instead.
+
+---
+
 ## 15. References
 
 - [`docs/design-system.md`](./design-system.md) — token system and
