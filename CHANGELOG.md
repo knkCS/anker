@@ -2,6 +2,11 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 1.13.0 — 2026-05-08
+
+### Added
+- `<DescriptionList>` component with `<DescriptionList.Row>` children. Supports `orientation="horizontal"` (default) and `orientation="vertical"`. Replaces hand-rolled Flex/Box patterns for read-only metadata blocks.
+
 ## 1.12.0 — 2026-05-08
 
 ### Added

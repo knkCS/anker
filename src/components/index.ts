@@ -74,6 +74,12 @@ export {
 	truncateText,
 	UrlCell,
 } from "./data-table";
+// DescriptionList
+export type {
+	DescriptionListProps,
+	DescriptionListRowProps,
+} from "./description-list";
+export { DescriptionList } from "./description-list";
 // Drawer
 export type { DrawerProps } from "./drawer";
 export { DrawerRoot } from "./drawer";
