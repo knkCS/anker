@@ -64,6 +64,7 @@ The full human-facing spec lives at the anker GitHub Pages docs site (linked fro
 - **No new color introductions.** If a color isn't in `colors.ts`, it doesn't exist. Why: the palette is closed by design — adding ad-hoc colors fragments the system.
 - **No `maxW` on a Card inside a settings/detail template body.** The template controls width; per-card overrides break visual rhythm and produce orphaned narrow cards on full-width pages. Why: the template is the contract for body width — cards are the contract for content surfacing.
 - **No inline create-forms above a DataTable.** Use a header-action button (or `usePageActions` from a tab) that opens a `Modal`. Why: inline forms steal vertical space, drift from the master pattern, and split form state from the rest of the page.
+- **Don't own `<Tabs.Root>` for an owned-panels tab page.** Use `SettingsPageTemplate.bodyTabs` or `DetailPageTemplate.bodyTabs`. Why: the template enforces `lazyMount unmountOnExit` so `usePageActions` registrations from inactive tabs can't collide with the active tab's. Consumer-owned `<Tabs.Root>` was the cause of the "stuck Add button" bug fixed in anker 1.12. The `tabs` prop on those templates is for nav-mode/filter-mode strips only (Tabs.List, no Tabs.Content).
 
 ---
 
