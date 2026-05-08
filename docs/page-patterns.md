@@ -887,6 +887,59 @@ or list, optionally filtered.
 - The toolbar can be omitted entirely — pass `toolbar={null}` (or just
   omit the prop). Don't fake a toolbar with a `<Box>`.
 
+#### Contract
+
+Every index page composes these slots, in this order:
+
+1. **Header** (`IndexPageTemplate` props):
+   - `breadcrumbs`, `title` — required.
+   - `actions` slot — dedicated to the **primary-add** trigger (a `Button` that opens a `Modal`). Secondary actions (Export, Import) follow.
+   - `tabs` — optional. When present, lives between header and toolbar.
+2. **Toolbar** (in this order, left → right):
+   - `Toolbar.Search` — typeahead input. Always present unless the dataset is bounded (≤ ~5 rows).
+   - `Toolbar.Filters` — `FilterChip` for boolean toggles (zero-or-more), `NativeSelect` for exclusive enums with > 3 values, omit otherwise.
+   - `Toolbar.Right` — optional secondary actions, then `Toolbar.Count`.
+3. **DataTable**:
+   - `selectable` + `rowSelection` / `onRowSelectionChange` / `getRowId` — when the entity has bulk verbs.
+   - `onRowClick` — when a detail page exists.
+4. **BulkActionBar swap-in** — when `selectedIds.length > 0`, the *toolbar element* is replaced (not appended) by a `BulkActionBar` carrying the bulk verbs. Render a single ternary:
+
+   ```tsx
+   const toolbar = selectedIds.length > 0
+     ? <BulkActionBar ...>{actions}</BulkActionBar>
+     : <Toolbar>...</Toolbar>;
+   ```
+
+5. **Create flow** — header-actions button → `Modal`. Inline forms above the toolbar are an anti-pattern: they steal vertical space, are easy to miss, and split form state from the rest of the page.
+
+#### Index-in-Tab sub-pattern
+
+For index-style content rendered inside `Tabs.Content` (typical inside `SettingsPageTemplate` and `DetailPageTemplate`):
+
+- The same Toolbar / DataTable / BulkActionBar contract applies inside the tab body.
+- **Tab-scoped primary-add lifts to the parent template's header-actions slot** via `usePageActions(<AddButton/>)`. This places the action where users expect it (top-right of page) without nesting a second header inside the tab. Anker's slot store handles registration/cleanup on tab switch automatically.
+- No second `<PageHeader>` inside the tab.
+- The tab does not own breadcrumbs; the parent page does.
+
+```tsx
+// Inside MembersTab body
+function MembersTab() {
+  const [addOpen, setAddOpen] = useState(false);
+  usePageActions(
+    <Button variant="solid" colorPalette="primary" size="sm" onClick={() => setAddOpen(true)}>
+      Add member
+    </Button>
+  );
+  return (
+    <>
+      <Toolbar>...</Toolbar>
+      <DataTable ... />
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} ... />
+    </>
+  );
+}
+```
+
 ### 11.2 DetailPageTemplate
 
 **When to use.** Any "single entity" page: a single user, a single
