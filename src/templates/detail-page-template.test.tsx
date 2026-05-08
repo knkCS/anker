@@ -2,7 +2,7 @@
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { AppShell } from "./app-shell";
 import { DetailPageTemplate } from "./detail-page-template";
 
@@ -65,5 +65,57 @@ describe("DetailPageTemplate", () => {
 			</AppShell>,
 		);
 		expect(screen.getByTestId("tabs")).toBeInTheDocument();
+	});
+
+	it("renders the active tab's content via bodyTabs (uncontrolled)", () => {
+		renderWithChakra(
+			<AppShell sidebar={<div />}>
+				<DetailPageTemplate
+					title="X"
+					bodyTabs={{
+						defaultValue: "a",
+						items: [
+							{ value: "a", label: "Tab A", content: <div data-testid="content-a">A</div> },
+							{ value: "b", label: "Tab B", content: <div data-testid="content-b">B</div> },
+						],
+					}}
+				/>
+			</AppShell>,
+		);
+		expect(screen.getByTestId("content-a")).toBeInTheDocument();
+		expect(screen.queryByTestId("content-b")).not.toBeInTheDocument();
+	});
+
+	it("renders the subheader between header and tabs", () => {
+		renderWithChakra(
+			<AppShell sidebar={<div />}>
+				<DetailPageTemplate
+					title="X"
+					subheader={<div data-testid="subheader">subheader</div>}
+				>
+					<div data-testid="body">body</div>
+				</DetailPageTemplate>
+			</AppShell>,
+		);
+		const sub = screen.getByTestId("subheader");
+		const body = screen.getByTestId("body");
+		expect(sub).toBeInTheDocument();
+		expect(sub.compareDocumentPosition(body) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+	});
+
+	it("throws when both bodyTabs and tabs are passed", () => {
+		const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+		expect(() =>
+			renderWithChakra(
+				<AppShell sidebar={<div />}>
+					<DetailPageTemplate
+						title="X"
+						tabs={<div />}
+						bodyTabs={{ defaultValue: "a", items: [{ value: "a", label: "A", content: <div /> }] }}
+					/>
+				</AppShell>,
+			),
+		).toThrow(/mutually exclusive/i);
+		spy.mockRestore();
 	});
 });
