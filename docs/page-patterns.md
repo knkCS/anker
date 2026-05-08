@@ -887,6 +887,41 @@ or list, optionally filtered.
 - The toolbar can be omitted entirely — pass `toolbar={null}` (or just
   omit the prop). Don't fake a toolbar with a `<Box>`.
 
+#### Contract
+
+Every index page composes these slots, in this order:
+
+1. **Header** (`IndexPageTemplate` props):
+   - `breadcrumbs`, `title` — required.
+   - `actions` slot — dedicated to the **primary-add** trigger (a `Button` that opens a `Modal`). Secondary actions (Export, Import) follow.
+   - `tabs` — optional. When present, lives between header and toolbar.
+2. **Toolbar** (in this order, left → right):
+   - `Toolbar.Search` — typeahead input. Always present unless the dataset is bounded (≤ ~5 rows).
+   - `Toolbar.Filters` — `FilterChip` for boolean toggles (zero-or-more), `NativeSelect` for exclusive enums with > 3 values, omit otherwise.
+   - `Toolbar.Right` — optional secondary actions, then `Toolbar.Count`.
+3. **DataTable**:
+   - `selectable` + `rowSelection` / `onRowSelectionChange` / `getRowId` — when the entity has bulk verbs.
+   - `onRowClick` — when a detail page exists.
+4. **BulkActionBar swap-in** — when `selectedIds.length > 0`, the *toolbar element* is replaced (not appended) by a `BulkActionBar` carrying the bulk verbs. Render a single ternary:
+
+   ```tsx
+   const toolbar = selectedIds.length > 0
+     ? <BulkActionBar ...>{actions}</BulkActionBar>
+     : <Toolbar>...</Toolbar>;
+   ```
+
+5. **Create flow** — header-actions button → `Modal`. Inline forms above the toolbar are an anti-pattern: they steal vertical space, are easy to miss, and split form state from the rest of the page.
+
+#### Index-in-Tab sub-pattern
+
+For index-style content rendered inside a tab body of `SettingsPageTemplate` or `DetailPageTemplate`, use the parent template's **`bodyTabs`** API. The template owns `<Tabs.Root>` with `lazyMount unmountOnExit`, so only the active tab mounts — `usePageActions` from inside a tab body registers exactly when that tab is active and clears on unmount.
+
+- The same Toolbar / DataTable / BulkActionBar contract applies inside the tab body.
+- Tab-scoped primary-add lifts to the parent template's header-actions slot via `usePageActions(<AddButton/>)`. Because `bodyTabs` lazy-mounts, only the active tab's `usePageActions` registration is alive — no collisions, no stale buttons.
+- No second `<PageHeader>` inside the tab.
+- The tab does not own breadcrumbs; the parent page does.
+- **Don't** wrap `bodyTabs` content in your own `<Tabs.Root>`. The template owns it.
+
 ### 11.2 DetailPageTemplate
 
 **When to use.** Any "single entity" page: a single user, a single
@@ -944,6 +979,42 @@ OAuth client, a single audit event detail, a single webhook config.
   requirement. A detail page without tabs is fine — render the body
   however the entity demands.
 
+#### `bodyTabs` — owned panels
+
+Use `bodyTabs` for tab bodies that are direct children of the template. The template wraps `<Tabs.Root>` with `lazyMount unmountOnExit`; only the active panel mounts. Use this any time each tab has its own body component.
+
+```tsx
+<DetailPageTemplate
+  breadcrumbs={[...]}
+  title={user.displayName}
+  bodyTabs={{
+    defaultValue: "profile",
+    items: [
+      { value: "profile",  label: "Profile",  content: <ProfileTab user={user} /> },
+      { value: "security", label: "Security", content: <SecurityTab user={user} /> },
+    ],
+  }}
+/>
+```
+
+For controlled tabs (e.g. URL deep-linking), pass `value` + `onValueChange` instead of `defaultValue`.
+
+#### `subheader`
+
+A `ReactNode` rendered between the PageHeader and the tabs (or body). Use for identity-card-style summaries that sit under the title bar.
+
+```tsx
+<DetailPageTemplate
+  title={user.displayName}
+  subheader={<UserIdentityCard user={user} />}
+  bodyTabs={{ ... }}
+/>
+```
+
+#### `tabs` (legacy / nav-mode)
+
+The `tabs` prop is for nav-mode tab strips (Tabs.List with no Tabs.Content; the body comes from `children`, typically a route's outlet). `bodyTabs` and `tabs` are mutually exclusive — passing both throws.
+
 ### 11.3 SettingsPageTemplate
 
 **When to use.** Any "preferences / configuration" page composed of
@@ -984,6 +1055,28 @@ organization settings, IDP settings, admin → general.
 - A single-tab settings page is a sign you should be using
   DetailPageTemplate instead. Use SettingsPageTemplate only when there
   are ≥ 2 tabs.
+
+#### `bodyTabs` — owned panels
+
+Same shape as `DetailPageTemplate.bodyTabs`. Prefer this for settings pages over the legacy `tabs` + `children` pattern; the template handles `lazyMount unmountOnExit` automatically so `usePageActions` from inside a tab body never collides with another tab's registration.
+
+```tsx
+<SettingsPageTemplate
+  breadcrumbs={[...]}
+  title={org.name}
+  bodyPadding="none"
+  maxBodyWidth="full"
+  bodyTabs={{
+    defaultValue: "general",
+    items: [
+      { value: "general", label: "General",  content: <GeneralTab .../> },
+      { value: "members", label: "Members",  content: <MembersTab .../> },
+    ],
+  }}
+/>
+```
+
+`bodyTabs` and `tabs` are mutually exclusive — passing both throws.
 
 ### 11.4 DashboardPageTemplate
 
