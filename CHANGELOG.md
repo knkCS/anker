@@ -2,6 +2,21 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 1.12.0 — 2026-05-08
+
+### Added
+- `DetailPageTemplate.bodyTabs` and `SettingsPageTemplate.bodyTabs` —
+  declarative owned-panel tabs. Template wraps `<Tabs.Root>` with
+  `lazyMount unmountOnExit` so only the active tab mounts. Eliminates
+  the stuck-header-actions footgun from consumer-owned Tabs.Root.
+- `DetailPageTemplate.subheader` — ReactNode rendered between the
+  PageHeader and tabs/body. Use for identity-card-style summaries.
+
+### Changed
+- `tabs` prop on Detail/SettingsPageTemplate now documented as
+  nav-mode/filter-mode only (Tabs.List with no Tabs.Content). For
+  owned-panel tabs, use `bodyTabs`. Passing both throws.
+
 ## [1.10.4] — 2026-05-05
 
 ### Fixed
