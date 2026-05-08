@@ -22,8 +22,8 @@
 
 import type { ReactNode } from "react";
 import { PageHeader, type PageHeaderProps } from "../components/page-header";
-import { Tabs } from "../primitives/tabs";
 import { Box, Flex } from "../primitives/layout";
+import { Tabs } from "../primitives/tabs";
 import { useRegisteredPageActions } from "./app-shell";
 import type { BodyTabsProp } from "./detail-page-template";
 

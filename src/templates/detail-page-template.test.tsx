@@ -75,8 +75,16 @@ describe("DetailPageTemplate", () => {
 					bodyTabs={{
 						defaultValue: "a",
 						items: [
-							{ value: "a", label: "Tab A", content: <div data-testid="content-a">A</div> },
-							{ value: "b", label: "Tab B", content: <div data-testid="content-b">B</div> },
+							{
+								value: "a",
+								label: "Tab A",
+								content: <div data-testid="content-a">A</div>,
+							},
+							{
+								value: "b",
+								label: "Tab B",
+								content: <div data-testid="content-b">B</div>,
+							},
 						],
 					}}
 				/>
@@ -100,7 +108,9 @@ describe("DetailPageTemplate", () => {
 		const sub = screen.getByTestId("subheader");
 		const body = screen.getByTestId("body");
 		expect(sub).toBeInTheDocument();
-		expect(sub.compareDocumentPosition(body) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+		expect(
+			sub.compareDocumentPosition(body) & Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 	});
 
 	it("throws when both bodyTabs and tabs are passed", () => {
@@ -111,7 +121,10 @@ describe("DetailPageTemplate", () => {
 					<DetailPageTemplate
 						title="X"
 						tabs={<div />}
-						bodyTabs={{ defaultValue: "a", items: [{ value: "a", label: "A", content: <div /> }] }}
+						bodyTabs={{
+							defaultValue: "a",
+							items: [{ value: "a", label: "A", content: <div /> }],
+						}}
 					/>
 				</AppShell>,
 			),
