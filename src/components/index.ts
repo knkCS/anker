@@ -89,6 +89,9 @@ export { FactBox } from "./fact-box";
 // InlineCreatableList
 export type { InlineCreatableListProps } from "./inline-creatable-list";
 export { InlineCreatableList } from "./inline-creatable-list";
+// KnkLogo
+export type { KnkLogoProps } from "./knk-logo";
+export { KnkLogo } from "./knk-logo";
 // LabeledSwitch
 export type { LabeledSwitchProps } from "./labeled-switch";
 export { LabeledSwitch } from "./labeled-switch";
