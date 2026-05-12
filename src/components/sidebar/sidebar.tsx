@@ -1,7 +1,7 @@
 // src/components/sidebar/sidebar.tsx
 
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, IconButton } from "../../atoms/button";
 import { Box, Flex } from "../../primitives/layout";
 import {
@@ -69,12 +69,14 @@ const SidebarRoot = ({
 		}
 	}, [collapsed, storageKey]);
 
+	const toggle = useCallback(() => setCollapsed((c) => !c), []);
+
 	const ctx = useMemo<SidebarContextValue>(
 		() => ({
 			collapsed,
-			toggle: () => setCollapsed((c) => !c),
+			toggle,
 		}),
-		[collapsed],
+		[collapsed, toggle],
 	);
 
 	return (
@@ -89,10 +91,34 @@ const SidebarRoot = ({
 				borderRightWidth="1px"
 				borderRightColor="border"
 				transition="width 250ms ease-out"
-				overflow="hidden"
 				position="relative"
 			>
 				{children}
+				<IconButton
+					data-testid="sidebar-toggle"
+					aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+					onClick={toggle}
+					variant="outline"
+					size="xs"
+					position="absolute"
+					top="6"
+					right="-3.5"
+					width="7"
+					height="7"
+					minW="7"
+					borderRadius="full"
+					bg="bg-surface"
+					borderColor="border"
+					boxShadow="sm"
+					zIndex={1}
+					_hover={{ bg: "bg-muted" }}
+				>
+					{collapsed ? (
+						<PanelLeftOpen size={14} />
+					) : (
+						<PanelLeftClose size={14} />
+					)}
+				</IconButton>
 			</Flex>
 		</SidebarContext.Provider>
 	);
