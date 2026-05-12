@@ -3,7 +3,6 @@
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { Button, IconButton } from "../../atoms/button";
-import { KnkLogo } from "../knk-logo/knk-logo";
 import { Box, Flex } from "../../primitives/layout";
 import {
 	MenuContent,
@@ -12,7 +11,8 @@ import {
 	MenuTrigger,
 } from "../../primitives/menu";
 import { Tooltip } from "../../primitives/tooltip";
-import { Heading, Text } from "../../primitives/typography";
+import { Text } from "../../primitives/typography";
+import { KnkLogo } from "../knk-logo/knk-logo";
 
 const COLLAPSED_WIDTH = "64px";
 const EXPANDED_WIDTH = "240px";
