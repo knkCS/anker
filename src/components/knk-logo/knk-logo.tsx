@@ -34,6 +34,7 @@ export const KnkLogo = ({
 	boxSize = 48,
 	invert = false,
 	alt = "knkcms",
+	color,
 	...rest
 }: KnkLogoProps) => (
 	<chakra.span
@@ -43,6 +44,7 @@ export const KnkLogo = ({
 		aria-label={alt}
 		width={boxSize}
 		flexShrink={0}
+		color={color ?? "primary.700"}
 		filter={invert ? "brightness(0) invert(1)" : undefined}
 		css={{
 			"& svg": {
