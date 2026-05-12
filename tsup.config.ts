@@ -28,4 +28,7 @@ export default defineConfig({
   treeshake: true,
   sourcemap: true,
   minify: false,
+  loader: {
+    ".svg": "dataurl",
+  },
 });
