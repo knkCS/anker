@@ -44,6 +44,7 @@ export const KnkLogo = ({
 				display: "block",
 			},
 		}}
+		// biome-ignore lint/security/noDangerouslySetInnerHtml: bundled brand asset, not user input
 		dangerouslySetInnerHTML={{ __html: knkLogoSvg }}
 		{...rest}
 	/>

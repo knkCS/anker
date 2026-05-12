@@ -101,7 +101,7 @@ export function SettingsPageTemplate({
 				? {
 						value: bodyTabs.value,
 						onValueChange: (d: { value: string }) =>
-							bodyTabs.onValueChange!(d.value),
+							bodyTabs.onValueChange?.(d.value),
 					}
 				: { defaultValue: bodyTabs.defaultValue };
 		return (
