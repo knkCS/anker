@@ -22,7 +22,7 @@ export const Default: Story = {
 	render: () => (
 		<Sidebar>
 			<Sidebar.Header>
-				<Sidebar.Logo wordmark="Odon" subtitle="Identity Provider" />
+				<Sidebar.Logo productName="odon" />
 			</Sidebar.Header>
 			<Sidebar.Body>
 				<Sidebar.Section label="Identity">

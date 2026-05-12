@@ -3,6 +3,7 @@
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { Button, IconButton } from "../../atoms/button";
+import { KnkLogo } from "../knk-logo/knk-logo";
 import { Box, Flex } from "../../primitives/layout";
 import {
 	MenuContent,
@@ -122,11 +123,11 @@ SidebarFooter.displayName = "Sidebar.Footer";
 
 // Logo
 export interface SidebarLogoProps {
-	wordmark: string;
-	subtitle?: string;
+	/** Lowercase product name, e.g. "odon", "core", "mediahub". */
+	productName: string;
 }
 
-const SidebarLogo = ({ wordmark, subtitle }: SidebarLogoProps) => {
+const SidebarLogo = ({ productName }: SidebarLogoProps) => {
 	const { collapsed, toggle } = useSidebarContext();
 
 	const toggleButton = (
@@ -144,52 +145,34 @@ const SidebarLogo = ({ wordmark, subtitle }: SidebarLogoProps) => {
 	if (collapsed) {
 		return (
 			<Flex direction="column" align="center" gap="2">
-				<Heading
-					as="span"
-					fontSize="lg"
-					fontWeight="bold"
-					color="primary.700"
-					letterSpacing="tight"
-				>
-					{wordmark.charAt(0)}
-				</Heading>
+				<KnkLogo boxSize={28} invert />
 				{toggleButton}
 			</Flex>
 		);
 	}
 
 	return (
-		<Flex
-			direction="row"
-			align="center"
-			justify="space-between"
-			gap="2"
-			w="full"
-		>
-			<Box mb={subtitle ? "0" : "0"}>
-				<Heading
-					as="span"
-					fontSize="lg"
-					fontWeight="bold"
-					color="primary.700"
-					letterSpacing="tight"
+		<Flex direction="column" align="center" gap="2" w="full">
+			<Flex direction="column" align="center" gap="2" pb="3">
+				<KnkLogo boxSize={48} invert />
+				<Text
+					fontSize="sm"
+					fontWeight="semibold"
+					color="currentColor"
+					lineHeight="1"
 				>
-					{wordmark}
-				</Heading>
-				{subtitle && (
-					<Text
-						fontSize="2xs"
-						fontWeight="semibold"
-						letterSpacing="wider"
-						textTransform="uppercase"
-						color="muted"
-						mt="0.5"
-					>
-						{subtitle}
-					</Text>
-				)}
-			</Box>
-			{toggleButton}
+					{productName}
+				</Text>
+			</Flex>
+			<Box
+				w="full"
+				borderBottomWidth="1px"
+				borderBottomColor="whiteAlpha.200"
+				mb="2"
+			/>
+			<Flex w="full" justify="flex-end">
+				{toggleButton}
+			</Flex>
 		</Flex>
 	);
 };
