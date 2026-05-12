@@ -37,7 +37,7 @@ describe("Sidebar", () => {
 			</Sidebar>,
 		);
 		expect(screen.getByText("odon")).toBeInTheDocument();
-		expect(screen.getByAltText("knkcms")).toBeInTheDocument();
+		expect(screen.getByLabelText("knkcms")).toBeInTheDocument();
 	});
 
 	it("renders Sidebar.Slot children", () => {
@@ -368,7 +368,7 @@ describe("Sidebar", () => {
 			</Sidebar>,
 		);
 		// Logo image still present, product name text hidden when collapsed
-		expect(screen.getByAltText("knkcms")).toBeInTheDocument();
+		expect(screen.getByLabelText("knkcms")).toBeInTheDocument();
 		expect(screen.queryByText("odon")).not.toBeInTheDocument();
 	});
 
