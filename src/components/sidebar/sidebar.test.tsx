@@ -27,30 +27,17 @@ describe("Sidebar", () => {
 		expect(screen.getByTestId("sidebar")).toBeInTheDocument();
 	});
 
-	it("renders Sidebar.Logo wordmark and subtitle", () => {
+	it("renders Sidebar.Logo with productName and KnkLogo image", () => {
 		renderExpanded(
 			<Sidebar>
 				<Sidebar.Header>
-					<Sidebar.Logo wordmark="Odon" subtitle="Identity Provider" />
+					<Sidebar.Logo productName="odon" />
 				</Sidebar.Header>
 				<Sidebar.Body />
 			</Sidebar>,
 		);
-		expect(screen.getByText("Odon")).toBeInTheDocument();
-		expect(screen.getByText("Identity Provider")).toBeInTheDocument();
-	});
-
-	it("renders Sidebar.Logo without subtitle when omitted", () => {
-		renderExpanded(
-			<Sidebar>
-				<Sidebar.Header>
-					<Sidebar.Logo wordmark="Odon" />
-				</Sidebar.Header>
-				<Sidebar.Body />
-			</Sidebar>,
-		);
-		expect(screen.getByText("Odon")).toBeInTheDocument();
-		expect(screen.queryByText("Identity Provider")).not.toBeInTheDocument();
+		expect(screen.getByText("odon")).toBeInTheDocument();
+		expect(screen.getByAltText("knkcms")).toBeInTheDocument();
 	});
 
 	it("renders Sidebar.Slot children", () => {
@@ -336,7 +323,7 @@ describe("Sidebar", () => {
 		renderWithChakra(
 			<Sidebar storageKey="test.sidebar.toggle">
 				<Sidebar.Header>
-					<Sidebar.Logo wordmark="Odon" />
+					<Sidebar.Logo productName="odon" />
 				</Sidebar.Header>
 				<Sidebar.Body>body</Sidebar.Body>
 			</Sidebar>,
@@ -367,7 +354,7 @@ describe("Sidebar", () => {
 
 	// ── Task 3: Logo compact mode ──
 
-	it("Sidebar.Logo shows compact form when collapsed", () => {
+	it("Sidebar.Logo hides product name when collapsed", () => {
 		Object.defineProperty(window, "innerWidth", {
 			configurable: true,
 			value: 1600,
@@ -375,15 +362,14 @@ describe("Sidebar", () => {
 		renderWithChakra(
 			<Sidebar defaultCollapsed>
 				<Sidebar.Header>
-					<Sidebar.Logo wordmark="Odon" subtitle="Identity Provider" />
+					<Sidebar.Logo productName="odon" />
 				</Sidebar.Header>
 				<Sidebar.Body />
 			</Sidebar>,
 		);
-		// First letter rendered, full wordmark and subtitle absent
-		expect(screen.getByText("O")).toBeInTheDocument();
-		expect(screen.queryByText("Odon")).not.toBeInTheDocument();
-		expect(screen.queryByText("Identity Provider")).not.toBeInTheDocument();
+		// Logo image still present, product name text hidden when collapsed
+		expect(screen.getByAltText("knkcms")).toBeInTheDocument();
+		expect(screen.queryByText("odon")).not.toBeInTheDocument();
 	});
 
 	// ── Task 4: Section label hidden when collapsed ──
