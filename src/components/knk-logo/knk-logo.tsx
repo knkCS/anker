@@ -1,9 +1,12 @@
 // src/components/knk-logo/knk-logo.tsx
 import { chakra, type HTMLChakraProps } from "@chakra-ui/react";
-import knkLogoUrl from "../../assets/knk-logo.svg";
+import knkLogoSvg from "../../assets/knk-logo.svg";
 
 export interface KnkLogoProps
-	extends Omit<HTMLChakraProps<"img">, "as" | "src" | "alt" | "invert"> {
+	extends Omit<
+		HTMLChakraProps<"span">,
+		"as" | "dangerouslySetInnerHTML" | "invert"
+	> {
 	/** Pixel or token size; controls width. Default 48. */
 	boxSize?: number | string;
 	/**
@@ -11,15 +14,15 @@ export interface KnkLogoProps
 	 * suitable for dark backgrounds like the primary-colored sidebar.
 	 */
 	invert?: boolean;
-	/** Override the default "knkcms" alt text. */
+	/** Accessible label. Default "knkcms". */
 	alt?: string;
 }
 
 /**
- * KnkLogo renders the knkcms brand mark via an <img> referencing the
- * SVG asset. Use the `invert` prop on dark backgrounds (e.g. the
- * primary-colored sidebar) until the source SVG is rewritten to use
- * `currentColor` for fills.
+ * KnkLogo renders the knkcms brand mark by inlining the SVG into the
+ * DOM (no image fetch, no data URL). This sidesteps both relative-URL
+ * resolution issues across deep routes and CSP `img-src` restrictions
+ * on data URIs.
  */
 export const KnkLogo = ({
 	boxSize = 48,
@@ -27,12 +30,21 @@ export const KnkLogo = ({
 	alt = "knkcms",
 	...rest
 }: KnkLogoProps) => (
-	<chakra.img
-		src={knkLogoUrl}
-		alt={alt}
+	<chakra.span
+		display="inline-flex"
+		alignItems="center"
+		role="img"
+		aria-label={alt}
 		width={boxSize}
-		height="auto"
 		filter={invert ? "brightness(0) invert(1)" : undefined}
+		css={{
+			"& svg": {
+				width: "100%",
+				height: "auto",
+				display: "block",
+			},
+		}}
+		dangerouslySetInnerHTML={{ __html: knkLogoSvg }}
 		{...rest}
 	/>
 );

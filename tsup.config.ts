@@ -29,6 +29,6 @@ export default defineConfig({
   sourcemap: true,
   minify: false,
   loader: {
-    ".svg": "dataurl",
+    ".svg": "text",
   },
 });
