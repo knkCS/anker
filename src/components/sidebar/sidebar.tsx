@@ -145,7 +145,7 @@ const SidebarLogo = ({ productName }: SidebarLogoProps) => {
 	if (collapsed) {
 		return (
 			<Flex direction="column" align="center" gap="2">
-				<KnkLogo boxSize={28} invert />
+				<KnkLogo boxSize={28} />
 				{toggleButton}
 			</Flex>
 		);
@@ -154,7 +154,7 @@ const SidebarLogo = ({ productName }: SidebarLogoProps) => {
 	return (
 		<Flex direction="column" align="center" gap="2" w="full">
 			<Flex direction="column" align="center" gap="2" pb="3">
-				<KnkLogo boxSize={48} invert />
+				<KnkLogo boxSize={48} />
 				<Text
 					fontSize="sm"
 					fontWeight="semibold"
@@ -164,12 +164,7 @@ const SidebarLogo = ({ productName }: SidebarLogoProps) => {
 					{productName}
 				</Text>
 			</Flex>
-			<Box
-				w="full"
-				borderBottomWidth="1px"
-				borderBottomColor="whiteAlpha.200"
-				mb="2"
-			/>
+			<Box w="full" borderBottomWidth="1px" borderBottomColor="border" mb="2" />
 			<Flex w="full" justify="flex-end">
 				{toggleButton}
 			</Flex>
