@@ -128,25 +128,12 @@ export interface SidebarLogoProps {
 }
 
 const SidebarLogo = ({ productName }: SidebarLogoProps) => {
-	const { collapsed, toggle } = useSidebarContext();
-
-	const toggleButton = (
-		<IconButton
-			data-testid="sidebar-toggle"
-			aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-			variant="ghost"
-			size="sm"
-			onClick={toggle}
-		>
-			{collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
-		</IconButton>
-	);
+	const { collapsed } = useSidebarContext();
 
 	if (collapsed) {
 		return (
-			<Flex direction="column" align="center" gap="2">
+			<Flex direction="column" align="center">
 				<KnkLogo boxSize={22} />
-				{toggleButton}
 			</Flex>
 		);
 	}
@@ -154,7 +141,7 @@ const SidebarLogo = ({ productName }: SidebarLogoProps) => {
 	return (
 		<Flex direction="column" align="center" gap="2" w="full">
 			<Flex direction="column" align="center" gap="2" pb="3">
-				<KnkLogo boxSize={38} />
+				<KnkLogo boxSize={56} />
 				<Text
 					fontSize="sm"
 					fontWeight="semibold"
@@ -163,10 +150,6 @@ const SidebarLogo = ({ productName }: SidebarLogoProps) => {
 				>
 					{productName}
 				</Text>
-			</Flex>
-			<Box w="full" borderBottomWidth="1px" borderBottomColor="border" mb="2" />
-			<Flex w="full" justify="flex-end">
-				{toggleButton}
 			</Flex>
 		</Flex>
 	);
