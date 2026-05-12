@@ -81,19 +81,25 @@ const SidebarRoot = ({
 
 	return (
 		<SidebarContext.Provider value={ctx}>
-			<Flex
-				data-testid="sidebar"
-				data-collapsed={collapsed ? "true" : "false"}
-				direction="column"
-				w={collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
-				minH="100vh"
-				bg="bg-canvas"
-				borderRightWidth="1px"
-				borderRightColor="border"
-				transition="width 250ms ease-out"
+			<Box
 				position="relative"
+				w={collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
+				transition="width 250ms ease-out"
+				flexShrink={0}
 			>
-				{children}
+				<Flex
+					data-testid="sidebar"
+					data-collapsed={collapsed ? "true" : "false"}
+					direction="column"
+					w="full"
+					minH="100vh"
+					bg="bg-canvas"
+					borderRightWidth="1px"
+					borderRightColor="border"
+					overflow="hidden"
+				>
+					{children}
+				</Flex>
 				<IconButton
 					data-testid="sidebar-toggle"
 					aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -119,7 +125,7 @@ const SidebarRoot = ({
 						<PanelLeftClose size={14} />
 					)}
 				</IconButton>
-			</Flex>
+			</Box>
 		</SidebarContext.Provider>
 	);
 };
