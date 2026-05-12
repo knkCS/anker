@@ -13,7 +13,18 @@ export interface KnkLogoProps
 		HTMLChakraProps<"span">,
 		"as" | "dangerouslySetInnerHTML" | "invert"
 	> {
-	/** Pixel or token size; controls width. Default 48. */
+	/**
+	 * Width of the rendered brand mark. Matches HTML element semantics:
+	 * a number is interpreted as **pixels** (e.g. `56` → `"56px"`), a
+	 * string is passed through as a CSS length (`"3.5rem"`, `"2em"`).
+	 *
+	 * Chakra spacing tokens are intentionally NOT accepted — the brand
+	 * mark needs a precise size, not one tied to layout rhythm. (Chakra's
+	 * sizes scale resolves `56` to `14rem`/224px, which is the trap this
+	 * prop's contract exists to prevent.)
+	 *
+	 * Default `48` (= `48px`).
+	 */
 	boxSize?: number | string;
 	/**
 	 * When true, applies a CSS filter to render the logo in white,
@@ -30,6 +41,9 @@ export interface KnkLogoProps
  * resolution issues across deep routes and CSP `img-src` restrictions
  * on data URIs.
  */
+const toCssLength = (v: number | string): string =>
+	typeof v === "number" ? `${v}px` : v;
+
 export const KnkLogo = ({
 	boxSize = 48,
 	invert = false,
@@ -42,7 +56,7 @@ export const KnkLogo = ({
 		alignItems="center"
 		role="img"
 		aria-label={alt}
-		width={boxSize}
+		width={toCssLength(boxSize)}
 		flexShrink={0}
 		color={color ?? "primary.700"}
 		filter={invert ? "brightness(0) invert(1)" : undefined}
