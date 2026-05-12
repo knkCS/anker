@@ -1,6 +1,12 @@
 // src/components/knk-logo/knk-logo.tsx
 import { chakra, type HTMLChakraProps } from "@chakra-ui/react";
-import knkLogoSvg from "../../assets/knk-logo.svg";
+import rawKnkLogoSvg from "../../assets/knk-logo.svg";
+
+// The SVG asset has hard-coded width/height attributes that win over CSS in
+// some renderers. Strip them so the wrapper's `boxSize` is authoritative.
+const knkLogoSvg = rawKnkLogoSvg
+	.replace(/\swidth="[^"]*"/, "")
+	.replace(/\sheight="[^"]*"/, "");
 
 export interface KnkLogoProps
 	extends Omit<
@@ -36,6 +42,7 @@ export const KnkLogo = ({
 		role="img"
 		aria-label={alt}
 		width={boxSize}
+		flexShrink={0}
 		filter={invert ? "brightness(0) invert(1)" : undefined}
 		css={{
 			"& svg": {
