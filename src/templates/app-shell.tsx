@@ -257,7 +257,6 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 				top="0"
 				alignSelf="start"
 				maxH="100vh"
-				overflowY="auto"
 			>
 				{sidebar}
 			</Box>
@@ -282,7 +281,6 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 					top="0"
 					alignSelf="start"
 					maxH="100vh"
-					overflowY="auto"
 					bg="bg-surface"
 					borderLeftWidth="1px"
 					borderColor="border"
