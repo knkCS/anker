@@ -7,6 +7,7 @@ import {
 	Users,
 	Webhook,
 } from "lucide-react";
+import { Flex } from "../../primitives/layout";
 import { Sidebar } from "./sidebar";
 
 const meta = {
@@ -50,5 +51,25 @@ export const Default: Story = {
 				</Sidebar.UserMenu>
 			</Sidebar.Footer>
 		</Sidebar>
+	),
+};
+
+export const ThreeProductsSideBySide: Story = {
+	render: () => (
+		<Flex gap="4">
+			{(["odon", "core", "mediahub"] as const).map((p) => (
+				<Sidebar key={p}>
+					<Sidebar.Header>
+						<Sidebar.Logo productName={p} />
+					</Sidebar.Header>
+					<Sidebar.Body>
+						<Sidebar.Section label="Section">
+							<Sidebar.Item active>Home</Sidebar.Item>
+							<Sidebar.Item>Settings</Sidebar.Item>
+						</Sidebar.Section>
+					</Sidebar.Body>
+				</Sidebar>
+			))}
+		</Flex>
 	),
 };
