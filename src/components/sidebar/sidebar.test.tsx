@@ -341,6 +341,21 @@ describe("Sidebar", () => {
 		window.localStorage.removeItem("test.sidebar.toggle");
 	});
 
+	it("Sidebar.toggle button is rendered by Sidebar root, not by Sidebar.Logo", () => {
+		Object.defineProperty(window, "innerWidth", {
+			configurable: true,
+			value: 1600,
+		});
+		renderWithChakra(
+			<Sidebar>
+				<Sidebar.Body>body</Sidebar.Body>
+			</Sidebar>,
+		);
+		// No <Sidebar.Logo> is rendered, but the toggle still exists because
+		// it lives on the sidebar root, not inside Logo.
+		expect(screen.getByTestId("sidebar-toggle")).toBeInTheDocument();
+	});
+
 	it("useSidebarContext throws when used outside Sidebar", () => {
 		// Suppress the React error boundary log:
 		const spy = vi.spyOn(console, "error").mockImplementation(() => {});
