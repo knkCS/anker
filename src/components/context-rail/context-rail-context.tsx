@@ -32,6 +32,7 @@ export const RAIL_ATOM = Symbol.for("anker.contextRail.atom");
 
 export function isRailAtom(child: React.ReactNode): boolean {
     if (!React.isValidElement(child)) return false;
-    const type = child.type as { railAtom?: symbol } | string;
-    return typeof type === "function" && type.railAtom === RAIL_ATOM;
+    const type = child.type;
+    if (typeof type !== "function") return false;
+    return (type as { railAtom?: symbol }).railAtom === RAIL_ATOM;
 }
