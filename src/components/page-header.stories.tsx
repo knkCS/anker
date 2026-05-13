@@ -4,7 +4,7 @@ import { Edit, Upload, UserPlus } from "lucide-react";
 import { Button } from "../atoms/button";
 import { Avatar } from "../primitives/avatar";
 import { Badge } from "../primitives/badge";
-import { Box, Flex } from "../primitives/layout";
+import { Flex } from "../primitives/layout";
 import { Tabs } from "../primitives/tabs";
 import { Text } from "../primitives/typography";
 import { PageHeader } from "./page-header";
@@ -65,11 +65,13 @@ export const WithEyebrow: Story = {
 
 export const WithDetailSlots: Story = {
 	args: {
-		breadcrumbs: [{ label: "Identity" }, { label: "Users" }, { label: "Jan Schmidt" }],
+		breadcrumbs: [
+			{ label: "Identity" },
+			{ label: "Users" },
+			{ label: "Jan Schmidt" },
+		],
 		title: "Jan Schmidt",
-		avatar: (
-			<Avatar name="Jan Schmidt" size="xl" />
-		),
+		avatar: <Avatar name="Jan Schmidt" size="xl" />,
 		badges: (
 			<>
 				<Badge colorPalette="green">Aktiv</Badge>
@@ -79,16 +81,26 @@ export const WithDetailSlots: Story = {
 		meta: (
 			<Flex align="center" gap="3" fontSize="sm" color="muted">
 				<Text as="span">jan.schmidt@example.com</Text>
-				<Text as="span" color="muted">·</Text>
+				<Text as="span" color="muted">
+					·
+				</Text>
 				<Text as="span">Entwicklung</Text>
-				<Text as="span" color="muted">·</Text>
-				<Text as="span" fontFamily="mono" fontSize="xs">usr_01HXYZ1234ABCD</Text>
+				<Text as="span" color="muted">
+					·
+				</Text>
+				<Text as="span" fontFamily="mono" fontSize="xs">
+					usr_01HXYZ1234ABCD
+				</Text>
 			</Flex>
 		),
 		actions: (
 			<>
-				<Button variant="outline" size="sm">Bearbeiten</Button>
-				<Button variant="solid" colorPalette="primary" size="sm">Zugang sperren</Button>
+				<Button variant="outline" size="sm">
+					Bearbeiten
+				</Button>
+				<Button variant="solid" colorPalette="primary" size="sm">
+					Zugang sperren
+				</Button>
 			</>
 		),
 	},
@@ -123,14 +135,14 @@ export const WithTabs: Story = {
 
 export const FullBand: Story = {
 	args: {
-		breadcrumbs: [{ label: "Identity" }, { label: "Users" }, { label: "Maria Müller" }],
+		breadcrumbs: [
+			{ label: "Identity" },
+			{ label: "Users" },
+			{ label: "Maria Müller" },
+		],
 		title: "Maria Müller",
-		avatar: (
-			<Avatar name="Maria Müller" size="xl" />
-		),
-		badges: (
-			<Badge colorPalette="green">Aktiv</Badge>
-		),
+		avatar: <Avatar name="Maria Müller" size="xl" />,
+		badges: <Badge colorPalette="green">Aktiv</Badge>,
 		meta: (
 			<Flex align="center" gap="2" fontSize="sm" color="muted">
 				<Text as="span">maria.mueller@example.com</Text>

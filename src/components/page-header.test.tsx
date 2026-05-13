@@ -88,8 +88,7 @@ describe("PageHeader", () => {
 		const title = screen.getByRole("heading", { name: "Jana Schmid" });
 		expect(avatar).toBeInTheDocument();
 		expect(
-			avatar.compareDocumentPosition(title) &
-				Node.DOCUMENT_POSITION_FOLLOWING,
+			avatar.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING,
 		).toBeTruthy();
 	});
 
@@ -120,8 +119,7 @@ describe("PageHeader", () => {
 		const title = screen.getByRole("heading", { name: "Jana Schmid" });
 		expect(meta).toBeInTheDocument();
 		expect(
-			title.compareDocumentPosition(meta) &
-				Node.DOCUMENT_POSITION_FOLLOWING,
+			title.compareDocumentPosition(meta) & Node.DOCUMENT_POSITION_FOLLOWING,
 		).toBeTruthy();
 	});
 
@@ -149,8 +147,7 @@ describe("PageHeader", () => {
 		const title = screen.getByRole("heading", { name: "Users" });
 		expect(tabsRow).toContainElement(tabsStrip);
 		expect(
-			title.compareDocumentPosition(tabsRow) &
-				Node.DOCUMENT_POSITION_FOLLOWING,
+			title.compareDocumentPosition(tabsRow) & Node.DOCUMENT_POSITION_FOLLOWING,
 		).toBeTruthy();
 	});
 
