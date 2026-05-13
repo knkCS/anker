@@ -270,3 +270,29 @@ export function ContextRailAvatar({
 }
 ContextRailAvatar.displayName = "ContextRail.Avatar";
 (ContextRailAvatar as unknown as { railAtom: symbol }).railAtom = RAIL_ATOM;
+
+export function ContextRailDivider() {
+    const { collapsed } = useContextRailMode();
+    if (collapsed) {
+        return (
+            <Box
+                data-testid="context-rail-divider"
+                w="5"
+                h="1px"
+                bg="border"
+                my="1"
+            />
+        );
+    }
+    return (
+        <Box
+            data-testid="context-rail-divider"
+            w="full"
+            h="1px"
+            bg="border"
+            my="3"
+        />
+    );
+}
+ContextRailDivider.displayName = "ContextRail.Divider";
+(ContextRailDivider as unknown as { railAtom: symbol }).railAtom = RAIL_ATOM;

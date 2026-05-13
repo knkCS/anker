@@ -530,3 +530,30 @@ describe("ContextRail.Avatar", () => {
         expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
     });
 });
+
+describe("ContextRail.Divider", () => {
+    it("renders a horizontal rule in expanded mode", () => {
+        Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
+        renderWithChakra(
+            <ContextRail>
+                <ContextRail.Divider />
+            </ContextRail>,
+        );
+        expect(screen.getByTestId("context-rail-divider")).toBeInTheDocument();
+    });
+
+    it("renders a narrow centered line in collapsed mode", () => {
+        Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+        renderWithChakra(
+            <ContextRail>
+                <ContextRail.Divider />
+            </ContextRail>,
+        );
+        expect(screen.getByTestId("context-rail-divider")).toBeInTheDocument();
+    });
+
+    it("Divider is tagged with RAIL_ATOM", () => {
+        const type = ContextRail.Divider as unknown as { railAtom: symbol };
+        expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
+    });
+});

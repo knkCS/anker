@@ -18,6 +18,7 @@ import {
 } from "./context-rail-context";
 import {
 	ContextRailAvatar,
+	ContextRailDivider,
 	ContextRailIconButton,
 	ContextRailStatusIcon,
 	ContextRailValueTile,
@@ -300,6 +301,7 @@ export const ContextRail = Object.assign(ContextRailRoot, {
 	Section: ContextRailSection,
 	Footer: ContextRailFooter,
 	Avatar: ContextRailAvatar,
+	Divider: ContextRailDivider,
 	IconButton: ContextRailIconButton,
 	StatusIcon: ContextRailStatusIcon,
 	ValueTile: ContextRailValueTile,
