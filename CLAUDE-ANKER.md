@@ -78,6 +78,7 @@ Available templates:
 | Template | Use for |
 |---|---|
 | `<AppShell>` | Authenticated chrome (sidebar · main · rail). Provides `usePageActions(node)`, `usePageHeader(node)`, and `usePageRail(node)` hooks. Page templates register their `<PageHeader>` via `usePageHeader`, which renders it as a band spanning main + rail. |
+| `<ContextRail>` | Right-rail container with sticky positioning, collapse toggle on the leading edge, and five mode-aware atom subcomponents for compact rendering at 44px: `IconButton`, `ValueTile`, `StatusIcon`, `Avatar`, `Divider`. Sections (`<ContextRail.Section>`) keep their expanded-mode chrome; in collapsed mode, only atom-tagged children render. See `docs/page-patterns.md` §ContextRail patterns. |
 | `<PageHeader>` | Three-row page header band (breadcrumb · detail · tabs). Props: `breadcrumbs`, `title`, `subtitle`, `eyebrow`, `actions`, `avatar`, `badges`, `meta`, `tabs`. Each row is independently optional except title. See `docs/page-patterns.md` §Page header anatomy. |
 | `<IndexPageTemplate>` | List pages — header + optional tabs + toolbar + DataTable |
 | `<DetailPageTemplate>` | Single-entity pages — registers a three-row header band via `usePageHeader`. New props: `avatar`, `badges`, `meta`, `tabs`. `subheader` and `bodyTabs` were removed in v2.2.0 — migrate to the slot props on PageHeader. |

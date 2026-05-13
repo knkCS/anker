@@ -1,6 +1,18 @@
 // src/components/context-rail/context-rail.stories.tsx
 import type { Meta, StoryObj } from "@storybook/react";
-import { History, Info, Monitor, ShieldCheck, Zap } from "lucide-react";
+import {
+	ArrowRight,
+	Download,
+	History,
+	Info,
+	Monitor,
+	Shield,
+	ShieldCheck,
+	Upload,
+	UserPlus,
+	X,
+	Zap,
+} from "lucide-react";
 import { Box, Flex } from "../../primitives/layout";
 import { ContextRail } from "./context-rail";
 
@@ -100,4 +112,111 @@ export const CollapsedByDefault: Story = {
 			</RailColumn>
 		);
 	},
+};
+
+export const AtomsExpanded: Story = {
+	render: () => (
+		<RailColumn>
+			<ContextRail>
+				<ContextRail.Header eyebrow="WORKSPACE" title="Overview" />
+				<ContextRail.Section id="users" label="Users">
+					<ContextRail.ValueTile value={100} label="Total users" />
+					<ContextRail.ValueTile value={100} label="Active users" muted />
+				</ContextRail.Section>
+				<ContextRail.StatusIcon
+					tone="amber"
+					icon={<Shield size={14} />}
+					label="2FA: 0 of 100 enabled"
+				/>
+				<ContextRail.Divider />
+				<ContextRail.Section id="actions" label="Quick actions">
+					<ContextRail.IconButton
+						label="Invite user"
+						icon={<UserPlus size={14} />}
+						onClick={() => {}}
+					/>
+					<ContextRail.IconButton
+						label="Import CSV"
+						icon={<Upload size={14} />}
+						onClick={() => {}}
+					/>
+					<ContextRail.IconButton
+						label="Export all"
+						icon={<Download size={14} />}
+						onClick={() => {}}
+					/>
+				</ContextRail.Section>
+			</ContextRail>
+		</RailColumn>
+	),
+};
+
+export const AtomsCollapsed: Story = {
+	render: () => (
+		<div style={{ width: 1000 }}>
+			<RailColumn>
+				<ContextRail>
+					<ContextRail.Header eyebrow="WORKSPACE" title="Overview" />
+					<ContextRail.Section id="users" label="Users">
+						<ContextRail.ValueTile value={100} label="Total users" />
+						<ContextRail.ValueTile value={100} label="Active users" muted />
+					</ContextRail.Section>
+					<ContextRail.StatusIcon
+						tone="amber"
+						icon={<Shield size={14} />}
+						label="2FA: 0 of 100 enabled"
+					/>
+					<ContextRail.Divider />
+					<ContextRail.Section id="actions" label="Quick actions">
+						<ContextRail.IconButton
+							label="Invite user"
+							icon={<UserPlus size={14} />}
+							onClick={() => {}}
+						/>
+						<ContextRail.IconButton
+							label="Import CSV"
+							icon={<Upload size={14} />}
+							onClick={() => {}}
+						/>
+						<ContextRail.IconButton
+							label="Export all"
+							icon={<Download size={14} />}
+							onClick={() => {}}
+						/>
+					</ContextRail.Section>
+				</ContextRail>
+			</RailColumn>
+		</div>
+	),
+};
+
+export const AvatarAndFooter: Story = {
+	render: () => (
+		<RailColumn>
+			<ContextRail>
+				<ContextRail.Header eyebrow="USER" title="Jana Schmid" />
+				<ContextRail.Avatar initials="JS" label="Jana Schmid · jana@knk.de" />
+				<ContextRail.StatusIcon
+					tone="green"
+					icon={<Shield size={14} />}
+					label="2FA: Active"
+				/>
+				<ContextRail.ValueTile value={3} label="Sessions" />
+				<ContextRail.Footer>
+					<ContextRail.IconButton
+						label="Open detail"
+						icon={<ArrowRight size={14} />}
+						onClick={() => {}}
+						tone="primary"
+					/>
+					<ContextRail.IconButton
+						label="Close preview"
+						icon={<X size={14} />}
+						onClick={() => {}}
+						tone="ghost"
+					/>
+				</ContextRail.Footer>
+			</ContextRail>
+		</RailColumn>
+	),
 };

@@ -1,10 +1,30 @@
 // src/components/context-rail/context-rail.tsx
 import { ChevronRight, PanelRightClose, PanelRightOpen } from "lucide-react";
-import type React from "react";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+	createContext,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { IconButton } from "../../atoms/button";
 import { Box, Flex } from "../../primitives/layout";
 import { Heading, Text } from "../../primitives/typography";
+import {
+	ContextRailAvatar,
+	ContextRailDivider,
+	ContextRailIconButton,
+	ContextRailStatusIcon,
+	ContextRailValueTile,
+} from "./atoms";
+import {
+	isRailAtom,
+	RAIL_ATOM,
+	RailModeContext,
+	useContextRailMode,
+} from "./context-rail-context";
+
+export { RAIL_ATOM, useContextRailMode };
 
 const COLLAPSED_WIDTH = "44px";
 const EXPANDED_WIDTH = "360px";
@@ -74,47 +94,62 @@ const ContextRailRoot = ({ storageKey, children }: ContextRailProps) => {
 
 	return (
 		<RailRootContext.Provider value={true}>
-			<Box
-				data-testid="context-rail"
-				data-collapsed={collapsed ? "true" : "false"}
-				w={collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
-				minH="100vh"
-				transition="width 250ms ease-out"
-				position="relative"
-			>
-				<IconButton
-					data-testid="context-rail-toggle"
-					aria-label={
-						collapsed ? "Expand context rail" : "Collapse context rail"
-					}
-					onClick={() => setCollapsed((c) => !c)}
-					variant="outline"
-					size="xs"
-					position="absolute"
-					top="6"
-					left="-3.5"
-					width="7"
-					height="7"
-					minW="7"
-					borderRadius="full"
-					bg="bg-surface"
-					borderColor="border"
-					boxShadow="sm"
-					zIndex={1}
-					_hover={{ bg: "bg-muted" }}
+			<RailModeContext.Provider value={{ collapsed }}>
+				<Box
+					data-testid="context-rail"
+					data-collapsed={collapsed ? "true" : "false"}
+					w={collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
+					minH="100vh"
+					transition="width 250ms ease-out"
+					position="relative"
 				>
+					<IconButton
+						data-testid="context-rail-toggle"
+						aria-label={
+							collapsed ? "Expand context rail" : "Collapse context rail"
+						}
+						onClick={() => setCollapsed((c) => !c)}
+						variant="outline"
+						size="xs"
+						position="absolute"
+						top="6"
+						left="-3.5"
+						width="7"
+						height="7"
+						minW="7"
+						borderRadius="full"
+						bg="bg-surface"
+						borderColor="border"
+						boxShadow="sm"
+						zIndex={1}
+						_hover={{ bg: "bg-muted" }}
+					>
+						{collapsed ? (
+							<PanelRightOpen size={14} />
+						) : (
+							<PanelRightClose size={14} />
+						)}
+					</IconButton>
 					{collapsed ? (
-						<PanelRightOpen size={14} />
+						<Flex
+							data-testid="context-rail-collapsed-body"
+							direction="column"
+							align="center"
+							gap="2"
+							pt="14"
+							pb="3"
+							h="full"
+							overflowY="auto"
+						>
+							{children}
+						</Flex>
 					) : (
-						<PanelRightClose size={14} />
+						<Box h="full" overflowY="auto" px="4" pt="4" pb="4">
+							{children}
+						</Box>
 					)}
-				</IconButton>
-				{collapsed ? null : (
-					<Box h="full" overflowY="auto" px="4" pt="4" pb="4">
-						{children}
-					</Box>
-				)}
-			</Box>
+				</Box>
+			</RailModeContext.Provider>
 		</RailRootContext.Provider>
 	);
 };
@@ -128,6 +163,8 @@ export interface ContextRailHeaderProps {
 
 const ContextRailHeader = ({ eyebrow, title }: ContextRailHeaderProps) => {
 	useWarnIfOutsideRailRoot("ContextRail.Header");
+	const { collapsed } = useContextRailMode();
+	if (collapsed) return null;
 	return (
 		<Box mb="4" pb="3" borderBottomWidth="1px" borderBottomColor="border">
 			{eyebrow && (
@@ -175,7 +212,15 @@ const ContextRailSection = ({
 	children,
 }: ContextRailSectionProps) => {
 	useWarnIfOutsideRailRoot("ContextRail.Section");
+	const { collapsed } = useContextRailMode();
 	const [open, setOpen] = useState(defaultOpen);
+
+	if (collapsed) {
+		const atomChildren = React.Children.toArray(children).filter(isRailAtom);
+		if (atomChildren.length === 0) return null;
+		return <>{atomChildren}</>;
+	}
+
 	return (
 		<Box
 			data-section-id={id}
@@ -234,11 +279,20 @@ const ContextRailSection = ({
 ContextRailSection.displayName = "ContextRail.Section";
 
 // Footer
-const ContextRailFooter = ({ children }: { children: React.ReactNode }) => (
-	<Box mt="4" pt="4" borderTopWidth="1px" borderTopColor="border-muted">
-		{children}
-	</Box>
-);
+const ContextRailFooter = ({ children }: { children: React.ReactNode }) => {
+	const { collapsed } = useContextRailMode();
+	return (
+		<Box
+			mt={collapsed ? "auto" : "4"}
+			pt={collapsed ? "3" : "4"}
+			borderTopWidth="1px"
+			borderTopColor="border-muted"
+			w="full"
+		>
+			{children}
+		</Box>
+	);
+};
 ContextRailFooter.displayName = "ContextRail.Footer";
 
 // Compose
@@ -246,4 +300,9 @@ export const ContextRail = Object.assign(ContextRailRoot, {
 	Header: ContextRailHeader,
 	Section: ContextRailSection,
 	Footer: ContextRailFooter,
+	Avatar: ContextRailAvatar,
+	Divider: ContextRailDivider,
+	IconButton: ContextRailIconButton,
+	StatusIcon: ContextRailStatusIcon,
+	ValueTile: ContextRailValueTile,
 });
