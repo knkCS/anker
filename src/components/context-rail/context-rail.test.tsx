@@ -239,7 +239,7 @@ describe("ContextRail", () => {
 		// tokens. (Exact computed string differs between Chakra versions.)
 		expect(cs.top).not.toBe("");
 		expect(cs.left).not.toBe("");
-		expect(cs.left).toMatch(/spacing-3/);
+		expect(cs.left).toMatch(/spacing-3[._]5/);
 	});
 
 	describe("dev-mode warnings", () => {
