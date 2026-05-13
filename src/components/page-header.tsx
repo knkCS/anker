@@ -95,11 +95,11 @@ export const PageHeader = ({
 			)}
 
 			<Flex align="flex-start" justify="space-between" gap="4">
-				{avatar ? (
+				{avatar && (
 					<Box data-testid="page-header-avatar" flexShrink={0}>
 						{avatar}
 					</Box>
-				) : null}
+				)}
 				<Box flex="1" minW="0">
 					<Flex align="center" gap="2" wrap="wrap">
 						<Heading
@@ -111,11 +111,11 @@ export const PageHeader = ({
 						>
 							{title}
 						</Heading>
-						{badges ? (
+						{badges && (
 							<Flex data-testid="page-header-badges" align="center" gap="2">
 								{badges}
 							</Flex>
-						) : null}
+						)}
 					</Flex>
 					{subtitle && (
 						<Text
@@ -127,11 +127,11 @@ export const PageHeader = ({
 							{subtitle}
 						</Text>
 					)}
-					{meta ? (
+					{meta && (
 						<Box data-testid="page-header-meta" mt="2">
 							{meta}
 						</Box>
-					) : null}
+					)}
 				</Box>
 				{hasActions && (
 					<Flex align="center" gap="2" flexShrink={0}>
