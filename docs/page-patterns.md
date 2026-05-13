@@ -47,8 +47,10 @@ by the `<AppShell>` template:
 
 ```
 ┌────────────┬────────────────────────────────────────────────────┐
-│            │                  Page header                       │
-│            │     (breadcrumbs · title · page actions)           │
+│            │   page header band:                                │
+│            │     [ breadcrumb ]                                 │
+│            │     [ detail row (avatar · title · actions)      ] │
+│            │     [ tabs (optional)                            ] │
 │  Sidebar   ├────────────────────────────────────┬───────────────┤
 │   240px    │         Main content               │ ContextRail   │
 │ ↔ 60px     │            (fluid)                 │    320px      │
@@ -94,7 +96,8 @@ Two named slots are exposed:
 The rail column's coordinate origin sits in grid row 2, below the header
 band. Its `position: sticky; top: 0` therefore pins to the bottom of the
 header, not to the viewport top. The sidebar still spans both rows and
-remains sticky to the viewport top.
+remains sticky to the viewport top. When the page header includes a tabs row, the rail's coordinate origin
+sits **below the tabs row** — i.e. below the entire header band.
 
 The store uses `useSyncExternalStore` so that producers (deep child
 components rendered after the consumer) and consumers (AppShell, the page
@@ -166,6 +169,72 @@ via `usePageRail`. Omit both (or pass `rail={null}`) and AppShell drops
 the third grid column entirely — the main column expands to fill the
 freed space. This is the right shape for solutions that don't have a
 contextual side panel.
+
+---
+
+## Page header anatomy
+
+The page header band is one `<PageHeader>` instance, registered into the
+header slot via `usePageHeader(...)` from a page template. It renders up
+to three vertically-stacked rows on `bg-surface`, separated by spacing
+(not borders). The bottom border of the band marks the transition to
+the body and rail.
+
+| Row | Purpose | Props |
+|-----|---------|-------|
+| 1 — Breadcrumb | Trail to the current page. Last crumb non-link. | `breadcrumbs` |
+| 2 — Detail | Identity of the current page or entity: optional avatar (left), title + badges + meta (center), actions (right). | `avatar`, `title`, `badges`, `subtitle`, `meta`, `actions` |
+| 3 — Tabs | In-page navigation or filter state. | `tabs` |
+
+Each row is independently optional except for the title in row 2, which
+is required.
+
+**Detail page example:**
+
+```tsx
+<DetailPageTemplate
+  breadcrumbs={[{ label: "Identity", to: "/identity" }, { label: "Users", to: "/identity/users" }, { label: "Jana Schmid" }]}
+  title="Jana Schmid"
+  avatar={<Avatar name="Jana Schmid" size="lg" />}
+  badges={<><Badge colorPalette="green">Aktiv</Badge><Badge colorPalette="blue">Admin</Badge></>}
+  meta={<Flex gap="4" fontSize="sm"><span>jana.schmid@knk.de</span><span>Produkt</span></Flex>}
+  actions={<Button>Bearbeiten</Button>}
+  tabs={
+    <Tabs.Root value={activeTab}>
+      <Tabs.List>
+        <Tabs.Trigger value="overview">Übersicht</Tabs.Trigger>
+        <Tabs.Trigger value="apps">Anwendungen</Tabs.Trigger>
+      </Tabs.List>
+    </Tabs.Root>
+  }
+>
+  {/* body cards */}
+</DetailPageTemplate>
+```
+
+**Index page example:**
+
+```tsx
+<IndexPageTemplate
+  breadcrumbs={[{ label: "Identity" }, { label: "Users" }]}
+  title="Users"
+  actions={<Button>Nutzer einladen</Button>}
+  tabs={
+    <Tabs.Root value={filter}>
+      <Tabs.List>
+        <Tabs.Trigger value="all">Alle</Tabs.Trigger>
+        <Tabs.Trigger value="active">Aktiv</Tabs.Trigger>
+      </Tabs.List>
+    </Tabs.Root>
+  }
+  toolbar={<SearchBar />}
+>
+  <DataTable … />
+</IndexPageTemplate>
+```
+
+Index pages omit `avatar`, `badges`, and `meta` — the detail row collapses
+to title + actions.
 
 ---
 
@@ -282,12 +351,15 @@ setting.
 >   Webhooks / Audit Log as separate index pages. Each is a top-level
 >   navigation target with its own page header.
 >
-> **Rule of thumb:** if the page header (title, breadcrumb, identity
-> card) stays the same across the items, they're tabs. If each item has
-> its own page header, they're sub-section nav.
+> **Rule of thumb:** if the in-page navigation keeps the entity identity
+> (breadcrumb, avatar, title, badges) constant across the destinations,
+> they belong in `tabs` on the page header. If each destination is a
+> distinct top-level page with its own breadcrumb and title, render them
+> as separate index pages in the sidebar.
 >
-> Don't mix the two in the same view — both UIs competing for the user's
-> eye is more noise than signal. Pick one based on the rule above.
+> Within a single page, prefer the `tabs` row over rendering a custom
+> in-body tab strip — it keeps the navigation surface consistent across
+> solutions.
 
 ---
 
@@ -957,12 +1029,15 @@ OAuth client, a single audit event detail, a single webhook config.
 >   Webhooks / Audit Log as separate index pages. Each is a top-level
 >   navigation target with its own page header.
 >
-> **Rule of thumb:** if the page header (title, breadcrumb, identity
-> card) stays the same across the items, they're tabs. If each item has
-> its own page header, they're sub-section nav.
+> **Rule of thumb:** if the in-page navigation keeps the entity identity
+> (breadcrumb, avatar, title, badges) constant across the destinations,
+> they belong in `tabs` on the page header. If each destination is a
+> distinct top-level page with its own breadcrumb and title, render them
+> as separate index pages in the sidebar.
 >
-> Don't mix the two in the same view — both UIs competing for the user's
-> eye is more noise than signal. Pick one based on the rule above.
+> Within a single page, prefer the `tabs` row over rendering a custom
+> in-body tab strip — it keeps the navigation surface consistent across
+> solutions.
 
 **Composition.**
 
