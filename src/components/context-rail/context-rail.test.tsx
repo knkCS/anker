@@ -307,6 +307,50 @@ describe("ContextRail", () => {
 		expect(screen.getByText("Section label")).toBeInTheDocument();
 	});
 
+	it("section in collapsed mode keeps atoms and hides non-atom children", () => {
+		Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.Section id="s1" label="Users">
+					<ContextRail.ValueTile value={42} label="Total: 42" />
+					<div data-testid="free-form">free-form content</div>
+					<ContextRail.IconButton
+						label="Invite"
+						icon={<span>＋</span>}
+						onClick={() => {}}
+					/>
+				</ContextRail.Section>
+			</ContextRail>,
+		);
+		// Atoms render
+		expect(screen.getByText("42")).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Invite" })).toBeInTheDocument();
+		// Non-atom hidden
+		expect(screen.queryByTestId("free-form")).not.toBeInTheDocument();
+		// Section label hidden
+		expect(screen.queryByText("Users")).not.toBeInTheDocument();
+	});
+
+	it("full rail with header, atoms, divider, and footer renders in collapsed mode", () => {
+		Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.Header title="Overview" />
+				<ContextRail.ValueTile value={100} label="Total" />
+				<ContextRail.Divider />
+				<ContextRail.StatusIcon tone="green" icon={<span>🛡</span>} label="MFA" />
+				<ContextRail.Footer>
+					<ContextRail.IconButton label="Open" icon={<span>→</span>} onClick={() => {}} tone="primary" />
+				</ContextRail.Footer>
+			</ContextRail>,
+		);
+		expect(screen.getByText("100")).toBeInTheDocument();
+		expect(screen.getByTestId("context-rail-divider")).toBeInTheDocument();
+		expect(screen.getByText("🛡")).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Open" })).toBeInTheDocument();
+		expect(screen.queryByText("Overview")).not.toBeInTheDocument();
+	});
+
 	describe("dev-mode warnings", () => {
 		let warnSpy: ReturnType<typeof vi.spyOn>;
 		let originalNodeEnv: string | undefined;
