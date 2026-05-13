@@ -8,7 +8,7 @@ import React, {
 	useState,
 } from "react";
 import { IconButton } from "../../atoms/button";
-import { Box, Flex } from "../../primitives/layout";
+import { Box, Flex, Stack } from "../../primitives/layout";
 import { Heading, Text } from "../../primitives/typography";
 import {
 	ContextRailAvatar,
@@ -144,9 +144,9 @@ const ContextRailRoot = ({ storageKey, children }: ContextRailProps) => {
 							{children}
 						</Flex>
 					) : (
-						<Box h="full" overflowY="auto" px="4" pt="4" pb="4">
+						<Stack h="full" overflowY="auto" px="4" pt="4" pb="4" gap="3">
 							{children}
-						</Box>
+						</Stack>
 					)}
 				</Box>
 			</RailModeContext.Provider>
@@ -272,7 +272,11 @@ const ContextRailSection = ({
 				</Flex>
 				{action && <Box py="3">{action}</Box>}
 			</Flex>
-			{open && <Box pb="3">{children}</Box>}
+			{open && (
+				<Stack pb="3" gap="2">
+					{children}
+				</Stack>
+			)}
 		</Box>
 	);
 };
