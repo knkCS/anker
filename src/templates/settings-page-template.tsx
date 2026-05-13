@@ -1,69 +1,43 @@
 // src/templates/settings-page-template.tsx
 //
-// SettingsPageTemplate — for any "preferences / configuration" page that
-// uses a tabbed split between mixed form / list content.
+// SettingsPageTemplate — for any "preferences / configuration" page.
 //
 //   ┌─────────────────────────────────────────┐
 //   │ PageHeader  (breadcrumbs · title · …)   │
-//   ├─────────────────────────────────────────┤
-//   │ Tabs (required for settings)            │
-//   ├─────────────────────────────────────────┤
-//   │ children OR bodyTabs panes              │
+//   │   avatar · badges · meta (detail row)   │
+//   │   tabs (optional third row)             │
+//   └─────────────────────────────────────────┘
+//   ┌─────────────────────────────────────────┐
+//   │ children (body — constrained width)     │
 //   └─────────────────────────────────────────┘
 //
-// Two ways to render tabs (mutually exclusive):
-//
-// 1. `bodyTabs` — declarative panels owned by the template. Template
-//    wraps Tabs.Root with `lazyMount unmountOnExit`. Prefer this for
-//    settings pages.
-//
-// 2. `tabs` + `children` — consumer owns Tabs.Root and Tabs.Content.
-//    Retained for back-compat / advanced cases.
+// Pass a `<Tabs.Root value={current}>` with only `<Tabs.List>` inside to
+// `tabs`; let the router (or parent) render the active panel as `children`.
 
 import type { ReactNode } from "react";
 import { PageHeader, type PageHeaderProps } from "../components/page-header";
 import { Box, Flex } from "../primitives/layout";
-import { Tabs } from "../primitives/tabs";
 import { usePageHeader, useRegisteredPageActions } from "./app-shell";
-export interface BodyTabsItem {
-	value: string;
-	label: ReactNode;
-	content: ReactNode;
-}
-
-export type BodyTabsProp =
-	| {
-			items: BodyTabsItem[];
-			defaultValue: string;
-			value?: never;
-			onValueChange?: never;
-	  }
-	| {
-			items: BodyTabsItem[];
-			value: string;
-			onValueChange: (next: string) => void;
-			defaultValue?: never;
-	  };
 
 export interface SettingsPageTemplateProps
 	extends Pick<
 		PageHeaderProps,
 		"breadcrumbs" | "title" | "subtitle" | "eyebrow"
 	> {
+	/**
+	 * Optional explicit page-action content. Falls back to the actions
+	 * registered via `usePageActions` if not provided.
+	 */
 	actions?: ReactNode;
-	/**
-	 * Tab strip (consumer-owned). Mutually exclusive with `bodyTabs`.
-	 * Settings pages should always have at least two tabs — if you only
-	 * have one section, use DetailPageTemplate instead.
-	 */
+	/** Avatar slot for the page header's detail row. */
+	avatar?: ReactNode;
+	/** Badges shown inline next to the title. */
+	badges?: ReactNode;
+	/** Secondary meta line below the title (email, dept, ID, etc.). */
+	meta?: ReactNode;
+	/** Tab strip rendered as the third row of the page header band. */
 	tabs?: ReactNode;
-	/**
-	 * Owned-panel tabs. Template renders Tabs.Root with `lazyMount
-	 * unmountOnExit`; only the active item's `content` mounts. Mutually
-	 * exclusive with `tabs`.
-	 */
-	bodyTabs?: BodyTabsProp;
-	/** Page body when `bodyTabs` is not set. */
+	/** Page body content. */
 	children?: ReactNode;
 	/**
 	 * Constrain the body width for readability. @default "3xl" (= 768px).
@@ -84,17 +58,14 @@ export function SettingsPageTemplate({
 	subtitle,
 	eyebrow,
 	actions,
+	avatar,
+	badges,
+	meta,
 	tabs,
-	bodyTabs,
 	children,
 	maxBodyWidth = "3xl",
 	bodyPadding = "default",
 }: SettingsPageTemplateProps) {
-	if (tabs && bodyTabs) {
-		throw new Error(
-			"SettingsPageTemplate: `tabs` and `bodyTabs` are mutually exclusive — use `bodyTabs` for owned panels, `tabs` for consumer-owned tab strips.",
-		);
-	}
 	const registered = useRegisteredPageActions();
 	const resolvedActions = actions ?? registered;
 	usePageHeader(
@@ -104,59 +75,15 @@ export function SettingsPageTemplate({
 			subtitle={subtitle}
 			eyebrow={eyebrow}
 			actions={resolvedActions}
+			avatar={avatar}
+			badges={badges}
+			meta={meta}
+			tabs={tabs}
 		/>,
 	);
+
 	const bodyPx = bodyPadding === "none" ? "0" : "8";
 	const bodyPt = bodyPadding === "none" ? "0" : "6";
-
-	const renderBody = (node: ReactNode) => (
-		<Box flex="1" minH="0" px={bodyPx} pt={bodyPt}>
-			<Box
-				maxW={maxBodyWidth}
-				marginInline={maxBodyWidth === "full" ? "0" : "auto"}
-			>
-				{node}
-			</Box>
-		</Box>
-	);
-
-	if (bodyTabs) {
-		const tabsRootProps =
-			bodyTabs.value !== undefined
-				? {
-						value: bodyTabs.value,
-						onValueChange: (d: { value: string }) =>
-							bodyTabs.onValueChange?.(d.value),
-					}
-				: { defaultValue: bodyTabs.defaultValue };
-		return (
-			<Flex
-				data-testid="settings-page-template"
-				direction="column"
-				flex="1"
-				minH="0"
-			>
-				<Tabs.Root lazyMount unmountOnExit {...tabsRootProps}>
-					<Box>
-						<Tabs.List>
-							{bodyTabs.items.map((item) => (
-								<Tabs.Trigger key={item.value} value={item.value}>
-									{item.label}
-								</Tabs.Trigger>
-							))}
-						</Tabs.List>
-					</Box>
-					{renderBody(
-						bodyTabs.items.map((item) => (
-							<Tabs.Content key={item.value} value={item.value}>
-								{item.content}
-							</Tabs.Content>
-						)),
-					)}
-				</Tabs.Root>
-			</Flex>
-		);
-	}
 
 	return (
 		<Flex
@@ -165,8 +92,14 @@ export function SettingsPageTemplate({
 			flex="1"
 			minH="0"
 		>
-			<Box>{tabs}</Box>
-			{renderBody(children)}
+			<Box flex="1" minH="0" px={bodyPx} pt={bodyPt}>
+				<Box
+					maxW={maxBodyWidth}
+					marginInline={maxBodyWidth === "full" ? "0" : "auto"}
+				>
+					{children}
+				</Box>
+			</Box>
 		</Flex>
 	);
 }
