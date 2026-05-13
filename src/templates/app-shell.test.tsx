@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { describe, expect, it } from "vitest";
 import { createAnkerTheme } from "../theme/create-theme";
-import { AppShell, usePageRail } from "./app-shell";
+import { AppShell, usePageHeader, usePageRail } from "./app-shell";
 
 function renderWithChakra(ui: ReactElement) {
 	return render(<ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>);
@@ -145,5 +145,62 @@ describe("AppShell", () => {
 		expect(rail).toHaveStyle({ borderLeftWidth: "1px" });
 		const cs = window.getComputedStyle(rail);
 		expect(cs.background).toContain("--chakra-colors-bg-surface");
+	});
+
+	function HeaderRegistrar({
+		label = "registered header",
+	}: {
+		label?: string;
+	}) {
+		usePageHeader(<div data-testid="header-content">{label}</div>);
+		return <div data-testid="page-body">body</div>;
+	}
+
+	it("renders header content registered by a descendant via usePageHeader", () => {
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<HeaderRegistrar />
+			</AppShell>,
+		);
+		expect(screen.getByTestId("header-content")).toBeInTheDocument();
+	});
+
+	it("renders no header row when no descendant registers a header", () => {
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<div data-testid="page-body">body</div>
+			</AppShell>,
+		);
+		expect(screen.queryByTestId("app-shell-header")).not.toBeInTheDocument();
+	});
+
+	it("header spans main + rail columns when both header and rail are registered", () => {
+		function HeaderAndRail() {
+			usePageHeader(<div data-testid="header-content">hdr</div>);
+			usePageRail(<div data-testid="rail-content">rail</div>);
+			return <div>body</div>;
+		}
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<HeaderAndRail />
+			</AppShell>,
+		);
+		const headerCell = screen.getByTestId("app-shell-header");
+		// With a rail present, the header cell spans columns 2-3 (gridColumn: "2 / 4").
+		expect(window.getComputedStyle(headerCell).gridColumn).toBe("2/4");
+	});
+
+	it("header spans only the main column when no rail is registered", () => {
+		function HeaderOnly() {
+			usePageHeader(<div data-testid="header-content">hdr</div>);
+			return <div>body</div>;
+		}
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<HeaderOnly />
+			</AppShell>,
+		);
+		const headerCell = screen.getByTestId("app-shell-header");
+		expect(window.getComputedStyle(headerCell).gridColumn).toBe("2/3");
 	});
 });

@@ -3,10 +3,16 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Building2, Plus, Users } from "lucide-react";
 import { Button } from "../atoms/button";
 import { ContextRail } from "../components/context-rail/context-rail";
+import { PageHeader } from "../components/page-header";
 import { Sidebar } from "../components/sidebar/sidebar";
 import { Box } from "../primitives/layout";
 import { Heading, Text } from "../primitives/typography";
-import { AppShell, usePageActions, usePageRail } from "./app-shell";
+import {
+	AppShell,
+	usePageActions,
+	usePageHeader,
+	usePageRail,
+} from "./app-shell";
 
 const meta = {
 	title: "Templates/AppShell",
@@ -122,6 +128,65 @@ export const DescendantDrivenRail: Story = {
 	render: () => (
 		<AppShell sidebar={<SampleSidebar />}>
 			<RegisteringChild />
+		</AppShell>
+	),
+};
+
+// Demonstrates the full header-band + rail layout: the header spans both the
+// main and rail columns (row 1), while the rail begins below it (row 2). The
+// header and rail are both registered by a descendant component via hooks
+// rather than passed as static props, which is the recommended pattern for
+// route-level pages.
+function HeaderAndRailDemo() {
+	usePageHeader(
+		<PageHeader
+			breadcrumbs={[{ label: "Identity" }, { label: "Users" }]}
+			title="Users"
+			actions={<Button>Nutzer einladen</Button>}
+		/>,
+	);
+	usePageRail(
+		<ContextRail>
+			<ContextRail.Header eyebrow="USER" title="Vorschau" />
+			<ContextRail.Section id="meta" label="Details">
+				<Text fontSize="sm" color="muted">
+					Rolle: Admin
+				</Text>
+				<Text fontSize="sm" color="muted">
+					2FA: An
+				</Text>
+			</ContextRail.Section>
+		</ContextRail>,
+	);
+	return (
+		<Box px="8" py="6">
+			<Text color="muted">Page body content (table, list, etc.)</Text>
+		</Box>
+	);
+}
+
+export const WithHeaderAndRail: Story = {
+	render: () => (
+		<AppShell
+			sidebar={
+				<Sidebar>
+					<Sidebar.Header>
+						<Sidebar.Logo wordmark="Odon" subtitle="Identity Provider" />
+					</Sidebar.Header>
+					<Sidebar.Body>
+						<Sidebar.Section label="Identity">
+							<Sidebar.Item icon={<Users size={16} />} active>
+								Users
+							</Sidebar.Item>
+							<Sidebar.Item icon={<Building2 size={16} />}>
+								Organizations
+							</Sidebar.Item>
+						</Sidebar.Section>
+					</Sidebar.Body>
+				</Sidebar>
+			}
+		>
+			<HeaderAndRailDemo />
 		</AppShell>
 	),
 };

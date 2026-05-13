@@ -46,14 +46,15 @@ solution. It is composed of three columns — sidebar, main, rail — assembled
 by the `<AppShell>` template:
 
 ```
-┌────────────┬─────────────────────────────────────┬────────────┐
-│            │                                     │            │
-│  Sidebar   │            Main content             │ ContextRail│
-│   240px    │              (fluid)                │   320px    │
-│ ↔ 60px     │                                     │  ↔ 44px    │
-│ collapsed  │                                     │ collapsed  │
-│            │                                     │            │
-└────────────┴─────────────────────────────────────┴────────────┘
+┌────────────┬────────────────────────────────────────────────────┐
+│            │                  Page header                       │
+│            │     (breadcrumbs · title · page actions)           │
+│  Sidebar   ├────────────────────────────────────┬───────────────┤
+│   240px    │         Main content               │ ContextRail   │
+│ ↔ 60px     │            (fluid)                 │    320px      │
+│ collapsed  │                                    │  ↔ 44px       │
+│            │                                    │  collapsed    │
+└────────────┴────────────────────────────────────┴───────────────┘
 ```
 
 ### Dimensions
@@ -83,8 +84,17 @@ Two named slots are exposed:
 
 - **`actions`** — registered via `usePageActions(content)`. Surfaced by
   the active page template inside its `<PageHeader>` `actions` slot.
+- **`header`**  — registered via `usePageHeader(content)`. Surfaced as the
+  body of grid row 1, spanning the main column and the rail column. Page
+  templates push their `<PageHeader>` here so the header band crosses both
+  columns and the rail's content begins below it.
 - **`rail`**    — registered via `usePageRail(content)`. Surfaced as the
   body of the right rail column.
+
+The rail column's coordinate origin sits in grid row 2, below the header
+band. Its `position: sticky; top: 0` therefore pins to the bottom of the
+header, not to the viewport top. The sidebar still spans both rows and
+remains sticky to the viewport top.
 
 The store uses `useSyncExternalStore` so that producers (deep child
 components rendered after the consumer) and consumers (AppShell, the page
@@ -369,12 +379,19 @@ When the rail is collapsed, only a thin 44px column with the
 expand-toggle remains. Section content is hidden. Tooltips on the
 toggle hint at what's hidden.
 
+The collapse toggle is a small round outline button (28×28, `bg-surface`,
+`border`, `shadow-sm`) anchored at `top: 6, left: -3.5` — it floats half-on
+the rail's leading edge, mirroring the sidebar's trailing-edge toggle. It
+is visually identical in expanded and collapsed states; only the icon
+swaps (`PanelRightClose` ↔ `PanelRightOpen`).
+
 ### Rail Root contract (required)
 
 > **Rail Root contract (required):** rail content MUST be wrapped in
 > `<ContextRail>` (the Root). The Root provides the column width
-> (360px expanded / 44px collapsed), the collapse toggle button, inner
-> padding, and persistence (`storageKey` prop). Using
+> (360px expanded / 44px collapsed), the floating collapse toggle
+> (mirrors `<Sidebar>` on the leading edge), inner padding, and
+> persistence (`storageKey` prop). Using
 > `<ContextRail.Header>` or `<ContextRail.Section>` inside a fragment
 > renders without errors — but you'll be missing all of those features.
 >

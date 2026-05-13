@@ -22,7 +22,7 @@
 import type { ReactNode } from "react";
 import { PageHeader, type PageHeaderProps } from "../components/page-header";
 import { Box, Flex } from "../primitives/layout";
-import { useRegisteredPageActions } from "./app-shell";
+import { usePageHeader, useRegisteredPageActions } from "./app-shell";
 
 export interface IndexPageTemplateProps
 	extends Pick<
@@ -75,6 +75,15 @@ export function IndexPageTemplate({
 }: IndexPageTemplateProps) {
 	const registered = useRegisteredPageActions();
 	const resolvedActions = actions ?? registered;
+	usePageHeader(
+		<PageHeader
+			breadcrumbs={breadcrumbs}
+			title={title}
+			subtitle={subtitle}
+			eyebrow={eyebrow}
+			actions={resolvedActions}
+		/>,
+	);
 	return (
 		<Flex
 			data-testid="index-page-template"
@@ -82,13 +91,6 @@ export function IndexPageTemplate({
 			flex="1"
 			minH="0"
 		>
-			<PageHeader
-				breadcrumbs={breadcrumbs}
-				title={title}
-				subtitle={subtitle}
-				eyebrow={eyebrow}
-				actions={resolvedActions}
-			/>
 			{tabs ? <Box>{tabs}</Box> : null}
 			{toolbar ? <Box>{toolbar}</Box> : null}
 			<Box flex="1" minH="0">

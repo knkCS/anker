@@ -11,7 +11,12 @@
 
 // AppShell + slot hooks
 export type { AppShellProps } from "./app-shell";
-export { AppShell, usePageActions, usePageRail } from "./app-shell";
+export {
+	AppShell,
+	usePageActions,
+	usePageHeader,
+	usePageRail,
+} from "./app-shell";
 // Unauthenticated / chromeless templates
 export type { AuthPageTemplateProps } from "./auth-page-template";
 export { AuthPageTemplate } from "./auth-page-template";

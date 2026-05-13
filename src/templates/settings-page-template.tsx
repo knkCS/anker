@@ -24,7 +24,7 @@ import type { ReactNode } from "react";
 import { PageHeader, type PageHeaderProps } from "../components/page-header";
 import { Box, Flex } from "../primitives/layout";
 import { Tabs } from "../primitives/tabs";
-import { useRegisteredPageActions } from "./app-shell";
+import { usePageHeader, useRegisteredPageActions } from "./app-shell";
 import type { BodyTabsProp } from "./detail-page-template";
 
 export type { BodyTabsItem, BodyTabsProp } from "./detail-page-template";
@@ -81,6 +81,15 @@ export function SettingsPageTemplate({
 	}
 	const registered = useRegisteredPageActions();
 	const resolvedActions = actions ?? registered;
+	usePageHeader(
+		<PageHeader
+			breadcrumbs={breadcrumbs}
+			title={title}
+			subtitle={subtitle}
+			eyebrow={eyebrow}
+			actions={resolvedActions}
+		/>,
+	);
 	const bodyPx = bodyPadding === "none" ? "0" : "8";
 	const bodyPt = bodyPadding === "none" ? "0" : "6";
 
@@ -111,13 +120,6 @@ export function SettingsPageTemplate({
 				flex="1"
 				minH="0"
 			>
-				<PageHeader
-					breadcrumbs={breadcrumbs}
-					title={title}
-					subtitle={subtitle}
-					eyebrow={eyebrow}
-					actions={resolvedActions}
-				/>
 				<Tabs.Root lazyMount unmountOnExit {...tabsRootProps}>
 					<Box>
 						<Tabs.List>
@@ -147,13 +149,6 @@ export function SettingsPageTemplate({
 			flex="1"
 			minH="0"
 		>
-			<PageHeader
-				breadcrumbs={breadcrumbs}
-				title={title}
-				subtitle={subtitle}
-				eyebrow={eyebrow}
-				actions={resolvedActions}
-			/>
 			<Box>{tabs}</Box>
 			{renderBody(children)}
 		</Flex>

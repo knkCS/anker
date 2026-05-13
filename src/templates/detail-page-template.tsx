@@ -32,7 +32,7 @@ import type { ReactNode } from "react";
 import { PageHeader, type PageHeaderProps } from "../components/page-header";
 import { Box, Flex } from "../primitives/layout";
 import { Tabs } from "../primitives/tabs";
-import { useRegisteredPageActions } from "./app-shell";
+import { usePageHeader, useRegisteredPageActions } from "./app-shell";
 
 export interface BodyTabsItem {
 	value: string;
@@ -103,6 +103,15 @@ export function DetailPageTemplate({
 	}
 	const registered = useRegisteredPageActions();
 	const resolvedActions = actions ?? registered;
+	usePageHeader(
+		<PageHeader
+			breadcrumbs={breadcrumbs}
+			title={title}
+			subtitle={subtitle}
+			eyebrow={eyebrow}
+			actions={resolvedActions}
+		/>,
+	);
 
 	if (bodyTabs) {
 		const tabsRootProps =
@@ -120,13 +129,6 @@ export function DetailPageTemplate({
 				flex="1"
 				minH="0"
 			>
-				<PageHeader
-					breadcrumbs={breadcrumbs}
-					title={title}
-					subtitle={subtitle}
-					eyebrow={eyebrow}
-					actions={resolvedActions}
-				/>
 				{subheader ? <Box>{subheader}</Box> : null}
 				<Tabs.Root lazyMount unmountOnExit {...tabsRootProps}>
 					<Box>
@@ -157,13 +159,6 @@ export function DetailPageTemplate({
 			flex="1"
 			minH="0"
 		>
-			<PageHeader
-				breadcrumbs={breadcrumbs}
-				title={title}
-				subtitle={subtitle}
-				eyebrow={eyebrow}
-				actions={resolvedActions}
-			/>
 			{subheader ? <Box>{subheader}</Box> : null}
 			{tabs ? <Box>{tabs}</Box> : null}
 			<Box flex="1" minH="0">
