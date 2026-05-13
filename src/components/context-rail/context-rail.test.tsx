@@ -463,3 +463,41 @@ describe("ContextRail.ValueTile", () => {
         expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
     });
 });
+
+describe("ContextRail.StatusIcon", () => {
+    it("renders icon + label in expanded mode", () => {
+        Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
+        renderWithChakra(
+            <ContextRail>
+                <ContextRail.StatusIcon
+                    tone="green"
+                    icon={<span data-testid="ico">🛡</span>}
+                    label="MFA: Active"
+                />
+            </ContextRail>,
+        );
+        expect(screen.getByTestId("ico")).toBeInTheDocument();
+        expect(screen.getByText("MFA: Active")).toBeInTheDocument();
+    });
+
+    it("renders tinted circle with tooltip in collapsed mode", () => {
+        Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+        renderWithChakra(
+            <ContextRail>
+                <ContextRail.StatusIcon
+                    tone="red"
+                    icon={<span data-testid="ico">🛡</span>}
+                    label="MFA: Off"
+                />
+            </ContextRail>,
+        );
+        expect(screen.getByTestId("ico")).toBeInTheDocument();
+        // Label hidden in collapsed mode (in tooltip only)
+        expect(screen.queryByText("MFA: Off")).not.toBeInTheDocument();
+    });
+
+    it("is tagged with RAIL_ATOM", () => {
+        const type = ContextRail.StatusIcon as unknown as { railAtom: symbol };
+        expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
+    });
+});

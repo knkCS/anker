@@ -8,7 +8,7 @@
 // in collapsed mode.
 import type React from "react";
 import { Button, IconButton } from "../../atoms/button";
-import { Box } from "../../primitives/layout";
+import { Box, Flex } from "../../primitives/layout";
 import { Tooltip } from "../../primitives/tooltip";
 import { Text } from "../../primitives/typography";
 import { RAIL_ATOM, useContextRailMode } from "./context-rail-context";
@@ -147,3 +147,68 @@ export function ContextRailValueTile({
 }
 ContextRailValueTile.displayName = "ContextRail.ValueTile";
 (ContextRailValueTile as unknown as { railAtom: symbol }).railAtom = RAIL_ATOM;
+
+type StatusTone = "green" | "amber" | "red" | "gray";
+
+export interface ContextRailStatusIconProps {
+    icon: React.ReactNode;
+    label: string;
+    tone: StatusTone;
+}
+
+const STATUS_TINTS: Record<StatusTone, { bg: string; color: string }> = {
+    green: { bg: "green.50", color: "green.700" },
+    amber: { bg: "yellow.50", color: "yellow.700" },
+    red: { bg: "red.50", color: "red.700" },
+    gray: { bg: "gray.100", color: "gray.700" },
+};
+
+export function ContextRailStatusIcon({
+    icon,
+    label,
+    tone,
+}: ContextRailStatusIconProps) {
+    const { collapsed } = useContextRailMode();
+    const tint = STATUS_TINTS[tone];
+
+    if (collapsed) {
+        return (
+            <Tooltip content={label} positioning={{ placement: "left" }}>
+                <Flex
+                    w="8"
+                    h="8"
+                    borderRadius="full"
+                    bg={tint.bg}
+                    color={tint.color}
+                    align="center"
+                    justify="center"
+                    aria-label={label}
+                >
+                    {icon}
+                </Flex>
+            </Tooltip>
+        );
+    }
+
+    return (
+        <Flex align="center" gap="2" py="1">
+            <Flex
+                w="6"
+                h="6"
+                borderRadius="full"
+                bg={tint.bg}
+                color={tint.color}
+                align="center"
+                justify="center"
+                flexShrink={0}
+            >
+                {icon}
+            </Flex>
+            <Text fontSize="xs" color="muted">
+                {label}
+            </Text>
+        </Flex>
+    );
+}
+ContextRailStatusIcon.displayName = "ContextRail.StatusIcon";
+(ContextRailStatusIcon as unknown as { railAtom: symbol }).railAtom = RAIL_ATOM;
