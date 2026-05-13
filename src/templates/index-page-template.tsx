@@ -6,8 +6,7 @@
 //
 //   ┌─────────────────────────────────────────┐
 //   │ PageHeader  (breadcrumbs · title · …)   │
-//   ├─────────────────────────────────────────┤
-//   │ Tabs (optional — under header)          │
+//   │            (tabs — third row)           │
 //   ├─────────────────────────────────────────┤
 //   │ Toolbar (search · filters · count)      │
 //   ├─────────────────────────────────────────┤
@@ -36,7 +35,7 @@ export interface IndexPageTemplateProps
 	 */
 	actions?: ReactNode;
 	/**
-	 * Optional tab strip rendered between the PageHeader and the toolbar.
+	 * Optional tab strip rendered inside the PageHeader band as the third row.
 	 * Pass an instance of `<Tabs.Root>` (with its own `<Tabs.List>` and
 	 * `<Tabs.Content>`s). When omitted, no tab strip is rendered.
 	 */
@@ -56,8 +55,8 @@ export interface IndexPageTemplateProps
 }
 
 /**
- * Canonical list-page layout. Renders PageHeader → optional Tabs → optional
- * Toolbar → children, full-bleed against the canvas.
+ * Canonical list-page layout. Renders PageHeader (with optional tabs inside) →
+ * optional Toolbar → children, full-bleed against the canvas.
  *
  * Page actions are sourced from (in priority order): `actions` prop →
  * registered slot via `usePageActions`. This lets a tab-pane component deep
@@ -82,6 +81,7 @@ export function IndexPageTemplate({
 			subtitle={subtitle}
 			eyebrow={eyebrow}
 			actions={resolvedActions}
+			tabs={tabs}
 		/>,
 	);
 	return (
@@ -91,7 +91,6 @@ export function IndexPageTemplate({
 			flex="1"
 			minH="0"
 		>
-			{tabs ? <Box>{tabs}</Box> : null}
 			{toolbar ? <Box>{toolbar}</Box> : null}
 			<Box flex="1" minH="0">
 				{children}
