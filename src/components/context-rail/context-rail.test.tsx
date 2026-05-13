@@ -412,3 +412,54 @@ describe("ContextRail.IconButton", () => {
 		expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
 	});
 });
+
+describe("ContextRail.ValueTile", () => {
+    it("renders the value and label in expanded mode", () => {
+        Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
+        renderWithChakra(
+            <ContextRail>
+                <ContextRail.ValueTile value={100} label="Total users" />
+            </ContextRail>,
+        );
+        expect(screen.getByText("100")).toBeInTheDocument();
+        expect(screen.getByText("Total users")).toBeInTheDocument();
+    });
+
+    it("renders just the value with tooltip in collapsed mode", () => {
+        Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+        renderWithChakra(
+            <ContextRail>
+                <ContextRail.ValueTile value={100} label="Total users" />
+            </ContextRail>,
+        );
+        expect(screen.getByText("100")).toBeInTheDocument();
+        // Label not visible (it's in the tooltip)
+        expect(screen.queryByText("Total users")).not.toBeInTheDocument();
+    });
+
+    it("is hidden in collapsed mode when value is zero", () => {
+        Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+        renderWithChakra(
+            <ContextRail>
+                <ContextRail.ValueTile value={0} label="Suspended" />
+            </ContextRail>,
+        );
+        expect(screen.queryByText("0")).not.toBeInTheDocument();
+        expect(screen.queryByText("Suspended")).not.toBeInTheDocument();
+    });
+
+    it("renders zero in collapsed mode when keepWhenEmpty is set", () => {
+        Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+        renderWithChakra(
+            <ContextRail>
+                <ContextRail.ValueTile value={0} label="Suspended" keepWhenEmpty />
+            </ContextRail>,
+        );
+        expect(screen.getByText("0")).toBeInTheDocument();
+    });
+
+    it("ValueTile is tagged with RAIL_ATOM", () => {
+        const type = ContextRail.ValueTile as unknown as { railAtom: symbol };
+        expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
+    });
+});

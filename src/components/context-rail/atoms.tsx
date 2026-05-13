@@ -8,7 +8,9 @@
 // in collapsed mode.
 import type React from "react";
 import { Button, IconButton } from "../../atoms/button";
+import { Box } from "../../primitives/layout";
 import { Tooltip } from "../../primitives/tooltip";
+import { Text } from "../../primitives/typography";
 import { RAIL_ATOM, useContextRailMode } from "./context-rail-context";
 
 type IconButtonTone =
@@ -83,3 +85,65 @@ export function ContextRailIconButton({
 }
 ContextRailIconButton.displayName = "ContextRail.IconButton";
 (ContextRailIconButton as unknown as { railAtom: symbol }).railAtom = RAIL_ATOM;
+
+export interface ContextRailValueTileProps {
+    value: number | string;
+    label: string;
+    muted?: boolean;
+    keepWhenEmpty?: boolean;
+}
+
+function isEmpty(value: number | string): boolean {
+    if (value === 0) return true;
+    if (value === "0" || value === "") return true;
+    return false;
+}
+
+export function ContextRailValueTile({
+    value,
+    label,
+    muted,
+    keepWhenEmpty,
+}: ContextRailValueTileProps) {
+    const { collapsed } = useContextRailMode();
+    const hideWhenEmpty = collapsed && isEmpty(value) && !keepWhenEmpty;
+
+    if (hideWhenEmpty) return null;
+
+    if (collapsed) {
+        return (
+            <Tooltip content={label} positioning={{ placement: "left" }}>
+                <Box
+                    w="8"
+                    h="8"
+                    borderRadius="md"
+                    bg="bg-subtle"
+                    borderWidth="1px"
+                    borderColor="border"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    fontSize="xs"
+                    fontWeight="bold"
+                    color={muted ? "muted" : "default"}
+                    aria-label={`${label}: ${value}`}
+                >
+                    {value}
+                </Box>
+            </Tooltip>
+        );
+    }
+
+    return (
+        <Box bg="bg-subtle" borderRadius="md" p="2" minW="0" flex="1">
+            <Text fontSize="xs" color="muted" mb="1">
+                {label}
+            </Text>
+            <Text fontSize="lg" fontWeight="semibold" color={muted ? "muted" : "default"}>
+                {value}
+            </Text>
+        </Box>
+    );
+}
+ContextRailValueTile.displayName = "ContextRail.ValueTile";
+(ContextRailValueTile as unknown as { railAtom: symbol }).railAtom = RAIL_ATOM;

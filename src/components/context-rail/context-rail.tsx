@@ -16,7 +16,7 @@ import {
 	isRailAtom,
 	useContextRailMode,
 } from "./context-rail-context";
-import { ContextRailIconButton } from "./atoms";
+import { ContextRailIconButton, ContextRailValueTile } from "./atoms";
 
 export { RAIL_ATOM, useContextRailMode };
 
@@ -295,4 +295,5 @@ export const ContextRail = Object.assign(ContextRailRoot, {
 	Section: ContextRailSection,
 	Footer: ContextRailFooter,
 	IconButton: ContextRailIconButton,
+	ValueTile: ContextRailValueTile,
 });
