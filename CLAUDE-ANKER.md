@@ -77,7 +77,7 @@ Available templates:
 
 | Template | Use for |
 |---|---|
-| `<AppShell>` | Authenticated chrome (sidebar · main · rail). Provides `usePageActions(node)` and `usePageRail(node)` hooks. |
+| `<AppShell>` | Authenticated chrome (sidebar · main · rail). Provides `usePageActions(node)`, `usePageHeader(node)`, and `usePageRail(node)` hooks. Page templates register their `<PageHeader>` via `usePageHeader`, which renders it as a band spanning main + rail. |
 | `<IndexPageTemplate>` | List pages — header + optional tabs + toolbar + DataTable |
 | `<DetailPageTemplate>` | Single-entity pages — header + optional tabs + body |
 | `<SettingsPageTemplate>` | Tabbed settings pages with form Cards |
