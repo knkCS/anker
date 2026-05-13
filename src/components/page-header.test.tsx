@@ -76,4 +76,59 @@ describe("PageHeader", () => {
 			screen.queryByTestId("page-header-breadcrumbs"),
 		).not.toBeInTheDocument();
 	});
+
+	it("renders avatar to the left of the title when provided", () => {
+		renderWithChakra(
+			<PageHeader
+				title="Jana Schmid"
+				avatar={<div data-testid="avatar">JS</div>}
+			/>,
+		);
+		const avatar = screen.getByTestId("avatar");
+		const title = screen.getByRole("heading", { name: "Jana Schmid" });
+		expect(avatar).toBeInTheDocument();
+		expect(
+			avatar.compareDocumentPosition(title) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+	});
+
+	it("renders badges inline with the title", () => {
+		renderWithChakra(
+			<PageHeader
+				title="Jana Schmid"
+				badges={
+					<>
+						<span data-testid="b1">Aktiv</span>
+						<span data-testid="b2">Admin</span>
+					</>
+				}
+			/>,
+		);
+		expect(screen.getByTestId("b1")).toBeInTheDocument();
+		expect(screen.getByTestId("b2")).toBeInTheDocument();
+	});
+
+	it("renders the meta line below the title", () => {
+		renderWithChakra(
+			<PageHeader
+				title="Jana Schmid"
+				meta={<span data-testid="meta">jana@example.test</span>}
+			/>,
+		);
+		const meta = screen.getByTestId("meta");
+		const title = screen.getByRole("heading", { name: "Jana Schmid" });
+		expect(meta).toBeInTheDocument();
+		expect(
+			title.compareDocumentPosition(meta) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+	});
+
+	it("does not render avatar/badges/meta containers when those props are absent", () => {
+		renderWithChakra(<PageHeader title="Plain" />);
+		expect(screen.queryByTestId("page-header-avatar")).not.toBeInTheDocument();
+		expect(screen.queryByTestId("page-header-badges")).not.toBeInTheDocument();
+		expect(screen.queryByTestId("page-header-meta")).not.toBeInTheDocument();
+	});
 });
