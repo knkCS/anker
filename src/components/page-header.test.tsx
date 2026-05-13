@@ -131,4 +131,31 @@ describe("PageHeader", () => {
 		expect(screen.queryByTestId("page-header-badges")).not.toBeInTheDocument();
 		expect(screen.queryByTestId("page-header-meta")).not.toBeInTheDocument();
 	});
+
+	it("renders a tabs row at the bottom of the band when tabs is provided", () => {
+		renderWithChakra(
+			<PageHeader
+				title="Users"
+				tabs={
+					<div data-testid="tabs-strip">
+						<button type="button">All</button>
+						<button type="button">Active</button>
+					</div>
+				}
+			/>,
+		);
+		const tabsRow = screen.getByTestId("page-header-tabs");
+		const tabsStrip = screen.getByTestId("tabs-strip");
+		const title = screen.getByRole("heading", { name: "Users" });
+		expect(tabsRow).toContainElement(tabsStrip);
+		expect(
+			title.compareDocumentPosition(tabsRow) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+	});
+
+	it("does not render a tabs row when tabs prop is absent", () => {
+		renderWithChakra(<PageHeader title="Users" />);
+		expect(screen.queryByTestId("page-header-tabs")).not.toBeInTheDocument();
+	});
 });

@@ -17,6 +17,7 @@ export interface PageHeaderProps {
 	badges?: React.ReactNode;
 	eyebrow?: React.ReactNode;
 	meta?: React.ReactNode;
+	tabs?: React.ReactNode;
 }
 
 export const PageHeader = ({
@@ -28,6 +29,7 @@ export const PageHeader = ({
 	badges,
 	eyebrow,
 	meta,
+	tabs,
 }: PageHeaderProps) => {
 	const hasCrumbs = !!breadcrumbs && breadcrumbs.length > 0;
 	const hasActions = !!actions;
@@ -139,6 +141,11 @@ export const PageHeader = ({
 					</Flex>
 				)}
 			</Flex>
+			{tabs && (
+				<Box data-testid="page-header-tabs" mt="4" mx="-8">
+					{tabs}
+				</Box>
+			)}
 		</Box>
 	);
 };
