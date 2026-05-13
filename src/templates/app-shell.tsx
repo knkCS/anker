@@ -2,25 +2,32 @@
 //
 // AppShell — top-level layout for authenticated knkCMS pages.
 //
-// Composition: a 3-column CSS grid with a fixed-width sidebar, a fluid main
-// content column, and an optional fixed-width context rail.
+// Composition: a 3-column × 2-row CSS grid. The sidebar spans the full
+// height on the left. The page header band (when registered) spans the
+// main + rail columns across row 1. The main content sits in row 2
+// column 2; the optional context rail sits in row 2 column 3, beginning
+// below the header band.
 //
-//     ┌─────────┬───────────────────────────┬─────────┐
-//     │         │                           │         │
-//     │ sidebar │         children          │  rail   │
-//     │         │  (page header / content)  │         │
-//     │         │                           │         │
-//     └─────────┴───────────────────────────┴─────────┘
+//     ┌─────────┬───────────────────────────────────┐
+//     │         │            page header            │
+//     │         ├───────────────────────┬───────────┤
+//     │ sidebar │         children      │   rail    │
+//     │         │   (body / tabs / …)   │           │
+//     │         │                       │           │
+//     └─────────┴───────────────────────┴───────────┘
 //
 // Slot mechanism
 // --------------
 // AppShell installs an external slot store on its descendants via context.
-// Two named slots are exposed:
+// Three named slots are exposed:
 //
 //   - "actions" — registered via `usePageActions(node)` — surfaced by page
 //     templates inside their <PageHeader actions=…> slot.
-//   - "rail"    — registered via `usePageRail(node)`    — surfaced by AppShell
-//     as the content of the right rail column.
+//   - "header"  — registered via `usePageHeader(node)`  — surfaced by
+//     AppShell as the content of grid row 1 (spanning the main + rail
+//     columns). Page templates push their <PageHeader> here.
+//   - "rail"    — registered via `usePageRail(node)`    — surfaced by
+//     AppShell as the content of the right rail column (row 2 column 3).
 //
 // The store uses `useSyncExternalStore` so that producers (deep child
 // components rendered after the consumer) and consumers (AppShell, the page
