@@ -447,15 +447,61 @@ covering the table.
 
 ### Collapsed state
 
-When the rail is collapsed, only a thin 44px column with the
-expand-toggle remains. Section content is hidden. Tooltips on the
-toggle hint at what's hidden.
+When the rail is collapsed, the column narrows to 44px. The floating
+collapse toggle remains anchored at the leading edge (see the
+"Rail Root contract" subsection). Atom subcomponents — `IconButton`,
+`ValueTile`, `StatusIcon`, `Avatar`, `Divider` — render in their compact
+form to surface useful content; see "Compact atoms" above. Section
+headers and non-atom JSX inside `<ContextRail.Section>` are hidden in
+collapsed mode.
 
 The collapse toggle is a small round outline button (28×28, `bg-surface`,
 `border`, `shadow-sm`) anchored at `top: 6, left: -3.5` — it floats half-on
 the rail's leading edge, mirroring the sidebar's trailing-edge toggle. It
 is visually identical in expanded and collapsed states; only the icon
 swaps (`PanelRightClose` ↔ `PanelRightOpen`).
+
+### Compact atoms
+
+The rail's 44px collapsed column surfaces useful content via five
+mode-aware atom subcomponents. Each renders an expanded form when the
+rail is open and a compact 32×32 form (with a left-placed tooltip) when
+collapsed.
+
+| Atom | Purpose | Tones |
+|------|---------|-------|
+| `<ContextRail.IconButton>` | Clickable action with tooltip. | `default · primary · outline-red · outline-primary · ghost` |
+| `<ContextRail.ValueTile>` | A number-with-tooltip. Hidden in collapsed mode when value is zero/empty unless `keepWhenEmpty`. | `default · muted` |
+| `<ContextRail.StatusIcon>` | Semantic state indicator. | `green · amber · red · gray` |
+| `<ContextRail.Avatar>` | Compact entity identity. | — |
+| `<ContextRail.Divider>` | Visual grouping. Renders narrow in collapsed mode. | — |
+
+Place atoms inside `<ContextRail.Section>` for expanded-mode grouping with
+a labeled header, or at the top level of `<ContextRail>` (siblings of
+`<Section>`) for simpler rails. In collapsed mode, section headers and
+non-atom JSX inside sections are hidden — only atom-tagged children render.
+
+**Tone guidance for StatusIcon:**
+
+- `green` — healthy, no action needed.
+- `amber` — low adoption or informational nudge.
+- `red` — action required, broken state.
+- `gray` — neutral / informational (rarely needed; ValueTile usually fits better).
+
+**Example:**
+
+```tsx
+<ContextRail storageKey="users-rail">
+  <ContextRail.Header eyebrow="WORKSPACE" title="Overview" />
+  <ContextRail.Section id="users" label="Users">
+    <ContextRail.ValueTile value={total} label="Total users" />
+    <ContextRail.ValueTile value={active} label="Active users" muted />
+  </ContextRail.Section>
+  <ContextRail.StatusIcon tone="amber" icon={<Shield />} label="2FA: 0 of 100 enabled" />
+  <ContextRail.Divider />
+  <ContextRail.IconButton label="Invite user" icon={<UserPlus />} onClick={…} />
+</ContextRail>
+```
 
 ### Rail Root contract (required)
 
