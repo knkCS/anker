@@ -147,7 +147,11 @@ describe("AppShell", () => {
 		expect(cs.background).toContain("--chakra-colors-bg-surface");
 	});
 
-	function HeaderRegistrar({ label = "registered header" }: { label?: string }) {
+	function HeaderRegistrar({
+		label = "registered header",
+	}: {
+		label?: string;
+	}) {
 		usePageHeader(<div data-testid="header-content">{label}</div>);
 		return <div data-testid="page-body">body</div>;
 	}

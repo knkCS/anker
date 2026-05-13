@@ -7,7 +7,12 @@ import { PageHeader } from "../components/page-header";
 import { Sidebar } from "../components/sidebar/sidebar";
 import { Box } from "../primitives/layout";
 import { Heading, Text } from "../primitives/typography";
-import { AppShell, usePageActions, usePageHeader, usePageRail } from "./app-shell";
+import {
+	AppShell,
+	usePageActions,
+	usePageHeader,
+	usePageRail,
+} from "./app-shell";
 
 const meta = {
 	title: "Templates/AppShell",
