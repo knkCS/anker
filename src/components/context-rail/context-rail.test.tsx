@@ -239,7 +239,11 @@ describe("ContextRail", () => {
 		// tokens. (Exact computed string differs between Chakra versions.)
 		expect(cs.top).not.toBe("");
 		expect(cs.left).not.toBe("");
-		expect(cs.left).toMatch(/spacing-3[._]5/);
+		// Chakra emits the `-3.5` spacing token as
+		// `calc(var(--chakra-spacing-3\.5) * -1)` — the dot is escaped in the
+		// custom-property name. Match `3` followed by an (optionally
+		// escaped) dot or underscore then `5`.
+		expect(cs.left).toMatch(/spacing-3\\?[._]5/);
 	});
 
 	describe("dev-mode warnings", () => {
