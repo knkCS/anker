@@ -3,7 +3,7 @@ import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ContextRail } from "./context-rail";
+import { ContextRail, useContextRailMode } from "./context-rail";
 
 function renderWithChakra(ui: React.ReactElement) {
 	return render(<ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>);
@@ -244,6 +244,37 @@ describe("ContextRail", () => {
 		// custom-property name. Match `3` followed by an (optionally
 		// escaped) dot or underscore then `5`.
 		expect(cs.left).toMatch(/spacing-3\\?[._]5/);
+	});
+
+	it("provides RailModeContext with collapsed=false when expanded", () => {
+		function Probe() {
+			const mode = useContextRailMode();
+			return <div data-testid="probe">{String(mode.collapsed)}</div>;
+		}
+		Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
+		renderWithChakra(
+			<ContextRail>
+				<Probe />
+			</ContextRail>,
+		);
+		expect(screen.getByTestId("probe")).toHaveTextContent("false");
+	});
+
+	it("provides RailModeContext with collapsed=true when rail is collapsed", async () => {
+		function Probe() {
+			const mode = useContextRailMode();
+			return <div data-testid="probe">{String(mode.collapsed)}</div>;
+		}
+		Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
+		const user = userEvent.setup();
+		renderWithChakra(
+			<ContextRail>
+				<Probe />
+			</ContextRail>,
+		);
+		expect(screen.getByTestId("probe")).toHaveTextContent("false");
+		await user.click(screen.getByTestId("context-rail-toggle"));
+		expect(screen.getByTestId("probe")).toHaveTextContent("true");
 	});
 
 	describe("dev-mode warnings", () => {

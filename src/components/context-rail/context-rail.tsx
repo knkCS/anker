@@ -20,6 +20,24 @@ const COLLAPSE_BREAKPOINT = 1440;
 const RailRootContext = createContext<boolean>(false);
 
 /**
+ * Carries the rail's collapsed state to atom subcomponents. Atoms read this
+ * to decide between their expanded and compact renderings. Provided by
+ * `<ContextRail>`; defaults to `{ collapsed: false }` when used outside.
+ */
+const RailModeContext = createContext<{ collapsed: boolean }>({
+	collapsed: false,
+});
+
+/**
+ * Hook used by rail atoms to read the rail's collapsed state. Returns
+ * `{ collapsed: false }` when called outside a `<ContextRail>` Root —
+ * atoms then render their expanded form.
+ */
+export function useContextRailMode(): { collapsed: boolean } {
+	return useContext(RailModeContext);
+}
+
+/**
  * Dev-mode helper: warn once per component-mount when a rail child is
  * rendered without a `<ContextRail>` Root ancestor. No-op in production.
  */
@@ -74,6 +92,7 @@ const ContextRailRoot = ({ storageKey, children }: ContextRailProps) => {
 
 	return (
 		<RailRootContext.Provider value={true}>
+			<RailModeContext.Provider value={{ collapsed }}>
 			<Box
 				data-testid="context-rail"
 				data-collapsed={collapsed ? "true" : "false"}
@@ -109,12 +128,15 @@ const ContextRailRoot = ({ storageKey, children }: ContextRailProps) => {
 						<PanelRightClose size={14} />
 					)}
 				</IconButton>
-				{collapsed ? null : (
+				{collapsed ? (
+					<Box display="none">{children}</Box>
+				) : (
 					<Box h="full" overflowY="auto" px="4" pt="4" pb="4">
 						{children}
 					</Box>
 				)}
 			</Box>
+			</RailModeContext.Provider>
 		</RailRootContext.Provider>
 	);
 };
