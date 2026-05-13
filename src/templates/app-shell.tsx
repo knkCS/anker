@@ -43,7 +43,7 @@ import {
 } from "react";
 import { Box, Flex, Grid } from "../primitives/layout";
 
-type SlotName = "actions" | "rail";
+type SlotName = "actions" | "header" | "rail";
 
 interface SlotStore {
 	get(slot: SlotName): ReactNode;
@@ -55,10 +55,12 @@ interface SlotStore {
 function createSlotStore(): SlotStore {
 	const values: Record<SlotName, ReactNode> = {
 		actions: null,
+		header: null,
 		rail: null,
 	};
 	const listeners: Record<SlotName, Set<() => void>> = {
 		actions: new Set(),
+		header: new Set(),
 		rail: new Set(),
 	};
 
@@ -169,6 +171,32 @@ export function usePageRail(content: ReactNode): void {
 }
 
 /**
+ * Register page-header content (typically a <PageHeader>) from any descendant
+ * of `<AppShell>`. The content is rendered by AppShell in grid row 1, spanning
+ * the main column and the rail column (when present), so the header band
+ * crosses both columns and the rail starts below it.
+ *
+ * Pass `null` (or omit) to clear the registration. The hook is a no-op when
+ * called outside an AppShell.
+ */
+export function usePageHeader(content: ReactNode): void {
+	const store = useContext(SlotStoreContext);
+	const latest = useRef<ReactNode>(content);
+	latest.current = content;
+	useEffect(() => {
+		if (!store) return;
+		store.set("header", latest.current);
+		return () => {
+			store.clear("header");
+		};
+	}, [store]);
+	useEffect(() => {
+		if (!store) return;
+		store.set("header", content);
+	}, [store, content]);
+}
+
+/**
  * Internal hook used by page templates to read the currently-registered
  * page-actions ReactNode. Page templates fall back to a locally-passed
  * `actions` prop when nothing is registered.
@@ -231,27 +259,29 @@ AppShell.displayName = "AppShell";
 
 function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 	const railNode = useSlotValue("rail");
+	const headerNode = useSlotValue("header");
 
-	// Precedence: registered rail content wins, fall back to the `rail` prop.
-	// The rail column is enabled when *either* the consumer passed a `rail`
-	// element *or* a descendant registered content via `usePageRail`.
 	const renderedRail = railNode ?? rail;
 	const showRailColumn =
 		renderedRail !== undefined &&
 		renderedRail !== null &&
 		renderedRail !== false;
+	const showHeaderRow = headerNode !== null && headerNode !== undefined;
 
 	return (
 		<Grid
 			data-testid="app-shell"
 			data-rail={showRailColumn ? "true" : "false"}
+			data-header={showHeaderRow ? "true" : "false"}
 			templateColumns={showRailColumn ? "auto 1fr auto" : "auto 1fr"}
+			templateRows="auto 1fr"
 			minH="100vh"
 			bg="bg-canvas"
 		>
 			<Box
 				data-testid="app-shell-sidebar"
 				gridColumn="1"
+				gridRow="1 / 3"
 				minW="0"
 				position="sticky"
 				top="0"
@@ -260,12 +290,22 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 			>
 				{sidebar}
 			</Box>
+			{showHeaderRow ? (
+				<Box
+					data-testid="app-shell-header"
+					gridColumn={showRailColumn ? "2 / 4" : "2 / 3"}
+					gridRow="1"
+					minW="0"
+				>
+					{headerNode}
+				</Box>
+			) : null}
 			<Flex
 				data-testid="app-shell-main"
 				gridColumn="2"
+				gridRow="2"
 				direction="column"
 				minW="0"
-				minH="100vh"
 				bg="bg-canvas"
 				borderLeftWidth="1px"
 				borderColor="border"
@@ -276,6 +316,7 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 				<Box
 					data-testid="app-shell-rail"
 					gridColumn="3"
+					gridRow="2"
 					minW="0"
 					position="sticky"
 					top="0"
