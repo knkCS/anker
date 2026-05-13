@@ -277,6 +277,36 @@ describe("ContextRail", () => {
 		expect(screen.getByTestId("probe")).toHaveTextContent("true");
 	});
 
+	it("hides Section labels and Header in collapsed mode", () => {
+		Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.Header eyebrow="EYE" title="Title" />
+				<ContextRail.Section id="s1" label="Section label">
+					<div data-testid="non-atom">free-form jsx</div>
+				</ContextRail.Section>
+			</ContextRail>,
+		);
+		// Header and Section labels are hidden in collapsed mode
+		expect(screen.queryByText("Title")).not.toBeInTheDocument();
+		expect(screen.queryByText("Section label")).not.toBeInTheDocument();
+		// Non-atom JSX inside Section is hidden in collapsed mode
+		expect(screen.queryByTestId("non-atom")).not.toBeInTheDocument();
+	});
+
+	it("renders Section children normally in expanded mode", () => {
+		Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.Section id="s1" label="Section label">
+					<div data-testid="non-atom">free-form jsx</div>
+				</ContextRail.Section>
+			</ContextRail>,
+		);
+		expect(screen.getByTestId("non-atom")).toBeInTheDocument();
+		expect(screen.getByText("Section label")).toBeInTheDocument();
+	});
+
 	describe("dev-mode warnings", () => {
 		let warnSpy: ReturnType<typeof vi.spyOn>;
 		let originalNodeEnv: string | undefined;

@@ -1,7 +1,12 @@
 // src/components/context-rail/context-rail.tsx
 import { ChevronRight, PanelRightClose, PanelRightOpen } from "lucide-react";
-import type React from "react";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+	createContext,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { IconButton } from "../../atoms/button";
 import { Box, Flex } from "../../primitives/layout";
 import { Heading, Text } from "../../primitives/typography";
@@ -49,6 +54,19 @@ function isDevMode(): boolean {
 	const proc = (globalThis as { process?: { env?: { NODE_ENV?: string } } })
 		.process;
 	return proc?.env?.NODE_ENV !== "production";
+}
+
+/**
+ * Sentinel placed on rail-atom component functions (e.g., ContextRail.IconButton)
+ * so that `<ContextRail.Section>` can filter children in collapsed mode and
+ * keep only the atom-tagged ones.
+ */
+export const RAIL_ATOM = Symbol.for("anker.contextRail.atom");
+
+function isRailAtom(child: React.ReactNode): boolean {
+	if (!React.isValidElement(child)) return false;
+	const type = child.type as { railAtom?: symbol } | string;
+	return typeof type === "function" && type.railAtom === RAIL_ATOM;
 }
 
 function useWarnIfOutsideRailRoot(componentName: string) {
@@ -129,7 +147,18 @@ const ContextRailRoot = ({ storageKey, children }: ContextRailProps) => {
 					)}
 				</IconButton>
 				{collapsed ? (
-					<Box display="none">{children}</Box>
+					<Flex
+						data-testid="context-rail-collapsed-body"
+						direction="column"
+						align="center"
+						gap="2"
+						pt="14"
+						pb="3"
+						h="full"
+						overflowY="auto"
+					>
+						{children}
+					</Flex>
 				) : (
 					<Box h="full" overflowY="auto" px="4" pt="4" pb="4">
 						{children}
@@ -150,6 +179,8 @@ export interface ContextRailHeaderProps {
 
 const ContextRailHeader = ({ eyebrow, title }: ContextRailHeaderProps) => {
 	useWarnIfOutsideRailRoot("ContextRail.Header");
+	const { collapsed } = useContextRailMode();
+	if (collapsed) return null;
 	return (
 		<Box mb="4" pb="3" borderBottomWidth="1px" borderBottomColor="border">
 			{eyebrow && (
@@ -197,7 +228,15 @@ const ContextRailSection = ({
 	children,
 }: ContextRailSectionProps) => {
 	useWarnIfOutsideRailRoot("ContextRail.Section");
+	const { collapsed } = useContextRailMode();
 	const [open, setOpen] = useState(defaultOpen);
+
+	if (collapsed) {
+		const atomChildren = React.Children.toArray(children).filter(isRailAtom);
+		if (atomChildren.length === 0) return null;
+		return <>{atomChildren}</>;
+	}
+
 	return (
 		<Box
 			data-section-id={id}
@@ -256,11 +295,20 @@ const ContextRailSection = ({
 ContextRailSection.displayName = "ContextRail.Section";
 
 // Footer
-const ContextRailFooter = ({ children }: { children: React.ReactNode }) => (
-	<Box mt="4" pt="4" borderTopWidth="1px" borderTopColor="border-muted">
-		{children}
-	</Box>
-);
+const ContextRailFooter = ({ children }: { children: React.ReactNode }) => {
+	const { collapsed } = useContextRailMode();
+	return (
+		<Box
+			mt={collapsed ? "auto" : "4"}
+			pt={collapsed ? "3" : "4"}
+			borderTopWidth="1px"
+			borderTopColor="border-muted"
+			w="full"
+		>
+			{children}
+		</Box>
+	);
+};
 ContextRailFooter.displayName = "ContextRail.Footer";
 
 // Compose
