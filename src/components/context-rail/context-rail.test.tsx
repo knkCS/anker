@@ -224,6 +224,24 @@ describe("ContextRail", () => {
 		expect(header).toHaveStyle({ borderBottomWidth: "1px" });
 	});
 
+	it("toggle is positioned as a floating round button on the leading edge", () => {
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.Header title="X" />
+			</ContextRail>,
+		);
+		const toggle = screen.getByTestId("context-rail-toggle");
+		const cs = window.getComputedStyle(toggle);
+		expect(cs.position).toBe("absolute");
+		// Chakra v3 emits spacing tokens as CSS custom properties; we just
+		// assert the `left` and `top` properties were set to *something*
+		// non-empty, and that the value references the expected spacing
+		// tokens. (Exact computed string differs between Chakra versions.)
+		expect(cs.top).not.toBe("");
+		expect(cs.left).not.toBe("");
+		expect(cs.left).toMatch(/spacing-3/);
+	});
+
 	describe("dev-mode warnings", () => {
 		let warnSpy: ReturnType<typeof vi.spyOn>;
 		let originalNodeEnv: string | undefined;
