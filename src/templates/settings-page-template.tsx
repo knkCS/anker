@@ -25,9 +25,25 @@ import { PageHeader, type PageHeaderProps } from "../components/page-header";
 import { Box, Flex } from "../primitives/layout";
 import { Tabs } from "../primitives/tabs";
 import { usePageHeader, useRegisteredPageActions } from "./app-shell";
-import type { BodyTabsProp } from "./detail-page-template";
+export interface BodyTabsItem {
+	value: string;
+	label: ReactNode;
+	content: ReactNode;
+}
 
-export type { BodyTabsItem, BodyTabsProp } from "./detail-page-template";
+export type BodyTabsProp =
+	| {
+			items: BodyTabsItem[];
+			defaultValue: string;
+			value?: never;
+			onValueChange?: never;
+	  }
+	| {
+			items: BodyTabsItem[];
+			value: string;
+			onValueChange: (next: string) => void;
+			defaultValue?: never;
+	  };
 
 export interface SettingsPageTemplateProps
 	extends Pick<
