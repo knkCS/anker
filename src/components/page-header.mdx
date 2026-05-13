@@ -1,0 +1,57 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as PageHeaderStories from "./page-header.stories";
+
+<Meta of={PageHeaderStories} />
+
+# PageHeader
+
+The top-of-page chrome shared by every authenticated knkCMS page. Renders
+a single white-bg band with up to three vertically-stacked rows:
+
+1. **Breadcrumb** — trail to the current page. Last crumb is non-link.
+2. **Detail** — identity of the page or entity: optional avatar (left),
+   title with optional badges (center), optional meta line below the
+   title, optional actions (right).
+3. **Tabs** — in-page navigation or filter state. Sits flush with the
+   band's bottom border.
+
+Each row is independently optional except the title. Pages register the
+component via `usePageHeader` from a page template (`IndexPageTemplate`,
+`DetailPageTemplate`, `SettingsPageTemplate`) — see `app-shell.tsx` and
+`docs/page-patterns.md` for the slot mechanism.
+
+## Detail slots — avatar, badges, meta
+
+When the page is about a specific entity (a user, an org, a workspace),
+populate the detail row with the entity's identifying chrome.
+
+<Canvas of={PageHeaderStories.WithDetailSlots} />
+
+## Tabs
+
+Tabs go in the third row of the band. Use them for in-page navigation
+(detail pages) or filter state (index pages).
+
+<Canvas of={PageHeaderStories.WithTabs} />
+
+## All three rows together
+
+A detail page with full identity and tabs.
+
+<Canvas of={PageHeaderStories.FullBand} />
+
+## Props
+
+<ArgTypes of={PageHeaderStories} />
+
+## When to use which row
+
+- **Breadcrumb** — always, except on top-level dashboard pages.
+- **Avatar / badges / meta** — only on entity detail pages. Index pages,
+  settings pages, and dashboards skip these.
+- **Tabs** — when the page has multiple views that share the same identity
+  (the entity, the workspace, the filter). If each destination has its
+  own page header / title, it's not a tab — it's a separate page.
+
+See `docs/page-patterns.md` §Page header anatomy for the full design
+reference.
