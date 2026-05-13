@@ -1,6 +1,18 @@
 // src/components/context-rail/context-rail.stories.tsx
 import type { Meta, StoryObj } from "@storybook/react";
-import { ArrowRight, Download, History, Info, Monitor, Shield, ShieldCheck, Upload, UserPlus, X, Zap } from "lucide-react";
+import {
+	ArrowRight,
+	Download,
+	History,
+	Info,
+	Monitor,
+	Shield,
+	ShieldCheck,
+	Upload,
+	UserPlus,
+	X,
+	Zap,
+} from "lucide-react";
 import { Box, Flex } from "../../primitives/layout";
 import { ContextRail } from "./context-rail";
 

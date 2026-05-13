@@ -251,7 +251,10 @@ describe("ContextRail", () => {
 			const mode = useContextRailMode();
 			return <div data-testid="probe">{String(mode.collapsed)}</div>;
 		}
-		Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
+		Object.defineProperty(window, "innerWidth", {
+			value: 1600,
+			configurable: true,
+		});
 		renderWithChakra(
 			<ContextRail>
 				<Probe />
@@ -265,7 +268,10 @@ describe("ContextRail", () => {
 			const mode = useContextRailMode();
 			return <div data-testid="probe">{String(mode.collapsed)}</div>;
 		}
-		Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
+		Object.defineProperty(window, "innerWidth", {
+			value: 1600,
+			configurable: true,
+		});
 		const user = userEvent.setup();
 		renderWithChakra(
 			<ContextRail>
@@ -278,7 +284,10 @@ describe("ContextRail", () => {
 	});
 
 	it("hides Section labels and Header in collapsed mode", () => {
-		Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+		Object.defineProperty(window, "innerWidth", {
+			value: 1024,
+			configurable: true,
+		});
 		renderWithChakra(
 			<ContextRail>
 				<ContextRail.Header eyebrow="EYE" title="Title" />
@@ -295,7 +304,10 @@ describe("ContextRail", () => {
 	});
 
 	it("renders Section children normally in expanded mode", () => {
-		Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
+		Object.defineProperty(window, "innerWidth", {
+			value: 1600,
+			configurable: true,
+		});
 		renderWithChakra(
 			<ContextRail>
 				<ContextRail.Section id="s1" label="Section label">
@@ -308,7 +320,10 @@ describe("ContextRail", () => {
 	});
 
 	it("section in collapsed mode keeps atoms and hides non-atom children", () => {
-		Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+		Object.defineProperty(window, "innerWidth", {
+			value: 1024,
+			configurable: true,
+		});
 		renderWithChakra(
 			<ContextRail>
 				<ContextRail.Section id="s1" label="Users">
@@ -332,15 +347,27 @@ describe("ContextRail", () => {
 	});
 
 	it("full rail with header, atoms, divider, and footer renders in collapsed mode", () => {
-		Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+		Object.defineProperty(window, "innerWidth", {
+			value: 1024,
+			configurable: true,
+		});
 		renderWithChakra(
 			<ContextRail>
 				<ContextRail.Header title="Overview" />
 				<ContextRail.ValueTile value={100} label="Total" />
 				<ContextRail.Divider />
-				<ContextRail.StatusIcon tone="green" icon={<span>🛡</span>} label="MFA" />
+				<ContextRail.StatusIcon
+					tone="green"
+					icon={<span>🛡</span>}
+					label="MFA"
+				/>
 				<ContextRail.Footer>
-					<ContextRail.IconButton label="Open" icon={<span>→</span>} onClick={() => {}} tone="primary" />
+					<ContextRail.IconButton
+						label="Open"
+						icon={<span>→</span>}
+						onClick={() => {}}
+						tone="primary"
+					/>
 				</ContextRail.Footer>
 			</ContextRail>,
 		);
@@ -407,7 +434,10 @@ describe("ContextRail", () => {
 
 describe("ContextRail.IconButton", () => {
 	it("renders an outline Button with label text in expanded mode", () => {
-		Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
+		Object.defineProperty(window, "innerWidth", {
+			value: 1600,
+			configurable: true,
+		});
 		renderWithChakra(
 			<ContextRail>
 				<ContextRail.IconButton
@@ -417,12 +447,17 @@ describe("ContextRail.IconButton", () => {
 				/>
 			</ContextRail>,
 		);
-		expect(screen.getByRole("button", { name: /Invite user/i })).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: /Invite user/i }),
+		).toBeInTheDocument();
 		expect(screen.getByTestId("ico")).toBeInTheDocument();
 	});
 
 	it("renders an icon-only IconButton with aria-label in collapsed mode", () => {
-		Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+		Object.defineProperty(window, "innerWidth", {
+			value: 1024,
+			configurable: true,
+		});
 		renderWithChakra(
 			<ContextRail>
 				<ContextRail.IconButton
@@ -436,7 +471,9 @@ describe("ContextRail.IconButton", () => {
 		// Visible text "Invite user" is not in the DOM (only in the tooltip / aria-label)
 		expect(screen.queryByText("Invite user")).not.toBeInTheDocument();
 		// Button is reachable by aria-label
-		expect(screen.getByRole("button", { name: "Invite user" })).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Invite user" }),
+		).toBeInTheDocument();
 	});
 
 	it("calls onClick when clicked", async () => {
@@ -444,7 +481,11 @@ describe("ContextRail.IconButton", () => {
 		const user = userEvent.setup();
 		renderWithChakra(
 			<ContextRail>
-				<ContextRail.IconButton label="Action" icon={<span>X</span>} onClick={onClick} />
+				<ContextRail.IconButton
+					label="Action"
+					icon={<span>X</span>}
+					onClick={onClick}
+				/>
 			</ContextRail>,
 		);
 		await user.click(screen.getByRole("button", { name: /Action/i }));
@@ -458,146 +499,176 @@ describe("ContextRail.IconButton", () => {
 });
 
 describe("ContextRail.ValueTile", () => {
-    it("renders the value and label in expanded mode", () => {
-        Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
-        renderWithChakra(
-            <ContextRail>
-                <ContextRail.ValueTile value={100} label="Total users" />
-            </ContextRail>,
-        );
-        expect(screen.getByText("100")).toBeInTheDocument();
-        expect(screen.getByText("Total users")).toBeInTheDocument();
-    });
+	it("renders the value and label in expanded mode", () => {
+		Object.defineProperty(window, "innerWidth", {
+			value: 1600,
+			configurable: true,
+		});
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.ValueTile value={100} label="Total users" />
+			</ContextRail>,
+		);
+		expect(screen.getByText("100")).toBeInTheDocument();
+		expect(screen.getByText("Total users")).toBeInTheDocument();
+	});
 
-    it("renders just the value with tooltip in collapsed mode", () => {
-        Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
-        renderWithChakra(
-            <ContextRail>
-                <ContextRail.ValueTile value={100} label="Total users" />
-            </ContextRail>,
-        );
-        expect(screen.getByText("100")).toBeInTheDocument();
-        // Label not visible (it's in the tooltip)
-        expect(screen.queryByText("Total users")).not.toBeInTheDocument();
-    });
+	it("renders just the value with tooltip in collapsed mode", () => {
+		Object.defineProperty(window, "innerWidth", {
+			value: 1024,
+			configurable: true,
+		});
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.ValueTile value={100} label="Total users" />
+			</ContextRail>,
+		);
+		expect(screen.getByText("100")).toBeInTheDocument();
+		// Label not visible (it's in the tooltip)
+		expect(screen.queryByText("Total users")).not.toBeInTheDocument();
+	});
 
-    it("is hidden in collapsed mode when value is zero", () => {
-        Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
-        renderWithChakra(
-            <ContextRail>
-                <ContextRail.ValueTile value={0} label="Suspended" />
-            </ContextRail>,
-        );
-        expect(screen.queryByText("0")).not.toBeInTheDocument();
-        expect(screen.queryByText("Suspended")).not.toBeInTheDocument();
-    });
+	it("is hidden in collapsed mode when value is zero", () => {
+		Object.defineProperty(window, "innerWidth", {
+			value: 1024,
+			configurable: true,
+		});
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.ValueTile value={0} label="Suspended" />
+			</ContextRail>,
+		);
+		expect(screen.queryByText("0")).not.toBeInTheDocument();
+		expect(screen.queryByText("Suspended")).not.toBeInTheDocument();
+	});
 
-    it("renders zero in collapsed mode when keepWhenEmpty is set", () => {
-        Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
-        renderWithChakra(
-            <ContextRail>
-                <ContextRail.ValueTile value={0} label="Suspended" keepWhenEmpty />
-            </ContextRail>,
-        );
-        expect(screen.getByText("0")).toBeInTheDocument();
-    });
+	it("renders zero in collapsed mode when keepWhenEmpty is set", () => {
+		Object.defineProperty(window, "innerWidth", {
+			value: 1024,
+			configurable: true,
+		});
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.ValueTile value={0} label="Suspended" keepWhenEmpty />
+			</ContextRail>,
+		);
+		expect(screen.getByText("0")).toBeInTheDocument();
+	});
 
-    it("ValueTile is tagged with RAIL_ATOM", () => {
-        const type = ContextRail.ValueTile as unknown as { railAtom: symbol };
-        expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
-    });
+	it("ValueTile is tagged with RAIL_ATOM", () => {
+		const type = ContextRail.ValueTile as unknown as { railAtom: symbol };
+		expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
+	});
 });
 
 describe("ContextRail.StatusIcon", () => {
-    it("renders icon + label in expanded mode", () => {
-        Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
-        renderWithChakra(
-            <ContextRail>
-                <ContextRail.StatusIcon
-                    tone="green"
-                    icon={<span data-testid="ico">🛡</span>}
-                    label="MFA: Active"
-                />
-            </ContextRail>,
-        );
-        expect(screen.getByTestId("ico")).toBeInTheDocument();
-        expect(screen.getByText("MFA: Active")).toBeInTheDocument();
-    });
+	it("renders icon + label in expanded mode", () => {
+		Object.defineProperty(window, "innerWidth", {
+			value: 1600,
+			configurable: true,
+		});
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.StatusIcon
+					tone="green"
+					icon={<span data-testid="ico">🛡</span>}
+					label="MFA: Active"
+				/>
+			</ContextRail>,
+		);
+		expect(screen.getByTestId("ico")).toBeInTheDocument();
+		expect(screen.getByText("MFA: Active")).toBeInTheDocument();
+	});
 
-    it("renders tinted circle with tooltip in collapsed mode", () => {
-        Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
-        renderWithChakra(
-            <ContextRail>
-                <ContextRail.StatusIcon
-                    tone="red"
-                    icon={<span data-testid="ico">🛡</span>}
-                    label="MFA: Off"
-                />
-            </ContextRail>,
-        );
-        expect(screen.getByTestId("ico")).toBeInTheDocument();
-        // Label hidden in collapsed mode (in tooltip only)
-        expect(screen.queryByText("MFA: Off")).not.toBeInTheDocument();
-    });
+	it("renders tinted circle with tooltip in collapsed mode", () => {
+		Object.defineProperty(window, "innerWidth", {
+			value: 1024,
+			configurable: true,
+		});
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.StatusIcon
+					tone="red"
+					icon={<span data-testid="ico">🛡</span>}
+					label="MFA: Off"
+				/>
+			</ContextRail>,
+		);
+		expect(screen.getByTestId("ico")).toBeInTheDocument();
+		// Label hidden in collapsed mode (in tooltip only)
+		expect(screen.queryByText("MFA: Off")).not.toBeInTheDocument();
+	});
 
-    it("is tagged with RAIL_ATOM", () => {
-        const type = ContextRail.StatusIcon as unknown as { railAtom: symbol };
-        expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
-    });
+	it("is tagged with RAIL_ATOM", () => {
+		const type = ContextRail.StatusIcon as unknown as { railAtom: symbol };
+		expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
+	});
 });
 
 describe("ContextRail.Avatar", () => {
-    it("renders an avatar with label in expanded mode", () => {
-        Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
-        renderWithChakra(
-            <ContextRail>
-                <ContextRail.Avatar initials="JS" label="Jana Schmid · jana@knk.de" />
-            </ContextRail>,
-        );
-        expect(screen.getByText("JS")).toBeInTheDocument();
-        expect(screen.getByText(/Jana Schmid/)).toBeInTheDocument();
-    });
+	it("renders an avatar with label in expanded mode", () => {
+		Object.defineProperty(window, "innerWidth", {
+			value: 1600,
+			configurable: true,
+		});
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.Avatar initials="JS" label="Jana Schmid · jana@knk.de" />
+			</ContextRail>,
+		);
+		expect(screen.getByText("JS")).toBeInTheDocument();
+		expect(screen.getByText(/Jana Schmid/)).toBeInTheDocument();
+	});
 
-    it("renders 32×32 avatar with tooltip in collapsed mode", () => {
-        Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
-        renderWithChakra(
-            <ContextRail>
-                <ContextRail.Avatar initials="JS" label="Jana Schmid · jana@knk.de" />
-            </ContextRail>,
-        );
-        expect(screen.getByText("JS")).toBeInTheDocument();
-        expect(screen.queryByText(/Jana Schmid/)).not.toBeInTheDocument();
-    });
+	it("renders 32×32 avatar with tooltip in collapsed mode", () => {
+		Object.defineProperty(window, "innerWidth", {
+			value: 1024,
+			configurable: true,
+		});
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.Avatar initials="JS" label="Jana Schmid · jana@knk.de" />
+			</ContextRail>,
+		);
+		expect(screen.getByText("JS")).toBeInTheDocument();
+		expect(screen.queryByText(/Jana Schmid/)).not.toBeInTheDocument();
+	});
 
-    it("Avatar is tagged with RAIL_ATOM", () => {
-        const type = ContextRail.Avatar as unknown as { railAtom: symbol };
-        expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
-    });
+	it("Avatar is tagged with RAIL_ATOM", () => {
+		const type = ContextRail.Avatar as unknown as { railAtom: symbol };
+		expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
+	});
 });
 
 describe("ContextRail.Divider", () => {
-    it("renders a horizontal rule in expanded mode", () => {
-        Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
-        renderWithChakra(
-            <ContextRail>
-                <ContextRail.Divider />
-            </ContextRail>,
-        );
-        expect(screen.getByTestId("context-rail-divider")).toBeInTheDocument();
-    });
+	it("renders a horizontal rule in expanded mode", () => {
+		Object.defineProperty(window, "innerWidth", {
+			value: 1600,
+			configurable: true,
+		});
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.Divider />
+			</ContextRail>,
+		);
+		expect(screen.getByTestId("context-rail-divider")).toBeInTheDocument();
+	});
 
-    it("renders a narrow centered line in collapsed mode", () => {
-        Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
-        renderWithChakra(
-            <ContextRail>
-                <ContextRail.Divider />
-            </ContextRail>,
-        );
-        expect(screen.getByTestId("context-rail-divider")).toBeInTheDocument();
-    });
+	it("renders a narrow centered line in collapsed mode", () => {
+		Object.defineProperty(window, "innerWidth", {
+			value: 1024,
+			configurable: true,
+		});
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.Divider />
+			</ContextRail>,
+		);
+		expect(screen.getByTestId("context-rail-divider")).toBeInTheDocument();
+	});
 
-    it("Divider is tagged with RAIL_ATOM", () => {
-        const type = ContextRail.Divider as unknown as { railAtom: symbol };
-        expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
-    });
+	it("Divider is tagged with RAIL_ATOM", () => {
+		const type = ContextRail.Divider as unknown as { railAtom: symbol };
+		expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
+	});
 });

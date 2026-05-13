@@ -11,7 +11,7 @@ import React, { createContext, useContext } from "react";
  * `<ContextRail>`; defaults to `{ collapsed: false }` when used outside.
  */
 export const RailModeContext = createContext<{ collapsed: boolean }>({
-    collapsed: false,
+	collapsed: false,
 });
 
 /**
@@ -20,7 +20,7 @@ export const RailModeContext = createContext<{ collapsed: boolean }>({
  * atoms then render their expanded form.
  */
 export function useContextRailMode(): { collapsed: boolean } {
-    return useContext(RailModeContext);
+	return useContext(RailModeContext);
 }
 
 /**
@@ -31,8 +31,8 @@ export function useContextRailMode(): { collapsed: boolean } {
 export const RAIL_ATOM = Symbol.for("anker.contextRail.atom");
 
 export function isRailAtom(child: React.ReactNode): boolean {
-    if (!React.isValidElement(child)) return false;
-    const type = child.type;
-    if (typeof type !== "function") return false;
-    return (type as { railAtom?: symbol }).railAtom === RAIL_ATOM;
+	if (!React.isValidElement(child)) return false;
+	const type = child.type;
+	if (typeof type !== "function") return false;
+	return (type as { railAtom?: symbol }).railAtom === RAIL_ATOM;
 }

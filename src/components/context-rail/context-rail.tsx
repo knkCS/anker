@@ -11,18 +11,18 @@ import { IconButton } from "../../atoms/button";
 import { Box, Flex } from "../../primitives/layout";
 import { Heading, Text } from "../../primitives/typography";
 import {
-	RAIL_ATOM,
-	RailModeContext,
-	isRailAtom,
-	useContextRailMode,
-} from "./context-rail-context";
-import {
 	ContextRailAvatar,
 	ContextRailDivider,
 	ContextRailIconButton,
 	ContextRailStatusIcon,
 	ContextRailValueTile,
 } from "./atoms";
+import {
+	isRailAtom,
+	RAIL_ATOM,
+	RailModeContext,
+	useContextRailMode,
+} from "./context-rail-context";
 
 export { RAIL_ATOM, useContextRailMode };
 
@@ -95,60 +95,60 @@ const ContextRailRoot = ({ storageKey, children }: ContextRailProps) => {
 	return (
 		<RailRootContext.Provider value={true}>
 			<RailModeContext.Provider value={{ collapsed }}>
-			<Box
-				data-testid="context-rail"
-				data-collapsed={collapsed ? "true" : "false"}
-				w={collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
-				minH="100vh"
-				transition="width 250ms ease-out"
-				position="relative"
-			>
-				<IconButton
-					data-testid="context-rail-toggle"
-					aria-label={
-						collapsed ? "Expand context rail" : "Collapse context rail"
-					}
-					onClick={() => setCollapsed((c) => !c)}
-					variant="outline"
-					size="xs"
-					position="absolute"
-					top="6"
-					left="-3.5"
-					width="7"
-					height="7"
-					minW="7"
-					borderRadius="full"
-					bg="bg-surface"
-					borderColor="border"
-					boxShadow="sm"
-					zIndex={1}
-					_hover={{ bg: "bg-muted" }}
+				<Box
+					data-testid="context-rail"
+					data-collapsed={collapsed ? "true" : "false"}
+					w={collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
+					minH="100vh"
+					transition="width 250ms ease-out"
+					position="relative"
 				>
-					{collapsed ? (
-						<PanelRightOpen size={14} />
-					) : (
-						<PanelRightClose size={14} />
-					)}
-				</IconButton>
-				{collapsed ? (
-					<Flex
-						data-testid="context-rail-collapsed-body"
-						direction="column"
-						align="center"
-						gap="2"
-						pt="14"
-						pb="3"
-						h="full"
-						overflowY="auto"
+					<IconButton
+						data-testid="context-rail-toggle"
+						aria-label={
+							collapsed ? "Expand context rail" : "Collapse context rail"
+						}
+						onClick={() => setCollapsed((c) => !c)}
+						variant="outline"
+						size="xs"
+						position="absolute"
+						top="6"
+						left="-3.5"
+						width="7"
+						height="7"
+						minW="7"
+						borderRadius="full"
+						bg="bg-surface"
+						borderColor="border"
+						boxShadow="sm"
+						zIndex={1}
+						_hover={{ bg: "bg-muted" }}
 					>
-						{children}
-					</Flex>
-				) : (
-					<Box h="full" overflowY="auto" px="4" pt="4" pb="4">
-						{children}
-					</Box>
-				)}
-			</Box>
+						{collapsed ? (
+							<PanelRightOpen size={14} />
+						) : (
+							<PanelRightClose size={14} />
+						)}
+					</IconButton>
+					{collapsed ? (
+						<Flex
+							data-testid="context-rail-collapsed-body"
+							direction="column"
+							align="center"
+							gap="2"
+							pt="14"
+							pb="3"
+							h="full"
+							overflowY="auto"
+						>
+							{children}
+						</Flex>
+					) : (
+						<Box h="full" overflowY="auto" px="4" pt="4" pb="4">
+							{children}
+						</Box>
+					)}
+				</Box>
 			</RailModeContext.Provider>
 		</RailRootContext.Provider>
 	);

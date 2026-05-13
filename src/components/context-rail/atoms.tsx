@@ -14,136 +14,140 @@ import { Text } from "../../primitives/typography";
 import { RAIL_ATOM, useContextRailMode } from "./context-rail-context";
 
 type IconButtonTone =
-    | "default"
-    | "primary"
-    | "outline-red"
-    | "outline-primary"
-    | "ghost";
+	| "default"
+	| "primary"
+	| "outline-red"
+	| "outline-primary"
+	| "ghost";
 
 export interface ContextRailIconButtonProps {
-    label: string;
-    icon: React.ReactNode;
-    onClick?: () => void;
-    tone?: IconButtonTone;
+	label: string;
+	icon: React.ReactNode;
+	onClick?: () => void;
+	tone?: IconButtonTone;
 }
 
 function buttonVariantFromTone(tone: IconButtonTone): {
-    variant: "outline" | "solid" | "ghost";
-    colorPalette?: string;
+	variant: "outline" | "solid" | "ghost";
+	colorPalette?: string;
 } {
-    switch (tone) {
-        case "primary":
-            return { variant: "solid", colorPalette: "primary" };
-        case "outline-red":
-            return { variant: "outline", colorPalette: "red" };
-        case "outline-primary":
-            return { variant: "outline", colorPalette: "primary" };
-        case "ghost":
-            return { variant: "ghost" };
-        default:
-            return { variant: "outline" };
-    }
+	switch (tone) {
+		case "primary":
+			return { variant: "solid", colorPalette: "primary" };
+		case "outline-red":
+			return { variant: "outline", colorPalette: "red" };
+		case "outline-primary":
+			return { variant: "outline", colorPalette: "primary" };
+		case "ghost":
+			return { variant: "ghost" };
+		default:
+			return { variant: "outline" };
+	}
 }
 
 export function ContextRailIconButton({
-    label,
-    icon,
-    onClick,
-    tone = "default",
+	label,
+	icon,
+	onClick,
+	tone = "default",
 }: ContextRailIconButtonProps) {
-    const { collapsed } = useContextRailMode();
-    const { variant, colorPalette } = buttonVariantFromTone(tone);
+	const { collapsed } = useContextRailMode();
+	const { variant, colorPalette } = buttonVariantFromTone(tone);
 
-    if (collapsed) {
-        return (
-            <Tooltip content={label} positioning={{ placement: "left" }}>
-                <IconButton
-                    variant={variant}
-                    colorPalette={colorPalette}
-                    size="sm"
-                    aria-label={label}
-                    onClick={onClick}
-                >
-                    {icon}
-                </IconButton>
-            </Tooltip>
-        );
-    }
+	if (collapsed) {
+		return (
+			<Tooltip content={label} positioning={{ placement: "left" }}>
+				<IconButton
+					variant={variant}
+					colorPalette={colorPalette}
+					size="sm"
+					aria-label={label}
+					onClick={onClick}
+				>
+					{icon}
+				</IconButton>
+			</Tooltip>
+		);
+	}
 
-    return (
-        <Button
-            variant={variant}
-            colorPalette={colorPalette}
-            size="sm"
-            w="full"
-            onClick={onClick}
-        >
-            {icon}
-            {label}
-        </Button>
-    );
+	return (
+		<Button
+			variant={variant}
+			colorPalette={colorPalette}
+			size="sm"
+			w="full"
+			onClick={onClick}
+		>
+			{icon}
+			{label}
+		</Button>
+	);
 }
 ContextRailIconButton.displayName = "ContextRail.IconButton";
 (ContextRailIconButton as unknown as { railAtom: symbol }).railAtom = RAIL_ATOM;
 
 export interface ContextRailValueTileProps {
-    value: number | string;
-    label: string;
-    muted?: boolean;
-    keepWhenEmpty?: boolean;
+	value: number | string;
+	label: string;
+	muted?: boolean;
+	keepWhenEmpty?: boolean;
 }
 
 function isEmpty(value: number | string): boolean {
-    if (value === 0) return true;
-    if (value === "0" || value === "") return true;
-    return false;
+	if (value === 0) return true;
+	if (value === "0" || value === "") return true;
+	return false;
 }
 
 export function ContextRailValueTile({
-    value,
-    label,
-    muted,
-    keepWhenEmpty,
+	value,
+	label,
+	muted,
+	keepWhenEmpty,
 }: ContextRailValueTileProps) {
-    const { collapsed } = useContextRailMode();
-    const hideWhenEmpty = collapsed && isEmpty(value) && !keepWhenEmpty;
+	const { collapsed } = useContextRailMode();
+	const hideWhenEmpty = collapsed && isEmpty(value) && !keepWhenEmpty;
 
-    if (hideWhenEmpty) return null;
+	if (hideWhenEmpty) return null;
 
-    if (collapsed) {
-        return (
-            <Tooltip content={label} positioning={{ placement: "left" }}>
-                <Box
-                    w="8"
-                    h="8"
-                    borderRadius="md"
-                    bg="bg-subtle"
-                    borderWidth="1px"
-                    borderColor="border"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    fontSize="xs"
-                    fontWeight="bold"
-                    color={muted ? "muted" : "default"}
-                    aria-label={`${label}: ${value}`}
-                >
-                    {value}
-                </Box>
-            </Tooltip>
-        );
-    }
+	if (collapsed) {
+		return (
+			<Tooltip content={label} positioning={{ placement: "left" }}>
+				<Box
+					w="8"
+					h="8"
+					borderRadius="md"
+					bg="bg-subtle"
+					borderWidth="1px"
+					borderColor="border"
+					display="flex"
+					alignItems="center"
+					justifyContent="center"
+					fontSize="xs"
+					fontWeight="bold"
+					color={muted ? "muted" : "default"}
+					aria-label={`${label}: ${value}`}
+				>
+					{value}
+				</Box>
+			</Tooltip>
+		);
+	}
 
-    return (
-        <Box bg="bg-subtle" borderRadius="md" p="2" minW="0" flex="1">
-            <Text fontSize="xs" color="muted" mb="1">
-                {label}
-            </Text>
-            <Text fontSize="lg" fontWeight="semibold" color={muted ? "muted" : "default"}>
-                {value}
-            </Text>
-        </Box>
-    );
+	return (
+		<Box bg="bg-subtle" borderRadius="md" p="2" minW="0" flex="1">
+			<Text fontSize="xs" color="muted" mb="1">
+				{label}
+			</Text>
+			<Text
+				fontSize="lg"
+				fontWeight="semibold"
+				color={muted ? "muted" : "default"}
+			>
+				{value}
+			</Text>
+		</Box>
+	);
 }
 ContextRailValueTile.displayName = "ContextRail.ValueTile";
 (ContextRailValueTile as unknown as { railAtom: symbol }).railAtom = RAIL_ATOM;
@@ -151,148 +155,148 @@ ContextRailValueTile.displayName = "ContextRail.ValueTile";
 type StatusTone = "green" | "amber" | "red" | "gray";
 
 export interface ContextRailStatusIconProps {
-    icon: React.ReactNode;
-    label: string;
-    tone: StatusTone;
+	icon: React.ReactNode;
+	label: string;
+	tone: StatusTone;
 }
 
 const STATUS_TINTS: Record<StatusTone, { bg: string; color: string }> = {
-    green: { bg: "green.50", color: "green.700" },
-    amber: { bg: "yellow.50", color: "yellow.700" },
-    red: { bg: "red.50", color: "red.700" },
-    gray: { bg: "gray.100", color: "gray.700" },
+	green: { bg: "green.50", color: "green.700" },
+	amber: { bg: "yellow.50", color: "yellow.700" },
+	red: { bg: "red.50", color: "red.700" },
+	gray: { bg: "gray.100", color: "gray.700" },
 };
 
 export function ContextRailStatusIcon({
-    icon,
-    label,
-    tone,
+	icon,
+	label,
+	tone,
 }: ContextRailStatusIconProps) {
-    const { collapsed } = useContextRailMode();
-    const tint = STATUS_TINTS[tone];
+	const { collapsed } = useContextRailMode();
+	const tint = STATUS_TINTS[tone];
 
-    if (collapsed) {
-        return (
-            <Tooltip content={label} positioning={{ placement: "left" }}>
-                <Flex
-                    w="8"
-                    h="8"
-                    borderRadius="full"
-                    bg={tint.bg}
-                    color={tint.color}
-                    align="center"
-                    justify="center"
-                    aria-label={label}
-                >
-                    {icon}
-                </Flex>
-            </Tooltip>
-        );
-    }
+	if (collapsed) {
+		return (
+			<Tooltip content={label} positioning={{ placement: "left" }}>
+				<Flex
+					w="8"
+					h="8"
+					borderRadius="full"
+					bg={tint.bg}
+					color={tint.color}
+					align="center"
+					justify="center"
+					aria-label={label}
+				>
+					{icon}
+				</Flex>
+			</Tooltip>
+		);
+	}
 
-    return (
-        <Flex align="center" gap="2" py="1">
-            <Flex
-                w="6"
-                h="6"
-                borderRadius="full"
-                bg={tint.bg}
-                color={tint.color}
-                align="center"
-                justify="center"
-                flexShrink={0}
-            >
-                {icon}
-            </Flex>
-            <Text fontSize="xs" color="muted">
-                {label}
-            </Text>
-        </Flex>
-    );
+	return (
+		<Flex align="center" gap="2" py="1">
+			<Flex
+				w="6"
+				h="6"
+				borderRadius="full"
+				bg={tint.bg}
+				color={tint.color}
+				align="center"
+				justify="center"
+				flexShrink={0}
+			>
+				{icon}
+			</Flex>
+			<Text fontSize="xs" color="muted">
+				{label}
+			</Text>
+		</Flex>
+	);
 }
 ContextRailStatusIcon.displayName = "ContextRail.StatusIcon";
 (ContextRailStatusIcon as unknown as { railAtom: symbol }).railAtom = RAIL_ATOM;
 
 export interface ContextRailAvatarProps {
-    initials: string;
-    label: string;
-    src?: string;
-    onClick?: () => void;
+	initials: string;
+	label: string;
+	src?: string;
+	onClick?: () => void;
 }
 
 export function ContextRailAvatar({
-    initials,
-    label,
-    src,
-    onClick,
+	initials,
+	label,
+	src,
+	onClick,
 }: ContextRailAvatarProps) {
-    const { collapsed } = useContextRailMode();
+	const { collapsed } = useContextRailMode();
 
-    const avatarBox = (
-        <Flex
-            w={collapsed ? "8" : "10"}
-            h={collapsed ? "8" : "10"}
-            borderRadius="full"
-            bg="bg-emphasis"
-            color="white"
-            align="center"
-            justify="center"
-            fontWeight="bold"
-            fontSize={collapsed ? "xs" : "sm"}
-            flexShrink={0}
-            cursor={onClick ? "pointer" : "default"}
-            onClick={onClick}
-            backgroundImage={src ? `url(${src})` : undefined}
-            backgroundSize="cover"
-            backgroundPosition="center"
-            aria-label={label}
-        >
-            {!src && initials}
-        </Flex>
-    );
+	const avatarBox = (
+		<Flex
+			w={collapsed ? "8" : "10"}
+			h={collapsed ? "8" : "10"}
+			borderRadius="full"
+			bg="bg-emphasis"
+			color="white"
+			align="center"
+			justify="center"
+			fontWeight="bold"
+			fontSize={collapsed ? "xs" : "sm"}
+			flexShrink={0}
+			cursor={onClick ? "pointer" : "default"}
+			onClick={onClick}
+			backgroundImage={src ? `url(${src})` : undefined}
+			backgroundSize="cover"
+			backgroundPosition="center"
+			aria-label={label}
+		>
+			{!src && initials}
+		</Flex>
+	);
 
-    if (collapsed) {
-        return (
-            <Tooltip content={label} positioning={{ placement: "left" }}>
-                {avatarBox}
-            </Tooltip>
-        );
-    }
+	if (collapsed) {
+		return (
+			<Tooltip content={label} positioning={{ placement: "left" }}>
+				{avatarBox}
+			</Tooltip>
+		);
+	}
 
-    return (
-        <Flex align="center" gap="3" py="1">
-            {avatarBox}
-            <Text fontSize="xs" color="muted" truncate>
-                {label}
-            </Text>
-        </Flex>
-    );
+	return (
+		<Flex align="center" gap="3" py="1">
+			{avatarBox}
+			<Text fontSize="xs" color="muted" truncate>
+				{label}
+			</Text>
+		</Flex>
+	);
 }
 ContextRailAvatar.displayName = "ContextRail.Avatar";
 (ContextRailAvatar as unknown as { railAtom: symbol }).railAtom = RAIL_ATOM;
 
 export function ContextRailDivider() {
-    const { collapsed } = useContextRailMode();
-    if (collapsed) {
-        return (
-            <Box
-                data-testid="context-rail-divider"
-                w="5"
-                h="1px"
-                bg="border"
-                my="1"
-            />
-        );
-    }
-    return (
-        <Box
-            data-testid="context-rail-divider"
-            w="full"
-            h="1px"
-            bg="border"
-            my="3"
-        />
-    );
+	const { collapsed } = useContextRailMode();
+	if (collapsed) {
+		return (
+			<Box
+				data-testid="context-rail-divider"
+				w="5"
+				h="1px"
+				bg="border"
+				my="1"
+			/>
+		);
+	}
+	return (
+		<Box
+			data-testid="context-rail-divider"
+			w="full"
+			h="1px"
+			bg="border"
+			my="3"
+		/>
+	);
 }
 ContextRailDivider.displayName = "ContextRail.Divider";
 (ContextRailDivider as unknown as { railAtom: symbol }).railAtom = RAIL_ATOM;
