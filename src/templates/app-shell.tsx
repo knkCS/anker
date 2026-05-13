@@ -9,10 +9,13 @@
 // below the header band.
 //
 //     ┌─────────┬───────────────────────────────────┐
-//     │         │            page header            │
+//     │         │   page header band                │
+//     │         │   ┌ breadcrumb ─────────────────┐ │
+//     │         │   ┌ detail (avatar/title/etc.) ─┐ │
+//     │         │   ┌ tabs (optional) ────────────┐ │
 //     │         ├───────────────────────┬───────────┤
-//     │ sidebar │         children      │   rail    │
-//     │         │   (body / tabs / …)   │           │
+//     │ sidebar │       children        │   rail    │
+//     │         │   (body / cards / …)  │           │
 //     │         │                       │           │
 //     └─────────┴───────────────────────┴───────────┘
 //

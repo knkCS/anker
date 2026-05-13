@@ -78,8 +78,9 @@ Available templates:
 | Template | Use for |
 |---|---|
 | `<AppShell>` | Authenticated chrome (sidebar · main · rail). Provides `usePageActions(node)`, `usePageHeader(node)`, and `usePageRail(node)` hooks. Page templates register their `<PageHeader>` via `usePageHeader`, which renders it as a band spanning main + rail. |
+| `<PageHeader>` | Three-row page header band (breadcrumb · detail · tabs). Props: `breadcrumbs`, `title`, `subtitle`, `eyebrow`, `actions`, `avatar`, `badges`, `meta`, `tabs`. Each row is independently optional except title. See `docs/page-patterns.md` §Page header anatomy. |
 | `<IndexPageTemplate>` | List pages — header + optional tabs + toolbar + DataTable |
-| `<DetailPageTemplate>` | Single-entity pages — header + optional tabs + body |
+| `<DetailPageTemplate>` | Single-entity pages — registers a three-row header band via `usePageHeader`. New props: `avatar`, `badges`, `meta`, `tabs`. `subheader` and `bodyTabs` were removed in v2.2.0 — migrate to the slot props on PageHeader. |
 | `<SettingsPageTemplate>` | Tabbed settings pages with form Cards |
 | `<DashboardPageTemplate>` | Widget-grid overview pages |
 | `<AuthPageTemplate>` | Login, register, MFA, verify — centered card, no shell |

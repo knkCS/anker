@@ -13,7 +13,11 @@ export interface PageHeaderProps {
 	title: React.ReactNode;
 	subtitle?: React.ReactNode;
 	actions?: React.ReactNode;
+	avatar?: React.ReactNode;
+	badges?: React.ReactNode;
 	eyebrow?: React.ReactNode;
+	meta?: React.ReactNode;
+	tabs?: React.ReactNode;
 }
 
 export const PageHeader = ({
@@ -21,7 +25,11 @@ export const PageHeader = ({
 	title,
 	subtitle,
 	actions,
+	avatar,
+	badges,
 	eyebrow,
+	meta,
+	tabs,
 }: PageHeaderProps) => {
 	const hasCrumbs = !!breadcrumbs && breadcrumbs.length > 0;
 	const hasActions = !!actions;
@@ -88,17 +96,29 @@ export const PageHeader = ({
 				</Flex>
 			)}
 
-			<Flex align="center" justify="space-between" gap="4">
+			<Flex align="flex-start" justify="space-between" gap="4">
+				{avatar && (
+					<Box data-testid="page-header-avatar" flexShrink={0}>
+						{avatar}
+					</Box>
+				)}
 				<Box flex="1" minW="0">
-					<Heading
-						as="h1"
-						fontSize="2xl"
-						fontWeight="semibold"
-						color="default"
-						letterSpacing="-0.02em"
-					>
-						{title}
-					</Heading>
+					<Flex align="center" gap="2" wrap="wrap">
+						<Heading
+							as="h1"
+							fontSize="2xl"
+							fontWeight="semibold"
+							color="default"
+							letterSpacing="-0.02em"
+						>
+							{title}
+						</Heading>
+						{badges && (
+							<Flex data-testid="page-header-badges" align="center" gap="2">
+								{badges}
+							</Flex>
+						)}
+					</Flex>
 					{subtitle && (
 						<Text
 							data-testid="page-header-subtitle"
@@ -109,6 +129,11 @@ export const PageHeader = ({
 							{subtitle}
 						</Text>
 					)}
+					{meta && (
+						<Box data-testid="page-header-meta" mt="2">
+							{meta}
+						</Box>
+					)}
 				</Box>
 				{hasActions && (
 					<Flex align="center" gap="2" flexShrink={0}>
@@ -116,6 +141,11 @@ export const PageHeader = ({
 					</Flex>
 				)}
 			</Flex>
+			{tabs && (
+				<Box data-testid="page-header-tabs" mt="4" mx="-8">
+					{tabs}
+				</Box>
+			)}
 		</Box>
 	);
 };
