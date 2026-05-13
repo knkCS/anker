@@ -360,3 +360,55 @@ describe("ContextRail", () => {
 		});
 	});
 });
+
+describe("ContextRail.IconButton", () => {
+	it("renders an outline Button with label text in expanded mode", () => {
+		Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.IconButton
+					label="Invite user"
+					icon={<span data-testid="ico">＋</span>}
+					onClick={() => {}}
+				/>
+			</ContextRail>,
+		);
+		expect(screen.getByRole("button", { name: /Invite user/i })).toBeInTheDocument();
+		expect(screen.getByTestId("ico")).toBeInTheDocument();
+	});
+
+	it("renders an icon-only IconButton with aria-label in collapsed mode", () => {
+		Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.IconButton
+					label="Invite user"
+					icon={<span data-testid="ico">＋</span>}
+					onClick={() => {}}
+				/>
+			</ContextRail>,
+		);
+		expect(screen.getByTestId("ico")).toBeInTheDocument();
+		// Visible text "Invite user" is not in the DOM (only in the tooltip / aria-label)
+		expect(screen.queryByText("Invite user")).not.toBeInTheDocument();
+		// Button is reachable by aria-label
+		expect(screen.getByRole("button", { name: "Invite user" })).toBeInTheDocument();
+	});
+
+	it("calls onClick when clicked", async () => {
+		const onClick = vi.fn();
+		const user = userEvent.setup();
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.IconButton label="Action" icon={<span>X</span>} onClick={onClick} />
+			</ContextRail>,
+		);
+		await user.click(screen.getByRole("button", { name: /Action/i }));
+		expect(onClick).toHaveBeenCalledOnce();
+	});
+
+	it("is tagged with RAIL_ATOM", () => {
+		const type = ContextRail.IconButton as unknown as { railAtom: symbol };
+		expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
+	});
+});

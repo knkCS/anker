@@ -10,6 +10,15 @@ import React, {
 import { IconButton } from "../../atoms/button";
 import { Box, Flex } from "../../primitives/layout";
 import { Heading, Text } from "../../primitives/typography";
+import {
+	RAIL_ATOM,
+	RailModeContext,
+	isRailAtom,
+	useContextRailMode,
+} from "./context-rail-context";
+import { ContextRailIconButton } from "./atoms";
+
+export { RAIL_ATOM, useContextRailMode };
 
 const COLLAPSED_WIDTH = "44px";
 const EXPANDED_WIDTH = "360px";
@@ -25,24 +34,6 @@ const COLLAPSE_BREAKPOINT = 1440;
 const RailRootContext = createContext<boolean>(false);
 
 /**
- * Carries the rail's collapsed state to atom subcomponents. Atoms read this
- * to decide between their expanded and compact renderings. Provided by
- * `<ContextRail>`; defaults to `{ collapsed: false }` when used outside.
- */
-const RailModeContext = createContext<{ collapsed: boolean }>({
-	collapsed: false,
-});
-
-/**
- * Hook used by rail atoms to read the rail's collapsed state. Returns
- * `{ collapsed: false }` when called outside a `<ContextRail>` Root —
- * atoms then render their expanded form.
- */
-export function useContextRailMode(): { collapsed: boolean } {
-	return useContext(RailModeContext);
-}
-
-/**
  * Dev-mode helper: warn once per component-mount when a rail child is
  * rendered without a `<ContextRail>` Root ancestor. No-op in production.
  */
@@ -54,19 +45,6 @@ function isDevMode(): boolean {
 	const proc = (globalThis as { process?: { env?: { NODE_ENV?: string } } })
 		.process;
 	return proc?.env?.NODE_ENV !== "production";
-}
-
-/**
- * Sentinel placed on rail-atom component functions (e.g., ContextRail.IconButton)
- * so that `<ContextRail.Section>` can filter children in collapsed mode and
- * keep only the atom-tagged ones.
- */
-export const RAIL_ATOM = Symbol.for("anker.contextRail.atom");
-
-function isRailAtom(child: React.ReactNode): boolean {
-	if (!React.isValidElement(child)) return false;
-	const type = child.type as { railAtom?: symbol } | string;
-	return typeof type === "function" && type.railAtom === RAIL_ATOM;
 }
 
 function useWarnIfOutsideRailRoot(componentName: string) {
@@ -316,4 +294,5 @@ export const ContextRail = Object.assign(ContextRailRoot, {
 	Header: ContextRailHeader,
 	Section: ContextRailSection,
 	Footer: ContextRailFooter,
+	IconButton: ContextRailIconButton,
 });
