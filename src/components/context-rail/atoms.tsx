@@ -212,3 +212,61 @@ export function ContextRailStatusIcon({
 }
 ContextRailStatusIcon.displayName = "ContextRail.StatusIcon";
 (ContextRailStatusIcon as unknown as { railAtom: symbol }).railAtom = RAIL_ATOM;
+
+export interface ContextRailAvatarProps {
+    initials: string;
+    label: string;
+    src?: string;
+    onClick?: () => void;
+}
+
+export function ContextRailAvatar({
+    initials,
+    label,
+    src,
+    onClick,
+}: ContextRailAvatarProps) {
+    const { collapsed } = useContextRailMode();
+
+    const avatarBox = (
+        <Flex
+            w={collapsed ? "8" : "10"}
+            h={collapsed ? "8" : "10"}
+            borderRadius="full"
+            bg="bg-emphasis"
+            color="white"
+            align="center"
+            justify="center"
+            fontWeight="bold"
+            fontSize={collapsed ? "xs" : "sm"}
+            flexShrink={0}
+            cursor={onClick ? "pointer" : "default"}
+            onClick={onClick}
+            backgroundImage={src ? `url(${src})` : undefined}
+            backgroundSize="cover"
+            backgroundPosition="center"
+            aria-label={label}
+        >
+            {!src && initials}
+        </Flex>
+    );
+
+    if (collapsed) {
+        return (
+            <Tooltip content={label} positioning={{ placement: "left" }}>
+                {avatarBox}
+            </Tooltip>
+        );
+    }
+
+    return (
+        <Flex align="center" gap="3" py="1">
+            {avatarBox}
+            <Text fontSize="xs" color="muted" truncate>
+                {label}
+            </Text>
+        </Flex>
+    );
+}
+ContextRailAvatar.displayName = "ContextRail.Avatar";
+(ContextRailAvatar as unknown as { railAtom: symbol }).railAtom = RAIL_ATOM;

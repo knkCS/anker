@@ -17,6 +17,7 @@ import {
 	useContextRailMode,
 } from "./context-rail-context";
 import {
+	ContextRailAvatar,
 	ContextRailIconButton,
 	ContextRailStatusIcon,
 	ContextRailValueTile,
@@ -298,6 +299,7 @@ export const ContextRail = Object.assign(ContextRailRoot, {
 	Header: ContextRailHeader,
 	Section: ContextRailSection,
 	Footer: ContextRailFooter,
+	Avatar: ContextRailAvatar,
 	IconButton: ContextRailIconButton,
 	StatusIcon: ContextRailStatusIcon,
 	ValueTile: ContextRailValueTile,

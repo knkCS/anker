@@ -501,3 +501,32 @@ describe("ContextRail.StatusIcon", () => {
         expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
     });
 });
+
+describe("ContextRail.Avatar", () => {
+    it("renders an avatar with label in expanded mode", () => {
+        Object.defineProperty(window, "innerWidth", { value: 1600, configurable: true });
+        renderWithChakra(
+            <ContextRail>
+                <ContextRail.Avatar initials="JS" label="Jana Schmid · jana@knk.de" />
+            </ContextRail>,
+        );
+        expect(screen.getByText("JS")).toBeInTheDocument();
+        expect(screen.getByText(/Jana Schmid/)).toBeInTheDocument();
+    });
+
+    it("renders 32×32 avatar with tooltip in collapsed mode", () => {
+        Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+        renderWithChakra(
+            <ContextRail>
+                <ContextRail.Avatar initials="JS" label="Jana Schmid · jana@knk.de" />
+            </ContextRail>,
+        );
+        expect(screen.getByText("JS")).toBeInTheDocument();
+        expect(screen.queryByText(/Jana Schmid/)).not.toBeInTheDocument();
+    });
+
+    it("Avatar is tagged with RAIL_ATOM", () => {
+        const type = ContextRail.Avatar as unknown as { railAtom: symbol };
+        expect(type.railAtom).toBe(Symbol.for("anker.contextRail.atom"));
+    });
+});
