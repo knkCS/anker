@@ -155,4 +155,20 @@ describe("PageHeader", () => {
 		renderWithChakra(<PageHeader title="Users" />);
 		expect(screen.queryByTestId("page-header-tabs")).not.toBeInTheDocument();
 	});
+
+	it("tab row sits flush with the band's bottom border (negative mb cancels outer pb)", () => {
+		renderWithChakra(
+			<PageHeader
+				title="Users"
+				tabs={<div data-testid="tabs-strip">tabs</div>}
+			/>,
+		);
+		const tabsRow = screen.getByTestId("page-header-tabs");
+		// The tabs wrapper applies `mb="-4"` so it negative-margins out the
+		// parent band's `pb="4"`. Chakra emits this as a CSS custom property
+		// multiplied by -1 inside calc().
+		const cs = window.getComputedStyle(tabsRow);
+		expect(cs.marginBottom).not.toBe("");
+		expect(cs.marginBottom).toMatch(/spacing-4|-4|calc/);
+	});
 });

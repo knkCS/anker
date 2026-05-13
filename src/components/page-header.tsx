@@ -142,7 +142,7 @@ export const PageHeader = ({
 				)}
 			</Flex>
 			{tabs && (
-				<Box data-testid="page-header-tabs" mt="4" mx="-8">
+				<Box data-testid="page-header-tabs" mt="4" mx="-8" mb="-4">
 					{tabs}
 				</Box>
 			)}
