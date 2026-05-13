@@ -2,13 +2,17 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import {
 	ArrowRight,
+	Copy,
 	Download,
 	History,
 	Info,
 	Monitor,
 	Shield,
 	ShieldCheck,
+	ShieldOff,
 	Upload,
+	UserCheck,
+	UserMinus,
 	UserPlus,
 	X,
 	Zap,
@@ -202,6 +206,118 @@ export const AvatarAndFooter: Story = {
 					label="2FA: Active"
 				/>
 				<ContextRail.ValueTile value={3} label="Sessions" />
+				<ContextRail.Footer>
+					<ContextRail.IconButton
+						label="Open detail"
+						icon={<ArrowRight size={14} />}
+						onClick={() => {}}
+						tone="primary"
+					/>
+					<ContextRail.IconButton
+						label="Close preview"
+						icon={<X size={14} />}
+						onClick={() => {}}
+						tone="ghost"
+					/>
+				</ContextRail.Footer>
+			</ContextRail>
+		</RailColumn>
+	),
+};
+
+/** §4.1 Overview/stats — generic template for workspace overview rails */
+export const PatternOverviewStats: Story = {
+	render: () => (
+		<RailColumn>
+			<ContextRail storageKey="story-pattern-overview">
+				<ContextRail.Header eyebrow="WORKSPACE" title="Overview" />
+				<ContextRail.Section id="users" label="Users">
+					<Flex direction="row" gap="2" flexWrap="wrap">
+						<ContextRail.ValueTile value={1284} label="Total" />
+						<ContextRail.ValueTile value={1108} label="Active" muted />
+					</Flex>
+					<Flex direction="row" gap="2" flexWrap="wrap" mt="2">
+						<ContextRail.ValueTile value={12} label="Invited" muted />
+						<ContextRail.ValueTile value={2} label="Suspended" muted />
+					</Flex>
+				</ContextRail.Section>
+				<ContextRail.StatusIcon
+					tone="amber"
+					icon={<Shield size={14} />}
+					label="2FA: 856 of 1284 enabled"
+				/>
+				<ContextRail.Divider />
+				<ContextRail.IconButton
+					label="Invite user"
+					icon={<UserPlus size={14} />}
+					onClick={() => {}}
+				/>
+				<ContextRail.IconButton
+					label="Import CSV"
+					icon={<Upload size={14} />}
+					onClick={() => {}}
+				/>
+				<ContextRail.IconButton
+					label="Export all"
+					icon={<Download size={14} />}
+					onClick={() => {}}
+				/>
+			</ContextRail>
+		</RailColumn>
+	),
+};
+
+/** §4.3 Bulk-selection — generic template for multi-select action rails */
+export const PatternBulkSelection: Story = {
+	render: () => (
+		<RailColumn>
+			<ContextRail storageKey="story-pattern-bulk">
+				<ContextRail.Header eyebrow="3 selected" title="Bulk actions" />
+				<ContextRail.ValueTile value={3} keepWhenEmpty label="3 selected" />
+				<ContextRail.Divider />
+				<ContextRail.ValueTile value={2} label="Active" muted />
+				<ContextRail.ValueTile value={1} label="Invited" muted />
+				<ContextRail.ValueTile value={0} label="Suspended" muted />
+				<ContextRail.Divider />
+				<ContextRail.IconButton
+					label="Deactivate"
+					icon={<UserMinus size={14} />}
+					onClick={() => {}}
+				/>
+				<ContextRail.IconButton
+					label="Reactivate"
+					icon={<UserCheck size={14} />}
+					onClick={() => {}}
+				/>
+				<ContextRail.IconButton
+					label="Reset MFA"
+					icon={<ShieldOff size={14} />}
+					onClick={() => {}}
+				/>
+			</ContextRail>
+		</RailColumn>
+	),
+};
+
+/** §4.2 Detail-context — generic template for single-entity context rails */
+export const PatternDetailContext: Story = {
+	render: () => (
+		<RailColumn>
+			<ContextRail storageKey="story-pattern-detail">
+				<ContextRail.Header eyebrow="User" title="Jana Schmid" />
+				<ContextRail.Avatar initials="JS" label="Jana Schmid · jana@knk.de" />
+				<ContextRail.StatusIcon
+					tone="green"
+					icon={<Shield size={14} />}
+					label="2FA: Active"
+				/>
+				<ContextRail.ValueTile value={3} label="Sessions" muted />
+				<ContextRail.Divider />
+				<ContextRail.IconButton
+					label="Copy ID"
+					icon={<Copy size={14} />}
+					onClick={() => {}}
+				/>
 				<ContextRail.Footer>
 					<ContextRail.IconButton
 						label="Open detail"
