@@ -10,9 +10,10 @@ import {
 	MenuRoot,
 	MenuTrigger,
 } from "../../primitives/menu";
-import { Tooltip } from "../../primitives/tooltip";
 import { Text } from "../../primitives/typography";
 import { KnkLogo } from "../knk-logo/knk-logo";
+import { NavList } from "../nav-list/nav-list";
+import { NavListModeProvider } from "../nav-list/nav-list-context";
 
 const COLLAPSED_WIDTH = "64px";
 const EXPANDED_WIDTH = "240px";
@@ -81,51 +82,53 @@ const SidebarRoot = ({
 
 	return (
 		<SidebarContext.Provider value={ctx}>
-			<Box
-				position="relative"
-				w={collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
-				transition="width 250ms ease-out"
-				flexShrink={0}
-			>
-				<Flex
-					data-testid="sidebar"
-					data-collapsed={collapsed ? "true" : "false"}
-					direction="column"
-					w="full"
-					minH="100vh"
-					bg="bg-canvas"
-					borderRightWidth="1px"
-					borderRightColor="border"
-					overflow="hidden"
+			<NavListModeProvider value={{ collapsed }}>
+				<Box
+					position="relative"
+					w={collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
+					transition="width 250ms ease-out"
+					flexShrink={0}
 				>
-					{children}
-				</Flex>
-				<IconButton
-					data-testid="sidebar-toggle"
-					aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-					onClick={toggle}
-					variant="outline"
-					size="xs"
-					position="absolute"
-					top="6"
-					right="-3.5"
-					width="7"
-					height="7"
-					minW="7"
-					borderRadius="full"
-					bg="bg-surface"
-					borderColor="border"
-					boxShadow="sm"
-					zIndex={1}
-					_hover={{ bg: "bg-muted" }}
-				>
-					{collapsed ? (
-						<PanelLeftOpen size={14} />
-					) : (
-						<PanelLeftClose size={14} />
-					)}
-				</IconButton>
-			</Box>
+					<Flex
+						data-testid="sidebar"
+						data-collapsed={collapsed ? "true" : "false"}
+						direction="column"
+						w="full"
+						minH="100vh"
+						bg="bg-canvas"
+						borderRightWidth="1px"
+						borderRightColor="border"
+						overflow="hidden"
+					>
+						{children}
+					</Flex>
+					<IconButton
+						data-testid="sidebar-toggle"
+						aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+						onClick={toggle}
+						variant="outline"
+						size="xs"
+						position="absolute"
+						top="6"
+						right="-3.5"
+						width="7"
+						height="7"
+						minW="7"
+						borderRadius="full"
+						bg="bg-surface"
+						borderColor="border"
+						boxShadow="sm"
+						zIndex={1}
+						_hover={{ bg: "bg-muted" }}
+					>
+						{collapsed ? (
+							<PanelLeftOpen size={14} />
+						) : (
+							<PanelLeftClose size={14} />
+						)}
+					</IconButton>
+				</Box>
+			</NavListModeProvider>
 		</SidebarContext.Provider>
 	);
 };
@@ -200,29 +203,9 @@ export interface SidebarSectionProps {
 	children: React.ReactNode;
 }
 
-const SidebarSection = ({ label, children }: SidebarSectionProps) => {
-	const { collapsed } = useSidebarContext();
-	return (
-		<Box mb="4" px="3">
-			{!collapsed && (
-				<Text
-					fontSize="2xs"
-					fontWeight="semibold"
-					letterSpacing="wider"
-					textTransform="uppercase"
-					color="muted"
-					px="2"
-					mb="1"
-				>
-					{label}
-				</Text>
-			)}
-			<Flex direction="column" gap="0.5">
-				{children}
-			</Flex>
-		</Box>
-	);
-};
+const SidebarSection = ({ label, children }: SidebarSectionProps) => (
+	<NavList.Group label={label}>{children}</NavList.Group>
+);
 SidebarSection.displayName = "Sidebar.Section";
 
 // Item — nav link with active state
@@ -240,109 +223,17 @@ const SidebarItem = ({
 	asChild,
 	active,
 	label,
-}: SidebarItemProps) => {
-	const { collapsed } = useSidebarContext();
-
-	// Styles must be plain CSS so they survive `style={...}` inline styling on
-	// the cloned asChild element (e.g. <NavLink>). Chakra prop shorthand like
-	// `bg="primary.50"` or `borderRadius="md"` is silently dropped by the
-	// browser when applied as inline CSS — it only resolves through Chakra
-	// components. We reference Chakra's emitted CSS variables directly.
-	const itemStyle: React.CSSProperties = {
-		display: "flex",
-		alignItems: "center",
-		justifyContent: collapsed ? "center" : "flex-start",
-		gap: "var(--chakra-spacing-2)",
-		paddingInline: "var(--chakra-spacing-3)",
-		paddingBlock: "var(--chakra-spacing-2)",
-		borderRadius: "var(--chakra-radii-sm)",
-		fontSize: "var(--chakra-font-sizes-sm)",
-		fontWeight: active
-			? "var(--chakra-font-weights-medium)"
-			: "var(--chakra-font-weights-normal)",
-		color: active
-			? "var(--chakra-colors-primary-700)"
-			: "var(--chakra-colors-default)",
-		background: active ? "var(--chakra-colors-bg-surface)" : "transparent",
-		boxShadow: active
-			? "inset 0 0 0 1px var(--chakra-colors-border), 0 1px 2px rgba(0,0,0,0.04)"
-			: undefined,
-		position: "relative",
-		textDecoration: "none",
-	};
-
-	const iconEl = icon ? (
-		<Box display="inline-flex" alignItems="center" flexShrink={0}>
-			{icon}
-		</Box>
-	) : null;
-
-	// Right-tab indicator on active items, matching the design handoff
-	// (3px × 14px primary.700 pill at the trailing edge of the row).
-	// Hidden when collapsed (no room).
-	const activeTab =
-		active && !collapsed ? (
-			<span
-				aria-hidden="true"
-				style={{
-					width: 3,
-					height: 14,
-					background: "var(--chakra-colors-primary-700)",
-					borderRadius: 999,
-					flexShrink: 0,
-					marginInlineStart: "auto",
-				}}
-			/>
-		) : null;
-
-	const tooltipLabel = label || (typeof children === "string" ? children : "");
-
-	const wrapTooltip = (node: React.ReactElement) =>
-		collapsed && tooltipLabel ? (
-			<Tooltip content={tooltipLabel} positioning={{ placement: "right" }}>
-				{node}
-			</Tooltip>
-		) : (
-			node
-		);
-
-	if (asChild) {
-		const child = React.Children.only(children) as React.ReactElement<
-			React.HTMLAttributes<HTMLElement> & {
-				href?: string;
-				"data-testid"?: string;
-				"data-active"?: string;
-				children?: React.ReactNode;
-			}
-		>;
-		const cloned = React.cloneElement(
-			child,
-			{
-				"data-active": active ? "true" : "false",
-				style: {
-					...itemStyle,
-					...(child.props.style as React.CSSProperties | undefined),
-				},
-			},
-			iconEl,
-			collapsed ? null : child.props.children,
-			activeTab,
-		);
-		return wrapTooltip(cloned);
-	}
-
-	return wrapTooltip(
-		<Box
-			data-testid="sidebar-item"
-			data-active={active ? "true" : "false"}
-			style={itemStyle}
-		>
-			{iconEl}
-			{!collapsed && children}
-			{activeTab}
-		</Box>,
-	);
-};
+}: SidebarItemProps) => (
+	<NavList.Item
+		icon={icon}
+		active={active}
+		asChild={asChild}
+		label={label}
+		testId="sidebar-item"
+	>
+		{children}
+	</NavList.Item>
+);
 SidebarItem.displayName = "Sidebar.Item";
 
 // UserMenu

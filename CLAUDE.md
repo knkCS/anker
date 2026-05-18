@@ -14,7 +14,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in six layers
 
 1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 24 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
 2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
-3. **`/components`** — Higher-level composites: Card, Drawer, Modal, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox. 13 components.
+3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox. 14 components.
 4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, SearchInput, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc. 16 component groups.
 5. **`/forms`** — Form controls built on React Hook Form + Zod: InputField, TextareaField, ArrayField, DatePickerField, CodeField, etc. 19 components.
 6. **`/feedback`** — Feedback patterns: ConfirmModal with provider + `useConfirmModal` hook.
@@ -230,6 +230,12 @@ Additional rules:
 - Simple: flat file at `src/components/{name}.tsx` + `src/components/{name}.stories.tsx`
 - Complex (with hooks/subcomponents): directory at `src/components/{name}/` with `index.ts`, `{name}.tsx`, `use-{name}.tsx`, `{name}.stories.tsx`
 - Add export to `src/components/index.ts`
+
+### Sub-nav template (`<SubNavLayout>`)
+1. Create `src/templates/subnav-layout.tsx`
+2. Use `<NavList>` from `src/components/nav-list/` for the left column — same primitive `<Sidebar>` uses
+3. Publish `NavListModeProvider` from the layout root so items collapse with the layout
+4. Persist collapse via `storageKey` to `localStorage`, like `<Sidebar>` / `<ContextRail>`
 
 ### Form field (RHF wrapper)
 1. Create `src/forms/{name}-field.tsx` — wrap `FormField<T>` with Controller render prop

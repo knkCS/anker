@@ -98,6 +98,18 @@ export { LabeledSwitch } from "./labeled-switch";
 // Modal
 export type { ModalProps } from "./modal";
 export { Modal } from "./modal";
+// NavList
+export type {
+	NavListGroupProps,
+	NavListItemProps,
+	NavListProps,
+} from "./nav-list";
+export {
+	NavList,
+	type NavListMode,
+	NavListModeProvider,
+	useNavListMode,
+} from "./nav-list";
 // PageHeader
 export type { PageHeaderBreadcrumb, PageHeaderProps } from "./page-header";
 export { PageHeader } from "./page-header";

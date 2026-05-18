@@ -89,8 +89,11 @@ Available templates:
 | `<ErrorPage>` | 404 / 500 / 403 |
 | `<LoadingPage>` | Initial app boot |
 | `<MaintenancePage>` | Service-down screens |
+| `<SubNavLayout>` | Multi-resource navigation inside a `<DetailPageTemplate>` tab body — grouped vertical nav (left) + detail pane (right) with collapse toggle and `localStorage` persistence. |
 
 **Rule:** if a template doesn't fit your page, file an issue — don't reinvent the layout.
+
+- For multi-resource navigation inside a tab body, use `<SubNavLayout>` rather than rolling your own master-detail. It owns collapse state, persistence, and the divider — wire `<NavList.Item asChild>` to `<NavLink>` for URL deep-linking.
 
 Full spec with composition diagrams, slot tables, and authoring rules: `docs/page-patterns.md` in the anker repo (linked from the GitHub Pages docs site).
 
