@@ -56,6 +56,8 @@ export interface NavListItemProps {
 	asChild?: boolean;
 	/** Override tooltip text when the parent is collapsed. */
 	label?: string;
+	/** data-testid for the root element (non-asChild branch). Defaults to "nav-list-item". */
+	testId?: string;
 	children: ReactNode;
 }
 
@@ -65,6 +67,7 @@ const NavListItem = ({
 	active,
 	asChild,
 	label,
+	testId = "nav-list-item",
 	children,
 }: NavListItemProps) => {
 	const { collapsed } = useNavListMode();
@@ -170,7 +173,7 @@ const NavListItem = ({
 
 	return wrapTooltip(
 		<Box
-			data-testid="nav-list-item"
+			data-testid={testId}
 			data-active={active ? "true" : "false"}
 			aria-current={active ? "page" : undefined}
 			style={itemStyle}
