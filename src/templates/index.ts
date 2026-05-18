@@ -38,3 +38,5 @@ export type { MarketingPageTemplateProps } from "./marketing-page-template";
 export { MarketingPageTemplate } from "./marketing-page-template";
 export type { SettingsPageTemplateProps } from "./settings-page-template";
 export { SettingsPageTemplate } from "./settings-page-template";
+export type { SubNavLayoutProps } from "./subnav-layout";
+export { SubNavLayout } from "./subnav-layout";
