@@ -67,18 +67,22 @@ const DetailBody = ({ rows = 10 }: { rows?: number }) => (
 			borderColor="border"
 			borderRadius="sm"
 		>
-			{Array.from({ length: rows }).map((_, i) => (
+			{Array.from({ length: rows }, (_, i) => ({
+				id: `pattern-${i + 1}`,
+				value: (i + 1) * 1.2,
+				isLast: i === rows - 1,
+			})).map((p) => (
 				<Flex
-					key={i}
+					key={p.id}
 					px="3"
 					py="2"
-					borderBottomWidth={i === rows - 1 ? "0" : "1px"}
+					borderBottomWidth={p.isLast ? "0" : "1px"}
 					borderColor="border-muted"
 					justify="space-between"
 				>
-					<Text fontSize="sm">pattern-{i + 1}</Text>
+					<Text fontSize="sm">{p.id}</Text>
 					<Text fontSize="sm" color="muted">
-						{(i + 1) * 1.2}pt
+						{p.value}pt
 					</Text>
 				</Flex>
 			))}

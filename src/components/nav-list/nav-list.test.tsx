@@ -1,6 +1,6 @@
 // src/components/nav-list/nav-list.test.tsx
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { NavList } from "./nav-list";
 import { NavListModeProvider } from "./nav-list-context";
