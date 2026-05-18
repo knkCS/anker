@@ -287,6 +287,8 @@ inset border, a subtle drop shadow, and a 3px × 14px `primary.700` pill
 on the trailing edge. When the sidebar is collapsed, the active state
 keeps the background and border but drops the trailing pill (no room).
 
+Sidebar's section + item rendering is implemented via the shared `<NavList>` primitive in `@knkcs/anker/components`. The same primitive powers `<SubNavLayout>` (see § 8 Sub-nav layout). If you need the visual standalone — group label + icon row + count + active pill — import `<NavList>` directly.
+
 ### When sections appear vs. when they're empty
 
 - **Show a section** when it has at least one item visible to the current
@@ -775,7 +777,91 @@ Use `variant="line"` for content tabs (anker default). Avoid
 
 ---
 
-## 8. Modal patterns
+## 8. Sub-nav layout
+
+`<SubNavLayout>` is the inner layout primitive for **multi-resource navigation inside a `<DetailPageTemplate>` tab body**: a grouped vertical nav on the left and a detail pane on the right, separated by a vertical divider with a collapse toggle.
+
+It is distinct from:
+- `<Sidebar>` (page-level chrome owned by `<AppShell>`)
+- Tabs in `<PageHeader>` (page-level navigation between tab bodies)
+- `<ContextRail>` (optional third column to the right)
+
+### Composition
+
+```
+AppShell
+├── Sidebar
+├── DetailPageTemplate
+│   └── tab body
+│       └── SubNavLayout
+│           ├── .Nav     (NavList.Group × N)
+│           └── .Detail
+│               ├── .Toolbar (optional)
+│               └── children (DataTable, editor, …)
+└── ContextRail   (optional)
+```
+
+`<SubNavLayout>` sits flush in the main column — no card wrapper, no padding, no border on the layout root. The divider between Nav and Detail is `border-left: 1px solid border` on `.Detail`.
+
+### When to use
+
+- A tab body has 2+ resource categories of different types (e.g. Catalogs = page geometries / fonts / glue / colors / master pages).
+- Each category has its own table or editor.
+- The active category benefits from URL deep-linking (e.g. `/catalogs/glue`).
+
+### When not to use
+
+- The tab body is one homogeneous list — use `<DataTable>` directly.
+- The categories are filters of one underlying list — use filter chips in `<Toolbar>`.
+- The categories are independent destinations with their own page chrome — those belong as siblings in `<Sidebar>`, not inside a sub-nav.
+
+### Geometry
+
+| Element | Expanded | Collapsed |
+|---|---|---|
+| `.Nav` width | `220px` | `56px` |
+| `.Detail` width | `1fr` | `1fr` |
+| Transition | `grid-template-columns 250ms ease-out` | — |
+
+### Collapse behavior
+
+`<SubNavLayout storageKey="…">` persists collapse state to `localStorage`. Item labels, group labels, counts, and the active pill hide when collapsed; the icon centers and a `<Tooltip>` shows the label on hover. The toggle button uses `PanelLeftClose` / `PanelLeftOpen` icons and floats centered on the divider.
+
+**Storage-key convention:** `<feature>-subnav` (e.g. `catalogs-subnav`). Avoid colliding with `<Sidebar>` keys (`<feature>-sidebar`) and `<ContextRail>` keys (`<feature>-rail`).
+
+### Three-column example
+
+```tsx
+<AppShell sidebar={<MySidebar />} rail={<MyContextRail />}>
+  <DetailPageTemplate
+    breadcrumbs={…}
+    title="Boorberg Standard"
+    badges={…}
+    tabs={<CatalogsTabs />}
+  >
+    <SubNavLayout storageKey="catalogs-subnav">
+      <SubNavLayout.Nav aria-label="Catalogs sub-navigation">
+        <NavList.Group label="Page">…</NavList.Group>
+        <NavList.Group label="Typography">…</NavList.Group>
+        <NavList.Group label="Visual">…</NavList.Group>
+      </SubNavLayout.Nav>
+
+      <SubNavLayout.Detail>
+        <SubNavLayout.Toolbar>
+          <Input placeholder="Filter patterns…" />
+          <Text fontSize="xs" color="muted">10 patterns · ordered by usage</Text>
+          <Button colorPalette="primary" ml="auto">+ Add pattern</Button>
+        </SubNavLayout.Toolbar>
+        <DataTable … />
+      </SubNavLayout.Detail>
+    </SubNavLayout>
+  </DetailPageTemplate>
+</AppShell>
+```
+
+---
+
+## 9. Modal patterns
 
 Two modal types exist:
 
@@ -853,7 +939,7 @@ place red is allowed in the UI.
 
 ---
 
-## 9. Form patterns
+## 10. Form patterns
 
 ### Layout
 
@@ -905,7 +991,7 @@ trap (which one persists?).
 
 ---
 
-## 10. Empty / loading / error states
+## 11. Empty / loading / error states
 
 ### DataTable empty state
 
@@ -968,7 +1054,7 @@ solutions and federated views.
 
 ---
 
-## 11. Page templates
+## 12. Page templates
 
 This section defines every supported page template. Each template
 includes a composition diagram, when-to-use guidance, and escape
@@ -981,7 +1067,7 @@ if the template doesn't fit, you can pass arbitrary content into the
 slot. Config objects would force every variant to be expressible as
 data, and we don't have that crystal ball.
 
-### 11.1 IndexPageTemplate
+### 12.1 IndexPageTemplate
 
 **When to use.** Any "browse a list" page: users, OAuth clients, audit
 events, API keys, webhooks. The page's main content is a `<DataTable>`
@@ -1057,7 +1143,7 @@ For index-style content rendered inside a tab body of `SettingsPageTemplate` or 
 - The tab does not own breadcrumbs; the parent page does.
 - **Don't** wrap `bodyTabs` content in your own `<Tabs.Root>`. The template owns it.
 
-### 11.2 DetailPageTemplate
+### 12.2 DetailPageTemplate
 
 **When to use.** Any "single entity" page: a single user, a single
 OAuth client, a single audit event detail, a single webhook config.
@@ -1153,7 +1239,7 @@ A `ReactNode` rendered between the PageHeader and the tabs (or body). Use for id
 
 The `tabs` prop is for nav-mode tab strips (Tabs.List with no Tabs.Content; the body comes from `children`, typically a route's outlet). `bodyTabs` and `tabs` are mutually exclusive — passing both throws.
 
-### 11.3 SettingsPageTemplate
+### 12.3 SettingsPageTemplate
 
 **When to use.** Any "preferences / configuration" page composed of
 multiple tabbed sections: personal settings (Profile, Password, MFA),
@@ -1216,7 +1302,7 @@ Same shape as `DetailPageTemplate.bodyTabs`. Prefer this for settings pages over
 
 `bodyTabs` and `tabs` are mutually exclusive — passing both throws.
 
-### 11.4 DashboardPageTemplate
+### 12.4 DashboardPageTemplate
 
 **When to use.** Overview pages composed of a grid of widgets — small
 stat tiles, mini-charts, recent-activity panes. Inspired by Linear's
@@ -1266,7 +1352,7 @@ dense info, clear hierarchy.
   span. Refined minimalism applies more strictly to dashboards because
   the screen is busy by definition.
 
-### 11.5 AuthPageTemplate
+### 12.5 AuthPageTemplate
 
 **When to use.** Pre-authentication screens: login, register, MFA
 challenge, forgot/reset password. The user is not signed in, the app
@@ -1298,7 +1384,7 @@ Internally a thin wrapper around the existing `<AuthCard>`.
 - For email-verification "we sent a link" screens, use the same
   template with a single action button as `children`.
 
-### 11.6 Verify / Confirm page
+### 12.6 Verify / Confirm page
 
 **When to use.** Email verification, account-deletion confirmation,
 "check your inbox" callouts. These pages have copy + a single CTA, no
@@ -1322,7 +1408,7 @@ form.
 There is no separate `<VerifyPageTemplate>` — verify is just a special
 case of auth.
 
-### 11.7 OAuth consent page
+### 12.7 OAuth consent page
 
 **When to use.** Relying-party authorization prompt — "App X wants
 access to your account".
@@ -1348,7 +1434,7 @@ allow/deny buttons).
 The denser `lg` width gives room for the scope list without forcing the
 user to scroll.
 
-### 11.8 Logout / signed-out page
+### 12.8 Logout / signed-out page
 
 **When to use.** Post-logout landing — confirms sign-out and offers a
 sign-back-in CTA.
@@ -1368,7 +1454,7 @@ sign-back-in CTA.
 </AuthPageTemplate>
 ```
 
-### 11.9 MarketingPageTemplate
+### 12.9 MarketingPageTemplate
 
 **When to use.** Unauthenticated marketing surfaces — product
 landing, "about us", coming-soon teasers. Full-bleed, no app shell.
@@ -1413,7 +1499,7 @@ landing, "about us", coming-soon teasers. Full-bleed, no app shell.
 - Use `secondary.600` (brand orange) at most once on the page (e.g. on
   the hero CTA, never on body links).
 
-### 11.10 ErrorPage
+### 12.10 ErrorPage
 
 **When to use.** 404, 500, 403, generic failures.
 Full-bleed, no app shell.
@@ -1440,7 +1526,7 @@ Optional logo top-left, optional illustration above the status code.
 - Don't tell the user "an error has occurred" in the description.
   Give them a useful next step instead.
 
-### 11.11 LoadingPage
+### 12.11 LoadingPage
 
 **When to use.** Initial app boot — before the authenticated app
 shell has hydrated. For in-page loading (tab switch, data refresh)
@@ -1461,7 +1547,7 @@ use a centered `<Spinner>` inside the page body.
   (< 500ms). The flash of "Loading…" is worse than the flash of
   blank.
 
-### 11.12 MaintenancePage
+### 12.12 MaintenancePage
 
 **When to use.** The service is down for upgrade or maintenance.
 Operators serve this from a static asset or fallback handler.
@@ -1485,7 +1571,7 @@ Operators serve this from a static asset or fallback handler.
 
 ---
 
-### 11.13 DataTable cells
+### 12.13 DataTable cells
 
 **Rule.** Cells from `@knkcs/anker/components` are the contract — **never
 inline cell JSX from primitives unless no cell fits**. If no cell fits, file an issue and propose a new cell. Inline
@@ -1583,7 +1669,7 @@ If you need a flush body (e.g. a `<DataTable>` inside a Card), file an issue —
 
 ---
 
-## 12. Slot mechanism
+## 13. Slot mechanism
 
 `<AppShell>` exposes two write-side hooks for descendant components to
 register content into the shell:
@@ -1665,11 +1751,11 @@ over nothing.
 
 ---
 
-## 13. Template components
+## 14. Template components
 
 This section enumerates the `@knkcs/anker/templates` exports.
 
-### 13.1 `<AppShell>`
+### 14.1 `<AppShell>`
 
 | Prop      | Type        | Required | Notes                                          |
 |-----------|-------------|----------|------------------------------------------------|
@@ -1683,7 +1769,7 @@ Rail precedence: descendant `usePageRail(content)` wins over the `rail`
 prop. The column is reserved when *either* a prop is supplied *or* a
 descendant registers content; omit both to drop the third grid track.
 
-### 13.2 `<IndexPageTemplate>`
+### 14.2 `<IndexPageTemplate>`
 
 | Prop          | Type        | Required | Notes                                          |
 |---------------|-------------|----------|------------------------------------------------|
@@ -1696,7 +1782,7 @@ descendant registers content; omit both to drop the third grid track.
 | `toolbar`     | `ReactNode` | no       | `<Toolbar>`                                    |
 | `children`    | `ReactNode` | yes      | Body, flush                                    |
 
-### 13.3 `<DetailPageTemplate>`
+### 14.3 `<DetailPageTemplate>`
 
 | Prop          | Type        | Required | Notes                                          |
 |---------------|-------------|----------|------------------------------------------------|
@@ -1705,7 +1791,7 @@ descendant registers content; omit both to drop the third grid track.
 | `tabs`        | `ReactNode` | no       |                                                |
 | `children`    | `ReactNode` | yes      | Body, flush                                    |
 
-### 13.4 `<SettingsPageTemplate>`
+### 14.4 `<SettingsPageTemplate>`
 
 | Prop           | Type        | Required | Notes                                          |
 |----------------|-------------|----------|------------------------------------------------|
@@ -1715,7 +1801,7 @@ descendant registers content; omit both to drop the third grid track.
 | `maxBodyWidth` | `string`    | no       | Default `"3xl"`. Pass `"full"` to disable.     |
 | `children`     | `ReactNode` | yes      | Body                                           |
 
-### 13.5 `<DashboardPageTemplate>`
+### 14.5 `<DashboardPageTemplate>`
 
 | Prop          | Type        | Required | Notes                                          |
 |---------------|-------------|----------|------------------------------------------------|
@@ -1724,15 +1810,15 @@ descendant registers content; omit both to drop the third grid track.
 | `gap`         | `string`    | no       | Default `"4"` (= 16px)                         |
 | `children`    | `ReactNode` | yes      | Widgets in 12-col grid                         |
 
-### 13.6 `<AuthPageTemplate>`
+### 14.6 `<AuthPageTemplate>`
 
 Slots inherited from `<AuthCard>`. See 11.5.
 
-### 13.7 `<MarketingPageTemplate>`
+### 14.7 `<MarketingPageTemplate>`
 
 See 11.9 for the full slot table.
 
-### 13.8 `<ErrorPage>`
+### 14.8 `<ErrorPage>`
 
 | Prop          | Type        | Required | Notes                                          |
 |---------------|-------------|----------|------------------------------------------------|
@@ -1743,14 +1829,14 @@ See 11.9 for the full slot table.
 | `illustration`| `ReactNode` | no       |                                                |
 | `logo`        | `ReactNode` | no       |                                                |
 
-### 13.9 `<LoadingPage>`
+### 14.9 `<LoadingPage>`
 
 | Prop      | Type        | Required | Notes                                          |
 |-----------|-------------|----------|------------------------------------------------|
 | `logo`    | `ReactNode` | no       |                                                |
 | `message` | `ReactNode` | no       |                                                |
 
-### 13.10 `<MaintenancePage>`
+### 14.10 `<MaintenancePage>`
 
 | Prop          | Type        | Required | Notes                                          |
 |---------------|-------------|----------|------------------------------------------------|
@@ -1762,7 +1848,7 @@ See 11.9 for the full slot table.
 
 ---
 
-## 14. Authoring rules
+## 15. Authoring rules
 
 These rules are the contract for solution authors.
 
@@ -1816,7 +1902,7 @@ These rules are the contract for solution authors.
 
 ---
 
-## 14. Primitives
+## 16. Primitives
 
 #### DescriptionList
 
@@ -1843,7 +1929,7 @@ Don't use `<DescriptionList>` for editable form fields — pair `<TextInput>` wi
 
 ---
 
-## 15. References
+## 17. References
 
 - [`docs/design-system.md`](./design-system.md) — token system and
   visual language. Read first.
