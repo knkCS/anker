@@ -146,6 +146,7 @@ const NavListItem = ({
 	if (asChild) {
 		const child = React.Children.only(children) as React.ReactElement<
 			React.HTMLAttributes<HTMLElement> & {
+				"data-active"?: string;
 				children?: ReactNode;
 			}
 		>;
