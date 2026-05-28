@@ -20,6 +20,7 @@ export function TextareaField<T extends FieldValues>({
 		textareaProps,
 		readOnly,
 		disabled,
+		showDirtyState,
 		...rest
 	} = props;
 
@@ -29,9 +30,10 @@ export function TextareaField<T extends FieldValues>({
 			label={label}
 			readOnly={readOnly}
 			disabled={disabled}
+			showDirtyState={showDirtyState}
 			{...rest}
 		>
-			{(field) => (
+			{(field, { isDirty }) => (
 				<Textarea
 					{...field}
 					value={String(field.value ?? "")}
@@ -40,6 +42,8 @@ export function TextareaField<T extends FieldValues>({
 					readOnly={readOnly}
 					disabled={disabled}
 					opacity={readOnly ? 0.8 : 1}
+					borderColor={isDirty ? "yellow.400" : undefined}
+					bg={isDirty ? "yellow.50" : undefined}
 					ref={ref}
 					{...textareaProps}
 				/>
