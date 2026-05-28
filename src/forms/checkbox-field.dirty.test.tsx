@@ -5,11 +5,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { describe, expect, it } from "vitest";
 import { CheckboxField } from "./checkbox-field";
 
-function Harness({
-	showDirtyState,
-}: {
-	showDirtyState?: boolean;
-}) {
+function Harness({ showDirtyState }: { showDirtyState?: boolean }) {
 	const form = useForm({ defaultValues: { agree: false } });
 	useEffect(() => {
 		form.setValue("agree", true, { shouldDirty: true });

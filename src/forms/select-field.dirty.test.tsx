@@ -5,11 +5,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { describe, expect, it } from "vitest";
 import { SelectField } from "./select-field";
 
-function Harness({
-	showDirtyState,
-}: {
-	showDirtyState?: boolean;
-}) {
+function Harness({ showDirtyState }: { showDirtyState?: boolean }) {
 	const form = useForm({ defaultValues: { pick: "a" } });
 	useEffect(() => {
 		form.setValue("pick", "b", { shouldDirty: true });
@@ -17,11 +13,7 @@ function Harness({
 	return (
 		<ChakraProvider value={defaultSystem}>
 			<FormProvider {...form}>
-				<SelectField
-					name="pick"
-					label="Pick"
-					showDirtyState={showDirtyState}
-				>
+				<SelectField name="pick" label="Pick" showDirtyState={showDirtyState}>
 					<option value="a">Alpha</option>
 					<option value="b">Beta</option>
 				</SelectField>

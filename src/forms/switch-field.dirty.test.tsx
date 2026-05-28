@@ -5,11 +5,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { describe, expect, it } from "vitest";
 import { SwitchField } from "./switch-field";
 
-function Harness({
-	showDirtyState,
-}: {
-	showDirtyState?: boolean;
-}) {
+function Harness({ showDirtyState }: { showDirtyState?: boolean }) {
 	const form = useForm({ defaultValues: { enabled: false } });
 	useEffect(() => {
 		form.setValue("enabled", true, { shouldDirty: true });

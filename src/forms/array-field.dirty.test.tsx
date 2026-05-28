@@ -5,11 +5,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { describe, expect, it } from "vitest";
 import { ArrayField } from "./array-field";
 
-function Harness({
-	showDirtyState,
-}: {
-	showDirtyState?: boolean;
-}) {
+function Harness({ showDirtyState }: { showDirtyState?: boolean }) {
 	const form = useForm({
 		defaultValues: { tags: [{ key: "a", value: "apple" }] },
 	});
@@ -26,11 +22,7 @@ function Harness({
 	return (
 		<ChakraProvider value={defaultSystem}>
 			<FormProvider {...form}>
-				<ArrayField
-					name="tags"
-					label="Tags"
-					showDirtyState={showDirtyState}
-				/>
+				<ArrayField name="tags" label="Tags" showDirtyState={showDirtyState} />
 			</FormProvider>
 		</ChakraProvider>
 	);

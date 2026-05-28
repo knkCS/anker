@@ -33,7 +33,7 @@ import {
 	HStack,
 	Stack,
 } from "../../primitives/layout";
-import { Heading, Text } from "../../primitives/typography";
+import { Text } from "../../primitives/typography";
 
 const contactDetails = [
 	{ label: "Email", value: "sarah.mitchell@knkcs.com" },

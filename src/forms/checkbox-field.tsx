@@ -1,6 +1,6 @@
 import { Checkbox } from "@chakra-ui/react";
 import type React from "react";
-import type { FieldValues, Path } from "react-hook-form";
+import type { FieldValues } from "react-hook-form";
 import type { FormFieldProps } from "./form-field";
 import { FormField } from "./form-field";
 
@@ -81,11 +81,7 @@ export function CheckboxField<T extends FieldValues>({
 						<Checkbox.Control>
 							<Checkbox.Indicator />
 						</Checkbox.Control>
-						{(label || children) && (
-							<Checkbox.Label>
-								{children}
-							</Checkbox.Label>
-						)}
+						{(label || children) && <Checkbox.Label>{children}</Checkbox.Label>}
 					</Checkbox.Root>
 				);
 			}}

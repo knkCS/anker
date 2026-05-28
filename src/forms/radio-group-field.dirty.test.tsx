@@ -5,11 +5,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { describe, expect, it } from "vitest";
 import { RadioGroupField } from "./radio-group-field";
 
-function Harness({
-	showDirtyState,
-}: {
-	showDirtyState?: boolean;
-}) {
+function Harness({ showDirtyState }: { showDirtyState?: boolean }) {
 	const form = useForm({ defaultValues: { pick: "x" } });
 	useEffect(() => {
 		form.setValue("pick", "y", { shouldDirty: true });

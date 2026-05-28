@@ -97,7 +97,10 @@ export function FormField<T extends FieldValues>({
 							) : (
 								label
 							))}
-						{children({ ...field, "aria-describedby": describedBy }, { isDirty })}
+						{children(
+							{ ...field, "aria-describedby": describedBy },
+							{ isDirty },
+						)}
 						{description && (
 							<Text id={descriptionId} fontSize="xs" color="muted">
 								{description}
