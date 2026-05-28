@@ -205,11 +205,7 @@ describe("AppShell", () => {
 	});
 });
 
-function HeaderRegistrar({
-	sticky,
-}: {
-	sticky?: boolean;
-}) {
+function HeaderRegistrar({ sticky }: { sticky?: boolean }) {
 	usePageHeader(
 		<div data-testid="header-content">registered header</div>,
 		sticky === undefined ? undefined : { sticky },

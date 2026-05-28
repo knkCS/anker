@@ -243,12 +243,15 @@ function LongBody({ count = 40 }: { count?: number }) {
 
 export const StickyHeaderDefault: Story = {
 	render: () => (
-		<AppShell sidebar={<Box w="180px" p="4">sidebar</Box>}>
+		<AppShell
+			sidebar={
+				<Box w="180px" p="4">
+					sidebar
+				</Box>
+			}
+		>
 			<DetailPageTemplate
-				breadcrumbs={[
-					{ label: "Templates", to: "#" },
-					{ label: "Demo" },
-				]}
+				breadcrumbs={[{ label: "Templates", to: "#" }, { label: "Demo" }]}
 				title="Sticky header — default"
 				subtitle="Scroll the body; the header stays pinned."
 			>
@@ -260,12 +263,15 @@ export const StickyHeaderDefault: Story = {
 
 export const StickyHeaderOptOut: Story = {
 	render: () => (
-		<AppShell sidebar={<Box w="180px" p="4">sidebar</Box>}>
+		<AppShell
+			sidebar={
+				<Box w="180px" p="4">
+					sidebar
+				</Box>
+			}
+		>
 			<DetailPageTemplate
-				breadcrumbs={[
-					{ label: "Templates", to: "#" },
-					{ label: "Demo" },
-				]}
+				breadcrumbs={[{ label: "Templates", to: "#" }, { label: "Demo" }]}
 				title="Sticky header — opted out"
 				subtitle="Scroll the body; the header scrolls away."
 				stickyHeader={false}
