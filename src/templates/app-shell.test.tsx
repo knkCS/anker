@@ -245,4 +245,17 @@ describe("AppShell — sticky page header", () => {
 			"true",
 		);
 	});
+
+	it("stacks the sidebar above the sticky header so its protruding controls remain clickable", () => {
+		// Regression: the Sidebar's collapse toggle protrudes via `right: -3.5`
+		// into the next column. With the sticky header at z-index `docked` (10),
+		// the sidebar Box must sit strictly above so its toggle isn't covered.
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<HeaderRegistrar />
+			</AppShell>,
+		);
+		const sidebarBox = screen.getByTestId("app-shell-sidebar");
+		expect(sidebarBox).toHaveStyle({ zIndex: "11" });
+	});
 });
