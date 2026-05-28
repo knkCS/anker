@@ -309,6 +309,10 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 				top="0"
 				alignSelf="start"
 				maxH="100vh"
+				// One above Chakra's `docked` (10) so the Sidebar's collapse
+				// toggle — positioned with `right: -3.5` to protrude into the
+				// next column — renders above the sticky page-header band.
+				zIndex={11}
 			>
 				{sidebar}
 			</Box>
