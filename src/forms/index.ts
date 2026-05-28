@@ -21,6 +21,8 @@ export {
 	DatePickerField,
 	type DatePickerFieldProps,
 } from "./date-picker-field";
+// DirtyCounter
+export { DirtyCounter, type DirtyCounterProps } from "./dirty-counter";
 // DirtyFormGuard
 export { DirtyFormGuard, type DirtyFormGuardProps } from "./dirty-form-guard";
 // FileField
@@ -57,3 +59,5 @@ export { SelectField, type SelectFieldProps } from "./select-field";
 export { SwitchField, type SwitchFieldProps } from "./switch-field";
 // TextareaField
 export { TextareaField, type TextareaFieldProps } from "./textarea-field";
+// useFieldDirty
+export { type UseFieldDirtyOptions, useFieldDirty } from "./use-field-dirty";
