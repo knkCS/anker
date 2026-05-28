@@ -14,10 +14,11 @@ export function useFieldDirty(
 	name: string,
 	opts: UseFieldDirtyOptions = {},
 ): boolean {
-	const { showDirtyState = true } = opts;
-	if (!showDirtyState) return false;
+	// useFormContext must be called unconditionally before any branch
+	// (rules of hooks). Apply showDirtyState gate after.
 	const ctx = useFormContext();
-	if (!ctx) return false;
+	const { showDirtyState = true } = opts;
+	if (!showDirtyState || !ctx) return false;
 	const dirty = ctx.formState.dirtyFields as Record<string, unknown>;
 	return Boolean(dirty[name]);
 }
