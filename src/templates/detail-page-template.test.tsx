@@ -89,3 +89,31 @@ describe("DetailPageTemplate", () => {
 		expect(within(header).getByTestId("tb")).toBeInTheDocument();
 	});
 });
+
+describe("DetailPageTemplate — sticky header", () => {
+	it("renders a sticky header by default", () => {
+		renderWithChakra(
+			<AppShell sidebar={<div />}>
+				<DetailPageTemplate title="X">body</DetailPageTemplate>
+			</AppShell>,
+		);
+		expect(screen.getByTestId("app-shell-header")).toHaveAttribute(
+			"data-sticky-header",
+			"true",
+		);
+	});
+
+	it("opts out when stickyHeader={false}", () => {
+		renderWithChakra(
+			<AppShell sidebar={<div />}>
+				<DetailPageTemplate title="X" stickyHeader={false}>
+					body
+				</DetailPageTemplate>
+			</AppShell>,
+		);
+		expect(screen.getByTestId("app-shell-header")).toHaveAttribute(
+			"data-sticky-header",
+			"false",
+		);
+	});
+});

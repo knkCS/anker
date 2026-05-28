@@ -13,6 +13,7 @@ import {
 	usePageHeader,
 	usePageRail,
 } from "./app-shell";
+import { DetailPageTemplate } from "./detail-page-template";
 
 const meta = {
 	title: "Templates/AppShell",
@@ -218,6 +219,65 @@ export const StickyColumnsWithLongContent: Story = {
 					</Box>
 				))}
 			</Box>
+		</AppShell>
+	),
+};
+
+function LongBody({ count = 40 }: { count?: number }) {
+	return (
+		<Box p="6">
+			{Array.from({ length: count }, (_, i) => (
+				<Box
+					// biome-ignore lint/suspicious/noArrayIndexKey: static demo content
+					key={i}
+					py="3"
+					borderBottomWidth="1px"
+					borderBottomColor="border"
+				>
+					Row {i + 1} — scroll to see the sticky header stay pinned.
+				</Box>
+			))}
+		</Box>
+	);
+}
+
+export const StickyHeaderDefault: Story = {
+	render: () => (
+		<AppShell
+			sidebar={
+				<Box w="180px" p="4">
+					sidebar
+				</Box>
+			}
+		>
+			<DetailPageTemplate
+				breadcrumbs={[{ label: "Templates", to: "#" }, { label: "Demo" }]}
+				title="Sticky header — default"
+				subtitle="Scroll the body; the header stays pinned."
+			>
+				<LongBody />
+			</DetailPageTemplate>
+		</AppShell>
+	),
+};
+
+export const StickyHeaderOptOut: Story = {
+	render: () => (
+		<AppShell
+			sidebar={
+				<Box w="180px" p="4">
+					sidebar
+				</Box>
+			}
+		>
+			<DetailPageTemplate
+				breadcrumbs={[{ label: "Templates", to: "#" }, { label: "Demo" }]}
+				title="Sticky header — opted out"
+				subtitle="Scroll the body; the header scrolls away."
+				stickyHeader={false}
+			>
+				<LongBody />
+			</DetailPageTemplate>
 		</AppShell>
 	),
 };

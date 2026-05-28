@@ -52,6 +52,11 @@ export interface IndexPageTemplateProps
 	 * `children` if you need it.
 	 */
 	children: ReactNode;
+	/**
+	 * Pin the page-header band to the top of the viewport while the body
+	 * scrolls. @default true
+	 */
+	stickyHeader?: boolean;
 }
 
 /**
@@ -71,6 +76,7 @@ export function IndexPageTemplate({
 	tabs,
 	toolbar,
 	children,
+	stickyHeader = true,
 }: IndexPageTemplateProps) {
 	const registered = useRegisteredPageActions();
 	const resolvedActions = actions ?? registered;
@@ -83,6 +89,7 @@ export function IndexPageTemplate({
 			actions={resolvedActions}
 			tabs={tabs}
 		/>,
+		{ sticky: stickyHeader },
 	);
 	return (
 		<Flex

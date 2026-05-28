@@ -204,3 +204,45 @@ describe("AppShell", () => {
 		expect(window.getComputedStyle(headerCell).gridColumn).toBe("2/3");
 	});
 });
+
+function HeaderRegistrar({ sticky }: { sticky?: boolean }) {
+	usePageHeader(
+		<div data-testid="header-content">registered header</div>,
+		sticky === undefined ? undefined : { sticky },
+	);
+	return <div data-testid="page-body">body</div>;
+}
+
+describe("AppShell — sticky page header", () => {
+	it("marks the header row sticky by default when content is registered", () => {
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<HeaderRegistrar />
+			</AppShell>,
+		);
+		const headerBox = screen.getByTestId("app-shell-header");
+		expect(headerBox).toHaveAttribute("data-sticky-header", "true");
+	});
+
+	it("marks the header row non-sticky when the registration opts out", () => {
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<HeaderRegistrar sticky={false} />
+			</AppShell>,
+		);
+		const headerBox = screen.getByTestId("app-shell-header");
+		expect(headerBox).toHaveAttribute("data-sticky-header", "false");
+	});
+
+	it("keeps the single-arg usePageHeader form working (defaults to sticky)", () => {
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<HeaderRegistrar />
+			</AppShell>,
+		);
+		expect(screen.getByTestId("app-shell-header")).toHaveAttribute(
+			"data-sticky-header",
+			"true",
+		);
+	});
+});
