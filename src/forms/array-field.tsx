@@ -44,12 +44,19 @@ export function ArrayField<T extends FieldValues>(props: ArrayFieldProps<T>) {
 		addLabel = "Add Field",
 		removeLabel = "Remove Item",
 		readOnly,
+		showDirtyState,
 		emptyState,
 		...rest
 	} = props;
 
 	return (
-		<FormField<T> name={name} label={label} readOnly={readOnly} {...rest}>
+		<FormField<T>
+			name={name}
+			label={label}
+			readOnly={readOnly}
+			showDirtyState={showDirtyState}
+			{...rest}
+		>
 			{(/* field */) => (
 				<Box py={4} px={4} bg="bg" rounded="md">
 					{mode === "dynamic" ? (
