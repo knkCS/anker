@@ -12,7 +12,15 @@ export function SwitchField<T extends FieldValues>({
 	ref,
 	...props
 }: SwitchFieldProps<T> & { ref?: React.Ref<HTMLInputElement> }) {
-	const { name, label, readOnly, disabled, switchProps, ...rest } = props;
+	const {
+		name,
+		label,
+		readOnly,
+		disabled,
+		showDirtyState,
+		switchProps,
+		...rest
+	} = props;
 
 	return (
 		<FormField<T>
@@ -20,6 +28,7 @@ export function SwitchField<T extends FieldValues>({
 			label={label}
 			readOnly={readOnly}
 			disabled={disabled}
+			showDirtyState={showDirtyState}
 			{...rest}
 		>
 			{(field) => (

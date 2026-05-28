@@ -27,6 +27,7 @@ export function InputField<T extends FieldValues>({
 		inputProps,
 		readOnly,
 		disabled,
+		showDirtyState,
 		...rest
 	} = props;
 
@@ -36,9 +37,10 @@ export function InputField<T extends FieldValues>({
 			label={label}
 			readOnly={readOnly}
 			disabled={disabled}
+			showDirtyState={showDirtyState}
 			{...rest}
 		>
-			{(field) => (
+			{(field, { isDirty }) => (
 				<TextInput
 					{...field}
 					value={field.value ?? ""}
@@ -50,6 +52,8 @@ export function InputField<T extends FieldValues>({
 					readOnly={readOnly}
 					disabled={disabled}
 					opacity={readOnly ? 0.8 : 1}
+					borderColor={isDirty ? "yellow.400" : undefined}
+					bg={isDirty ? "yellow.50" : undefined}
 					ref={ref}
 					{...inputProps}
 				/>
