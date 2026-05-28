@@ -281,8 +281,7 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 	const headerSlot = useSlotValue("header") as HeaderSlotValue | null;
 
 	const headerNode: ReactNode = headerSlot?.node ?? null;
-	// sticky will be consumed by Task 2 to apply position:sticky styling
-	// const headerSticky = headerSlot?.sticky ?? true;
+	const headerSticky = headerSlot?.sticky ?? true;
 
 	const renderedRail = railNode ?? rail;
 	const showRailColumn =
@@ -316,9 +315,13 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 			{showHeaderRow ? (
 				<Box
 					data-testid="app-shell-header"
+					data-sticky-header={headerSticky ? "true" : "false"}
 					gridColumn={showRailColumn ? "2 / 4" : "2 / 3"}
 					gridRow="1"
 					minW="0"
+					position={headerSticky ? "sticky" : undefined}
+					top={headerSticky ? "0" : undefined}
+					zIndex={headerSticky ? "docked" : undefined}
 				>
 					{headerNode}
 				</Box>
