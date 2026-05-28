@@ -50,6 +50,11 @@ export interface SettingsPageTemplateProps
 	 * render flush.
 	 */
 	bodyPadding?: "default" | "none";
+	/**
+	 * Pin the page-header band to the top of the viewport while the body
+	 * scrolls. @default true
+	 */
+	stickyHeader?: boolean;
 }
 
 export function SettingsPageTemplate({
@@ -65,6 +70,7 @@ export function SettingsPageTemplate({
 	children,
 	maxBodyWidth = "3xl",
 	bodyPadding = "default",
+	stickyHeader = true,
 }: SettingsPageTemplateProps) {
 	const registered = useRegisteredPageActions();
 	const resolvedActions = actions ?? registered;
@@ -80,6 +86,7 @@ export function SettingsPageTemplate({
 			meta={meta}
 			tabs={tabs}
 		/>,
+		{ sticky: stickyHeader },
 	);
 
 	const bodyPx = bodyPadding === "none" ? "0" : "8";

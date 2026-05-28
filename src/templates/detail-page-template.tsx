@@ -42,6 +42,11 @@ export interface DetailPageTemplateProps
 	/** Optional tab strip rendered as the third row of the page header band. */
 	tabs?: ReactNode;
 	children?: ReactNode;
+	/**
+	 * Pin the page-header band to the top of the viewport while the body
+	 * scrolls. @default true
+	 */
+	stickyHeader?: boolean;
 }
 
 export function DetailPageTemplate({
@@ -55,6 +60,7 @@ export function DetailPageTemplate({
 	meta,
 	tabs,
 	children,
+	stickyHeader = true,
 }: DetailPageTemplateProps) {
 	const registered = useRegisteredPageActions();
 	const resolvedActions = actions ?? registered;
@@ -70,6 +76,7 @@ export function DetailPageTemplate({
 			meta={meta}
 			tabs={tabs}
 		/>,
+		{ sticky: stickyHeader },
 	);
 	return (
 		<Flex
