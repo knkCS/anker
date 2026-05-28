@@ -55,15 +55,20 @@ import { Box, Flex, Grid } from "../primitives/layout";
 
 type SlotName = "actions" | "header" | "rail";
 
+interface HeaderSlotValue {
+	node: ReactNode;
+	sticky: boolean;
+}
+
 interface SlotStore {
-	get(slot: SlotName): ReactNode;
-	set(slot: SlotName, node: ReactNode): void;
+	get(slot: SlotName): unknown;
+	set(slot: SlotName, value: unknown): void;
 	clear(slot: SlotName): void;
 	subscribe(slot: SlotName, listener: () => void): () => void;
 }
 
 function createSlotStore(): SlotStore {
-	const values: Record<SlotName, ReactNode> = {
+	const values: Record<SlotName, unknown> = {
 		actions: null,
 		header: null,
 		rail: null,
@@ -82,9 +87,9 @@ function createSlotStore(): SlotStore {
 		get(slot) {
 			return values[slot];
 		},
-		set(slot, node) {
-			if (values[slot] === node) return;
-			values[slot] = node;
+		set(slot, value) {
+			if (values[slot] === value) return;
+			values[slot] = value;
 			notify(slot);
 		},
 		clear(slot) {
@@ -108,7 +113,7 @@ const SlotStoreContext = createContext<SlotStore | null>(null);
  * subscribe to a named slot's currently-registered ReactNode. Returns `null`
  * when no producer has registered content (or when called outside an AppShell).
  */
-function useSlotValue(slot: SlotName): ReactNode {
+function useSlotValue(slot: SlotName): unknown {
 	const store = useContext(SlotStoreContext);
 	const subscribe = useCallback(
 		(listener: () => void) => {
@@ -183,16 +188,20 @@ export function usePageRail(content: ReactNode): void {
 /**
  * Register page-header content (typically a <PageHeader>) from any descendant
  * of `<AppShell>`. The content is rendered by AppShell in grid row 1, spanning
- * the main column and the rail column (when present), so the header band
- * crosses both columns and the rail starts below it.
+ * the main column and the rail column (when present).
  *
- * Pass `null` (or omit) to clear the registration. The hook is a no-op when
- * called outside an AppShell.
+ * Pass `options.sticky === false` to opt out of the default sticky behaviour
+ * for the specific page. The hook is a no-op when called outside an AppShell.
  */
-export function usePageHeader(content: ReactNode): void {
+export function usePageHeader(
+	content: ReactNode,
+	options?: { sticky?: boolean },
+): void {
 	const store = useContext(SlotStoreContext);
-	const latest = useRef<ReactNode>(content);
-	latest.current = content;
+	const sticky = options?.sticky ?? true;
+	const value: HeaderSlotValue = { node: content, sticky };
+	const latest = useRef<HeaderSlotValue>(value);
+	latest.current = value;
 	useEffect(() => {
 		if (!store) return;
 		store.set("header", latest.current);
@@ -202,8 +211,8 @@ export function usePageHeader(content: ReactNode): void {
 	}, [store]);
 	useEffect(() => {
 		if (!store) return;
-		store.set("header", content);
-	}, [store, content]);
+		store.set("header", { node: content, sticky });
+	}, [store, content, sticky]);
 }
 
 /**
@@ -212,7 +221,7 @@ export function usePageHeader(content: ReactNode): void {
  * `actions` prop when nothing is registered.
  */
 export function useRegisteredPageActions(): ReactNode {
-	return useSlotValue("actions");
+	return useSlotValue("actions") as ReactNode;
 }
 
 export interface AppShellProps {
@@ -268,8 +277,12 @@ export function AppShell({ sidebar, rail, children }: AppShellProps) {
 AppShell.displayName = "AppShell";
 
 function AppShellInner({ sidebar, rail, children }: AppShellProps) {
-	const railNode = useSlotValue("rail");
-	const headerNode = useSlotValue("header");
+	const railNode = useSlotValue("rail") as ReactNode;
+	const headerSlot = useSlotValue("header") as HeaderSlotValue | null;
+
+	const headerNode: ReactNode = headerSlot?.node ?? null;
+	// sticky will be consumed by Task 2 to apply position:sticky styling
+	// const headerSticky = headerSlot?.sticky ?? true;
 
 	const renderedRail = railNode ?? rail;
 	const showRailColumn =
