@@ -23,6 +23,7 @@ export function SelectField<T extends FieldValues>({
 		children,
 		readOnly,
 		disabled,
+		showDirtyState,
 		...rest
 	} = props;
 
@@ -32,9 +33,10 @@ export function SelectField<T extends FieldValues>({
 			label={label}
 			readOnly={readOnly}
 			disabled={disabled}
+			showDirtyState={showDirtyState}
 			{...rest}
 		>
-			{(field) => (
+			{(field, { isDirty }) => (
 				<NativeSelect
 					disabled={readOnly || disabled}
 					placeholder={placeholder}
@@ -42,6 +44,8 @@ export function SelectField<T extends FieldValues>({
 					value={String(field.value ?? "")}
 					id={name}
 					ref={ref}
+					borderColor={isDirty ? "yellow.400" : undefined}
+					bg={isDirty ? "yellow.50" : undefined}
 					{...selectProps}
 				>
 					{children}
