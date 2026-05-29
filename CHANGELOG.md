@@ -2,6 +2,13 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 2.7.0 — 2026-05-29
+
+### Added
+- `DirtyDot` atom — a 6px yellow dot for tab-trigger unsaved-changes signalling.
+- `Forms/Dirty surfaces` Storybook page documenting the three dirty surfaces
+  (field visual, `DirtyCounter` chip, `DirtyDot` tab indicator).
+
 ## 1.13.0 — 2026-05-08
 
 ### Added

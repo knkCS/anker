@@ -86,6 +86,9 @@ export {
 	type RelativeDateTimeProps,
 } from "./datetime";
 
+// DirtyDot
+export { DirtyDot, type DirtyDotProps } from "./dirty-dot";
+
 // EmptyState
 export { EmptyState, type EmptyStateProps } from "./empty-state";
 
