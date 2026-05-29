@@ -30,7 +30,7 @@ export const PopoverContent = function PopoverContent({
 			{/* Explicit zIndex so popovers render above sticky layout chrome
 			    (sidebar / page header) at `docked` (10). See the matching
 			    note in primitives/menu.tsx. */}
-			<ChakraPopover.Positioner zIndex="popover">
+			<ChakraPopover.Positioner zIndex={1500}>
 				<ChakraPopover.Content ref={ref} {...rest}>
 					{showArrow && (
 						<ChakraPopover.Arrow>
