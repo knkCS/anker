@@ -2,19 +2,17 @@
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { render, screen } from "@testing-library/react";
 import { act } from "react";
+import { describe, expect, it } from "vitest";
 import { FormProvider, useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 import {
 	RouterProvider,
 	createMemoryRouter,
+	useNavigate,
 } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+
 import { DirtyFormGuard } from "./dirty-form-guard";
 
-function makeRouter(opts: {
-	defaultDirty: boolean;
-	safePathPrefix?: string;
-}) {
+function makeRouter(opts: { defaultDirty: boolean; safePathPrefix?: string }) {
 	function FormHost() {
 		const form = useForm<{ name: string }>({
 			defaultValues: { name: opts.defaultDirty ? "" : "saved" },

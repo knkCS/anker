@@ -1,5 +1,11 @@
 import type { ReactNode } from "react";
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useMemo,
+	useState,
+} from "react";
 
 export interface TabDirtyState {
 	/** Returns true if a tab key has been marked dirty. */
@@ -29,10 +35,7 @@ export function TabDirtyProvider({ children }: { children: ReactNode }) {
 		setDirty((prev) => (prev[key] === v ? prev : { ...prev, [key]: v }));
 	}, []);
 
-	const isTabDirty = useCallback(
-		(key: string) => Boolean(dirty[key]),
-		[dirty],
-	);
+	const isTabDirty = useCallback((key: string) => Boolean(dirty[key]), [dirty]);
 
 	const value = useMemo<TabDirtyState>(
 		() => ({ isTabDirty, setTabDirty }),

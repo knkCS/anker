@@ -2,12 +2,13 @@
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { render, screen } from "@testing-library/react";
 import { act } from "react";
-import { useNavigate } from "react-router-dom";
+import { describe, expect, it } from "vitest";
 import {
 	RouterProvider,
 	createMemoryRouter,
+	useNavigate,
 } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+
 import { useUnsavedChangesBlocker } from "./use-unsaved-changes-blocker";
 
 function makeRouter(opts: {
