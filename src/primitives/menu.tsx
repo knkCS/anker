@@ -18,7 +18,13 @@ export const MenuContent = function MenuContent({
 	const { portalled = true, portalRef, ...rest } = props;
 	return (
 		<Portal disabled={!portalled} container={portalRef}>
-			<ChakraMenu.Positioner>
+			{/* Explicit zIndex on the positioner ensures menus render above
+			    layout chrome with `docked` z-index (10) — sidebar, sticky page
+			    header, etc. Chakra's default left this implicit, which broke
+			    AccountPopup rendering when the AppShell sidebar was bumped
+			    above `docked` to keep its protruding collapse toggle above the
+			    sticky page header. */}
+			<ChakraMenu.Positioner zIndex="dropdown">
 				<ChakraMenu.Content ref={ref} {...rest} />
 			</ChakraMenu.Positioner>
 		</Portal>

@@ -27,7 +27,10 @@ export const PopoverContent = function PopoverContent({
 	const { showArrow, portalled = true, portalRef, children, ...rest } = props;
 	return (
 		<Portal disabled={!portalled} container={portalRef}>
-			<ChakraPopover.Positioner>
+			{/* Explicit zIndex so popovers render above sticky layout chrome
+			    (sidebar / page header) at `docked` (10). See the matching
+			    note in primitives/menu.tsx. */}
+			<ChakraPopover.Positioner zIndex="popover">
 				<ChakraPopover.Content ref={ref} {...rest}>
 					{showArrow && (
 						<ChakraPopover.Arrow>
