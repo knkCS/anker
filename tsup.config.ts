@@ -9,6 +9,7 @@ export default defineConfig({
     "forms/index": "src/forms/index.ts",
     "feedback/index": "src/feedback/index.ts",
     "templates/index": "src/templates/index.ts",
+    "navigation/index": "src/navigation/index.ts",
   },
   format: ["esm"],
   dts: true,

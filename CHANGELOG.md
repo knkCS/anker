@@ -2,6 +2,33 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 2.8.0 — 2026-05-29
+
+### Added
+- New `@knkcs/anker/navigation` namespace:
+  - `useUnsavedChangesBlocker(isDirty, opts)` — primitive hook returning a
+    react-router `Blocker`. Supports `safePathPrefix` to exempt sibling
+    paths (e.g. tabs of the same detail page) and `shouldBlock` for
+    arbitrary predicates.
+  - `<UnsavedChangesGuard isDirty={…} …/>` — non-form-aware leave-page
+    guard composing the hook with `<LeavePageConfirmation/>`.
+  - `<TabDirtyProvider/>` + `useTabDirty()` — multi-key registry of
+    per-tab dirty state. Use with `<DirtyDot/>` to surface unsaved work
+    on tab triggers.
+- `<DirtyFormGuard/>` now accepts `safePathPrefix` and `shouldBlock`.
+  Existing callers without these props behave identically.
+
+### Changed
+- `<DirtyFormGuard/>` internally delegates to `<UnsavedChangesGuard/>`
+  (transparent refactor; no API break).
+- `Forms/Dirty surfaces` storybook page expanded to cover all five
+  dirty surfaces (field visual, counter chip, tab dot, form guard,
+  generic guard).
+
+### Requirements
+- The leave-page guards require a react-router-dom **data router**
+  (`createBrowserRouter` / `createMemoryRouter` + `<RouterProvider/>`).
+
 ## 2.7.0 — 2026-05-29
 
 ### Added

@@ -1,6 +1,6 @@
 {
   "name": "@knkcs/anker",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "UI component library for the knk software group",
   "repository": {
     "type": "git",
@@ -38,6 +38,10 @@
     "./templates": {
       "import": "./dist/templates/index.js",
       "types": "./dist/templates/index.d.ts"
+    },
+    "./navigation": {
+      "import": "./dist/navigation/index.js",
+      "types": "./dist/navigation/index.d.ts"
     }
   },
   "files": [
@@ -90,6 +94,7 @@
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^16.0.0",
     "@types/lodash.debounce": "^4.0.9",
+    "happy-dom": "^20.9.0",
     "i18next": "^23.0.0",
     "jsdom": "^25.0.0",
     "react": "^19.0.0",

@@ -1,38 +1,28 @@
 import type React from "react";
 import { useFormContext } from "react-hook-form";
-import { useBlocker } from "react-router-dom";
-import { LeavePageConfirmation } from "../primitives/leave-page-confirmation";
+import {
+	UnsavedChangesGuard,
+	type UnsavedChangesGuardProps,
+} from "../navigation/unsaved-changes-guard";
 
-export interface DirtyFormGuardProps {
-	/** Dialog title. @default "You have unsaved changes" */
-	title?: string;
-	/** Dialog message body. @default "Are you sure you want to leave this page? You have unsaved changes." */
-	message?: string;
-	/** Label for the confirm/leave button. @default "Leave" */
-	confirmLabel?: string;
-	/** Label for the cancel/stay button. @default "Stay" */
-	cancelLabel?: string;
+export interface DirtyFormGuardProps
+	extends Omit<UnsavedChangesGuardProps, "isDirty"> {
+	// Inherits title/message/confirmLabel/cancelLabel/safePathPrefix/shouldBlock
+	// from UnsavedChangesGuardProps; `isDirty` is resolved from
+	// `useFormContext().formState.isDirty`.
 }
 
-export const DirtyFormGuard: React.FC<DirtyFormGuardProps> = ({
-	title,
-	message,
-	confirmLabel,
-	cancelLabel,
-}) => {
+/**
+ * Form-aware shortcut for `<UnsavedChangesGuard/>`: sources `isDirty` from
+ * the surrounding `useFormContext()`. Must be mounted inside a
+ * `<FormProvider/>`. For non-form dirty sources (Monaco buffer, custom
+ * hook) use `<UnsavedChangesGuard isDirty={…}/>` directly.
+ *
+ * Pass `safePathPrefix` to exempt sibling tabs of the same detail page
+ * from the leave-confirmation modal.
+ */
+export const DirtyFormGuard: React.FC<DirtyFormGuardProps> = (props) => {
 	const { formState } = useFormContext();
-	const blocker = useBlocker(formState.isDirty);
-
-	return (
-		<LeavePageConfirmation
-			blocked={blocker.state === "blocked"}
-			onConfirmLeave={() => blocker.proceed?.()}
-			onCancelLeave={() => blocker.reset?.()}
-			title={title}
-			message={message}
-			confirmLabel={confirmLabel}
-			cancelLabel={cancelLabel}
-		/>
-	);
+	return <UnsavedChangesGuard isDirty={formState.isDirty} {...props} />;
 };
 DirtyFormGuard.displayName = "DirtyFormGuard";
