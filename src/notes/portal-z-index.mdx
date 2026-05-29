@@ -1,0 +1,95 @@
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Notes/Portal z-index gotcha" />
+
+# Portal z-index gotcha (Chakra v3)
+
+> **TL;DR.** When a portaled overlay (menu, popover, hover card, …) appears
+> *behind* layout chrome that you didn't expect to be on top, the bug is
+> almost certainly that Chakra's `*.Positioner` silently dropped your
+> `zIndex` prop. Use **inline `style={{ zIndex: N }}`**, not the `zIndex`
+> prop, on the Positioner.
+
+## What we hit
+
+When `AppShell`'s sidebar was bumped to `z-index: 11` (so its protruding
+collapse toggle could sit above the new sticky page header at
+`z-index: docked` = 10), portaled `Menu`/`Popover`/`HoverCard` content
+began rendering visually **behind the sidebar** — even though the
+positioner element was correctly portaled to `document.body`.
+
+DevTools showed the rendered DOM looked like:
+
+```
+body
+  div.chakra-menu__positioner   ← z-index: 1  (!)
+    div.chakra-menu__content    ← z-index: 1
+```
+
+…despite anker's wrapper passing `<ChakraMenu.Positioner zIndex={1500}>`.
+
+## Why the prop didn't take effect
+
+Chakra UI v3's `Menu.Positioner` / `Popover.Positioner` /
+`HoverCard.Positioner` components are styled with internal CSS classes
+(`chakra-menu__positioner` and friends) that set `z-index: 1`. When you
+pass `zIndex={N}` as a prop, **the prop is silently dropped** — it isn't
+forwarded onto the rendered element. The class-based `z-index: 1` wins
+because nothing overrides it.
+
+Token-named values (`zIndex="dropdown"`, `zIndex="popover"`) and literal
+numbers (`zIndex={1500}`) both fail the same way: it's the *prop* itself
+that's never applied.
+
+## The fix
+
+Use `style` instead of `zIndex`. Inline styles always beat class styles
+on specificity, so they reach the rendered element regardless of how
+Chakra ignores the dedicated prop:
+
+```tsx
+// ❌ Silently a no-op:
+<ChakraMenu.Positioner zIndex={1500}>
+
+// ✅ Actually applied:
+<ChakraMenu.Positioner style={{ zIndex: 1500 }}>
+```
+
+Anker's `MenuContent`, `HoverCard`, and `Popover` primitives already
+apply this fix internally; consumers don't need to do anything.
+
+## When to apply this pattern
+
+If you write a new wrapper around a Chakra v3 component whose visible
+element is rendered through a `Positioner` (anything that uses Floating
+UI under the hood — menus, popovers, tooltips, hover cards, select
+dropdowns, combobox dropdowns) and you need it to clear an unusually
+high z-index in the page (anything above `docked` = 10), set the
+z-index via `style` on the Positioner, not via a prop.
+
+## Diagnostic recipe (paste into DevTools console with the overlay open)
+
+```js
+(() => {
+  const popup = [...document.querySelectorAll('[data-state="open"]')].pop();
+  if (!popup) return console.log("No open overlay found.");
+  let n = popup;
+  while (n && n !== document.body) {
+    const s = getComputedStyle(n);
+    if (s.zIndex !== "auto") {
+      console.log(n.className || n.tagName, "z-index:", s.zIndex);
+    }
+    n = n.parentElement;
+  }
+})();
+```
+
+If the positioner is sitting at `z-index: 1`, your `zIndex` prop didn't
+apply — switch to `style={{ zIndex: N }}`.
+
+## See also
+
+- `src/primitives/menu.tsx` (the canonical fix site)
+- `src/primitives/popover.tsx`
+- `src/primitives/hover-card.tsx`
+- AppShell sidebar z-index: `src/templates/app-shell.tsx`

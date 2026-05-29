@@ -106,3 +106,14 @@ Anker wraps this into simplified APIs:
     </tr>
   </tbody>
 </table>
+
+## z-index against custom layout chrome
+
+If a consumer's layout has chrome above Chakra's default `docked` (10)
+— a sticky page header, a bumped sidebar context — Chakra v3's
+`Popover.Positioner` (and its sibling `Menu.Positioner` /
+`HoverCard.Positioner`) silently drops the `zIndex` prop. Anker's
+wrappers work around this by passing `style={{ zIndex: 1500 }}` on the
+positioner so the inline-style specificity beats the class-based
+default. See **Notes/Portal z-index gotcha** for the full background
+and a DevTools diagnostic snippet.
