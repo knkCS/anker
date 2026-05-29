@@ -4,14 +4,17 @@ import { Meta } from "@storybook/blocks";
 
 # Dirty surfaces
 
-knkCMS surfaces unsaved changes in three coordinated ways. Use the matching
-component for the surface you need — don't invent new dirty visuals.
+knkCMS surfaces unsaved changes in five coordinated ways. Use the
+matching component for the surface you need — don't invent new dirty
+visuals.
 
 | Surface | Component | Where it fires |
 |---|---|---|
 | **Field-level dirty visual** | yellow input border + dot on label | automatic on `InputField` / `SelectField` / `SwitchField` / `TextareaField` / `ArrayField` / `RadioGroupField` / `CheckboxField` via `formState.dirtyFields`. Opt out with `showDirtyState={false}`. |
 | **Header counter chip** | `<DirtyCounter />` | reads dirty count from `useFormContext`. Mount in the page header via `usePageActions`. |
-| **Tab-trigger dot** | `<DirtyDot active={…} />` | when a tabbed page has editable content on one tab and the user might be on another. Mount inside the `Tabs.Trigger`. |
+| **Tab-trigger dot** | `<DirtyDot active={…} />` + `useTabDirty()` | publishes/consumes per-tab dirty state. Mount inside each `Tabs.Trigger`. |
+| **Leave-page guard (form)** | `<DirtyFormGuard />` | inside a `<FormProvider/>`. Intercepts navigation when the form is dirty. |
+| **Leave-page guard (any)** | `<UnsavedChangesGuard isDirty={…} />` | for non-form dirty sources (Monaco buffer, custom hook, etc.). |
 
 ## Field-level dirty visual
 
@@ -33,15 +36,103 @@ usePageActions(<DirtyCounter />);
 
 ## Tab-trigger dot
 
+Wire any number of dirty sources to a tabbed detail page. Each
+content tab publishes its own dirty state; the layout's `Tabs.Trigger`
+renders `<DirtyDot/>` against the registry.
+
 ```tsx
 import { DirtyDot } from "@knkcs/anker/atoms";
+import { TabDirtyProvider, useTabDirty } from "@knkcs/anker/navigation";
 
-<Tabs.Trigger value="editor">
-  Editor
-  <DirtyDot active={isDirty} />
-</Tabs.Trigger>
+// Layout
+function DetailLayout() {
+  return (
+    <TabDirtyProvider>
+      <DetailLayoutInner />
+    </TabDirtyProvider>
+  );
+}
+
+function DetailLayoutInner() {
+  const { isTabDirty } = useTabDirty();
+  return (
+    <Tabs.Root>
+      <Tabs.List>
+        {tabs.map((t) => (
+          <Tabs.Trigger key={t.value} value={t.value}>
+            {t.label}
+            <DirtyDot active={isTabDirty(t.value)} />
+          </Tabs.Trigger>
+        ))}
+      </Tabs.List>
+    </Tabs.Root>
+  );
+}
+
+// A tab that publishes its dirty state (form example)
+function GeneralTab() {
+  const { setTabDirty } = useTabDirty();
+  const { formState } = useFormContext();
+  useEffect(() => {
+    setTabDirty("general", formState.isDirty);
+    return () => setTabDirty("general", false);
+  }, [formState.isDirty, setTabDirty]);
+  // …
+}
 ```
 
-The dot is a 6px yellow circle with `ml="2"` and the aria-label
-"ungespeicherte Änderungen". Pass `active={false}` to hide it; use `boxProps`
-to override colour or margin if you really need to.
+## Leave-page guard
+
+Block in-app navigation while there are unsaved changes. Use
+`safePathPrefix` to exempt sibling tabs of the same detail page so
+intra-page tab switches don't trigger the modal.
+
+**Form-aware (most common):**
+
+```tsx
+import { DirtyFormGuard } from "@knkcs/anker/forms";
+
+<FormProvider {...form}>
+  <DirtyFormGuard
+    safePathPrefix={`/template/templates/${templateId}/`}
+    title="Ungespeicherte Änderungen"
+    message="Möchten Sie die Seite verlassen? Ihre Änderungen gehen verloren."
+    confirmLabel="Verlassen"
+    cancelLabel="Bleiben"
+  />
+  {/* fields… */}
+</FormProvider>
+```
+
+**Any dirty source (Monaco buffer, custom hook, …):**
+
+```tsx
+import { UnsavedChangesGuard } from "@knkcs/anker/navigation";
+
+<UnsavedChangesGuard
+  isDirty={editor.hasAnyDirty}
+  safePathPrefix={`/template/templates/${templateId}/`}
+  title="Ungespeicherte Änderungen"
+/>
+```
+
+> **Data-router requirement.** Both guards rely on
+> `react-router-dom`'s `useBlocker`, which only works inside a data
+> router (`createBrowserRouter` / `createMemoryRouter` +
+> `<RouterProvider/>`). The legacy `<BrowserRouter>` / `<MemoryRouter>`
+> JSX routers do not implement `useBlocker`.
+
+## Advanced: primitive hook
+
+If you need to build a non-dialog UX (e.g. a toast, an inline banner),
+use the hook directly:
+
+```tsx
+import { useUnsavedChangesBlocker } from "@knkcs/anker/navigation";
+
+const blocker = useUnsavedChangesBlocker(isDirty, {
+  safePathPrefix: `/foo/bar/${id}/`,
+});
+// blocker.state === "blocked" | "proceeding" | "unblocked"
+// blocker.proceed(), blocker.reset()
+```
