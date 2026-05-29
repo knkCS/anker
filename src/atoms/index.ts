@@ -69,6 +69,9 @@ export {
 	type DataListRootProps,
 } from "./data-list";
 
+// DirtyDot
+export { DirtyDot, type DirtyDotProps } from "./dirty-dot";
+
 // DateInput
 export { DateInput, type DateInputProps } from "./date-input";
 // DateTime
