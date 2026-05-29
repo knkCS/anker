@@ -28,7 +28,10 @@ export const HoverCard = function HoverCard(props: HoverCardProps) {
 		<ChakraHoverCard.Root {...rest}>
 			<ChakraHoverCard.Trigger asChild>{children}</ChakraHoverCard.Trigger>
 			<Portal disabled={!portalled} container={portalRef}>
-				<ChakraHoverCard.Positioner>
+				{/* Explicit zIndex so hover cards render above sticky layout
+				    chrome (sidebar / page header) at `docked` (10). See the
+				    matching note in primitives/menu.tsx. */}
+				<ChakraHoverCard.Positioner zIndex="popover">
 					<ChakraHoverCard.Content {...contentProps}>
 						{showArrow && (
 							<ChakraHoverCard.Arrow>
