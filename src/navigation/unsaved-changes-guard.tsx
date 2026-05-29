@@ -4,8 +4,7 @@ import {
 	useUnsavedChangesBlocker,
 } from "./use-unsaved-changes-blocker";
 
-export interface UnsavedChangesGuardProps
-	extends UnsavedChangesBlockerOptions {
+export interface UnsavedChangesGuardProps extends UnsavedChangesBlockerOptions {
 	/** Source of truth for whether there's unsaved work. */
 	isDirty: boolean;
 	/** Dialog title. @default "You have unsaved changes" */
