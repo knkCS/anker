@@ -24,7 +24,7 @@ export const MenuContent = function MenuContent({
 			    AccountPopup rendering when the AppShell sidebar was bumped
 			    above `docked` to keep its protruding collapse toggle above the
 			    sticky page header. */}
-			<ChakraMenu.Positioner zIndex="dropdown">
+			<ChakraMenu.Positioner zIndex={1500}>
 				<ChakraMenu.Content ref={ref} {...rest} />
 			</ChakraMenu.Positioner>
 		</Portal>
