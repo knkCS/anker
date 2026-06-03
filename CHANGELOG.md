@@ -2,6 +2,11 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 2.9.3 — 2026-06-03
+
+### Fixed
+- `Popover`, `Menu`, `HoverCard`: positioner z-index bumped to `zIndex.tooltip` (1800) so popovers reliably render above drawers/modals. The 2.9.2 layer-aware calc resolved to 1500+0 on the positioner because Chakra's `--layer-index` is set on Content (not Positioner) and doesn't inherit upward; the positioner's `isolation: isolate` traps Content's z-index inside its own stacking context, so the body-level comparison was Positioner(1500) vs Drawer(1500), with drawer winning by DOM order.
+
 ## 2.9.2 — 2026-06-03
 
 ### Fixed

@@ -27,15 +27,14 @@ export const PopoverContent = function PopoverContent({
 	const { showArrow, portalled = true, portalRef, children, ...rest } = props;
 	return (
 		<Portal disabled={!portalled} container={portalRef}>
-			{/* Layer-aware z-index: starts at zIndex.popover (1500, above docked
-			    chrome) and adds Chakra's --layer-index offset so popovers stack
-			    above modals/drawers when opened nested. */}
-			<ChakraPopover.Positioner
-				style={{
-					zIndex:
-						"calc(var(--popover-z-index, var(--chakra-z-index-popover, 1500)) + var(--layer-index, 0))",
-				}}
-			>
+			{/* Static z-index above drawer/modal layer. Chakra's --layer-index
+			    is only set on Content (not Positioner) and doesn't inherit
+			    upward; the Positioner has `isolation: isolate` which traps
+			    Content's z-index in a local stacking context. So body-level
+			    stacking is decided by the Positioner's own z-index. Using
+			    zIndex.tooltip (1800) reliably beats drawers/modals which sit
+			    at zIndex.popover (1500) plus a small --layer-index offset. */}
+			<ChakraPopover.Positioner style={{ zIndex: 1800 }}>
 				<ChakraPopover.Content ref={ref} {...rest}>
 					{showArrow && (
 						<ChakraPopover.Arrow>

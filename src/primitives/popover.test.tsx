@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 describe("Popover z-index", () => {
-	it("Positioner z-index participates in Chakra's layer manager", () => {
+	it("Positioner z-index is 1800 (above drawer/modal layer)", () => {
 		render(
 			<ChakraProvider value={defaultSystem}>
 				<Popover open>
@@ -18,7 +18,6 @@ describe("Popover z-index", () => {
 		) as HTMLElement | null;
 		expect(positioner).not.toBeNull();
 		const style = positioner?.getAttribute("style") ?? "";
-		expect(style).toMatch(/--layer-index/);
-		expect(style).toMatch(/1500/);
+		expect(style).toMatch(/1800/);
 	});
 });
