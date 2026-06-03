@@ -136,9 +136,13 @@ describe("SubNavLayout", () => {
 	it("Root wraps the Grid in a self-stretching flex column", () => {
 		const { container } = renderWithChakra(
 			<SubNavLayout>
-				<SubNavLayout.Nav><div /></SubNavLayout.Nav>
-				<SubNavLayout.Detail><div /></SubNavLayout.Detail>
-			</SubNavLayout>
+				<SubNavLayout.Nav>
+					<div />
+				</SubNavLayout.Nav>
+				<SubNavLayout.Detail>
+					<div />
+				</SubNavLayout.Detail>
+			</SubNavLayout>,
 		);
 		const grid = container.querySelector('[data-testid="subnav-layout"]');
 		expect(grid).toBeInTheDocument();
