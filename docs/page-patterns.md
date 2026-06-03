@@ -309,6 +309,33 @@ The collapse-toggle lives **inside** `<Sidebar.Logo>`, not in the footer.
 This was a deliberate move in 1.8.1 — putting the toggle in the header
 keeps the footer pure user-action territory.
 
+### Sidebar account block
+
+The `<Sidebar.Footer>` slot is reserved for the user's account block —
+avatar + display name + active organization, paired with a menu for
+profile, logout, and org switching.
+
+Use `<AccountPopup>` from `@knkcs/odon-ui` (≥ 0.6.0) as the standard
+implementation across knkCMS solutions:
+
+```tsx
+import { AccountPopup } from "@knkcs/odon-ui";
+
+<Sidebar.Footer>
+  <AccountPopup
+    client={orgClient}
+    user={{ displayName, email }}
+    activeOrgId={state.active_org.id}
+    activeOrgName={lookupActiveOrgName(state)}
+    profilePath={state.profile_url}
+  />
+</Sidebar.Footer>
+```
+
+The popup's default trigger renders the rich avatar + name + org block
+that the sidebar pattern expects. Pass a custom `trigger` only when a
+specific solution needs a different shape.
+
 ### Sub-section pattern: "Personal / Organization / Identity / Admin"
 
 Larger solutions group their navigation into thematic sub-sections.
