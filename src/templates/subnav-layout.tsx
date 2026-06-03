@@ -53,44 +53,52 @@ const SubNavLayoutRoot = ({
 
 	return (
 		<NavListModeProvider value={navMode}>
-			<Grid
-				data-testid="subnav-layout"
-				data-collapsed={collapsed ? "true" : "false"}
-				gridTemplateColumns={`${collapsed ? COLLAPSED_NAV : EXPANDED_NAV} 1fr`}
-				alignItems="stretch"
+			<Box
+				data-testid="subnav-layout-stretch"
+				h="100%"
+				display="flex"
+				flexDirection="column"
 				minH="0"
-				flex="1"
-				position="relative"
-				transition="grid-template-columns 250ms ease-out"
 			>
-				{children}
-				<IconButton
-					data-testid="subnav-toggle"
-					aria-label={label}
-					onClick={toggle}
-					variant="outline"
-					size="xs"
-					position="absolute"
-					top="3"
-					left={collapsed ? "44px" : "208px"}
-					width="7"
-					height="7"
-					minW="7"
-					borderRadius="full"
-					bg="bg-surface"
-					borderColor="border"
-					boxShadow="sm"
-					zIndex={4}
-					_hover={{ bg: "bg-muted" }}
-					transition="left 250ms ease-out"
+				<Grid
+					data-testid="subnav-layout"
+					data-collapsed={collapsed ? "true" : "false"}
+					gridTemplateColumns={`${collapsed ? COLLAPSED_NAV : EXPANDED_NAV} 1fr`}
+					alignItems="stretch"
+					minH="0"
+					flex="1"
+					position="relative"
+					transition="grid-template-columns 250ms ease-out"
 				>
-					{collapsed ? (
-						<PanelLeftOpen size={14} />
-					) : (
-						<PanelLeftClose size={14} />
-					)}
-				</IconButton>
-			</Grid>
+					{children}
+					<IconButton
+						data-testid="subnav-toggle"
+						aria-label={label}
+						onClick={toggle}
+						variant="outline"
+						size="xs"
+						position="absolute"
+						top="3"
+						left={collapsed ? "44px" : "208px"}
+						width="7"
+						height="7"
+						minW="7"
+						borderRadius="full"
+						bg="bg-surface"
+						borderColor="border"
+						boxShadow="sm"
+						zIndex={4}
+						_hover={{ bg: "bg-muted" }}
+						transition="left 250ms ease-out"
+					>
+						{collapsed ? (
+							<PanelLeftOpen size={14} />
+						) : (
+							<PanelLeftClose size={14} />
+						)}
+					</IconButton>
+				</Grid>
+			</Box>
 		</NavListModeProvider>
 	);
 };
