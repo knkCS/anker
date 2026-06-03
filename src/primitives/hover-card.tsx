@@ -28,10 +28,15 @@ export const HoverCard = function HoverCard(props: HoverCardProps) {
 		<ChakraHoverCard.Root {...rest}>
 			<ChakraHoverCard.Trigger asChild>{children}</ChakraHoverCard.Trigger>
 			<Portal disabled={!portalled} container={portalRef}>
-				{/* Explicit zIndex so hover cards render above sticky layout
-				    chrome (sidebar / page header) at `docked` (10). See the
-				    matching note in primitives/menu.tsx. */}
-				<ChakraHoverCard.Positioner style={{ zIndex: 1500 }}>
+				{/* Layer-aware z-index: starts at zIndex.popover (1500, above docked
+				    chrome) and adds Chakra's --layer-index offset so hover cards stack
+				    above modals/drawers when opened nested. */}
+				<ChakraHoverCard.Positioner
+					style={{
+						zIndex:
+							"calc(var(--hover-card-z-index, var(--chakra-z-index-popover, 1500)) + var(--layer-index, 0))",
+					}}
+				>
 					<ChakraHoverCard.Content {...contentProps}>
 						{showArrow && (
 							<ChakraHoverCard.Arrow>
