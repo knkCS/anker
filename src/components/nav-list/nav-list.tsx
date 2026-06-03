@@ -41,7 +41,7 @@ const NavListGroup = ({ label, children }: NavListGroupProps) => {
 					{label}
 				</Text>
 			)}
-			<Flex direction="column" gap="1" data-testid="nav-list-group-items">
+			<Flex direction="column" gap="2" data-testid="nav-list-group-items">
 				{children}
 			</Flex>
 		</Box>
@@ -78,7 +78,7 @@ const NavListItem = ({
 		justifyContent: collapsed ? "center" : "flex-start",
 		gap: "var(--chakra-spacing-2)",
 		paddingInline: "var(--chakra-spacing-3)",
-		paddingBlock: "var(--chakra-spacing-2)",
+		paddingBlock: "var(--chakra-spacing-3)",
 		borderRadius: "var(--chakra-radii-sm)",
 		fontSize: "var(--chakra-font-sizes-sm)",
 		fontWeight: active
