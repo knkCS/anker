@@ -2,6 +2,18 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 2.9.0 — 2026-06-03
+
+### Changed
+- `NavList.Group`: increased default gap between items from 2px to 4px.
+  Visual change for all consumers; no API change.
+- `SubNavLayout`: now wraps its inner Grid in a flex column so it
+  self-stretches inside any parent with a definite height. Consumers
+  no longer need to wrap SubNavLayout in their own flex container.
+
+### Docs
+- Added "SubNavLayout sizing" section to `docs/page-patterns.md`.
+
 ## 2.8.0 — 2026-05-29
 
 ### Added

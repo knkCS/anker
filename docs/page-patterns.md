@@ -859,6 +859,26 @@ AppShell
 </AppShell>
 ```
 
+### SubNavLayout sizing
+
+`<SubNavLayout>` self-stretches to fill its parent's height. The only
+requirement on the parent is that it have a definite height. Inside a
+page template's main column this is automatic — page templates establish
+the grid row that gives content its height.
+
+Outside a page template (e.g. inside a tab body), wrap the SubNavLayout
+in a container with a definite height:
+
+```tsx
+// in a tab body inside a fixed-height shell
+<Box flex="1" minH="0">
+  <SubNavLayout …>…</SubNavLayout>
+</Box>
+```
+
+Or set `h="100%"` if the parent has explicit height. Without a definite
+parent height, the rail collapses to its content height.
+
 ---
 
 ## 9. Modal patterns

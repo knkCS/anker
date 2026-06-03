@@ -133,6 +133,19 @@ describe("SubNavLayout", () => {
 		).toBeInTheDocument();
 	});
 
+	it("Root wraps the Grid in a self-stretching flex column", () => {
+		const { container } = renderWithChakra(
+			<SubNavLayout>
+				<SubNavLayout.Nav><div /></SubNavLayout.Nav>
+				<SubNavLayout.Detail><div /></SubNavLayout.Detail>
+			</SubNavLayout>
+		);
+		const grid = container.querySelector('[data-testid="subnav-layout"]');
+		expect(grid).toBeInTheDocument();
+		const wrapper = grid?.parentElement;
+		expect(wrapper).toHaveAttribute("data-testid", "subnav-layout-stretch");
+	});
+
 	it("renders Toolbar inside Detail with bottom border", () => {
 		renderWithChakra(
 			<SubNavLayout>
