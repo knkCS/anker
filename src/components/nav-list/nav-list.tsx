@@ -41,7 +41,7 @@ const NavListGroup = ({ label, children }: NavListGroupProps) => {
 					{label}
 				</Text>
 			)}
-			<Flex direction="column" gap="0.5">
+			<Flex direction="column" gap="1" data-testid="nav-list-group-items">
 				{children}
 			</Flex>
 		</Box>

@@ -120,4 +120,16 @@ describe("NavList", () => {
 		expect(link).toHaveAttribute("data-active", "true");
 		expect(link).toHaveAttribute("aria-current", "page");
 	});
+
+	it("Group renders item flex container with data-testid nav-list-group-items", () => {
+		const { container } = renderWithChakra(
+			<NavList aria-label="t">
+				<NavList.Group label="Group">
+					<NavList.Item><span>One</span></NavList.Item>
+					<NavList.Item><span>Two</span></NavList.Item>
+				</NavList.Group>
+			</NavList>,
+		);
+		expect(container.querySelector('[data-testid="nav-list-group-items"]')).toBeInTheDocument();
+	});
 });
