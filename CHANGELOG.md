@@ -2,6 +2,15 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 2.9.2 — 2026-06-03
+
+### Fixed
+- `Popover`, `Menu`, `HoverCard`: positioner z-index now participates in
+  Chakra v3's `--layer-index` mechanism. Popovers/menus/hover-cards
+  opened inside a drawer or modal now stack correctly above the parent
+  overlay (previously the hardcoded `zIndex: 1500` left them at the same
+  z-index as drawers, causing visual clipping in nested cases).
+
 ## 2.9.1 — 2026-06-03
 
 ### Changed
