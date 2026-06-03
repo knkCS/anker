@@ -28,15 +28,13 @@ export const HoverCard = function HoverCard(props: HoverCardProps) {
 		<ChakraHoverCard.Root {...rest}>
 			<ChakraHoverCard.Trigger asChild>{children}</ChakraHoverCard.Trigger>
 			<Portal disabled={!portalled} container={portalRef}>
-				{/* Layer-aware z-index: starts at zIndex.popover (1500, above docked
-				    chrome) and adds Chakra's --layer-index offset so hover cards stack
-				    above modals/drawers when opened nested. */}
-				<ChakraHoverCard.Positioner
-					style={{
-						zIndex:
-							"calc(var(--hover-card-z-index, var(--chakra-z-index-popover, 1500)) + var(--layer-index, 0))",
-					}}
-				>
+				{/* Static z-index above drawer/modal layer. Chakra's --layer-index
+				    is only set on Content (not Positioner) and doesn't inherit
+				    upward; the Positioner has `isolation: isolate` which traps
+				    Content's z-index in a local stacking context. Using
+				    zIndex.tooltip (1800) reliably beats drawers/modals at
+				    zIndex.popover (1500). */}
+				<ChakraHoverCard.Positioner style={{ zIndex: 1800 }}>
 					<ChakraHoverCard.Content {...contentProps}>
 						{showArrow && (
 							<ChakraHoverCard.Arrow>

@@ -18,15 +18,13 @@ export const MenuContent = function MenuContent({
 	const { portalled = true, portalRef, ...rest } = props;
 	return (
 		<Portal disabled={!portalled} container={portalRef}>
-			{/* Layer-aware z-index: starts at zIndex.popover (1500, above docked
-			    chrome) and adds Chakra's --layer-index offset so menus stack
-			    above modals/drawers when opened nested. */}
-			<ChakraMenu.Positioner
-				style={{
-					zIndex:
-						"calc(var(--menu-z-index, var(--chakra-z-index-popover, 1500)) + var(--layer-index, 0))",
-				}}
-			>
+			{/* Static z-index above drawer/modal layer. Chakra's --layer-index
+			    is only set on Content (not Positioner) and doesn't inherit
+			    upward; the Positioner has `isolation: isolate` which traps
+			    Content's z-index in a local stacking context. Using
+			    zIndex.tooltip (1800) reliably beats drawers/modals at
+			    zIndex.popover (1500). */}
+			<ChakraMenu.Positioner style={{ zIndex: 1800 }}>
 				<ChakraMenu.Content ref={ref} {...rest} />
 			</ChakraMenu.Positioner>
 		</Portal>
