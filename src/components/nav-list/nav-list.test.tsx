@@ -125,11 +125,17 @@ describe("NavList", () => {
 		const { container } = renderWithChakra(
 			<NavList aria-label="t">
 				<NavList.Group label="Group">
-					<NavList.Item><span>One</span></NavList.Item>
-					<NavList.Item><span>Two</span></NavList.Item>
+					<NavList.Item>
+						<span>One</span>
+					</NavList.Item>
+					<NavList.Item>
+						<span>Two</span>
+					</NavList.Item>
 				</NavList.Group>
 			</NavList>,
 		);
-		expect(container.querySelector('[data-testid="nav-list-group-items"]')).toBeInTheDocument();
+		expect(
+			container.querySelector('[data-testid="nav-list-group-items"]'),
+		).toBeInTheDocument();
 	});
 });
