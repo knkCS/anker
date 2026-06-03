@@ -2,6 +2,12 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 2.9.1 — 2026-06-03
+
+### Changed
+- `NavList.Group`: bumped item gap from 4px to 8px (was tight in 2.9.0).
+- `NavList.Item`: bumped vertical padding from 8px to 12px each side (item height rises from ~32px to ~40px — standard nav row size).
+
 ## 2.9.0 — 2026-06-03
 
 ### Changed
