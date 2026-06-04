@@ -2,6 +2,15 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 2.10.0 — 2026-06-04
+
+### Added
+- `MenuButton` atom: a neutral action button driven by an `actions[]` array. One
+  action renders a plain `Button`; two or more collapse behind a `menuLabel`
+  trigger that opens a menu of the actions. Respects `variant`/`size`/`colorPalette`
+  (no hardcoded styling) and supports per-action `icon`, `disabled`, and an
+  optional `value` for stable identity.
+
 ## 2.9.3 — 2026-06-03
 
 ### Fixed
