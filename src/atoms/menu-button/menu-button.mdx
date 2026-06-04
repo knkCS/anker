@@ -1,0 +1,26 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./menu-button.stories";
+
+<Meta of={Stories} />
+
+# MenuButton
+
+A neutral action button driven by an `actions[]` array. One action renders a
+plain button; two or more collapse behind a `menuLabel` trigger that opens a
+menu of the actions. Respects `variant` / `size` / `colorPalette`.
+
+## Single action
+
+<Canvas of={Stories.SingleAction} />
+
+## Menu of actions
+
+<Canvas of={Stories.Menu} />
+
+## Empty
+
+<Canvas of={Stories.Empty} />
+
+## Props
+
+<ArgTypes of={Stories} />

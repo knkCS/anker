@@ -92,6 +92,13 @@ export { DirtyDot, type DirtyDotProps } from "./dirty-dot";
 // EmptyState
 export { EmptyState, type EmptyStateProps } from "./empty-state";
 
+// MenuButton
+export {
+	MenuButton,
+	type MenuButtonAction,
+	type MenuButtonProps,
+} from "./menu-button";
+
 // Persona
 export {
 	Persona,
