@@ -6,7 +6,7 @@ import { Box } from "../../primitives/layout";
 import { DrawerRoot } from "../drawer";
 import { DashboardToolbar } from "./dashboard-toolbar";
 import { type DashboardLabels, defaultDashboardLabels } from "./labels";
-import type { WidgetRegistry } from "./registry";
+import { isWidgetAvailable, type WidgetRegistry } from "./registry";
 import { resolveWidgetSettings } from "./resolve-settings";
 import type {
 	DashboardMode,
@@ -103,7 +103,14 @@ const ConfigDrawer: React.FC<{
 			onClose={onClose}
 			title={title}
 			saveLabel={saveLabel}
-			onSave={() => onSave(settings)}
+			onSave={() => {
+				const overrides = Object.fromEntries(
+					Object.entries(settings).filter(
+						([key, value]) => value !== def.defaultSettings?.[key],
+					),
+				);
+				onSave(overrides);
+			}}
 		>
 			{def.ConfigEditor ? (
 				<def.ConfigEditor settings={settings} onChange={setSettings} />
@@ -217,18 +224,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
 							editing ? (l) => draft.updateLayouts([...l]) : undefined
 						}
 					>
-						{draft.items.map((it) => (
-							<div key={it.id}>
-								<WidgetFrame
-									definition={registry.get(it.type)}
-									instance={it}
-									mode={mode}
-									labels={labels}
-									onConfigure={setConfiguringId}
-									onRemove={draft.removeWidget}
-								/>
-							</div>
-						))}
+						{draft.items.map((it) => {
+							const def = registry.get(it.type);
+							const available =
+								!def ||
+								isWidgetAvailable(def, grantedPermissions, availabilityContext);
+							return (
+								<div key={it.id}>
+									<WidgetFrame
+										definition={def}
+										instance={it}
+										mode={mode}
+										labels={labels}
+										available={available}
+										onConfigure={setConfiguringId}
+										onRemove={draft.removeWidget}
+									/>
+								</div>
+							);
+						})}
 					</ReactGridLayout>
 				</Box>
 			)}

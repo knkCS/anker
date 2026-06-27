@@ -145,6 +145,82 @@ describe("Dashboard", () => {
 		expect(onCommit.mock.calls[0][0]).toHaveLength(3);
 	});
 
+	it("hides the body of a saved instance the user lacks permission for", () => {
+		const adminDef: WidgetDefinition = {
+			type: "admin",
+			name: "Admin",
+			minSize: { w: 1, h: 1 },
+			defaultSize: { w: 2, h: 2 },
+			requiredPermissions: ["admin"],
+			Component: () => <span>secret-admin-body</span>,
+		};
+		const reg = createWidgetRegistry([adminDef]);
+		const w = [
+			{
+				id: "a",
+				type: "admin",
+				settings: {},
+				layout: { x: 0, y: 0, w: 2, h: 2 },
+			},
+		];
+		const { unmount } = wrap(
+			<Dashboard registry={reg} widgets={w} grantedPermissions={[]} />,
+		);
+		expect(screen.queryByText("secret-admin-body")).toBeNull();
+		expect(
+			screen.getByText(defaultDashboardLabels.noAccessWidget),
+		).toBeInTheDocument();
+		unmount();
+		wrap(
+			<Dashboard registry={reg} widgets={w} grantedPermissions={["admin"]} />,
+		);
+		expect(screen.getByText("secret-admin-body")).toBeInTheDocument();
+	});
+
+	it("persists only changed settings (overrides) from the config drawer", () => {
+		const onCommit = vi.fn();
+		const multi: WidgetDefinition = {
+			type: "multi",
+			name: "Multi",
+			minSize: { w: 1, h: 1 },
+			defaultSize: { w: 2, h: 2 },
+			settingsSchema: [
+				{ key: "a", label: "A", type: "text", defaultValue: "da" },
+				{ key: "b", label: "B", type: "text", defaultValue: "db" },
+			],
+			defaultSettings: { a: "da", b: "db" },
+			Component: () => <span>multi-body</span>,
+		};
+		const reg = createWidgetRegistry([multi]);
+		const w = [
+			{
+				id: "m",
+				type: "multi",
+				settings: {},
+				layout: { x: 0, y: 0, w: 2, h: 2 },
+			},
+		];
+		wrap(
+			<Dashboard
+				registry={reg}
+				widgets={w}
+				mode="edit"
+				onCommit={onCommit}
+				onModeChange={() => {}}
+			/>,
+		);
+		fireEvent.click(
+			screen.getByLabelText(defaultDashboardLabels.configureWidget),
+		);
+		fireEvent.change(screen.getByLabelText("A"), {
+			target: { value: "changed" },
+		});
+		const dialog = screen.getByRole("dialog");
+		fireEvent.click(within(dialog).getByText(defaultDashboardLabels.save));
+		fireEvent.click(screen.getByText(defaultDashboardLabels.save)); // toolbar save
+		expect(onCommit.mock.calls[0][0][0].settings).toEqual({ a: "changed" });
+	});
+
 	it("applies config-drawer changes to the draft on save", () => {
 		const onCommit = vi.fn();
 		const reg = createWidgetRegistry([counter]);

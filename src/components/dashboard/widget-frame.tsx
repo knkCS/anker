@@ -13,6 +13,7 @@ export interface WidgetFrameProps {
 	instance: WidgetInstance;
 	mode: DashboardMode;
 	labels: DashboardLabels;
+	available?: boolean;
 	onConfigure?: (id: string) => void;
 	onRemove?: (id: string) => void;
 }
@@ -22,12 +23,14 @@ export const WidgetFrame: React.FC<WidgetFrameProps> = ({
 	instance,
 	mode,
 	labels,
+	available,
 	onConfigure,
 	onRemove,
 }) => {
 	const editing = mode === "edit";
 	const configurable =
 		!!definition &&
+		available !== false &&
 		(!!definition.settingsSchema?.length || !!definition.ConfigEditor);
 
 	return (
@@ -75,11 +78,17 @@ export const WidgetFrame: React.FC<WidgetFrameProps> = ({
 
 			{definition ? (
 				<Widget heading={definition.name} icon={definition.icon}>
-					<definition.Component
-						id={instance.id}
-						settings={resolveWidgetSettings(definition, instance)}
-						mode={mode}
-					/>
+					{available === false ? (
+						<Text fontSize="sm" color="muted">
+							{labels.noAccessWidget}
+						</Text>
+					) : (
+						<definition.Component
+							id={instance.id}
+							settings={resolveWidgetSettings(definition, instance)}
+							mode={mode}
+						/>
+					)}
 				</Widget>
 			) : (
 				<Widget heading={labels.unknownWidget} icon={null}>
