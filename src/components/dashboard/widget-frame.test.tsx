@@ -84,4 +84,12 @@ describe("WidgetFrame", () => {
 			screen.getByLabelText(defaultDashboardLabels.removeWidget),
 		).toBeInTheDocument();
 	});
+
+	it("renders a no-access placeholder and hides the body when unavailable", () => {
+		renderFrame({ available: false });
+		expect(
+			screen.getByText(defaultDashboardLabels.noAccessWidget),
+		).toBeInTheDocument();
+		expect(screen.queryByText("val:7")).toBeNull();
+	});
 });

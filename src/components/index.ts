@@ -28,6 +28,7 @@ export type {
 	ContextRailSectionProps,
 } from "./context-rail/context-rail";
 export { ContextRail } from "./context-rail/context-rail";
+// Dashboard
 export type {
 	DashboardDraft,
 	DashboardLabels,
@@ -48,7 +49,6 @@ export type {
 	WidgetSettingField,
 	WidgetSize,
 } from "./dashboard";
-// Dashboard
 export {
 	createWidgetRegistry,
 	Dashboard,
