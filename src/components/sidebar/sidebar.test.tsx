@@ -462,3 +462,45 @@ describe("Sidebar", () => {
 		expect(screen.queryByText("jana@knk.de")).not.toBeInTheDocument();
 	});
 });
+
+describe("Sidebar — internal-scroll layout", () => {
+	function renderFull() {
+		return renderWithChakra(
+			<Sidebar>
+				<Sidebar.Header>
+					<Sidebar.Logo productName="test" />
+				</Sidebar.Header>
+				<Sidebar.Body>
+					<Sidebar.Section label="Library">
+						<Sidebar.Item>All</Sidebar.Item>
+					</Sidebar.Section>
+				</Sidebar.Body>
+				<Sidebar.Footer>
+					<div data-testid="footer-content">account</div>
+				</Sidebar.Footer>
+			</Sidebar>,
+		);
+	}
+
+	it("the sidebar fills its column height instead of forcing min-height 100vh", () => {
+		renderFull();
+		const inner = screen.getByTestId("sidebar");
+		// Chakra v3 renders h="full" as var(--chakra-sizes-full) (= 100% in browser)
+		expect(inner).toHaveStyle({ height: "var(--chakra-sizes-full)" });
+		expect(inner).not.toHaveStyle({ minHeight: "100vh" });
+	});
+
+	it("the body scrolls internally", () => {
+		renderFull();
+		expect(screen.getByTestId("sidebar-body")).toHaveStyle({
+			overflowY: "auto",
+		});
+	});
+
+	it("the footer never shrinks, so it stays pinned to the bottom", () => {
+		renderFull();
+		expect(screen.getByTestId("sidebar-footer")).toHaveStyle({
+			flexShrink: "0",
+		});
+	});
+});

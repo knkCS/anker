@@ -88,13 +88,14 @@ const SidebarRoot = ({
 					w={collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
 					transition="width 250ms ease-out"
 					flexShrink={0}
+					h="full"
 				>
 					<Flex
 						data-testid="sidebar"
 						data-collapsed={collapsed ? "true" : "false"}
 						direction="column"
 						w="full"
-						minH="100vh"
+						h="full"
 						bg="bg-canvas"
 						borderRightWidth="1px"
 						borderRightColor="border"
@@ -143,14 +144,20 @@ const SidebarHeader = ({ children }: { children: React.ReactNode }) => (
 SidebarHeader.displayName = "Sidebar.Header";
 
 const SidebarBody = ({ children }: { children?: React.ReactNode }) => (
-	<Box flex="1" overflowY="auto" py="3">
+	<Box data-testid="sidebar-body" flex="1" minH="0" overflowY="auto" py="3">
 		{children}
 	</Box>
 );
 SidebarBody.displayName = "Sidebar.Body";
 
 const SidebarFooter = ({ children }: { children: React.ReactNode }) => (
-	<Box p="3" borderTopWidth="1px" borderTopColor="border">
+	<Box
+		data-testid="sidebar-footer"
+		flexShrink={0}
+		p="3"
+		borderTopWidth="1px"
+		borderTopColor="border"
+	>
 		{children}
 	</Box>
 );
