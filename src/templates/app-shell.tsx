@@ -297,7 +297,8 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 			data-header={showHeaderRow ? "true" : "false"}
 			templateColumns={showRailColumn ? "auto 1fr auto" : "auto 1fr"}
 			templateRows="auto 1fr"
-			minH="100vh"
+			h="100vh"
+			overflow="hidden"
 			bg="bg-canvas"
 		>
 			<Box
@@ -305,10 +306,6 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 				gridColumn="1"
 				gridRow="1 / 3"
 				minW="0"
-				position="sticky"
-				top="0"
-				alignSelf="start"
-				maxH="100vh"
 				// One above Chakra's `docked` (10) so the Sidebar's collapse
 				// toggle — positioned with `right: -3.5` to protrude into the
 				// next column — renders above the sticky page-header band.
@@ -336,6 +333,8 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 				gridRow="2"
 				direction="column"
 				minW="0"
+				minH="0"
+				overflowY="auto"
 				bg="bg-canvas"
 				borderLeftWidth="1px"
 				borderColor="border"
@@ -348,10 +347,8 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 					gridColumn="3"
 					gridRow="2"
 					minW="0"
-					position="sticky"
-					top="0"
-					alignSelf="start"
-					maxH="100vh"
+					minH="0"
+					overflowY="auto"
 					bg="bg-surface"
 					borderLeftWidth="1px"
 					borderColor="border"

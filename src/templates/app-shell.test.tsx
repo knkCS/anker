@@ -106,19 +106,32 @@ describe("AppShell", () => {
 		expect(cs.background).toContain("--chakra-colors-bg-canvas");
 	});
 
-	it("sidebar column is sticky to the viewport top", () => {
-		// Regression: previously the sidebar scrolled away with the grid when
-		// the main column overflowed the viewport. The sidebar must stay put.
+	it("the shell grid is a fixed 100vh viewport that does not scroll the document", () => {
+		// Internal-scroll model: the grid is exactly the viewport height and
+		// clips its own overflow, so the document never scrolls — the columns
+		// scroll internally instead.
 		renderWithChakra(
 			<AppShell sidebar={<div data-testid="sb">sidebar</div>}>
 				<div>main</div>
 			</AppShell>,
 		);
-		const sidebarCol = screen.getByTestId("app-shell-sidebar");
-		expect(sidebarCol).toHaveStyle({ position: "sticky", top: "0" });
+		const grid = screen.getByTestId("app-shell");
+		expect(grid).toHaveStyle({ height: "100vh", overflow: "hidden" });
+		expect(grid).not.toHaveStyle({ minHeight: "100vh" });
 	});
 
-	it("rail column is sticky to the viewport top", () => {
+	it("the main column scrolls internally", () => {
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<div>main</div>
+			</AppShell>,
+		);
+		expect(screen.getByTestId("app-shell-main")).toHaveStyle({
+			overflowY: "auto",
+		});
+	});
+
+	it("the rail column scrolls internally and is no longer sticky", () => {
 		renderWithChakra(
 			<AppShell
 				sidebar={<div data-testid="sb" />}
@@ -128,7 +141,19 @@ describe("AppShell", () => {
 			</AppShell>,
 		);
 		const railCol = screen.getByTestId("app-shell-rail");
-		expect(railCol).toHaveStyle({ position: "sticky", top: "0" });
+		expect(railCol).toHaveStyle({ overflowY: "auto" });
+		expect(railCol).not.toHaveStyle({ position: "sticky" });
+	});
+
+	it("the sidebar column fills the grid height and is no longer sticky", () => {
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<div>main</div>
+			</AppShell>,
+		);
+		const sidebarCol = screen.getByTestId("app-shell-sidebar");
+		expect(sidebarCol).not.toHaveStyle({ position: "sticky" });
+		expect(sidebarCol).toHaveStyle({ zIndex: "11" });
 	});
 
 	it("rail column renders on the surface with a left divider", () => {
