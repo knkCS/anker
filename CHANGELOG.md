@@ -2,6 +2,17 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 2.10.1 — 2026-06-27
+
+### Fixed
+- `AppShell`, `Sidebar`, `ContextRail`: the sidebar account footer and the
+  context rail no longer scroll out of view when the main column or rail is
+  taller than the viewport. `AppShell` now uses an internal-scroll model — the
+  grid is a fixed `100vh` that does not scroll the document; the header band is
+  fixed, and the sidebar, main, and rail scroll internally. Root cause: the
+  three components used `min-height: 100vh` (an unbounded floor) where a bounded
+  height is required for internal `overflow: auto` to engage.
+
 ## 2.10.0 — 2026-06-04
 
 ### Added

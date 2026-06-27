@@ -93,11 +93,12 @@ Two named slots are exposed:
 - **`rail`**    — registered via `usePageRail(content)`. Surfaced as the
   body of the right rail column.
 
-The rail column's coordinate origin sits in grid row 2, below the header
-band. Its `position: sticky; top: 0` therefore pins to the bottom of the
-header, not to the viewport top. The sidebar still spans both rows and
-remains sticky to the viewport top. When the page header includes a tabs row, the rail's coordinate origin
-sits **below the tabs row** — i.e. below the entire header band.
+`<AppShell>` is an **internal-scroll** shell: the grid is exactly `100vh` and
+never scrolls the document (`overflow: hidden`). The header band is fixed in
+grid row 1; the sidebar, main column, and rail each scroll **internally**. The
+sidebar's account footer and the rail therefore stay pinned to the viewport
+while their content scrolls. When the page header includes a tabs row, the rail
+and main content begin **below the entire header band**.
 
 The store uses `useSyncExternalStore` so that producers (deep child
 components rendered after the consumer) and consumers (AppShell, the page
