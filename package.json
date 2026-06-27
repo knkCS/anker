@@ -68,10 +68,14 @@
     "@tanstack/react-table": "^8.0.0",
     "react": ">=18",
     "react-dom": ">=18",
+    "react-grid-layout": "^2.2.3",
     "react-hook-form": "^7.0.0",
     "react-i18next": ">=12",
     "react-router-dom": ">=6",
     "zod": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react-grid-layout": { "optional": true }
   },
   "dependencies": {
     "chakra-react-select": "^6.0.0",
@@ -99,6 +103,7 @@
     "jsdom": "^25.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-grid-layout": "^2.2.3",
     "react-hook-form": "^7.54.0",
     "react-i18next": "^14.0.0",
     "react-router-dom": "^7.14.0",

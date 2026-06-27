@@ -40,3 +40,26 @@ Object.defineProperty(globalThis, "localStorage", {
 	writable: true,
 	configurable: true,
 });
+
+// react-grid-layout needs these in jsdom
+if (!("ResizeObserver" in globalThis)) {
+	(globalThis as { ResizeObserver?: unknown }).ResizeObserver = class {
+		observe() {}
+		unobserve() {}
+		disconnect() {}
+	};
+}
+if (typeof window !== "undefined" && !window.matchMedia) {
+	window.matchMedia = ((query: string) => ({
+		matches: false,
+		media: query,
+		onchange: null,
+		addListener() {},
+		removeListener() {},
+		addEventListener() {},
+		removeEventListener() {},
+		dispatchEvent() {
+			return false;
+		},
+	})) as unknown as typeof window.matchMedia;
+}
