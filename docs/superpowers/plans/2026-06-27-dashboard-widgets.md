@@ -507,7 +507,9 @@ export function useDashboardDraft({
 	onDraftChange,
 }: UseDashboardDraftArgs): DashboardDraft {
 	const [draft, setDraft] = useState<WidgetInstance[] | null>(null);
-	const prevMode = useRef<DashboardMode>(mode);
+	// Initialize to "view" (not `mode`) so mounting directly in edit mode still
+	// triggers the seed branch on the first effect run.
+	const prevMode = useRef<DashboardMode>("view");
 
 	useEffect(() => {
 		if (mode === "edit" && prevMode.current !== "edit") {
@@ -2068,6 +2070,324 @@ Expected: Storybook builds without errors (the `Components/Dashboard` stories co
 npm run lint:write
 git add src/components/dashboard/demo-widgets.tsx src/components/dashboard/dashboard.stories.tsx CLAUDE.md package.json
 git commit -m "feat(dashboard): demo widgets, storybook coverage, docs; release 2.11.0"
+```
+
+---
+
+### Task 12: Documentation (usage guide for services + AI-session rules)
+
+Added after the original plan: comprehensive docs so other services and AI
+sessions know how to use the framework. Three audiences: service developers
+(Storybook MDX, published to GitHub Pages), AI sessions in consuming services
+(`CLAUDE-ANKER.md`, `@`-imported into their CLAUDE.md), and AI sessions inside
+anker (`CLAUDE.md` Patterns note).
+
+**Files:**
+- Create: `src/components/dashboard/dashboard.mdx`
+- Modify: `CLAUDE-ANKER.md` (append a `## Dashboard & Widgets` section at the end)
+- Modify: `CLAUDE.md` (append a `### Dashboard & Widget Framework` subsection at the end of the `## Patterns` section)
+
+**Interfaces:** Consumes the public dashboard surface + the `dashboard.stories`
+from Task 11. Produces documentation only — no code.
+
+- [ ] **Step 1: Create `src/components/dashboard/dashboard.mdx`** (verbatim)
+
+````mdx
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./dashboard.stories";
+
+<Meta of={Stories} />
+
+# Dashboard & Widgets
+
+A framework for building configurable, drag-and-resize widget dashboards. anker
+owns the grid engine, the edit experience, and the chrome; **your service owns
+the widgets, their data, and persistence.**
+
+<Canvas of={Stories.Default} />
+
+## Architecture at a glance
+
+- **You define widgets** as `WidgetDefinition` objects — each declares its
+  identity, sizing, settings schema, availability, and a `Component` that
+  renders its body and fetches its own data.
+- **You build a registry** with `createWidgetRegistry(defs)`.
+- **You render `<Dashboard>`** with the saved `widgets` array (the persisted
+  truth) and the current `mode`. anker handles drag, resize, add, remove,
+  configure, and the draft / discard / dirty edit session internally.
+- **You persist** the `WidgetInstance[]` that `onCommit` hands back.
+
+anker never fetches data, never talks to your backend, and never imports
+service code.
+
+## 1. Define a widget
+
+The `Component` receives resolved `settings`, the instance `id`, and the
+current `mode`, and renders the widget body. The frame (card, title, icon, edit
+controls) is supplied by anker.
+
+```tsx
+import type { WidgetDefinition } from "@knkcs/anker/components";
+import { ListChecks } from "lucide-react";
+
+interface MyTasksSettings { limit: number }
+
+export const myTasksWidget: WidgetDefinition<MyTasksSettings> = {
+  type: "my-tasks",                 // stable id, persisted in instances
+  name: "My tasks",                 // already-translated string (no i18n keys)
+  description: "Tasks assigned to you",
+  icon: <ListChecks size={18} />,   // any lucide node
+  category: "Work",                 // free-form grouping for the catalog
+  minSize: { w: 3, h: 2 },          // grid units
+  defaultSize: { w: 4, h: 3 },
+  maxSize: { w: 12, h: 6 },
+  defaultSettings: { limit: 5 },
+  settingsSchema: [
+    { key: "limit", label: "Max tasks", type: "number", defaultValue: 5 },
+  ],
+  requiredPermissions: ["task.read"], // opaque tokens; see Availability
+  Component: ({ settings }) => <MyTasksList limit={settings.limit} />, // fetches its own data
+};
+```
+
+The widget `Component` is plain React — fetch data with your own hooks
+(react-query, etc.) inside it. anker passes `settings` as the resolved merge of
+`defaultSettings` and the instance's saved settings.
+
+## 2. Build a registry
+
+```tsx
+import { createWidgetRegistry } from "@knkcs/anker/components";
+
+const registry = createWidgetRegistry([myTasksWidget, calendarWidget, statTileWidget]);
+```
+
+`createWidgetRegistry` is a factory (not a global singleton) — create one per
+dashboard and memoize it (`useMemo`) so it's stable across renders. It exposes
+`get(type)`, `getAll()`, and `getCatalog(grantedPermissions?, ctx?)`.
+
+## 3. Render the Dashboard (controlled)
+
+`<Dashboard>` is **controlled**: your app owns the saved `widgets` array and the
+`mode`. anker owns the ephemeral edit session.
+
+```tsx
+import {
+  Dashboard,
+  createWidgetRegistry,
+  type WidgetInstance,
+  type DashboardMode,
+} from "@knkcs/anker/components";
+
+function MyDashboard() {
+  const registry = useMemo(() => createWidgetRegistry(defs), []);
+  const [widgets, setWidgets] = useState<WidgetInstance[]>(loadedFromBackend);
+  const [mode, setMode] = useState<DashboardMode>("view");
+
+  return (
+    <Dashboard
+      registry={registry}
+      widgets={widgets}
+      mode={mode}
+      grantedPermissions={user.permissions}
+      onModeChange={setMode}
+      onCommit={(next) => { setWidgets(next); saveToBackend(next); }}
+    />
+  );
+}
+```
+
+That's the whole integration: **load → pass `widgets` → handle `onCommit` →
+toggle `mode`.** In edit mode, anker tracks a draft as the user drags, resizes,
+adds, removes, and configures widgets. **Save** calls `onCommit(draft)` and
+returns to view; **Discard** reverts. Observe in-flight changes with
+`onDraftChange` if you need an "unsaved changes" indicator or autosave.
+
+<Canvas of={Stories.EditMode} />
+
+## 4. Persist instances
+
+`onCommit` hands you a `WidgetInstance[]` — the serializable shape you store and
+reload:
+
+```ts
+interface WidgetInstance {
+  id: string;                          // unique per placed widget
+  type: string;                        // references WidgetDefinition.type
+  settings: Record<string, unknown>;   // instance overrides of defaultSettings
+  layout: { x: number; y: number; w: number; h: number }; // grid units
+}
+```
+
+Store this array however you like (per-user, per-role). To restore, pass it back
+as `widgets`. An unknown `type` (a widget your build no longer ships) renders a
+removable "Unknown widget" placeholder rather than crashing, and round-trips
+safely on save.
+
+## 5. Availability (permissions / feature flags)
+
+A widget is offered in the catalog only when available to the current user:
+
+- `requiredPermissions?: string[]` — opaque tokens. The widget shows only if
+  every token is in the `grantedPermissions` you pass to `<Dashboard>`. anker
+  assigns these strings no meaning — map them to your role/permission model.
+- `isAvailable?: (ctx) => boolean` — an escape hatch for arbitrary logic
+  (feature flags, license tiers). Receives the `availabilityContext` you pass to
+  `<Dashboard>`. Returning `false` hides the widget.
+
+<Canvas of={Stories.WithAdminPermission} />
+
+## 6. Settings & the config form
+
+Declare a `settingsSchema` (`text | number | boolean | select`) and anker
+renders a schema-driven config form when the user clicks the gear in edit mode:
+
+<Canvas of={Stories.ConfigForm} />
+
+For settings the generic form can't express, supply a custom
+`ConfigEditor: React.FC<WidgetConfigEditorProps>` on the definition — anker
+renders it instead.
+
+## 7. The catalog
+
+In edit mode, "Add widget" opens a catalog grouped by `category`, filtered by
+availability:
+
+<Canvas of={Stories.Catalog} />
+
+## Customization
+
+- **Strings** — every user-facing label is overridable via the `labels` prop (a
+  partial `DashboardLabels`); English defaults otherwise.
+- **Grid** — tune `grid={{ cols, rowHeight, margin, containerPadding }}`
+  (defaults: 12 cols, 90px rows, 16px margin).
+- **Empty state** — pass `emptyState` to override the default.
+- **Toolbar** — `toolbar={false}` removes the built-in Edit / Add / Save /
+  Discard bar if you drive `mode` yourself.
+
+## Peer dependency
+
+The grid requires **`react-grid-layout`** as an **optional peer dependency**.
+Install it in services that render a `<Dashboard>`:
+
+```bash
+npm install react-grid-layout@^2.2.3
+```
+
+Services that don't render a dashboard don't need it. anker ships the grid
+styles itself (via its Chakra layer) — you do **not** import any
+`react-grid-layout` CSS. (Internally anker imports the stable flat-props API
+from the `react-grid-layout/legacy` subpath; that's an implementation detail —
+you only install the package.)
+
+## Accessibility
+
+- All edit controls (drag handle, configure, remove, add) carry configurable
+  `aria-label`s (English defaults) and meet the 44×44px touch-target minimum.
+- The catalog and config editor are focus-trapping drawers.
+- Keyboard drag-and-drop reordering is not yet supported (the grid is
+  pointer-first) — a planned enhancement.
+- The resize cursor uses `se-resize` (a physical direction); in RTL the handle
+  still works but the cursor hint isn't mirrored (CSS has no logical cursor).
+
+## Guidelines
+
+- **Do** keep widgets self-contained: each fetches its own data and reads only
+  its `settings`.
+- **Do** memoize the registry and the `widgets` / derived arrays.
+- **Don't** mutate the `widgets` array you pass in — treat it as immutable;
+  apply `onCommit`'s result.
+- **Don't** put i18n keys in a widget's `name` / `description` — pass
+  already-translated strings.
+
+## Props
+
+<ArgTypes of={Stories} />
+````
+
+- [ ] **Step 2: Append to `CLAUDE-ANKER.md`** (a new `## Dashboard & Widgets` section at the end of the file, verbatim)
+
+````markdown
+## Dashboard & Widgets
+
+Build configurable widget dashboards with the `Dashboard` framework from
+`@knkcs/anker/components`. anker owns the grid, edit UX, and chrome; your
+service owns the widgets, their data, and persistence.
+
+**The contract.** A widget is a `WidgetDefinition` (`type`, `name`, `icon?`,
+`category?`, `minSize` / `defaultSize` / `maxSize?` in grid units,
+`defaultSettings?`, `settingsSchema?`, `requiredPermissions?`, `isAvailable?`,
+`Component`, `ConfigEditor?`). Build a registry with
+`createWidgetRegistry(defs)`. Render
+`<Dashboard registry widgets mode onModeChange onCommit grantedPermissions />`.
+
+**Controlled model.** Your app owns the saved `widgets: WidgetInstance[]` and
+`mode`; anker owns the edit-session draft. Integration is: load → pass
+`widgets` → persist on `onCommit` → toggle `mode`. Save calls `onCommit(draft)`;
+Discard reverts.
+
+### Do
+- **Let each widget fetch its own data** inside its `Component`. Why: anker is
+  domain-free and never fetches — centralizing data would couple the library to
+  your backend.
+- **Memoize the registry and `widgets`.** Why: a new registry/array reference
+  each render churns the grid.
+- **Pass already-translated strings** for `name` / `description` / `labels`.
+  Why: anker uses props, not i18n keys.
+- **Map your permission model to `requiredPermissions`** (opaque string tokens)
+  and pass `grantedPermissions`; use `isAvailable(ctx)` for feature
+  flags / license tiers.
+- **Persist the `WidgetInstance[]` from `onCommit`** and pass it back as
+  `widgets` to restore.
+
+### Don't
+- **Don't mutate the `widgets` array** you pass in — treat it as immutable and
+  apply `onCommit`'s result. Why: it's the controlled source of truth.
+- **Don't import any `react-grid-layout` CSS** — anker ships the grid styles.
+  Just `npm i react-grid-layout@^2.2.3` (optional peer dep, only for services
+  that render a `<Dashboard>`).
+- **Don't rebuild draft / discard / dirty logic** — anker owns the edit
+  session; read `onDraftChange` if you need an unsaved-changes indicator.
+````
+
+- [ ] **Step 3: Append to `CLAUDE.md`** — add this subsection at the END of the `## Patterns` section (immediately before the next top-level `##` heading after Patterns), verbatim:
+
+````markdown
+### Dashboard & Widget Framework
+
+`src/components/dashboard/` provides a domain-free dashboard framework (exported
+from `@knkcs/anker/components`): the widget contract (`WidgetDefinition`,
+`WidgetInstance`, `WidgetRenderProps`, …), `createWidgetRegistry`, and
+`<Dashboard>` — a `react-grid-layout` engine with view/edit modes, a catalog, a
+schema-driven config form, and a toolbar.
+
+- **Controlled model**: consumers own the saved `widgets` + `mode`; the
+  `useDashboardDraft` hook owns the ephemeral edit-session draft
+  (add/remove/resize/discard/dirty). `<Dashboard>` emits `onCommit(draft)` on
+  Save and reverts on Discard.
+- **Domain-free**: widgets self-fetch data; strings are props
+  (`DashboardLabels`); permissions are opaque `requiredPermissions` string
+  tokens + an optional `isAvailable(ctx)` predicate.
+- **react-grid-layout** is an optional peer dependency (`^2.2.3`). anker imports
+  its flat-props API from the `react-grid-layout/legacy` subpath (2.x relocated
+  it there) and injects the grid CSS via a Chakra `css` object — no stylesheet
+  import. Both `react-grid-layout` and `react-grid-layout/legacy` are in tsup
+  `external`.
+- Full usage guide: the `Components/Dashboard` Storybook docs
+  (`src/components/dashboard/dashboard.mdx`).
+````
+
+- [ ] **Step 4: Verify the Storybook build picks up the MDX and lint is clean**
+
+Run: `npm run build:storybook && npm run lint`
+Expected: Storybook build succeeds (the `dashboard.mdx` compiles and attaches to
+the `Components/Dashboard` page); lint clean (no regressions).
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/components/dashboard/dashboard.mdx CLAUDE-ANKER.md CLAUDE.md
+git commit -m "docs(dashboard): MDX usage guide + CLAUDE-ANKER + CLAUDE.md framework notes"
 ```
 
 ---
