@@ -168,6 +168,29 @@ Several component recipes include built-in visual polish:
 - **Tooltip**: `slideUp` entrance animation (150ms ease-out)
 - **Modal**: `backdropFilter: blur(4px)` frosted glass overlay
 
+### Dashboard & Widget Framework
+
+`src/components/dashboard/` provides a domain-free dashboard framework (exported
+from `@knkcs/anker/components`): the widget contract (`WidgetDefinition`,
+`WidgetInstance`, `WidgetRenderProps`, …), `createWidgetRegistry`, and
+`<Dashboard>` — a `react-grid-layout` engine with view/edit modes, a catalog, a
+schema-driven config form, and a toolbar.
+
+- **Controlled model**: consumers own the saved `widgets` + `mode`; the
+  `useDashboardDraft` hook owns the ephemeral edit-session draft
+  (add/remove/resize/discard/dirty). `<Dashboard>` emits `onCommit(draft)` on
+  Save and reverts on Discard.
+- **Domain-free**: widgets self-fetch data; strings are props
+  (`DashboardLabels`); permissions are opaque `requiredPermissions` string
+  tokens + an optional `isAvailable(ctx)` predicate.
+- **react-grid-layout** is an optional peer dependency (`^2.2.3`). anker imports
+  its flat-props API from the `react-grid-layout/legacy` subpath (2.x relocated
+  it there) and injects the grid CSS via a Chakra `css` object — no stylesheet
+  import. Both `react-grid-layout` and `react-grid-layout/legacy` are in tsup
+  `external`.
+- Full usage guide: the `Components/Dashboard` Storybook docs
+  (`src/components/dashboard/dashboard.mdx`).
+
 ## Chakra v3 Anti-Patterns
 
 This project uses Chakra UI v3. Never suggest v2 patterns:
