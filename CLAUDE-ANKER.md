@@ -142,3 +142,44 @@ Full slot/prop tables: `docs/react-table-reference.md`. Mapping guide for common
 - Theme entry: `import system from "@knkcs/anker/theme"`
 - Provider entry: `import { Provider } from "@knkcs/anker/primitives"`
 - Anker development rules (for working *on* anker, not consuming it): `node_modules/@knkcs/anker/CLAUDE.md` is **not** included in the package; see the anker GitHub repo
+
+## Dashboard & Widgets
+
+Build configurable widget dashboards with the `Dashboard` framework from
+`@knkcs/anker/components`. anker owns the grid, edit UX, and chrome; your
+service owns the widgets, their data, and persistence.
+
+**The contract.** A widget is a `WidgetDefinition` (`type`, `name`, `icon?`,
+`category?`, `minSize` / `defaultSize` / `maxSize?` in grid units,
+`defaultSettings?`, `settingsSchema?`, `requiredPermissions?`, `isAvailable?`,
+`Component`, `ConfigEditor?`). Build a registry with
+`createWidgetRegistry(defs)`. Render
+`<Dashboard registry widgets mode onModeChange onCommit grantedPermissions />`.
+
+**Controlled model.** Your app owns the saved `widgets: WidgetInstance[]` and
+`mode`; anker owns the edit-session draft. Integration is: load → pass
+`widgets` → persist on `onCommit` → toggle `mode`. Save calls `onCommit(draft)`;
+Discard reverts.
+
+### Do
+- **Let each widget fetch its own data** inside its `Component`. Why: anker is
+  domain-free and never fetches — centralizing data would couple the library to
+  your backend.
+- **Memoize the registry and `widgets`.** Why: a new registry/array reference
+  each render churns the grid.
+- **Pass already-translated strings** for `name` / `description` / `labels`.
+  Why: anker uses props, not i18n keys.
+- **Map your permission model to `requiredPermissions`** (opaque string tokens)
+  and pass `grantedPermissions`; use `isAvailable(ctx)` for feature
+  flags / license tiers.
+- **Persist the `WidgetInstance[]` from `onCommit`** and pass it back as
+  `widgets` to restore.
+
+### Don't
+- **Don't mutate the `widgets` array** you pass in — treat it as immutable and
+  apply `onCommit`'s result. Why: it's the controlled source of truth.
+- **Don't import any `react-grid-layout` CSS** — anker ships the grid styles.
+  Just `npm i react-grid-layout@^2.2.3` (optional peer dep, only for services
+  that render a `<Dashboard>`).
+- **Don't rebuild draft / discard / dirty logic** — anker owns the edit
+  session; read `onDraftChange` if you need an unsaved-changes indicator.
