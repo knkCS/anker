@@ -25,6 +25,8 @@ export default defineConfig({
     "react-router-dom",
     "react-i18next",
     "@tanstack/react-table",
+    "react-grid-layout",
+    "react-grid-layout/legacy",
   ],
   treeshake: true,
   sourcemap: true,
