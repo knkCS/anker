@@ -28,6 +28,39 @@ export type {
 	ContextRailSectionProps,
 } from "./context-rail/context-rail";
 export { ContextRail } from "./context-rail/context-rail";
+export type {
+	DashboardDraft,
+	DashboardLabels,
+	DashboardMode,
+	DashboardProps,
+	DashboardToolbarProps,
+	GridConfig,
+	UseDashboardDraftArgs,
+	WidgetCatalogProps,
+	WidgetConfigEditorProps,
+	WidgetConfigFormProps,
+	WidgetDefinition,
+	WidgetFrameProps,
+	WidgetInstance,
+	WidgetLayout,
+	WidgetRegistry,
+	WidgetRenderProps,
+	WidgetSettingField,
+	WidgetSize,
+} from "./dashboard";
+// Dashboard
+export {
+	createWidgetRegistry,
+	Dashboard,
+	DashboardToolbar,
+	defaultDashboardLabels,
+	isWidgetAvailable,
+	resolveWidgetSettings,
+	useDashboardDraft,
+	WidgetCatalog,
+	WidgetConfigForm,
+	WidgetFrame,
+} from "./dashboard";
 // DataTable + DataTable Cells
 export type {
 	ActionCellAction,
@@ -166,7 +199,6 @@ export {
 	useStepperNextButton,
 	useStepperPrevButton,
 } from "./stepper";
-
 // Table (deprecated, re-exports from CardList)
 export type { TableProps } from "./table";
 export { Table } from "./table";
