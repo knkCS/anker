@@ -99,7 +99,7 @@ const ContextRailRoot = ({ storageKey, children }: ContextRailProps) => {
 					data-testid="context-rail"
 					data-collapsed={collapsed ? "true" : "false"}
 					w={collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
-					minH="100vh"
+					h="full"
 					transition="width 250ms ease-out"
 					position="relative"
 				>

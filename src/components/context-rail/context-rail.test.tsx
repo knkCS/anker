@@ -22,6 +22,21 @@ describe("ContextRail", () => {
 		expect(screen.getByTestId("context-rail")).toBeInTheDocument();
 	});
 
+	it("the rail root fills its column height instead of forcing min-height 100vh", () => {
+		renderWithChakra(
+			<ContextRail>
+				<ContextRail.Section id="s" label="Section">
+					<div>content</div>
+				</ContextRail.Section>
+			</ContextRail>,
+		);
+		const root = screen.getByTestId("context-rail");
+		// Chakra renders h="full" as `height: var(--chakra-sizes-full)`; jsdom
+		// cannot resolve the custom property to 100%, so assert the token form.
+		expect(root).toHaveStyle({ height: "var(--chakra-sizes-full)" });
+		expect(root).not.toHaveStyle({ minHeight: "100vh" });
+	});
+
 	it("renders children when expanded", () => {
 		Object.defineProperty(window, "innerWidth", {
 			value: 1600,
