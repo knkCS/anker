@@ -131,7 +131,11 @@ describe("AppShell", () => {
 		});
 	});
 
-	it("the rail column scrolls internally and is no longer sticky", () => {
+	it("the rail column does not scroll itself and is no longer sticky", () => {
+		// The rail column must NOT set overflowY: a scrolling box would force
+		// overflow-x to clip and cut the ContextRail collapse toggle (positioned
+		// `left: -3.5` to protrude into the main column) in half. The rail scrolls
+		// via ContextRail's own inner Stack instead.
 		renderWithChakra(
 			<AppShell
 				sidebar={<div data-testid="sb" />}
@@ -141,7 +145,7 @@ describe("AppShell", () => {
 			</AppShell>,
 		);
 		const railCol = screen.getByTestId("app-shell-rail");
-		expect(railCol).toHaveStyle({ overflowY: "auto" });
+		expect(railCol).not.toHaveStyle({ overflowY: "auto" });
 		expect(railCol).not.toHaveStyle({ position: "sticky" });
 	});
 

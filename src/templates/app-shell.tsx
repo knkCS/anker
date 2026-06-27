@@ -348,7 +348,12 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 					gridRow="2"
 					minW="0"
 					minH="0"
-					overflowY="auto"
+					// No `overflowY` here: the rail's collapse toggle is positioned
+					// `left: -3.5` to protrude into the main column, and `overflow-y:
+					// auto` would force `overflow-x` to clip and cut the toggle in
+					// half. Like the sidebar (whose Body scrolls, not the column),
+					// the rail scrolls via ContextRail's own inner Stack. minH:0
+					// keeps this column bounded to the row so that inner scroll works.
 					bg="bg-surface"
 					borderLeftWidth="1px"
 					borderColor="border"

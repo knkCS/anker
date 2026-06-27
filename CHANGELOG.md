@@ -2,6 +2,16 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 2.10.2 — 2026-06-27
+
+### Fixed
+- `AppShell`: the context rail's collapse/expand toggle was clipped in half.
+  The 2.10.1 internal-scroll change gave the rail column `overflow-y: auto`,
+  which forces `overflow-x` to clip — cutting off the toggle that is positioned
+  `left: -3.5` to protrude into the main column. The rail column no longer
+  scrolls itself; like the sidebar, scrolling is handled by the inner component
+  (`ContextRail`'s own `Stack`), so the protruding toggle renders fully.
+
 ## 2.10.1 — 2026-06-27
 
 ### Fixed
