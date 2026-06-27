@@ -296,3 +296,4 @@ Consuming projects must install:
 - react-router-dom ^6.0.0
 - react-i18next >= 12
 - @tanstack/react-table ^8.0.0 (required for DataTable component)
+- react-grid-layout ^2.2.3 (optional — required only for the Dashboard component)
