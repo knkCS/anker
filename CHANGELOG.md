@@ -2,6 +2,30 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 2.11.0 — 2026-06-28
+
+### Added
+- **Dashboard & widget framework** (`@knkcs/anker/components`): a domain-free
+  framework for building configurable, drag-and-resize widget dashboards. Define
+  widgets as `WidgetDefinition` objects, build a registry with
+  `createWidgetRegistry`, and render `<Dashboard>` — a `react-grid-layout`
+  engine with view/edit modes, a widget catalog, a schema-driven config form, a
+  toolbar, unknown-widget safety, and render-time permission gating. The app
+  owns the saved `widgets` + `mode` (controlled); anker owns the edit-session
+  draft and emits `onCommit(draft)` on Save. Widgets self-fetch their own data,
+  user strings are props, and permissions are opaque `requiredPermissions`
+  tokens plus an optional `isAvailable` predicate. Exports include `Dashboard`,
+  `WidgetCatalog`, `WidgetConfigForm`, `DashboardToolbar`, `WidgetFrame`,
+  `createWidgetRegistry`, the `useDashboardDraft` hook, and the full contract
+  types. Documented in the `Components/Dashboard` Storybook page
+  (`dashboard.mdx`) and in `CLAUDE-ANKER.md`.
+
+### Peer dependencies
+- `react-grid-layout` (`^2.2.3`) is a new **optional** peer dependency, required
+  only by services that render `<Dashboard>`. anker ships the grid styles
+  itself via its Chakra layer — no `react-grid-layout` stylesheet import is
+  needed.
+
 ## 2.10.2 — 2026-06-27
 
 ### Fixed
