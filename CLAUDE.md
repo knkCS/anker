@@ -170,7 +170,7 @@ Several component recipes include built-in visual polish:
 
 ### Dashboard & Widget Framework
 
-`src/components/dashboard/` provides a domain-free dashboard framework (exported
+`src/dashboard/` provides a domain-free dashboard framework (exported
 from `@knkcs/anker/components`): the widget contract (`WidgetDefinition`,
 `WidgetInstance`, `WidgetRenderProps`, …), `createWidgetRegistry`, and
 `<Dashboard>` — a `react-grid-layout` engine with view/edit modes, a catalog, a
@@ -189,7 +189,7 @@ schema-driven config form, and a toolbar.
   import. Both `react-grid-layout` and `react-grid-layout/legacy` are in tsup
   `external`.
 - Full usage guide: the `Components/Dashboard` Storybook docs
-  (`src/components/dashboard/dashboard.mdx`).
+  (`src/dashboard/dashboard.mdx`).
 
 ## Chakra v3 Anti-Patterns
 
