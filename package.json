@@ -23,6 +23,10 @@
       "import": "./dist/components/index.js",
       "types": "./dist/components/index.d.ts"
     },
+    "./dashboard": {
+      "import": "./dist/dashboard/index.js",
+      "types": "./dist/dashboard/index.d.ts"
+    },
     "./atoms": {
       "import": "./dist/atoms/index.js",
       "types": "./dist/atoms/index.d.ts"
@@ -58,7 +62,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify-exports": "tsx scripts/verify-exports.ts",
+    "verify-exports": "tsx scripts/verify-exports.ts && tsx scripts/check-optional-deps.ts",
     "verify-exports:self-test": "tsx scripts/verify-exports.ts --self-test",
     "prepublishOnly": "npm run build && npm run verify-exports"
   },

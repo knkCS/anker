@@ -1,7 +1,7 @@
 import type React from "react";
-import { Box, HStack, Stack } from "../../primitives/layout";
-import { Text } from "../../primitives/typography";
-import { DrawerRoot } from "../drawer";
+import { DrawerRoot } from "../components/drawer";
+import { Box, HStack, Stack } from "../primitives/layout";
+import { Text } from "../primitives/typography";
 import type { WidgetDefinition } from "./types";
 
 export interface WidgetCatalogProps {

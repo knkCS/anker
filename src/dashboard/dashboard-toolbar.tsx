@@ -1,7 +1,7 @@
 import { Pencil, Plus } from "lucide-react";
 import type React from "react";
-import { Button } from "../../atoms/button";
-import { Flex, Spacer } from "../../primitives/layout";
+import { Button } from "../atoms/button";
+import { Flex, Spacer } from "../primitives/layout";
 import type { DashboardLabels } from "./labels";
 import type { DashboardMode } from "./types";
 

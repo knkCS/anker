@@ -1,9 +1,9 @@
 import { Input } from "@chakra-ui/react";
 import type React from "react";
-import { Stack } from "../../primitives/layout";
-import { NativeSelect } from "../../primitives/native-select";
-import { Switch } from "../../primitives/switch";
-import { Text } from "../../primitives/typography";
+import { Stack } from "../primitives/layout";
+import { NativeSelect } from "../primitives/native-select";
+import { Switch } from "../primitives/switch";
+import { Text } from "../primitives/typography";
 import type { WidgetSettingField } from "./types";
 
 export interface WidgetConfigFormProps {

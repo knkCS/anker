@@ -1,5 +1,5 @@
 import { FileText, Hash, ShieldCheck } from "lucide-react";
-import { Text } from "../../primitives/typography";
+import { Text } from "../primitives/typography";
 import { createWidgetRegistry } from "./registry";
 import type { WidgetDefinition } from "./types";
 

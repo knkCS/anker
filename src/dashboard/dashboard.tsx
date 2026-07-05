@@ -1,9 +1,9 @@
 import type React from "react";
 import { useMemo, useState } from "react";
 import GridLayout, { WidthProvider } from "react-grid-layout/legacy";
-import { EmptyState } from "../../atoms/empty-state";
-import { Box } from "../../primitives/layout";
-import { DrawerRoot } from "../drawer";
+import { EmptyState } from "../atoms/empty-state";
+import { DrawerRoot } from "../components/drawer";
+import { Box } from "../primitives/layout";
 import { DashboardToolbar } from "./dashboard-toolbar";
 import { type DashboardLabels, defaultDashboardLabels } from "./labels";
 import { isWidgetAvailable, type WidgetRegistry } from "./registry";

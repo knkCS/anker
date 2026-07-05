@@ -1,9 +1,9 @@
 import { GripVertical, Settings, X } from "lucide-react";
 import type React from "react";
-import { IconButton } from "../../atoms/button";
-import { Box, Flex, HStack } from "../../primitives/layout";
-import { Text } from "../../primitives/typography";
-import { Widget } from "../widget";
+import { IconButton } from "../atoms/button";
+import { Widget } from "../components/widget";
+import { Box, Flex, HStack } from "../primitives/layout";
+import { Text } from "../primitives/typography";
 import type { DashboardLabels } from "./labels";
 import { resolveWidgetSettings } from "./resolve-settings";
 import type { DashboardMode, WidgetDefinition, WidgetInstance } from "./types";

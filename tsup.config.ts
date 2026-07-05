@@ -5,6 +5,7 @@ export default defineConfig({
     "theme/index": "src/theme/index.ts",
     "primitives/index": "src/primitives/index.ts",
     "components/index": "src/components/index.ts",
+    "dashboard/index": "src/dashboard/index.ts",
     "atoms/index": "src/atoms/index.ts",
     "forms/index": "src/forms/index.ts",
     "feedback/index": "src/feedback/index.ts",
