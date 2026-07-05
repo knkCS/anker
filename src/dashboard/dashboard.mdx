@@ -32,7 +32,7 @@ current `mode`, and renders the widget body. The frame (card, title, icon, edit
 controls) is supplied by anker.
 
 ```tsx
-import type { WidgetDefinition } from "@knkcs/anker/components";
+import type { WidgetDefinition } from "@knkcs/anker/dashboard";
 import { ListChecks } from "lucide-react";
 
 interface MyTasksSettings { limit: number }
@@ -62,7 +62,7 @@ The widget `Component` is plain React — fetch data with your own hooks
 ## 2. Build a registry
 
 ```tsx
-import { createWidgetRegistry } from "@knkcs/anker/components";
+import { createWidgetRegistry } from "@knkcs/anker/dashboard";
 
 const registry = createWidgetRegistry([myTasksWidget, calendarWidget, statTileWidget]);
 ```
@@ -82,7 +82,7 @@ import {
   createWidgetRegistry,
   type WidgetInstance,
   type DashboardMode,
-} from "@knkcs/anker/components";
+} from "@knkcs/anker/dashboard";
 
 function MyDashboard() {
   const registry = useMemo(() => createWidgetRegistry(defs), []);

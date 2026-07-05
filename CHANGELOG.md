@@ -2,6 +2,23 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 3.0.0 — 2026-07-05
+
+### Breaking
+
+- **Dashboard moved to its own subpath.** All Dashboard/Widget exports
+  (`Dashboard`, `DashboardToolbar`, `createWidgetRegistry`,
+  `useDashboardDraft`, `WidgetCatalog`, `WidgetConfigForm`,
+  `WidgetFrame`, `resolveWidgetSettings`, `isWidgetAvailable`,
+  `defaultDashboardLabels`, and the `Dashboard*`/`Widget*`/`GridConfig`
+  types) now live at `@knkcs/anker/dashboard` instead of
+  `@knkcs/anker/components`. Migration: change the import specifier —
+  symbol names are unchanged. Why: `react-grid-layout` is an optional
+  peer, but the `/components` barrel's static import forced EVERY barrel
+  consumer to install it (#147). The module graph now enforces the
+  optionality: only `/dashboard` importers resolve it. A
+  `check-optional-deps` dist check guards the boundary in CI.
+
 ## 2.11.0 — 2026-06-28
 
 ### Added

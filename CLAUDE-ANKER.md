@@ -146,7 +146,7 @@ Full slot/prop tables: `docs/react-table-reference.md`. Mapping guide for common
 ## Dashboard & Widgets
 
 Build configurable widget dashboards with the `Dashboard` framework from
-`@knkcs/anker/components`. anker owns the grid, edit UX, and chrome; your
+`@knkcs/anker/dashboard`. anker owns the grid, edit UX, and chrome; your
 service owns the widgets, their data, and persistence.
 
 **The contract.** A widget is a `WidgetDefinition` (`type`, `name`, `icon?`,
@@ -178,8 +178,6 @@ Discard reverts.
 ### Don't
 - **Don't mutate the `widgets` array** you pass in — treat it as immutable and
   apply `onCommit`'s result. Why: it's the controlled source of truth.
-- **Don't import any `react-grid-layout` CSS** — anker ships the grid styles.
-  Just `npm i react-grid-layout@^2.2.3` (optional peer dep, only for services
-  that render a `<Dashboard>`).
+- **Don't import any `react-grid-layout` CSS** — anker ships the grid styles. Just `npm i react-grid-layout@^2.2.3` (optional peer dep, required only by services that import `@knkcs/anker/dashboard`).
 - **Don't rebuild draft / discard / dirty logic** — anker owns the edit
   session; read `onDraftChange` if you need an unsaved-changes indicator.
