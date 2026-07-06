@@ -10,7 +10,7 @@ import {
 } from "react-hook-form";
 import { Box, HStack } from "../primitives/layout";
 import { Text } from "../primitives/typography";
-import { FieldLabelMarkers } from "./form-markers";
+import { FieldLabelMarkers, useFormMarkers } from "./form-markers";
 
 export interface FormFieldProps<T extends FieldValues> {
 	name: Path<T>;
@@ -27,6 +27,9 @@ export interface FormFieldProps<T extends FieldValues> {
 	/** When false, suppresses the required asterisk. Form-level default via
 	 * `FormMarkersProvider`. @default true */
 	showRequiredIndicator?: boolean;
+	/** aria-label for the per-field dirty dot. Form-level default via
+	 * `FormMarkersProvider`. @default "Unsaved changes" */
+	dirtyLabel?: string;
 	actions?: React.ReactNode;
 	/** When false, the dirty-marker on the label is suppressed and the
 	 * children-callback's `meta.isDirty` is forced to false. @default true */
@@ -50,11 +53,15 @@ export function FormField<T extends FieldValues>({
 	readOnly,
 	optionalText,
 	showRequiredIndicator,
+	dirtyLabel,
 	actions,
 	showDirtyState = true,
 	children,
 }: FormFieldProps<T>) {
 	const { control } = useFormContext<T>();
+	const contextMarkers = useFormMarkers();
+	const resolvedDirtyLabel =
+		dirtyLabel ?? contextMarkers.dirtyLabel ?? "Unsaved changes";
 	const uid = useId();
 	const descriptionId = `${uid}-description`;
 	const helperId = `${uid}-helper`;
@@ -102,7 +109,7 @@ export function FormField<T extends FieldValues>({
 												borderRadius="full"
 												bg="yellow.500"
 												ml="2"
-												aria-label="ungespeicherte Änderung"
+												aria-label={resolvedDirtyLabel}
 											/>
 										)}
 									</Field.Label>

@@ -12,7 +12,7 @@ describe("DirtyDot", () => {
 		const { container } = renderWithChakra(<DirtyDot />);
 		const span = container.querySelector("span[aria-label]");
 		expect(span).not.toBeNull();
-		expect(span?.getAttribute("aria-label")).toBe("ungespeicherte Änderungen");
+		expect(span?.getAttribute("aria-label")).toBe("Unsaved changes");
 	});
 
 	it("renders nothing when active is false", () => {

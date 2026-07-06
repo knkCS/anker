@@ -9,9 +9,16 @@ export interface FormMarkers {
 	optionalText?: React.ReactNode;
 	/** When false, suppresses the required asterisk. @default true */
 	showRequiredIndicator?: boolean;
+	/** aria-label default for the per-field dirty dot. @default "Unsaved changes" */
+	dirtyLabel?: string;
 }
 
 const FormMarkersContext = createContext<FormMarkers>({});
+
+/** Internal: read the form-level marker defaults. Not exported from the barrel. */
+export function useFormMarkers(): FormMarkers {
+	return useContext(FormMarkersContext);
+}
 
 export interface FormMarkersProviderProps {
 	value: FormMarkers;
@@ -53,7 +60,7 @@ export function FieldLabelMarkers({
 	showRequiredIndicator,
 	optionalText,
 }: FieldLabelMarkersProps) {
-	const ctx = useContext(FormMarkersContext);
+	const ctx = useFormMarkers();
 	const show = showRequiredIndicator ?? ctx.showRequiredIndicator ?? true;
 	const text = optionalText ?? ctx.optionalText;
 	return (

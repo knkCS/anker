@@ -5,7 +5,7 @@ import { Text } from "../primitives/typography";
 export interface DirtyCounterProps {
 	/**
 	 * Label template. The literal `{count}` is replaced with the dirty
-	 * field count. @default "{count} ungespeicherte Änderungen"
+	 * field count. @default "{count} unsaved changes"
 	 */
 	label?: string;
 	/** Render nothing when no fields are dirty. @default true */
@@ -13,7 +13,7 @@ export interface DirtyCounterProps {
 }
 
 export function DirtyCounter({
-	label = "{count} ungespeicherte Änderungen",
+	label = "{count} unsaved changes",
 	hideWhenClean = true,
 }: DirtyCounterProps) {
 	const ctx = useFormContext();
