@@ -1,6 +1,7 @@
-import { Input, Stack } from "@chakra-ui/react";
+import { Input } from "@chakra-ui/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { FormProvider, useForm } from "react-hook-form";
+import { Stack } from "../primitives/layout";
 import { FormField } from "./form-field";
 import { FormMarkersProvider } from "./form-markers";
 
