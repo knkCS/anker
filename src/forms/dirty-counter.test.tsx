@@ -38,9 +38,9 @@ describe("DirtyCounter", () => {
 		expect(container.textContent).toBe("");
 	});
 
-	it("renders the count with the default German label when dirty", () => {
+	it("renders the count with the default English label when dirty", () => {
 		const { container } = render(<Harness dirtyCount={2} />);
-		expect(container.textContent).toContain("2 ungespeicherte Änderungen");
+		expect(container.textContent).toContain("2 unsaved changes");
 	});
 
 	it("respects a custom label template with {count}", () => {
@@ -54,6 +54,6 @@ describe("DirtyCounter", () => {
 		const { container } = render(
 			<Harness dirtyCount={0} hideWhenClean={false} />,
 		);
-		expect(container.textContent).toContain("0 ungespeicherte Änderungen");
+		expect(container.textContent).toContain("0 unsaved changes");
 	});
 });

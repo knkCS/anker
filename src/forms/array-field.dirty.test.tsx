@@ -31,11 +31,11 @@ function Harness({ showDirtyState }: { showDirtyState?: boolean }) {
 describe("ArrayField — dirty marker", () => {
 	it("renders the dirty marker dot when dirty", () => {
 		const { getByLabelText } = render(<Harness />);
-		expect(getByLabelText("ungespeicherte Änderung")).toBeInTheDocument();
+		expect(getByLabelText("Unsaved changes")).toBeInTheDocument();
 	});
 
 	it("suppresses the marker when showDirtyState is false", () => {
 		const { queryByLabelText } = render(<Harness showDirtyState={false} />);
-		expect(queryByLabelText("ungespeicherte Änderung")).toBeNull();
+		expect(queryByLabelText("Unsaved changes")).toBeNull();
 	});
 });

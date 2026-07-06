@@ -143,6 +143,12 @@ Full slot/prop tables: `docs/react-table-reference.md`. Mapping guide for common
   defaults — mostly-required forms use
   `{ showRequiredIndicator: false, optionalText: "(optional)" }`.
   String labels only.
+- `FormMarkersProvider` also carries `dirtyLabel` for customizing the
+  per-field dirty-dot aria-label (default "Unsaved changes"); per-field
+  `FormField` `dirtyLabel` prop overrides the provider default.
+- `SearchInput` accepts a `ref` exposing `clear()` (empties the input,
+  cancels pending debounce, emits `onSearch("")`) and `focus()`
+  methods via `SearchInputHandle`.
 
 ---
 

@@ -2,10 +2,24 @@ import { Input, InputGroup, type InputProps } from "@chakra-ui/react";
 import debounce from "lodash.debounce";
 import { Search } from "lucide-react";
 import type React from "react";
-import { useCallback, useEffect, useMemo } from "react";
+import {
+	forwardRef,
+	useCallback,
+	useEffect,
+	useImperativeHandle,
+	useMemo,
+	useRef,
+} from "react";
+
+export interface SearchInputHandle {
+	/** Empty the input, cancel any pending debounced flush, and emit onSearch(""). */
+	clear: () => void;
+	/** Focus the underlying input element. */
+	focus: () => void;
+}
 
 export interface SearchInputProps
-	extends Omit<InputProps, "onChange" | "defaultValue"> {
+	extends Omit<InputProps, "onChange" | "defaultValue" | "ref"> {
 	/** Called with the search query after debounce. */
 	onSearch: (query: string) => void;
 	/** Debounce delay in milliseconds. @default 300 */
@@ -17,46 +31,64 @@ export interface SearchInputProps
 	maxWidth?: string;
 }
 
-export const SearchInput: React.FC<SearchInputProps> = (props) => {
-	const {
-		onSearch,
-		debounceMs = 300,
-		placeholder = "Search...",
-		defaultValue = "",
-		maxWidth = "full",
-		...restProps
-	} = props;
+export const SearchInput = forwardRef<SearchInputHandle, SearchInputProps>(
+	function SearchInput(props, ref) {
+		const {
+			onSearch,
+			debounceMs = 300,
+			placeholder = "Search...",
+			defaultValue = "",
+			maxWidth = "full",
+			...restProps
+		} = props;
 
-	const debouncedSearch = useMemo(
-		() => debounce((term: string) => onSearch(term), debounceMs),
-		[onSearch, debounceMs],
-	);
+		const inputRef = useRef<HTMLInputElement>(null);
 
-	useEffect(() => {
-		return () => {
-			debouncedSearch.cancel();
-		};
-	}, [debouncedSearch]);
+		const debouncedSearch = useMemo(
+			() => debounce((term: string) => onSearch(term), debounceMs),
+			[onSearch, debounceMs],
+		);
 
-	const handleChange = useCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			debouncedSearch(e.target.value);
-		},
-		[debouncedSearch],
-	);
+		useEffect(() => {
+			return () => {
+				debouncedSearch.cancel();
+			};
+		}, [debouncedSearch]);
 
-	return (
-		<InputGroup maxWidth={maxWidth} startElement={<Search size={16} />}>
-			<Input
-				variant="outline"
-				type="text"
-				autoComplete="off"
-				placeholder={placeholder}
-				defaultValue={defaultValue}
-				onChange={handleChange}
-				{...restProps}
-			/>
-		</InputGroup>
-	);
-};
+		useImperativeHandle(
+			ref,
+			() => ({
+				clear: () => {
+					if (inputRef.current) inputRef.current.value = "";
+					debouncedSearch.cancel();
+					onSearch("");
+				},
+				focus: () => inputRef.current?.focus(),
+			}),
+			[debouncedSearch, onSearch],
+		);
+
+		const handleChange = useCallback(
+			(e: React.ChangeEvent<HTMLInputElement>) => {
+				debouncedSearch(e.target.value);
+			},
+			[debouncedSearch],
+		);
+
+		return (
+			<InputGroup maxWidth={maxWidth} startElement={<Search size={16} />}>
+				<Input
+					variant="outline"
+					type="text"
+					autoComplete="off"
+					placeholder={placeholder}
+					defaultValue={defaultValue}
+					onChange={handleChange}
+					ref={inputRef}
+					{...restProps}
+				/>
+			</InputGroup>
+		);
+	},
+);
 SearchInput.displayName = "SearchInput";

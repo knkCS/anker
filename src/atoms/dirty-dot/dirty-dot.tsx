@@ -4,7 +4,7 @@ import { Box } from "../../primitives/layout";
 export interface DirtyDotProps {
 	/** Render nothing when false. @default true */
 	active?: boolean;
-	/** aria-label for screen readers. @default "ungespeicherte Änderungen" */
+	/** aria-label for screen readers. @default "Unsaved changes" */
 	label?: string;
 	/** Box prop overrides (ml, color, size if anyone needs them). */
 	boxProps?: BoxProps;
@@ -12,7 +12,7 @@ export interface DirtyDotProps {
 
 export function DirtyDot({
 	active = true,
-	label = "ungespeicherte Änderungen",
+	label = "Unsaved changes",
 	boxProps,
 }: DirtyDotProps) {
 	if (!active) return null;
