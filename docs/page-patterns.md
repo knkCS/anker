@@ -1015,6 +1015,12 @@ optional-with-text in the same form — pick one and stick with it. Forms
 with mostly-required fields use `(optional)` markers; forms with
 mostly-optional fields use `*` on the few that are required.
 
+Implemented by `FormField`/`ControlledFormField`: `required` renders the
+`*`, `optionalText` renders the muted marker, and `FormMarkersProvider`
+sets the form-wide convention (pass
+`{ showRequiredIndicator: false, optionalText: "(optional)" }` for
+mostly-required forms).
+
 ### Save-button placement
 
 Two patterns:
