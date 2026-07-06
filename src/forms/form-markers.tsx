@@ -3,7 +3,8 @@ import type React from "react";
 import { createContext, useContext } from "react";
 import { Text } from "../primitives/typography";
 
-/** Form-level defaults for the §10 required/optional label markers. */
+/** Form-level defaults for field-label adornments: the §10
+ * required/optional markers and the dirty-dot announcement. */
 export interface FormMarkers {
 	/** Appended after the label in muted color when the field is NOT required. */
 	optionalText?: React.ReactNode;
