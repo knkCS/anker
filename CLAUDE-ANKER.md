@@ -146,6 +146,15 @@ Full slot/prop tables: `docs/react-table-reference.md`. Mapping guide for common
 
 ---
 
+## Feedback
+
+- `toaster` / `Toaster` (`@knkcs/anker/primitives`): module-singleton
+  toast store + region. Mount `<Toaster />` once per app; extra mounts
+  of the same pair are deduped automatically (first live mount wins),
+  so embedding components that bring their own `Toaster` is safe.
+
+---
+
 ## Pointers
 
 - Full spec: anker GitHub Pages docs site (`/design-system`, `/page-patterns`)
