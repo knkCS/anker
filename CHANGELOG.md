@@ -2,6 +2,18 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 3.1.1 — 2026-07-06
+
+### Fixed
+
+- **`Toaster` self-deduplicates.** Multiple mounted `<Toaster />`
+  instances of the same pair (e.g. a host app's global one plus one
+  embedded in a library component such as fieldkit's `SpecEditor`) now
+  render exactly one toast region — previously every region rendered
+  every toast, duplicating them. First live mount owns the region;
+  when it unmounts the next takes over. Custom `createAnkerToaster()`
+  pairs dedupe independently.
+
 ## 3.1.0 — 2026-07-06
 
 ### Added
