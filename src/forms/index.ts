@@ -1,5 +1,3 @@
-// FormField
-
 // ArrayField
 export { ArrayField, type ArrayFieldProps } from "./array-field";
 // CheckboxField
@@ -28,6 +26,12 @@ export { DirtyFormGuard, type DirtyFormGuardProps } from "./dirty-form-guard";
 // FileField
 export { FileField, type FileFieldProps } from "./file-field";
 export { FormField, type FormFieldProps } from "./form-field";
+// FormMarkers
+export {
+	type FormMarkers,
+	FormMarkersProvider,
+	type FormMarkersProviderProps,
+} from "./form-markers";
 // InlineEdit
 export {
 	InlineEdit,

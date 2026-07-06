@@ -10,6 +10,7 @@ import {
 } from "react-hook-form";
 import { Box, HStack } from "../primitives/layout";
 import { Text } from "../primitives/typography";
+import { FieldLabelMarkers } from "./form-markers";
 
 export interface FormFieldProps<T extends FieldValues> {
 	name: Path<T>;
@@ -20,6 +21,12 @@ export interface FormFieldProps<T extends FieldValues> {
 	required?: boolean;
 	disabled?: boolean;
 	readOnly?: boolean;
+	/** Appended after the label in muted color when the field is NOT required.
+	 * Form-level default via `FormMarkersProvider`. */
+	optionalText?: React.ReactNode;
+	/** When false, suppresses the required asterisk. Form-level default via
+	 * `FormMarkersProvider`. @default true */
+	showRequiredIndicator?: boolean;
 	actions?: React.ReactNode;
 	/** When false, the dirty-marker on the label is suppressed and the
 	 * children-callback's `meta.isDirty` is forced to false. @default true */
@@ -41,6 +48,8 @@ export function FormField<T extends FieldValues>({
 	required,
 	disabled,
 	readOnly,
+	optionalText,
+	showRequiredIndicator,
 	actions,
 	showDirtyState = true,
 	children,
@@ -79,6 +88,11 @@ export function FormField<T extends FieldValues>({
 								<HStack>
 									<Field.Label flex="1" htmlFor={name}>
 										{label}
+										<FieldLabelMarkers
+											required={required}
+											showRequiredIndicator={showRequiredIndicator}
+											optionalText={optionalText}
+										/>
 										{isDirty && (
 											<Box
 												as="span"
