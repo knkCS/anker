@@ -134,6 +134,18 @@ Full slot/prop tables: `docs/react-table-reference.md`. Mapping guide for common
 
 ---
 
+## Form fields
+
+- `FormField`/`ControlledFormField` render §10 label markers: `required`
+  shows `*` (suppress with `showRequiredIndicator={false}`);
+  `optionalText` renders a muted marker after non-required labels.
+  `FormMarkersProvider` (from `@knkcs/anker/forms`) sets form-level
+  defaults — mostly-required forms use
+  `{ showRequiredIndicator: false, optionalText: "(optional)" }`.
+  String labels only.
+
+---
+
 ## Pointers
 
 - Full spec: anker GitHub Pages docs site (`/design-system`, `/page-patterns`)

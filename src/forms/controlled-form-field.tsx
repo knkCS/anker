@@ -2,6 +2,7 @@ import { Field } from "@chakra-ui/react";
 import type React from "react";
 import { useId } from "react";
 import { HStack } from "../primitives/layout";
+import { FieldLabelMarkers } from "./form-markers";
 
 export interface ControlledFormFieldProps {
 	name: string;
@@ -11,6 +12,12 @@ export interface ControlledFormFieldProps {
 	required?: boolean;
 	disabled?: boolean;
 	readOnly?: boolean;
+	/** Appended after the label in muted color when the field is NOT required.
+	 * Form-level default via `FormMarkersProvider`. */
+	optionalText?: React.ReactNode;
+	/** When false, suppresses the required asterisk. Form-level default via
+	 * `FormMarkersProvider`. @default true */
+	showRequiredIndicator?: boolean;
 	actions?: React.ReactNode;
 	children: React.ReactNode;
 }
@@ -23,6 +30,8 @@ export const ControlledFormField: React.FC<ControlledFormFieldProps> = ({
 	required,
 	disabled,
 	readOnly,
+	optionalText,
+	showRequiredIndicator,
 	actions,
 	children,
 }) => {
@@ -42,6 +51,11 @@ export const ControlledFormField: React.FC<ControlledFormFieldProps> = ({
 					<HStack>
 						<Field.Label flex="1" htmlFor={name}>
 							{label}
+							<FieldLabelMarkers
+								required={required}
+								showRequiredIndicator={showRequiredIndicator}
+								optionalText={optionalText}
+							/>
 						</Field.Label>
 						{actions}
 					</HStack>

@@ -2,6 +2,26 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 3.1.0 — 2026-07-06
+
+### Added
+
+- **Required/optional label markers** on `FormField` and
+  `ControlledFormField` (#146): `required` now renders the `*`
+  indicator after string labels; new `optionalText` prop renders a
+  muted marker (e.g. `(optional)`) after non-required labels; new
+  `showRequiredIndicator` prop (default `true`) suppresses the
+  asterisk. New `FormMarkersProvider` sets form-level defaults for
+  both, enabling the one-convention-per-form rule from
+  `docs/page-patterns.md` §10. Markers apply to string labels only
+  (ReactNode labels bypass `Field.Label`, as with the dirty dot).
+
+### Changed
+
+- **Visual change:** required fields now show `*` by default.
+  Suppress per field (`showRequiredIndicator={false}`) or per form
+  (`FormMarkersProvider`).
+
 ## 3.0.0 — 2026-07-05
 
 ### Breaking
