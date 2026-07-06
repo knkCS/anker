@@ -56,6 +56,7 @@ export {
 // SearchInput
 export {
 	SearchInput,
+	type SearchInputHandle,
 	type SearchInputProps,
 } from "./search-input";
 // SelectField

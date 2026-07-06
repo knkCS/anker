@@ -2,6 +2,26 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 3.2.0 — 2026-07-06
+
+### Added
+
+- **Configurable per-field dirty-dot label** (#149): `FormField` gains
+  `dirtyLabel?: string` (forwarded by all field wrappers), and
+  `FormMarkersProvider`'s `FormMarkers` gains `dirtyLabel` as the
+  form-level default — resolution: prop → provider → default.
+- **`SearchInputHandle`**: `SearchInput` accepts a `ref` exposing
+  `clear()` (empties the input, cancels the pending debounce, emits
+  `onSearch("")`) and `focus()`.
+
+### Changed
+
+- **Dirty-state announcement defaults are now English**: the FormField
+  per-field dot says `"Unsaved changes"` (was hardcoded German),
+  `DirtyDot` defaults to `"Unsaved changes"`, `DirtyCounter` to
+  `"{count} unsaved changes"`. Apps wanting German pass `label`/
+  `dirtyLabel` or the `FormMarkersProvider` default.
+
 ## 3.1.1 — 2026-07-06
 
 ### Fixed
