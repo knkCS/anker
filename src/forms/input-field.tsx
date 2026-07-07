@@ -1,4 +1,4 @@
-import type { InputProps } from "@chakra-ui/react";
+import { type InputProps, mergeRefs } from "@chakra-ui/react";
 import type React from "react";
 import type { FieldValues } from "react-hook-form";
 import TextInput from "../atoms/text-input/text-input";
@@ -54,7 +54,10 @@ export function InputField<T extends FieldValues>({
 					opacity={readOnly ? 0.8 : 1}
 					borderColor={isDirty ? "yellow.400" : undefined}
 					bg={isDirty ? "yellow.50" : undefined}
-					ref={ref}
+					// Merge rather than override: `{...field}` spreads RHF's own
+					// field.ref, and a later `ref={ref}` would DISCARD it — leaving
+					// react-hook-form unregistered (setFocus/focus-on-error dead).
+					ref={mergeRefs(field.ref, ref)}
 					{...inputProps}
 				/>
 			)}

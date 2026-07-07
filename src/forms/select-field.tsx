@@ -1,4 +1,4 @@
-import type { NativeSelectFieldProps } from "@chakra-ui/react";
+import { mergeRefs, type NativeSelectFieldProps } from "@chakra-ui/react";
 import type React from "react";
 import type { FieldValues } from "react-hook-form";
 import { NativeSelect } from "../primitives/native-select";
@@ -43,7 +43,10 @@ export function SelectField<T extends FieldValues>({
 					{...field}
 					value={String(field.value ?? "")}
 					id={name}
-					ref={ref}
+					// Merge rather than override: `{...field}` spreads RHF's own
+					// field.ref, and a later `ref={ref}` would DISCARD it — leaving
+					// react-hook-form unregistered (setFocus/focus-on-error dead).
+					ref={mergeRefs(field.ref, ref)}
 					borderColor={isDirty ? "yellow.400" : undefined}
 					bg={isDirty ? "yellow.50" : undefined}
 					{...selectProps}
