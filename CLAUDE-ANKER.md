@@ -10,6 +10,15 @@ The full human-facing spec lives at the anker GitHub Pages docs site (linked fro
 
 ---
 
+## Peer dependencies
+
+anker 4.0.0 requires **React >=19** (as of July 2026). The library's
+ref-as-prop convention (used across atoms and form wrappers) depends on React
+19's ref-as-prop semantics; on React 18 refs were silently stripped. All known
+consumers run React 19. See `CHANGELOG.md` for migration notes if you're on 18.
+
+---
+
 ## Five design principles
 
 1. **Refined Minimalism.** Surfaces are calm. Brand colors are the crown, not the carpet — primary action only.
@@ -146,6 +155,11 @@ Full slot/prop tables: `docs/react-table-reference.md`. Mapping guide for common
 - `FormMarkersProvider` also carries `dirtyLabel` for customizing the
   per-field dirty-dot aria-label (default "Unsaved changes"); per-field
   `FormField` `dirtyLabel` prop overrides the provider default.
+- **react-hook-form integration (restored in 4.0.0):** Form wrappers merge
+  RHF's `field.ref` with consumer refs (via `mergeRefs()`), so element
+  registration is active — `setFocus()` and form-level focus-on-first-error
+  now work correctly. Inputs carry the `name` attribute (not just `id`) for
+  autofill and `[name=…]` selector targeting.
 - `SearchInput` accepts a `ref` exposing `clear()` (empties the input,
   cancels pending debounce, emits `onSearch("")`) and `focus()`
   methods via `SearchInputHandle`.

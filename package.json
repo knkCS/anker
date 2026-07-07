@@ -1,6 +1,6 @@
 {
   "name": "@knkcs/anker",
-  "version": "3.2.0",
+  "version": "4.0.0",
   "description": "UI component library for the knk software group",
   "repository": {
     "type": "git",
@@ -70,8 +70,8 @@
     "@chakra-ui/react": "^3.0.0",
     "@hookform/resolvers": "^3.0.0",
     "@tanstack/react-table": "^8.0.0",
-    "react": ">=18",
-    "react-dom": ">=18",
+    "react": ">=19",
+    "react-dom": ">=19",
     "react-grid-layout": "^2.2.3",
     "react-hook-form": "^7.0.0",
     "react-i18next": ">=12",

@@ -2,6 +2,28 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 4.0.0 — 2026-07-07
+
+### Breaking
+
+- **React peer floor is now `>=19`** (#150). The library's ref-as-prop
+  convention (used across atoms and form wrappers) requires React 19's
+  ref-as-prop semantics; on React 18 those refs were silently stripped.
+  All known consumers already run React 19 — upgrade React before
+  taking 4.x if you are on 18.
+
+### Fixed
+
+- **Form inputs carry the `name` attribute again** (#151): `TextInput`
+  passed `name` only as `id`; the DOM input now gets both. Restores
+  autofill/form semantics and `[name=…]` selector targeting.
+- **react-hook-form element registration restored**: form wrappers
+  spread RHF's `field` props and then OVERRODE `field.ref` with the
+  consumer ref, leaving RHF unregistered — `setFocus` and
+  focus-on-first-error were silently dead. Refs are now merged
+  (`mergeRefs(field.ref, ref)`); failed submits focus the first errored
+  field again, and consumer refs keep working.
+
 ## 3.2.0 — 2026-07-06
 
 ### Added
