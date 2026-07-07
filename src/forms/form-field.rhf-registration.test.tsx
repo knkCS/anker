@@ -4,6 +4,8 @@ import { createRef, useEffect } from "react";
 import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
 import { describe, expect, it } from "vitest";
 import { InputField } from "./input-field";
+import { NumberInputField } from "./number-input-field";
+import { SwitchField } from "./switch-field";
 import { TextareaField } from "./textarea-field";
 
 // react-hook-form's setFocus() defers the actual DOM `.focus()` call inside a
@@ -90,5 +92,36 @@ describe("form wrappers — DOM name + RHF registration", () => {
 		});
 		await flushSetFocus();
 		expect(area).toHaveFocus();
+	});
+
+	it("NumberInputField: RHF setFocus reaches the input", async () => {
+		let form: UseFormReturn<{ name: string }> | undefined;
+		render(
+			<Harness onForm={(f) => (form = f)}>
+				<NumberInputField name="name" label="Amount" />
+			</Harness>,
+		);
+		act(() => {
+			form?.setFocus("name");
+		});
+		await flushSetFocus();
+		// NumberInput renders with role="spinbutton"; label is associated with root, not the input itself
+		expect(screen.getByRole("spinbutton")).toHaveFocus();
+	});
+
+	it("SwitchField: RHF setFocus reaches the hidden input", async () => {
+		let form: UseFormReturn<{ name: string }> | undefined;
+		render(
+			<Harness onForm={(f) => (form = f)}>
+				<SwitchField name="name" label="Active" />
+			</Harness>,
+		);
+		act(() => {
+			form?.setFocus("name");
+		});
+		await flushSetFocus();
+		// Switch focuses its hidden checkbox input.
+		expect(document.activeElement?.tagName).toBe("INPUT");
+		expect(document.activeElement?.getAttribute("name")).toBe("name");
 	});
 });
