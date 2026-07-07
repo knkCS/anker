@@ -1,4 +1,4 @@
-import { Input } from "@chakra-ui/react";
+import { Input, mergeRefs } from "@chakra-ui/react";
 import type React from "react";
 import type { FieldValues } from "react-hook-form";
 import { FormField, type FormFieldProps } from "./form-field";
@@ -46,7 +46,10 @@ export function DatePickerField<T extends FieldValues>({
 					max={max}
 					readOnly={readOnly}
 					disabled={disabled}
-					ref={ref}
+					// Merge rather than override: `{...field}` spreads RHF's own
+					// field.ref, and a later `ref={ref}` would DISCARD it — leaving
+					// react-hook-form unregistered (setFocus/focus-on-error dead).
+					ref={mergeRefs(field.ref, ref)}
 				/>
 			)}
 		</FormField>

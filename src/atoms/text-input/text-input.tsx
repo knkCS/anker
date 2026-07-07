@@ -14,7 +14,7 @@ const TextInput = ({
 	return (
 		<Group attached w="full">
 			{prepend && prepend !== "" && <InputAddon>{prepend}</InputAddon>}
-			<Input id={name} size={size} {...rest} ref={ref} />
+			<Input id={name} name={name} size={size} {...rest} ref={ref} />
 			{append && append !== "" && <InputAddon>{append}</InputAddon>}
 		</Group>
 	);

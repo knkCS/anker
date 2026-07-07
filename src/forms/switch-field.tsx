@@ -1,3 +1,4 @@
+import { mergeRefs } from "@chakra-ui/react";
 import type React from "react";
 import type { FieldValues } from "react-hook-form";
 import { Switch, type SwitchProps } from "../primitives/switch";
@@ -42,7 +43,11 @@ export function SwitchField<T extends FieldValues>({
 					readOnly={readOnly}
 					opacity={readOnly ? 0.8 : 1}
 					aria-describedby={field["aria-describedby"]}
-					ref={ref}
+					// Merge rather than override: this control cherry-picks field
+					// props instead of spreading `{...field}`, but `field.ref` still
+					// needs to reach the real input, or RHF never registers it
+					// (setFocus/focus-on-error dead).
+					ref={mergeRefs(field.ref, ref)}
 					{...switchProps}
 				/>
 			)}
