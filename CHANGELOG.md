@@ -2,6 +2,37 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 4.0.1 — 2026-07-13
+
+### Fixed
+
+- **Text inputs render their intended background again** (#153): the input
+  recipe was a v2-style slot recipe registered under `slotRecipes.input`,
+  which Chakra v3's single-part `Input` never reads — Chakra's default
+  (`outline` with `bg: transparent`) applied and inputs rendered
+  transparent on any non-white surface. The same styles are now registered
+  where v3 looks: plain `recipes.input` (all four variants + size `lg`) and
+  `recipes.inputAddon`. No styling was designed or changed — only where it
+  is registered. A registration pin test now guards the composed system.
+- **Dead v2 slot-recipe registrations removed** (#153 sweep): `modal`,
+  `persona`, `comment`, `tsProperty`, `treeItem` were registered under
+  `slotRecipes` but consumed by nothing (not v3 slot keys; no
+  `useSlotRecipe` consumer). The one documented style among them — a
+  frosted-glass overlay — is ported to the `dialog` slot recipe
+  (`backdrop.backdropFilter: blur(4px)`), which Chakra's `Dialog.Backdrop`
+  consumes for all dialog surfaces (Modal, ConfirmModal,
+  LeavePageConfirmation).
+
+### Docs
+
+- **CLAUDE-ANKER.md gains a "Modal mount pattern" section** (#152, docs
+  half): mandatory `lazyMount unmountOnExit`; the open-transition
+  fallback-reset idiom (`onExitComplete` is skipped on interrupted
+  reopens); the two blessed dialog shapes with mediahub exemplar paths;
+  the uncontrolled-inputs-inside-Modal warning; the nested-dialog
+  scroll-lock rule. The API half (a guaranteed session-end callback) stays
+  open on #152.
+
 ## 4.0.0 — 2026-07-07
 
 ### Breaking
