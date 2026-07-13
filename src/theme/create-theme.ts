@@ -8,7 +8,6 @@ import {
 	button,
 	card,
 	checkbox,
-	comment,
 	container,
 	dialog,
 	drawer,
@@ -16,8 +15,6 @@ import {
 	input,
 	inputAddon,
 	menu,
-	modal,
-	persona,
 	popover,
 	prose,
 	separator,
@@ -27,8 +24,6 @@ import {
 	tag,
 	textarea,
 	tooltip,
-	treeItem,
-	tsProperty,
 	tsRadioCard,
 } from "./recipes";
 import {
@@ -167,10 +162,7 @@ export function createAnkerTheme(preset?: ThemePreset) {
 
 			slotRecipes: {
 				card,
-				tsProperty,
-				treeItem,
 				checkbox,
-				comment,
 				dialog,
 				drawer,
 				// Field.Root override: v3 defaults to alignItems: flex-start which
@@ -188,8 +180,6 @@ export function createAnkerTheme(preset?: ThemePreset) {
 					},
 				}),
 				menu,
-				modal,
-				persona,
 				popover,
 				stepper,
 				table,

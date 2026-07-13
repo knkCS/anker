@@ -44,4 +44,9 @@ describe("createAnkerTheme recipe registration (#153)", () => {
 			_dark: "gray.800",
 		});
 	});
+
+	it("dialog backdrop carries the frosted-glass blur (ported from the dead modal recipe)", () => {
+		const dialog = system.getSlotRecipe("dialog", null);
+		expect(dialog?.base?.backdrop?.backdropFilter).toBe("blur(4px)");
+	});
 });
