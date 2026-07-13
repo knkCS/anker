@@ -6,7 +6,7 @@ export { default as container } from "./container";
 export { dialog } from "./dialog";
 export { drawerTheme as drawer } from "./drawer";
 export { default as formLabel } from "./form-label";
-export { default as input } from "./input";
+export { inputAddonTheme as inputAddon, inputTheme as input } from "./input";
 export { menuTheme as menu } from "./menu";
 export { modalSlotRecipe as modal } from "./modal";
 export { default as persona } from "./persona";

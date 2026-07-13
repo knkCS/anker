@@ -296,10 +296,10 @@ Additional rules:
 **Color palette tokens** (per-palette): `{palette}.contrast`, `{palette}.fg`, `{palette}.subtle`, `{palette}.muted`, `{palette}.emphasized`, `{palette}.solid`, `{palette}.focusRing`, `{palette}.border`
 
 ### Registered recipes (single-part)
-`button`, `container`, `prose`, `separator`, `formLabel`, `textarea`, `tooltip`, `tsRadioCard`, `tag`
+`button`, `container`, `prose`, `separator`, `formLabel`, `input`, `inputAddon`, `textarea`, `tooltip`, `tsRadioCard`, `tag`
 
 ### Registered slot recipes (multi-part)
-`card`, `checkbox`, `comment`, `dialog`, `drawer`, `field` (inline in theme/index.ts), `input`, `menu`, `modal`, `persona`, `popover`, `stepper`, `table`, `tabs`, `tsProperty`, `treeItem`
+`card`, `checkbox`, `comment`, `dialog`, `drawer`, `field` (inline in create-theme.ts), `menu`, `modal`, `persona`, `popover`, `stepper`, `table`, `tabs`, `tsProperty`, `treeItem`
 
 ## Breaking Changes
 
