@@ -175,6 +175,39 @@ Full slot/prop tables: `docs/react-table-reference.md`. Mapping guide for common
 
 ---
 
+## Modal mount pattern
+
+- **Always keep `Modal` mounted; drive it with `open` and set
+  `lazyMount unmountOnExit`.** Never `{open ? <Modal open … /> : null}` and
+  never `if (!open) return null` inside a dialog component. A dialog machine
+  that mounts already-open or unmounts while open orphans zag's cleanup under
+  React StrictMode (dev): the body scroll lock leaks (`overflow: hidden` +
+  `pointer-events: none` on `<body>`, `aria-hidden` on `#root`) and the whole
+  app is unclickable until reload — and one leaked lock poisons every later
+  dialog. `lazyMount unmountOnExit` still gives you fresh content per open.
+- **`onExitComplete` is NOT a reliable session-end hook.** zag's presence
+  machine fires it only on the unmount transition; a reopen that interrupts
+  the exit animation — or a same-tick close+reopen — skips it silently. Pair
+  it with the open-transition fallback-reset idiom: when `open` flips to
+  true, re-seed the dialog's per-session state in case the exit callback
+  never ran.
+- **Two blessed dialog shapes** (copyable exemplars in mediahub):
+  single-component dialog → `web/src/components/asset-type/asset-type-form-dialog.tsx`;
+  create/edit wrapper → `web/src/components/status/status-form-dialog.tsx`
+  (both inner dialogs stay mounted with complementary `open` booleans + a
+  render-top entity latch). Dedicated create-only/edit-only call sites pair
+  naturally with a latched-branch shape (both-mounted leaves
+  permanently-inert off-branches).
+- **Avoid uncontrolled inputs inside Modal content.** On an interrupted
+  reopen the content never unmounts, so `defaultValue`-style inputs (e.g. a
+  bare `SearchInput`) keep stale DOM text while your state resets. Use
+  controlled inputs or a per-session `key`.
+- **Nested dialogs:** an inner dialog's `preventBodyScroll` no-ops when the
+  body is already locked — safe only for machines that mount closed, which
+  the rules above guarantee.
+
+---
+
 ## Pointers
 
 - Full spec: anker GitHub Pages docs site (`/design-system`, `/page-patterns`)
