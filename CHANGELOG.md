@@ -14,6 +14,10 @@ All notable changes to `@knkcs/anker` are documented in this file. The format fo
   where v3 looks: plain `recipes.input` (all four variants + size `lg`) and
   `recipes.inputAddon`. No styling was designed or changed — only where it
   is registered. A registration pin test now guards the composed system.
+  Note the reach: select controls pick up the same background/hover/focus
+  styling, because chakra-react-select derives its Control styles from the
+  `input` recipe — every `Select`/`SelectField` changes alongside text
+  inputs (same "already-written styles now apply" class, no new design).
 - **Dead v2 slot-recipe registrations removed** (#153 sweep): `modal`,
   `persona`, `comment`, `tsProperty`, `treeItem` were registered under
   `slotRecipes` but consumed by nothing (not v3 slot keys; no
