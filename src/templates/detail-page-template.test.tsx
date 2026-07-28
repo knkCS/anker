@@ -3,7 +3,8 @@ import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { render, screen, within } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { describe, expect, it } from "vitest";
-import { AppShell } from "./app-shell";
+import { Tabs } from "../primitives/tabs";
+import { AppShell, usePageActions } from "./app-shell";
 import { DetailPageTemplate } from "./detail-page-template";
 
 function renderWithChakra(ui: ReactElement) {
@@ -115,5 +116,118 @@ describe("DetailPageTemplate — sticky header", () => {
 			"data-sticky-header",
 			"false",
 		);
+	});
+});
+
+// These tests pin the guarantee behind the "one mounted usePageActions caller"
+// rule in CLAUDE-ANKER.md (#175). The rule used to say "don't own a Tabs.Root —
+// use bodyTabs", but bodyTabs was removed in 2.2.0 and took its
+// `lazyMount unmountOnExit` guard with it. Nothing in the template enforces the
+// invariant now, so the hazard and the two ways of avoiding it are pinned here.
+
+/** A tab body that lifts its own primary action into the page header. */
+function TabBody({ label }: { label: string }) {
+	usePageActions(<button type="button">{`Add ${label}`}</button>);
+	return <div>{`${label} body`}</div>;
+}
+
+describe("DetailPageTemplate — usePageActions collision", () => {
+	it("shows the wrong action when two tab bodies are mounted at once", () => {
+		// The actions slot holds a single registration, so simultaneously
+		// mounted callers race and the last one to register wins. Panel A is
+		// the active tab, but the header ends up showing panel B's button —
+		// this is the "stuck Add button" bug fixed in 1.12.
+		renderWithChakra(
+			<AppShell sidebar={<div />}>
+				<DetailPageTemplate title="Jana Schmid">
+					<TabBody key="a" label="A" />
+					<TabBody key="b" label="B" />
+				</DetailPageTemplate>
+			</AppShell>,
+		);
+		const header = screen.getByTestId("app-shell-header");
+		expect(within(header).queryByText("Add A")).not.toBeInTheDocument();
+		expect(within(header).getByText("Add B")).toBeInTheDocument();
+	});
+
+	it("shows the active tab's action when only it is mounted (nav-link tabs)", () => {
+		// The prescribed pattern: the router renders exactly one panel as
+		// `children`, so exactly one registration is ever alive.
+		const { rerender } = renderWithChakra(
+			<AppShell sidebar={<div />}>
+				<DetailPageTemplate title="Jana Schmid">
+					<TabBody label="A" />
+				</DetailPageTemplate>
+			</AppShell>,
+		);
+		let header = screen.getByTestId("app-shell-header");
+		expect(within(header).getByText("Add A")).toBeInTheDocument();
+		expect(within(header).queryByText("Add B")).not.toBeInTheDocument();
+
+		// Navigating to the sibling route swaps the panel — and the action.
+		rerender(
+			<ChakraProvider value={defaultSystem}>
+				<AppShell sidebar={<div />}>
+					<DetailPageTemplate title="Jana Schmid">
+						<TabBody label="B" />
+					</DetailPageTemplate>
+				</AppShell>
+			</ChakraProvider>,
+		);
+		header = screen.getByTestId("app-shell-header");
+		expect(within(header).getByText("Add B")).toBeInTheDocument();
+		expect(within(header).queryByText("Add A")).not.toBeInTheDocument();
+	});
+
+	it("shows the active tab's action for a body-owned Tabs.Root with lazyMount unmountOnExit", () => {
+		// The escape hatch for self-contained body tabs: the consumer restores
+		// the invariant by mounting only the active panel.
+		renderWithChakra(
+			<AppShell sidebar={<div />}>
+				<DetailPageTemplate title="Jana Schmid">
+					<Tabs.Root defaultValue="a" lazyMount unmountOnExit>
+						<Tabs.List>
+							<Tabs.Trigger value="a">A</Tabs.Trigger>
+							<Tabs.Trigger value="b">B</Tabs.Trigger>
+						</Tabs.List>
+						<Tabs.Content value="a">
+							<TabBody label="A" />
+						</Tabs.Content>
+						<Tabs.Content value="b">
+							<TabBody label="B" />
+						</Tabs.Content>
+					</Tabs.Root>
+				</DetailPageTemplate>
+			</AppShell>,
+		);
+		const header = screen.getByTestId("app-shell-header");
+		expect(within(header).getByText("Add A")).toBeInTheDocument();
+		expect(within(header).queryByText("Add B")).not.toBeInTheDocument();
+	});
+
+	it("shows the wrong action for a body-owned Tabs.Root without the guard", () => {
+		// Same markup, guard omitted: Chakra keeps the inactive panel mounted,
+		// so its registration overwrites the active tab's.
+		renderWithChakra(
+			<AppShell sidebar={<div />}>
+				<DetailPageTemplate title="Jana Schmid">
+					<Tabs.Root defaultValue="a">
+						<Tabs.List>
+							<Tabs.Trigger value="a">A</Tabs.Trigger>
+							<Tabs.Trigger value="b">B</Tabs.Trigger>
+						</Tabs.List>
+						<Tabs.Content value="a">
+							<TabBody label="A" />
+						</Tabs.Content>
+						<Tabs.Content value="b">
+							<TabBody label="B" />
+						</Tabs.Content>
+					</Tabs.Root>
+				</DetailPageTemplate>
+			</AppShell>,
+		);
+		const header = screen.getByTestId("app-shell-header");
+		expect(within(header).queryByText("Add A")).not.toBeInTheDocument();
+		expect(within(header).getByText("Add B")).toBeInTheDocument();
 	});
 });
