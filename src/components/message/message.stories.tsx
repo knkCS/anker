@@ -16,17 +16,51 @@ type Story = StoryObj<typeof meta>;
 
 const sampleActions = (
 	<>
-		<IconButton variant="ghost" size="xs" aria-label="Reply">
+		<IconButton
+			variant="ghost"
+			size="xs"
+			aria-label="Reply"
+			minWidth="44px"
+			minHeight="44px"
+		>
 			<Reply />
 		</IconButton>
-		<IconButton variant="ghost" size="xs" aria-label="Add reaction">
+		<IconButton
+			variant="ghost"
+			size="xs"
+			aria-label="Add reaction"
+			minWidth="44px"
+			minHeight="44px"
+		>
 			<SmilePlus />
 		</IconButton>
-		<IconButton variant="ghost" size="xs" aria-label="Edit">
+		<IconButton
+			variant="ghost"
+			size="xs"
+			aria-label="Edit"
+			minWidth="44px"
+			minHeight="44px"
+		>
 			<Pencil />
 		</IconButton>
 	</>
 );
+
+export const Default: Story = {
+	render() {
+		return (
+			<MessageGroup
+				author="Ada Lovelace"
+				avatar={<Avatar name="Ada Lovelace" size="sm" />}
+			>
+				<MessageBubble timestamp="14:03">
+					One rendered message: bubble surface, timestamp beside it, and the
+					segment slot as body.
+				</MessageBubble>
+			</MessageGroup>
+		);
+	},
+};
 
 export const SelfVsOther: Story = {
 	render() {

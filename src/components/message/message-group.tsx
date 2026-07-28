@@ -37,16 +37,7 @@ export const MessageGroup = (props: MessageGroupProps) => {
 						{avatar}
 					</chakra.div>
 				) : null}
-				<chakra.div
-					css={{
-						display: "flex",
-						flexDirection: "column",
-						gap: "1",
-						minWidth: 0,
-						flex: "1",
-						alignItems: isSelf ? "flex-end" : "flex-start",
-					}}
-				>
+				<chakra.div css={styles.content} className="message-group__content">
 					{author ? (
 						<chakra.div css={styles.header} className="message-group__header">
 							{author}

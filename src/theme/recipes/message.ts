@@ -12,6 +12,7 @@ export const messageTheme = defineSlotRecipe({
 		"group",
 		"header",
 		"avatar",
+		"content",
 		"bubbleRow",
 		"bubble",
 		"timestamp",
@@ -33,8 +34,15 @@ export const messageTheme = defineSlotRecipe({
 		avatar: {
 			flexShrink: 0,
 		},
+		content: {
+			display: "flex",
+			flexDirection: "column",
+			alignItems: "flex-start",
+			gap: 1,
+			minWidth: 0,
+			flex: "1",
+		},
 		bubbleRow: {
-			position: "relative",
 			display: "flex",
 			alignItems: "flex-end",
 			gap: 2,
@@ -47,6 +55,7 @@ export const messageTheme = defineSlotRecipe({
 			},
 		},
 		bubble: {
+			position: "relative",
 			paddingInline: 3,
 			paddingBlock: 2,
 			borderRadius: "xl",
@@ -98,6 +107,9 @@ export const messageTheme = defineSlotRecipe({
 			self: {
 				group: {
 					flexDirection: "row-reverse",
+				},
+				content: {
+					alignItems: "flex-end",
 				},
 				bubbleRow: {
 					flexDirection: "row-reverse",

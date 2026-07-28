@@ -51,21 +51,21 @@ export const MessageBubble = (props: MessageBubbleProps) => {
 
 	return (
 		<chakra.div css={styles.bubbleRow} className="message__bubble-row">
-			{actions ? (
-				<chakra.div
-					css={styles.toolbar}
-					className="message__toolbar"
-					data-testid="message-toolbar"
-				>
-					{actions}
-				</chakra.div>
-			) : null}
 			<chakra.div
 				css={styles.bubble}
 				className="message__bubble"
 				data-testid="message-bubble"
 			>
 				{children}
+				{actions ? (
+					<chakra.div
+						css={styles.toolbar}
+						className="message__toolbar"
+						data-testid="message-toolbar"
+					>
+						{actions}
+					</chakra.div>
+				) : null}
 			</chakra.div>
 			{meta}
 		</chakra.div>

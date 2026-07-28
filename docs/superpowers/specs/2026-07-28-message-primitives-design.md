@@ -102,6 +102,12 @@ export interface MessageBubbleProps {
 One slot recipe, `message` (`defineSlotRecipe`), slots:
 `group`, `header`, `avatar`, `bubbleRow`, `bubble`, `timestamp`, `toolbar`, `tombstone`.
 
+> **Implementation correction (2026-07-28):** the recipe ships a ninth slot,
+> `content` — the header+bubbles column beside the avatar. The group needs
+> that wrapper element anyway, and its alignment is variant-dependent
+> (`self` right-aligns it); styling it inline in the component would put
+> variant styling outside the recipe, unreachable by presets.
+
 - Variant `variant: self | other` — alignment (`justify-content`) and bubble fill
   (`bg-accent-subtle` vs `bg-surface` + `border`).
   - **Implementation correction (2026-07-28):** the self fill ships as
