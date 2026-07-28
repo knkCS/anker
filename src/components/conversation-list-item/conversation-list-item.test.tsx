@@ -16,20 +16,23 @@ function renderWithAnkerTheme(ui: ReactElement) {
 }
 
 /**
- * All injected CSS rules whose selector targets the rendered root's generated
- * class. Style tags accumulate across tests in this file, so a plain
- * split-on-class would leak other rules into negative assertions — extract
- * only `selector{declarations}` blocks that mention the class instead.
+ * All injected CSS rules whose selector targets the element's generated class.
+ * Style tags accumulate across tests in this file, so a plain split-on-class
+ * would leak other rules into negative assertions — extract only
+ * `selector{declarations}` blocks that mention the class instead.
  */
-function rootRuleText() {
-	const root = screen.getByTestId("conversation-list-item");
-	const cssClass = Array.from(root.classList).find((c) => c.startsWith("css-"));
+function ruleTextFor(el: Element) {
+	const cssClass = Array.from(el.classList).find((c) => c.startsWith("css-"));
 	expect(cssClass).toBeDefined();
 	const css = Array.from(document.querySelectorAll("style"))
 		.map((s) => s.textContent ?? "")
 		.join("\n");
 	const ruleFor = new RegExp(`[^{}]*\\.${cssClass}[^{}]*\\{[^{}]*\\}`, "g");
 	return (css.match(ruleFor) ?? []).join("\n");
+}
+
+function rootRuleText() {
+	return ruleTextFor(screen.getByTestId("conversation-list-item"));
 }
 
 describe("ConversationListItem", () => {
@@ -121,16 +124,7 @@ describe("ConversationListItem", () => {
 		for (const slot of ["title", "preview"]) {
 			const el = container.querySelector(`.conversation-list-item__${slot}`);
 			expect(el).toBeInTheDocument();
-			const cssClass = Array.from((el as Element).classList).find((c) =>
-				c.startsWith("css-"),
-			);
-			const css = Array.from(document.querySelectorAll("style"))
-				.map((s) => s.textContent ?? "")
-				.join("\n");
-			const rules = (
-				css.match(new RegExp(`[^{}]*\\.${cssClass}[^{}]*\\{[^{}]*\\}`, "g")) ??
-				[]
-			).join("\n");
+			const rules = ruleTextFor(el as Element);
 			expect(rules).toContain("text-overflow:ellipsis");
 			expect(rules).toContain("white-space:nowrap");
 		}

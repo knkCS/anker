@@ -56,12 +56,14 @@ export const ConversationListItem = (props: ConversationListItemProps) => {
 						css={styles.previewRow}
 						className="conversation-list-item__preview-row"
 					>
-						<chakra.div
-							css={styles.preview}
-							className="conversation-list-item__preview"
-						>
-							{preview}
-						</chakra.div>
+						{preview ? (
+							<chakra.div
+								css={styles.preview}
+								className="conversation-list-item__preview"
+							>
+								{preview}
+							</chakra.div>
+						) : null}
 						{badge ? (
 							<chakra.div
 								css={styles.badge}

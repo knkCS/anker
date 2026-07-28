@@ -6,6 +6,15 @@ import { ConversationListItem } from "./conversation-list-item";
 const meta = {
 	title: "Components/ConversationListItem",
 	component: ConversationListItem,
+	// Rows fill their container — every story renders inside a sized list
+	// column. Override the width per story via parameters.listWidth.
+	decorators: [
+		(Story, context) => (
+			<Stack gap="1" maxWidth={context.parameters.listWidth ?? "360px"}>
+				<Story />
+			</Stack>
+		),
+	],
 } satisfies Meta<typeof ConversationListItem>;
 
 export default meta;
@@ -24,13 +33,6 @@ export const Default: Story = {
 		timestamp: "14:03",
 		avatar: <Avatar name="Design weekly" size="sm" />,
 	},
-	render(args) {
-		return (
-			<Stack gap="1" maxWidth="360px">
-				<ConversationListItem {...args} />
-			</Stack>
-		);
-	},
 };
 
 export const Selected: Story = {
@@ -38,13 +40,6 @@ export const Selected: Story = {
 		...Default.args,
 		title: "Release planning",
 		isSelected: true,
-	},
-	render(args) {
-		return (
-			<Stack gap="1" maxWidth="360px">
-				<ConversationListItem {...args} />
-			</Stack>
-		);
 	},
 };
 
@@ -55,16 +50,10 @@ export const WithBadge: Story = {
 		preview: "Ada: Can someone take the escalation?",
 		badge: unreadBadge,
 	},
-	render(args) {
-		return (
-			<Stack gap="1" maxWidth="360px">
-				<ConversationListItem {...args} />
-			</Stack>
-		);
-	},
 };
 
 export const Truncation: Story = {
+	parameters: { listWidth: "280px" },
 	args: {
 		title:
 			"Quarterly planning for the northern region rollout with the extended partner group",
@@ -74,20 +63,12 @@ export const Truncation: Story = {
 		avatar: <Avatar name="Quarterly planning" size="sm" />,
 		badge: unreadBadge,
 	},
-	render(args) {
-		return (
-			<Stack gap="1" maxWidth="280px">
-				<ConversationListItem {...args} />
-			</Stack>
-		);
-	},
 };
 
 export const WithAndWithoutAvatar: Story = {
-	args: { title: "" },
 	render() {
 		return (
-			<Stack gap="1" maxWidth="360px">
+			<>
 				<ConversationListItem
 					title="Grace Hopper"
 					preview="You: See you tomorrow!"
@@ -99,17 +80,17 @@ export const WithAndWithoutAvatar: Story = {
 					preview="Ada: The proof holds."
 					timestamp="Tue"
 				/>
-			</Stack>
+			</>
 		);
 	},
 };
 
 /** A small list combining the states — closest to real consumer usage. */
 export const ConversationList: Story = {
-	args: { title: "" },
+	parameters: { listWidth: "320px" },
 	render() {
 		return (
-			<Stack gap="1" maxWidth="320px">
+			<>
 				<ConversationListItem
 					title="Design weekly"
 					preview="Grace: The new tokens are in the branch."
@@ -130,7 +111,7 @@ export const ConversationList: Story = {
 					timestamp="Mon"
 					avatar={<Avatar name="Grace Hopper" size="sm" />}
 				/>
-			</Stack>
+			</>
 		);
 	},
 };

@@ -93,6 +93,9 @@ export const conversationListItemTheme = defineSlotRecipe({
 			flexShrink: 0,
 			display: "inline-flex",
 			alignItems: "center",
+			// Keeps a badge-only preview row end-aligned; a no-op when the
+			// preview is present (it already flexes to fill the row).
+			marginInlineStart: "auto",
 		},
 	},
 	variants: {
