@@ -1,6 +1,6 @@
 {
   "name": "@knkcs/anker",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": "UI component library for the knk software group",
   "repository": {
     "type": "git",
@@ -79,7 +79,9 @@
     "zod": "^3.0.0"
   },
   "peerDependenciesMeta": {
-    "react-grid-layout": { "optional": true }
+    "react-grid-layout": {
+      "optional": true
+    }
   },
   "dependencies": {
     "chakra-react-select": "^6.0.0",

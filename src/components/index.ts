@@ -95,6 +95,9 @@ export { KnkLogo } from "./knk-logo";
 // LabeledSwitch
 export type { LabeledSwitchProps } from "./labeled-switch";
 export { LabeledSwitch } from "./labeled-switch";
+// Message (MessageGroup + MessageBubble)
+export type { MessageBubbleProps, MessageGroupProps } from "./message";
+export { MessageBubble, MessageGroup } from "./message";
 // Modal
 export type { ModalProps } from "./modal";
 export { Modal } from "./modal";

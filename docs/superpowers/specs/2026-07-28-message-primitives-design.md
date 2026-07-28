@@ -102,8 +102,20 @@ export interface MessageBubbleProps {
 One slot recipe, `message` (`defineSlotRecipe`), slots:
 `group`, `header`, `avatar`, `bubbleRow`, `bubble`, `timestamp`, `toolbar`, `tombstone`.
 
+> **Implementation correction (2026-07-28):** the recipe ships a ninth slot,
+> `content` — the header+bubbles column beside the avatar. The group needs
+> that wrapper element anyway, and its alignment is variant-dependent
+> (`self` right-aligns it); styling it inline in the component would put
+> variant styling outside the recipe, unreachable by presets.
+
 - Variant `variant: self | other` — alignment (`justify-content`) and bubble fill
   (`bg-accent-subtle` vs `bg-surface` + `border`).
+  - **Implementation correction (2026-07-28):** the self fill ships as
+    `primary.subtle` (`primary.100` light / `primary.900` dark), not
+    `bg-accent-subtle`. `bg-accent-subtle` resolves to `primary.700` in light
+    mode — an inverted accent surface meant to pair with `on-accent-subtle`
+    text — which would break this spec's own soft-tint / default-text-color
+    requirement (§Visual direction 1).
 - Semantic tokens only: `bg-surface`, `bg-accent-subtle`, `border`, `muted`/`subtle`
   text, `sm` shadow on the toolbar, `fast` duration + `fadeIn` keyframe for the toolbar
   entrance. No hardcoded colors.

@@ -1,0 +1,101 @@
+import { Canvas, Meta } from "@storybook/blocks";
+import * as Stories from "./message.stories";
+
+<Meta of={Stories} />
+
+# Message
+
+Presentation-only chat message primitives: `MessageGroup` groups a consecutive
+same-author run so avatar and author render once; `MessageBubble` renders one
+message — timestamp, edited marker, tombstone state, and a floating action
+toolbar. The message body is an **opaque segment slot**: anker renders whatever
+children it is given and never knows what segment kinds exist.
+
+Both components are data-agnostic: props in, callbacks out. No fetching, no
+state hooks, no service types.
+
+## Usage
+
+<Canvas of={Stories.SelfVsOther} />
+
+```tsx
+import { MessageBubble, MessageGroup } from "@knkcs/anker/components";
+
+<MessageGroup author="Ada Lovelace" avatar={<Avatar name="Ada Lovelace" size="sm" />}>
+  <MessageBubble timestamp="14:02">Hello!</MessageBubble>
+  <MessageBubble timestamp="14:03" isEdited>Fixed a typo.</MessageBubble>
+</MessageGroup>
+
+<MessageGroup isSelf>
+  <MessageBubble timestamp="14:04">Right-aligned, soft tint.</MessageBubble>
+</MessageGroup>
+```
+
+## Grouped runs
+
+<Canvas of={Stories.GroupedRun} />
+
+- `MessageGroup` renders `author` and `avatar` once for the whole run and
+  publishes alignment/tint to its child bubbles — bubbles never take an
+  `isSelf` prop themselves.
+- Self groups typically pass neither `author` nor `avatar`; if provided, they
+  render anyway.
+- A `MessageBubble` outside any group falls back to `other` styling,
+  left-aligned.
+
+## States
+
+<Canvas of={Stories.EditedMarker} />
+<Canvas of={Stories.Tombstone} />
+
+- `isEdited` appends the marker to the timestamp (`14:03 · edited`); override
+  the text with `editedLabel`.
+- `isDeleted` replaces the whole row with a muted tombstone line
+  (`Message deleted · 14:03`); `children` and `actions` are not rendered at
+  all. Override the text with `deletedLabel`.
+- `timestamp` is a ReactNode — pass a formatted string or a `<DateTime />`
+  element; the consumer owns formatting.
+
+## Actions
+
+<Canvas of={Stories.WithActions} />
+
+The `actions` slot renders as a raised pill overlapping the bubble's top-right
+corner, revealed on row hover and on `focus-within`. The buttons are entirely
+consumer-supplied — reply, react, edit, whatever the service needs.
+
+## The segment slot
+
+<Canvas of={Stories.ArbitrarySegments} />
+
+The bubble wraps `children` in nothing else — no typography reset, no content
+assumptions. Text, images, code blocks, custom segment renderers: all pass
+through untouched.
+
+## Guidelines
+
+- **Do** keep segment rendering in your service — anker only provides the
+  bubble surface.
+- **Do** pass pre-formatted timestamps (or a `<DateTime />` element); anker
+  never formats time.
+- **Don't** put interactive content that needs its own hover affordances in
+  the top-right corner of the bubble — the toolbar overlaps it.
+- **Don't** wrap a single conversation turn in multiple groups; one group =
+  one consecutive same-author run.
+- The rendered elements carry stable class names for consumer CSS hooks:
+  `message-group`, `message-group__avatar`, `message-group__header`,
+  `message-group__content`, `message__bubble-row`, `message__bubble`,
+  `message__timestamp`, `message__toolbar`, `message__tombstone`.
+
+## Accessibility
+
+- The toolbar reveal is pure CSS (`:hover` / `:focus-within`), so consumer
+  action buttons stay tabbable and keyboard users are never locked out.
+- Action buttons are the consumer's responsibility — icon-only buttons must
+  carry an `aria-label`.
+- Edited and deleted states are plain visible text, announced by screen
+  readers without extra ARIA.
+- Touch: hover has no equivalent and `focus-within` only covers
+  external-keyboard use. If your service targets touch, provide a
+  touch-native affordance for message actions (e.g. long-press or an
+  always-visible overflow item) — anker does not supply one.

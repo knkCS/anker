@@ -12,9 +12,9 @@ Anker is the shared UI component library for the knk software group, extracted a
 
 Single npm package (`@knkcs/anker`) with subpath exports organized in nine layers:
 
-1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 19 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
+1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 20 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
 2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
-3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox. 14 components.
+3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox, MessageGroup/MessageBubble.
 4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc.
 5. **`/forms`** — Form controls built on React Hook Form + Zod: InputField, TextareaField, ArrayField, DatePickerField, CodeField, etc. Also the canonical home of SearchInput (`/atoms` re-exports it for backwards compatibility).
 6. **`/feedback`** — Feedback patterns: ConfirmModal with provider + `useConfirmModal` hook, UploadToastStack.
@@ -42,7 +42,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in nine layer
 src/
 ├── theme/           # Design tokens + recipes
 │   ├── tokens/      # colors, semantic, shadows, spacing, radii, typography, animations, z-index
-│   ├── recipes/     # Chakra component recipes (19 files)
+│   ├── recipes/     # Chakra component recipes (20 files)
 │   ├── presets/     # Theme personality presets (ThemePreset, defaultPreset)
 │   ├── create-theme.ts  # createAnkerTheme() factory
 │   └── utils/       # Color manipulation helpers
@@ -173,6 +173,18 @@ Several component recipes include built-in visual polish:
 - **Card**: Elevated variant lifts 1px + deepens shadow on hover
 - **Tooltip**: `slideUp` entrance animation (150ms ease-out)
 - **Modal**: `backdropFilter: blur(4px)` frosted glass overlay
+
+### Message Primitives (Chat)
+
+`src/components/message/` provides presentation-only chat primitives:
+`MessageGroup` (one consecutive same-author run — author/avatar render once,
+`isSelf` right-aligns and tints child bubbles via context) and `MessageBubble`
+(timestamp + edited marker, deleted tombstone, floating `actions` toolbar on
+hover/`focus-within`, and an **opaque segment slot** — children render
+untouched; anker never knows what segment kinds exist). Styled by the
+`message` slot recipe. Self bubbles use `primary.subtle` (soft tint, default
+text stays readable) — NOT `bg-accent-subtle`, which is an inverted accent
+surface. Usage guide: `src/components/message/message.mdx`.
 
 ### Dashboard & Widget Framework
 
@@ -305,7 +317,7 @@ Additional rules:
 `button`, `container`, `prose`, `separator`, `formLabel`, `input`, `inputAddon`, `textarea`, `tooltip`, `tsRadioCard`, `tag`
 
 ### Registered slot recipes (multi-part)
-`card`, `checkbox`, `dialog`, `drawer`, `field` (inline in create-theme.ts), `menu`, `popover`, `stepper`, `table`, `tabs`
+`card`, `checkbox`, `dialog`, `drawer`, `field` (inline in create-theme.ts), `menu`, `message`, `popover`, `stepper`, `table`, `tabs`
 
 ## Breaking Changes
 
