@@ -10,14 +10,17 @@ Anker is the shared UI component library for the knk software group, extracted a
 
 ### Package Structure
 
-Single npm package (`@knkcs/anker`) with subpath exports organized in six layers:
+Single npm package (`@knkcs/anker`) with subpath exports organized in nine layers:
 
 1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 19 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
 2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
 3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox. 14 components.
-4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, SearchInput, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc. 16 component groups.
-5. **`/forms`** — Form controls built on React Hook Form + Zod: InputField, TextareaField, ArrayField, DatePickerField, CodeField, etc. 19 components.
-6. **`/feedback`** — Feedback patterns: ConfirmModal with provider + `useConfirmModal` hook.
+4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc.
+5. **`/forms`** — Form controls built on React Hook Form + Zod: InputField, TextareaField, ArrayField, DatePickerField, CodeField, etc. Also the canonical home of SearchInput (`/atoms` re-exports it for backwards compatibility).
+6. **`/feedback`** — Feedback patterns: ConfirmModal with provider + `useConfirmModal` hook, UploadToastStack.
+7. **`/dashboard`** — Domain-free dashboard framework: the widget contract (`WidgetDefinition`, `WidgetInstance`), `createWidgetRegistry`, and the `<Dashboard>` grid engine (see Dashboard & Widget Framework below).
+8. **`/templates`** — Page-level layouts: AppShell, SubNavLayout, and page templates (index, detail, settings, auth, dashboard, marketing, error/loading/maintenance).
+9. **`/navigation`** — Unsaved-changes navigation guards: `UnsavedChangesGuard`, `useUnsavedChangesBlocker`, tab dirty context.
 
 ### Key Technology Choices
 
@@ -45,9 +48,12 @@ src/
 │   └── utils/       # Color manipulation helpers
 ├── primitives/      # Chakra wrappers (accordion, alert, avatar, breadcrumb, hover-card, menu, pin-input, popover, progress, segmented-control, skeleton, slider, spinner, tooltip, etc.)
 ├── components/      # Card, Drawer, Modal, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox
-├── atoms/           # Persona, StatusBadge, SearchInput, DateTime, Select, Clipboard, DataList, etc.
-├── forms/           # React Hook Form controls (InputField, ArrayField, etc.)
-├── feedback/        # ConfirmModal + provider
+├── atoms/           # Persona, StatusBadge, DateTime, Select, Clipboard, DataList, etc.
+├── forms/           # React Hook Form controls (InputField, ArrayField, etc.) + SearchInput
+├── feedback/        # ConfirmModal + provider, UploadToastStack
+├── dashboard/       # Widget contract, registry, <Dashboard> grid engine
+├── templates/       # AppShell, SubNavLayout, page templates
+├── navigation/      # Unsaved-changes guards, tab dirty context
 └── (no root index.ts — consumers use subpath imports)
 ```
 
@@ -171,7 +177,7 @@ Several component recipes include built-in visual polish:
 ### Dashboard & Widget Framework
 
 `src/dashboard/` provides a domain-free dashboard framework (exported
-from `@knkcs/anker/components`): the widget contract (`WidgetDefinition`,
+from `@knkcs/anker/dashboard`): the widget contract (`WidgetDefinition`,
 `WidgetInstance`, `WidgetRenderProps`, …), `createWidgetRegistry`, and
 `<Dashboard>` — a `react-grid-layout` engine with view/edit modes, a catalog, a
 schema-driven config form, and a toolbar.
@@ -320,3 +326,17 @@ Consuming projects must install:
 - react-i18next >= 12
 - @tanstack/react-table ^8.0.0 (required for DataTable component)
 - react-grid-layout ^2.2.3 (optional — required only for the Dashboard component)
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in this repo's GitHub Issues (knkCS/anker), managed via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-role vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
