@@ -1,6 +1,7 @@
 export { buttonTheme as button } from "./button";
 export { default as card } from "./card";
 export { default as checkbox } from "./checkbox";
+export { composerTheme as composer } from "./composer";
 export { default as container } from "./container";
 export { dialog } from "./dialog";
 export { drawerTheme as drawer } from "./drawer";

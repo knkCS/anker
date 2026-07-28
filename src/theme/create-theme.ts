@@ -8,6 +8,7 @@ import {
 	button,
 	card,
 	checkbox,
+	composer,
 	container,
 	dialog,
 	drawer,
@@ -165,6 +166,7 @@ export function createAnkerTheme(preset?: ThemePreset) {
 			slotRecipes: {
 				card,
 				checkbox,
+				composer,
 				dialog,
 				drawer,
 				// Field.Root override: v3 defaults to alignItems: flex-start which
