@@ -9,9 +9,12 @@ import { expect } from "vitest";
  * silently falling back to Chakra's default (the anker#153 dead-registration
  * class of bug).
  *
- * Style tags accumulate across tests in a file, so a plain split-on-class
- * would leak other rules into negative assertions — only `selector{declarations}`
- * blocks that mention the class are extracted.
+ * Style tags accumulate across tests in a file, so a plain split-on-class runs
+ * to the end of the stylesheet and pulls in unrelated rules — that loosens
+ * positive assertions as well as breaking negative ones. Only
+ * `selector{declarations}` blocks that mention the class are extracted.
+ *
+ * Calls `expect` internally, so it only runs inside a test.
  */
 export function ruleTextFor(el: Element) {
 	const cssClass = Array.from(el.classList).find((c) => c.startsWith("css-"));

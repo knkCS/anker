@@ -16,7 +16,6 @@ function renderWithAnkerTheme(ui: ReactElement) {
 	return render(<ChakraProvider value={system}>{ui}</ChakraProvider>);
 }
 
-/** All injected CSS rule text attached to the rendered bubble's generated class. */
 function bubbleRuleText() {
 	return ruleTextFor(screen.getByTestId("message-bubble"));
 }

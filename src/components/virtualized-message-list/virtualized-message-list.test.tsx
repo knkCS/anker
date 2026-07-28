@@ -40,11 +40,12 @@ const twoDays = [
 ];
 
 /**
- * Rule text for the first element carrying `testId`. `getAll…[0]` rather than
- * `getByTestId`: `message-list-divider` renders once per day boundary, and the
- * recipe assertion only needs one of them.
+ * Rule text for the *first* element carrying `testId`. `getAll…[0]` rather than
+ * `getByTestId`: `message-list-divider` renders once per day boundary, so a
+ * singular query throws on multi-day fixtures; the recipe assertion needs only
+ * one of them.
  */
-function ruleTextForTestId(testId: string) {
+function firstRuleTextFor(testId: string) {
 	return ruleTextFor(screen.getAllByTestId(testId)[0]);
 }
 
@@ -171,10 +172,10 @@ describe("VirtualizedMessageList", () => {
 		// Viewport carries the recipe's scroll styles; the divider carries the
 		// boundary-line border token. Both only hold if the recipe is registered
 		// in create-theme.ts AND the component consumes it.
-		expect(ruleTextForTestId("message-list-viewport")).toContain(
+		expect(firstRuleTextFor("message-list-viewport")).toContain(
 			"overflow-y:auto",
 		);
-		expect(ruleTextForTestId("message-list-divider")).toContain(
+		expect(firstRuleTextFor("message-list-divider")).toContain(
 			"var(--chakra-colors-border)",
 		);
 	});
