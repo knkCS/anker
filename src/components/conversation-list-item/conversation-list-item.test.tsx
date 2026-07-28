@@ -4,6 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
+import { ruleTextFor } from "../../test/recipe-styles";
 import { createAnkerTheme } from "../../theme/create-theme";
 import { ConversationListItem } from "./conversation-list-item";
 
@@ -13,22 +14,6 @@ import { ConversationListItem } from "./conversation-list-item";
 const system = createAnkerTheme();
 function renderWithAnkerTheme(ui: ReactElement) {
 	return render(<ChakraProvider value={system}>{ui}</ChakraProvider>);
-}
-
-/**
- * All injected CSS rules whose selector targets the element's generated class.
- * Style tags accumulate across tests in this file, so a plain split-on-class
- * would leak other rules into negative assertions — extract only
- * `selector{declarations}` blocks that mention the class instead.
- */
-function ruleTextFor(el: Element) {
-	const cssClass = Array.from(el.classList).find((c) => c.startsWith("css-"));
-	expect(cssClass).toBeDefined();
-	const css = Array.from(document.querySelectorAll("style"))
-		.map((s) => s.textContent ?? "")
-		.join("\n");
-	const ruleFor = new RegExp(`[^{}]*\\.${cssClass}[^{}]*\\{[^{}]*\\}`, "g");
-	return (css.match(ruleFor) ?? []).join("\n");
 }
 
 function rootRuleText() {
