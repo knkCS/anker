@@ -387,7 +387,7 @@ Consuming projects must install:
 - @tanstack/react-table ^8.0.0 (required for DataTable component)
 - react-grid-layout ^2.2.3 (optional — required only for the Dashboard component)
 
-Note: React 18 is **not** a supported target. 4.0.0 raised the floor to `>= 19` as a breaking change because the ref-as-prop convention used across atoms and form wrappers has its refs silently stripped on React 18, which killed `setFocus()` and focus-on-first-error — see the **Breaking** entry under 4.0.0 in `CHANGELOG.md` (#150).
+Note: React 18 is **not** a supported target. 4.0.0 raised the floor to `>= 19` as a breaking change because the ref-as-prop convention used across atoms and form wrappers relies on React 19's ref-as-prop semantics — on React 18 those refs are silently stripped, so every ref-based API in the library is dead without an error. See the **Breaking** entry under 4.0.0 in `CHANGELOG.md` (#150).
 
 This list is pinned to `package.json`'s `peerDependencies` by `src/test/peer-deps-docs.test.ts` — change both together.
 
