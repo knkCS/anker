@@ -12,10 +12,10 @@ Anker is the shared UI component library for the knk software group, extracted a
 
 Single npm package (`@knkcs/anker`) with subpath exports organized in nine layers:
 
-1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 24 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
+1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 26 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
 2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
 3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox, MessageGroup/MessageBubble, VirtualizedMessageList, Composer, ConversationListItem.
-4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc.
+4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, UnreadBadge, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc.
 5. **`/forms`** — Form controls built on React Hook Form + Zod: InputField, TextareaField, ArrayField, DatePickerField, CodeField, etc. Also the canonical home of SearchInput (`/atoms` re-exports it for backwards compatibility).
 6. **`/feedback`** — Feedback patterns: ConfirmModal with provider + `useConfirmModal` hook, UploadToastStack.
 7. **`/dashboard`** — Domain-free dashboard framework: the widget contract (`WidgetDefinition`, `WidgetInstance`), `createWidgetRegistry`, and the `<Dashboard>` grid engine (see Dashboard & Widget Framework below).
@@ -42,7 +42,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in nine layer
 src/
 ├── theme/           # Design tokens + recipes
 │   ├── tokens/      # colors, semantic, shadows, spacing, radii, typography, animations, z-index
-│   ├── recipes/     # Chakra component recipes (23 files)
+│   ├── recipes/     # Chakra component recipes (24 files)
 │   ├── presets/     # Theme personality presets (ThemePreset, defaultPreset)
 │   ├── create-theme.ts  # createAnkerTheme() factory
 │   └── utils/       # Color manipulation helpers
@@ -195,6 +195,17 @@ the soft `primary.subtle` tint (same rule as message self bubbles — never
 `bg-accent-subtle`). Title/preview truncate to one line via the
 `conversationListItem` slot recipe. Usage guide:
 `src/components/conversation-list-item/conversation-list-item.mdx`.
+
+`src/atoms/unread-badge/` provides `UnreadBadge` (the `badge` slot's usual
+occupant): a count pill with a `max` cap (`99+`) and a `hasMention` variant.
+It renders `null` when there is nothing to show, so call sites pass a count
+unconditionally instead of guarding. Plain counts stay on the neutral
+`gray.solid` fill — an unread count is information, not an action, so the
+`primary.solid` fill is reserved for mentions, which also carry an `@` glyph
+so the two states never rely on hue alone. The cap/hide decision lives in the
+pure, TDD-tested `formatUnreadCount()` rather than the render path. Styled by
+the single-part `unreadBadge` recipe, read by hand via `useRecipe` (the
+`prose` pattern) and pinned in `create-theme.test.ts`.
 
 `src/components/composer/` provides `Composer`: the chat message input —
 auto-growing textarea, send button with submit-on-enter (IME-safe,
@@ -351,7 +362,7 @@ Additional rules:
 **Color palette tokens** (per-palette): `{palette}.contrast`, `{palette}.fg`, `{palette}.subtle`, `{palette}.muted`, `{palette}.emphasized`, `{palette}.solid`, `{palette}.focusRing`, `{palette}.border`
 
 ### Registered recipes (single-part)
-`button`, `container`, `prose`, `separator`, `formLabel`, `input`, `inputAddon`, `textarea`, `tooltip`, `tsRadioCard`, `tag`
+`button`, `container`, `prose`, `separator`, `formLabel`, `input`, `inputAddon`, `textarea`, `tooltip`, `tsRadioCard`, `tag`, `unreadBadge`
 
 ### Registered slot recipes (multi-part)
 `card`, `checkbox`, `composer`, `conversationListItem`, `dialog`, `drawer`, `field` (inline in create-theme.ts), `menu`, `message`, `messageList`, `popover`, `stepper`, `table`, `tabs`

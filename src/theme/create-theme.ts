@@ -29,6 +29,7 @@ import {
 	textarea,
 	tooltip,
 	tsRadioCard,
+	unreadBadge,
 } from "./recipes";
 import {
 	colors as baseColors,
@@ -162,6 +163,7 @@ export function createAnkerTheme(preset?: ThemePreset) {
 				tooltip,
 				tsRadioCard,
 				tag,
+				unreadBadge,
 			},
 
 			slotRecipes: {

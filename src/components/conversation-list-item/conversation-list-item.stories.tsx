@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Avatar, Badge } from "../../primitives";
+import { UnreadBadge } from "../../atoms/unread-badge";
+import { Avatar } from "../../primitives";
 import { Stack } from "../../primitives/layout";
 import { ConversationListItem } from "./conversation-list-item";
 
@@ -20,11 +21,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const unreadBadge = (
-	<Badge colorPalette="primary" variant="solid" borderRadius="full">
-		3
-	</Badge>
-);
+const unreadBadge = <UnreadBadge count={3} />;
+const mentionBadge = <UnreadBadge count={2} hasMention />;
 
 export const Default: Story = {
 	args: {
@@ -110,6 +108,13 @@ export const ConversationList: Story = {
 					preview={<em>Grace is typing…</em>}
 					timestamp="Mon"
 					avatar={<Avatar name="Grace Hopper" size="sm" />}
+				/>
+				<ConversationListItem
+					title="Platform team"
+					preview="Ada: @you can you review the token PR?"
+					timestamp="Mon"
+					avatar={<Avatar name="Platform team" size="sm" />}
+					badge={mentionBadge}
 				/>
 			</>
 		);
