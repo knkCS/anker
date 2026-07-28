@@ -232,6 +232,33 @@ fetching, segment rendering, and time formatting.
 
 ---
 
+## VirtualizedMessageList
+
+`VirtualizedMessageList` (`@knkcs/anker/components`) renders virtualized
+message history: newest at the bottom, scroll anchoring, day dividers, a
+load-older callback. Presentation-only: your service owns the messages, their
+order, and all fetching.
+
+- **Give the parent a bounded height** — the list fills its container.
+- **`items` are oldest → newest** and opaque to anker: supply `getItemKey`
+  (stable unique key) and render each row via `renderItem` (typically
+  `MessageGroup`/`MessageBubble`). Append new messages at the end, prepend
+  older pages at the start — scroll position is preserved in both cases.
+- **Pinning**: at the bottom the list follows appended items; once the user
+  scrolls up it holds position and shows a jump-to-latest pill
+  (`jumpToLatestLabel`). Tune with `pinThreshold` (default 48px).
+- **`onLoadOlder` fires once per approach** to the top (within
+  `loadOlderThreshold`, default 240px) and re-arms when the user scrolls
+  away. Load the previous page and prepend it; the component never fetches.
+  A list too short to scroll never fires.
+- **Day dividers** come from `getItemDate` (local calendar days); label via
+  `formatDayLabel` (default "Today"/"Yesterday"/locale date). Omit
+  `getItemDate` to disable.
+- The scroll region is a `role="log"` landmark — set `aria-label` (default
+  "Message history").
+
+---
+
 ## Pointers
 
 - Full spec: anker GitHub Pages docs site (`/design-system`, `/page-patterns`)

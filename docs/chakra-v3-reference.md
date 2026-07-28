@@ -101,7 +101,7 @@ Key points:
 
 Used for composite components with multiple named slots.
 
-Registered: `card`, `checkbox`, `comment`, `dialog`, `drawer`, `field` (inline), `input`, `menu`, `message`, `modal`, `persona`, `popover`, `stepper`, `table`, `tabs`
+Registered: `card`, `checkbox`, `dialog`, `drawer`, `field` (inline), `menu`, `message`, `messageList`, `popover`, `stepper`, `table`, `tabs`
 
 Structure:
 

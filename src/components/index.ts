@@ -220,6 +220,12 @@ export {
 // UploadDropZone
 export type { UploadDropZoneProps } from "./upload-drop-zone";
 export { UploadDropZone } from "./upload-drop-zone";
+// VirtualizedMessageList
+export type {
+	MessageListRow,
+	VirtualizedMessageListProps,
+} from "./virtualized-message-list";
+export { VirtualizedMessageList } from "./virtualized-message-list";
 // Widget
 export type { WidgetProps } from "./widget";
 export { Widget } from "./widget";

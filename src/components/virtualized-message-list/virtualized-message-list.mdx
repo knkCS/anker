@@ -1,0 +1,83 @@
+import { Canvas, Meta } from "@storybook/blocks";
+import * as Stories from "./virtualized-message-list.stories";
+
+<Meta of={Stories} />
+
+# VirtualizedMessageList
+
+Virtualized message history for chat surfaces: newest messages at the bottom,
+scroll anchoring, day dividers, and a load-older callback. Presentation-only
+and data-agnostic — the consumer owns the messages, their order, and all
+fetching; the component renders items through an **opaque render prop** and
+never inspects them.
+
+The list fills its container: give the parent a bounded height.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+```tsx
+import { VirtualizedMessageList } from "@knkcs/anker/components";
+
+<Box height="480px">
+  <VirtualizedMessageList
+    items={messages} // oldest → newest; the last item renders at the bottom
+    getItemKey={(m) => m.id}
+    getItemDate={(m) => m.sentAt}
+    renderItem={(m) => (
+      <MessageGroup author={m.author} isSelf={m.isSelf}>
+        <MessageBubble timestamp={formatTime(m.sentAt)}>{m.body}</MessageBubble>
+      </MessageGroup>
+    )}
+    onLoadOlder={loadPreviousPage}
+  />
+</Box>
+```
+
+## Scroll anchoring
+
+<Canvas of={Stories.PinnedToBottom} />
+
+- While the user is at (or within `pinThreshold` of) the bottom, appended
+  items keep the list **pinned** — it follows new messages.
+- Once the user scrolls up, appended items no longer move the viewport, and a
+  **jump-to-latest** pill appears (`jumpToLatestLabel`, default
+  "Jump to latest"). Clicking it returns to the newest message.
+
+<Canvas of={Stories.ScrolledUpPreservesPosition} />
+
+## Loading older pages
+
+<Canvas of={Stories.LoadOlderPages} />
+
+`onLoadOlder` fires **once** each time scrolling approaches the top (within
+`loadOlderThreshold`, default 240px), re-arming only after the user scrolls
+away — the consumer loads the previous page and **prepends** it to `items`.
+The list preserves the visible scroll position across the prepend. The
+component never fetches; a list too short to scroll never fires.
+
+## Day dividers
+
+<Canvas of={Stories.DayDividers} />
+
+A divider renders before the first message of each local calendar day, based
+on `getItemDate`. The default label is "Today"/"Yesterday"/a locale-formatted
+date; override with `formatDayLabel`. Omit `getItemDate` to disable dividers.
+
+## Large histories
+
+<Canvas of={Stories.LargeList} />
+
+Rows are virtualized with `@tanstack/react-virtual`; only the visible window
+(plus overscan) is mounted, so 1000+ item histories scroll smoothly. Row
+heights are measured after render — `estimateItemSize` (default 72px) only
+tunes the initial estimate.
+
+## Accessibility
+
+- The scroll region is a `role="log"` landmark labeled via `aria-label`
+  (default "Message history"), so screen readers announce newly appended
+  messages politely.
+- The jump-to-latest pill is a real button with a visible label and a 44×44px
+  touch target.

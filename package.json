@@ -84,6 +84,7 @@
     }
   },
   "dependencies": {
+    "@tanstack/react-virtual": "^3.14.8",
     "chakra-react-select": "^6.0.0",
     "color2k": "^2.0.0",
     "dayjs": "^1.11.0",
