@@ -2,7 +2,24 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## 4.0.1 — 2026-07-13
+## 4.1.0 — 2026-07-28
+
+### Added
+
+- **Chat message primitives** (#157): `MessageGroup` + `MessageBubble` in
+  `@knkcs/anker/components`, consumed by `@knkcs/messengerhub-ui`
+  (messengerhub ADR-0009). Presentation-only and data-agnostic: the message
+  body is an opaque segment slot (children render untouched — anker never
+  knows what segment kinds exist), timestamps are pre-formatted ReactNodes,
+  and the floating `actions` toolbar (revealed on row hover /
+  `focus-within`) is a consumer-filled slot. `MessageGroup` renders a
+  consecutive same-author run — author/avatar once, `isSelf`
+  alignment/tint published to child bubbles via context. States:
+  `isEdited` marker (`14:03 · edited`), `isDeleted` tombstone line
+  replacing the bubble. Styled by the new `message` slot recipe
+  (semantic tokens, logical properties, RTL-ready). Self bubbles use
+  `primary.subtle` — a soft tint that keeps default-color text readable —
+  not the inverted `bg-accent-subtle` surface.
 
 ### Fixed
 
