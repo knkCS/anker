@@ -232,6 +232,28 @@ fetching, segment rendering, and time formatting.
 
 ---
 
+## ConversationListItem
+
+`ConversationListItem` (`@knkcs/anker/components`) is one row in a
+conversation list: title, preview/subtitle slot, timestamp, avatar slot, badge
+slot, hover + selected states. Presentation-only: your service owns the
+conversation data, unread counts, and time formatting.
+
+- **The row is a native button**: `onSelect` fires on click/Enter/Space. Wrap
+  rows in your own list container; anker renders only the row.
+- **`preview`, `avatar`, `badge` are opaque slots** — last-message line or
+  typing hint in `preview`, `<Avatar />`/`<Persona hideDetails />` in
+  `avatar`, an unread badge in `badge`. No data assumptions.
+- **`isSelected`** marks the active conversation: `aria-current="true"` plus
+  the soft `primary.subtle` tint (readable default text — not an inverted
+  surface).
+- **`timestamp` is pre-formatted** (string or `<DateTime />`) — consumer
+  decides locale/granularity.
+- Title and preview truncate to one line; timestamp and badge never shrink.
+  Size the list column — the row fills its container's width.
+
+---
+
 ## VirtualizedMessageList
 
 `VirtualizedMessageList` (`@knkcs/anker/components`) renders virtualized

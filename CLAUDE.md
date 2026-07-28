@@ -14,7 +14,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in nine layer
 
 1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 23 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
 2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
-3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox, MessageGroup/MessageBubble, VirtualizedMessageList, Composer.
+3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox, MessageGroup/MessageBubble, VirtualizedMessageList, Composer, ConversationListItem.
 4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc.
 5. **`/forms`** — Form controls built on React Hook Form + Zod: InputField, TextareaField, ArrayField, DatePickerField, CodeField, etc. Also the canonical home of SearchInput (`/atoms` re-exports it for backwards compatibility).
 6. **`/feedback`** — Feedback patterns: ConfirmModal with provider + `useConfirmModal` hook, UploadToastStack.
@@ -186,6 +186,16 @@ untouched; anker never knows what segment kinds exist). Styled by the
 text stays readable) — NOT `bg-accent-subtle`, which is an inverted accent
 surface. Usage guide: `src/components/message/message.mdx`.
 
+`src/components/conversation-list-item/` provides `ConversationListItem`: one
+row in a conversation list — title, preview/subtitle slot, timestamp, avatar
+slot, badge slot (all opaque `ReactNode`s; no data assumptions), hover +
+selected states. The row is a native `<button>` (`onSelect` callback,
+keyboard activation for free); `isSelected` sets `aria-current="true"` and
+the soft `primary.subtle` tint (same rule as message self bubbles — never
+`bg-accent-subtle`). Title/preview truncate to one line via the
+`conversationListItem` slot recipe. Usage guide:
+`src/components/conversation-list-item/conversation-list-item.mdx`.
+
 `src/components/composer/` provides `Composer`: the chat message input —
 auto-growing textarea, send button with submit-on-enter (IME-safe,
 Shift+Enter = newline, blank never submits; uncontrolled clears after
@@ -344,7 +354,7 @@ Additional rules:
 `button`, `container`, `prose`, `separator`, `formLabel`, `input`, `inputAddon`, `textarea`, `tooltip`, `tsRadioCard`, `tag`
 
 ### Registered slot recipes (multi-part)
-`card`, `checkbox`, `composer`, `dialog`, `drawer`, `field` (inline in create-theme.ts), `menu`, `message`, `messageList`, `popover`, `stepper`, `table`, `tabs`
+`card`, `checkbox`, `composer`, `conversationListItem`, `dialog`, `drawer`, `field` (inline in create-theme.ts), `menu`, `message`, `messageList`, `popover`, `stepper`, `table`, `tabs`
 
 ## Breaking Changes
 

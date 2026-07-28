@@ -10,6 +10,7 @@ import {
 	checkbox,
 	composer,
 	container,
+	conversationListItem,
 	dialog,
 	drawer,
 	formLabel,
@@ -167,6 +168,7 @@ export function createAnkerTheme(preset?: ThemePreset) {
 				card,
 				checkbox,
 				composer,
+				conversationListItem,
 				dialog,
 				drawer,
 				// Field.Root override: v3 defaults to alignItems: flex-start which

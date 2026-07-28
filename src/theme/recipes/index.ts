@@ -3,6 +3,7 @@ export { default as card } from "./card";
 export { default as checkbox } from "./checkbox";
 export { composerTheme as composer } from "./composer";
 export { default as container } from "./container";
+export { conversationListItemTheme as conversationListItem } from "./conversation-list-item";
 export { dialog } from "./dialog";
 export { drawerTheme as drawer } from "./drawer";
 export { default as formLabel } from "./form-label";
