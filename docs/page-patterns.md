@@ -1189,13 +1189,13 @@ Every index page composes these slots, in this order:
 
 #### Index-in-Tab sub-pattern
 
-For index-style content rendered inside a tab body of `SettingsPageTemplate` or `DetailPageTemplate`, use the parent template's **`bodyTabs`** API. The template owns `<Tabs.Root>` with `lazyMount unmountOnExit`, so only the active tab mounts — `usePageActions` from inside a tab body registers exactly when that tab is active and clears on unmount.
+For index-style content rendered inside a tab body of `SettingsPageTemplate` or `DetailPageTemplate`, use **nav-link tabs**: pass a `<Tabs.Root value={current}>` containing only a `<Tabs.List>` to the parent template's `tabs` prop, and let the router render the active panel as `children`. Only the active panel is mounted, so `usePageActions` from inside a tab body registers exactly when that tab is active and clears on unmount.
 
 - The same Toolbar / DataTable / BulkActionBar contract applies inside the tab body.
-- Tab-scoped primary-add lifts to the parent template's header-actions slot via `usePageActions(<AddButton/>)`. Because `bodyTabs` lazy-mounts, only the active tab's `usePageActions` registration is alive — no collisions, no stale buttons.
+- Tab-scoped primary-add lifts to the parent template's header-actions slot via `usePageActions(<AddButton/>)`. Because only the active panel is mounted, only its registration is alive — no collisions, no stale buttons.
 - No second `<PageHeader>` inside the tab.
 - The tab does not own breadcrumbs; the parent page does.
-- **Don't** wrap `bodyTabs` content in your own `<Tabs.Root>`. The template owns it.
+- **Don't** leave two panels mounted at once. Nothing in the template prevents it: the header-actions slot holds a single unkeyed registration, so a second mounted panel's `usePageActions` overwrites the active tab's. If you render panels from a `<Tabs.Root>` you own in the body rather than from the router, set `lazyMount unmountOnExit` so only the active one mounts.
 
 ### 12.2 DetailPageTemplate
 
@@ -1257,41 +1257,36 @@ OAuth client, a single audit event detail, a single webhook config.
   requirement. A detail page without tabs is fine — render the body
   however the entity demands.
 
-#### `bodyTabs` — owned panels
+#### `tabs` — nav-link tabs
 
-Use `bodyTabs` for tab bodies that are direct children of the template. The template wraps `<Tabs.Root>` with `lazyMount unmountOnExit`; only the active panel mounts. Use this any time each tab has its own body component.
+`tabs` takes a `<Tabs.Root>` containing only a `<Tabs.List>` — no `<Tabs.Content>`. The tab list renders as the third row of the header band; the active panel arrives separately as `children`, normally from the router. Use this any time each tab has its own body component.
 
 ```tsx
 <DetailPageTemplate
   breadcrumbs={[...]}
   title={user.displayName}
-  bodyTabs={{
-    defaultValue: "profile",
-    items: [
-      { value: "profile",  label: "Profile",  content: <ProfileTab user={user} /> },
-      { value: "security", label: "Security", content: <SecurityTab user={user} /> },
-    ],
-  }}
-/>
+  tabs={
+    <Tabs.Root value={currentTab} variant="line">
+      <Tabs.List>
+        <Tabs.Trigger value="profile">Profile</Tabs.Trigger>
+        <Tabs.Trigger value="security">Security</Tabs.Trigger>
+      </Tabs.List>
+    </Tabs.Root>
+  }
+>
+  <Outlet />
+</DetailPageTemplate>
 ```
 
-For controlled tabs (e.g. URL deep-linking), pass `value` + `onValueChange` instead of `defaultValue`.
+Derive `currentTab` from the URL and let the route render the matching panel. The tab list and the panels end up in different parts of the React tree — the list is registered into the header band through the slot store, the panels render in the template body — so one `<Tabs.Root>` cannot wrap both, and `<Tabs.Content>` inside `tabs` would never receive a body.
 
-#### `subheader`
-
-A `ReactNode` rendered between the PageHeader and the tabs (or body). Use for identity-card-style summaries that sit under the title bar.
-
-```tsx
-<DetailPageTemplate
-  title={user.displayName}
-  subheader={<UserIdentityCard user={user} />}
-  bodyTabs={{ ... }}
-/>
-```
-
-#### `tabs` (legacy / nav-mode)
-
-The `tabs` prop is for nav-mode tab strips (Tabs.List with no Tabs.Content; the body comes from `children`, typically a route's outlet). `bodyTabs` and `tabs` are mutually exclusive — passing both throws.
+> **Removed in v2.2.0 — `bodyTabs` and `subheader`.**
+> Migrate `bodyTabs` to the nav-link tabs above. Migrate `subheader` to
+> the `avatar` / `badges` / `meta` slots, which render on the header's
+> detail row. Note the guarantee moved with the prop: `bodyTabs` owned a
+> `<Tabs.Root>` with `lazyMount unmountOnExit`, so the template kept a
+> single panel mounted for you. Now only the router does — see the
+> `usePageActions` rule in `CLAUDE-ANKER.md`.
 
 ### 12.3 SettingsPageTemplate
 
@@ -1334,9 +1329,9 @@ organization settings, IDP settings, admin → general.
   DetailPageTemplate instead. Use SettingsPageTemplate only when there
   are ≥ 2 tabs.
 
-#### `bodyTabs` — owned panels
+#### `tabs` — nav-link tabs
 
-Same shape as `DetailPageTemplate.bodyTabs`. Prefer this for settings pages over the legacy `tabs` + `children` pattern; the template handles `lazyMount unmountOnExit` automatically so `usePageActions` from inside a tab body never collides with another tab's registration.
+Same shape as `DetailPageTemplate.tabs`: a `<Tabs.Root>` holding only a `<Tabs.List>`, with the active panel supplied as `children`.
 
 ```tsx
 <SettingsPageTemplate
@@ -1344,17 +1339,21 @@ Same shape as `DetailPageTemplate.bodyTabs`. Prefer this for settings pages over
   title={org.name}
   bodyPadding="none"
   maxBodyWidth="full"
-  bodyTabs={{
-    defaultValue: "general",
-    items: [
-      { value: "general", label: "General",  content: <GeneralTab .../> },
-      { value: "members", label: "Members",  content: <MembersTab .../> },
-    ],
-  }}
-/>
+  tabs={
+    <Tabs.Root value={currentTab} variant="line">
+      <Tabs.List>
+        <Tabs.Trigger value="general">General</Tabs.Trigger>
+        <Tabs.Trigger value="members">Members</Tabs.Trigger>
+      </Tabs.List>
+    </Tabs.Root>
+  }
+>
+  <Outlet />
+</SettingsPageTemplate>
 ```
 
-`bodyTabs` and `tabs` are mutually exclusive — passing both throws.
+`bodyTabs` was removed in v2.2.0; the same migration and the same
+`usePageActions` caveat as `DetailPageTemplate` apply.
 
 ### 12.4 DashboardPageTemplate
 

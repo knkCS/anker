@@ -119,11 +119,16 @@ describe("DetailPageTemplate — sticky header", () => {
 	});
 });
 
-// These tests pin the guarantee behind the "one mounted usePageActions caller"
-// rule in CLAUDE-ANKER.md (#175). The rule used to say "don't own a Tabs.Root —
-// use bodyTabs", but bodyTabs was removed in 2.2.0 and took its
+// Characterization tests for the "one mounted usePageActions caller" rule in
+// CLAUDE-ANKER.md (#175). The rule used to say "don't own a Tabs.Root — use
+// bodyTabs", but bodyTabs was removed in 2.2.0 and took its
 // `lazyMount unmountOnExit` guard with it. Nothing in the template enforces the
-// invariant now, so the hazard and the two ways of avoiding it are pinned here.
+// invariant now, so both the hazard and the two ways of avoiding it are pinned
+// here.
+//
+// The two "shows the wrong action" tests deliberately assert the footgun. If
+// the actions slot ever becomes keyed by caller, they will fail — that is the
+// point: the rule they back would no longer be true and must be rewritten too.
 
 /** A tab body that lifts its own primary action into the page header. */
 function TabBody({ label }: { label: string }) {
@@ -131,17 +136,24 @@ function TabBody({ label }: { label: string }) {
 	return <div>{`${label} body`}</div>;
 }
 
+/** Re-render through the same provider wrapper `renderWithChakra` installs. */
+function rerenderWithChakra(
+	rerender: (ui: ReactElement) => void,
+	ui: ReactElement,
+) {
+	rerender(<ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>);
+}
+
 describe("DetailPageTemplate — usePageActions collision", () => {
 	it("shows the wrong action when two tab bodies are mounted at once", () => {
-		// The actions slot holds a single registration, so simultaneously
-		// mounted callers race and the last one to register wins. Panel A is
-		// the active tab, but the header ends up showing panel B's button —
-		// this is the "stuck Add button" bug fixed in 1.12.
+		// The actions slot holds a single unkeyed registration, so mounted
+		// callers overwrite each other. Panel A is the active tab, but the
+		// header ends up showing panel B's button — the "stuck Add button".
 		renderWithChakra(
 			<AppShell sidebar={<div />}>
 				<DetailPageTemplate title="Jana Schmid">
-					<TabBody key="a" label="A" />
-					<TabBody key="b" label="B" />
+					<TabBody label="A" />
+					<TabBody label="B" />
 				</DetailPageTemplate>
 			</AppShell>,
 		);
@@ -150,12 +162,21 @@ describe("DetailPageTemplate — usePageActions collision", () => {
 		expect(within(header).getByText("Add B")).toBeInTheDocument();
 	});
 
-	it("shows the active tab's action when only it is mounted (nav-link tabs)", () => {
-		// The prescribed pattern: the router renders exactly one panel as
-		// `children`, so exactly one registration is ever alive.
+	it("shows the active tab's action for nav-link tabs", () => {
+		// The prescribed shape: a Tabs.Root holding only a Tabs.List goes to
+		// `tabs`, and the router renders exactly one panel as `children`, so
+		// exactly one registration is ever alive.
+		const navTabs = (current: string) => (
+			<Tabs.Root value={current}>
+				<Tabs.List>
+					<Tabs.Trigger value="a">A</Tabs.Trigger>
+					<Tabs.Trigger value="b">B</Tabs.Trigger>
+				</Tabs.List>
+			</Tabs.Root>
+		);
 		const { rerender } = renderWithChakra(
 			<AppShell sidebar={<div />}>
-				<DetailPageTemplate title="Jana Schmid">
+				<DetailPageTemplate title="Jana Schmid" tabs={navTabs("a")}>
 					<TabBody label="A" />
 				</DetailPageTemplate>
 			</AppShell>,
@@ -165,14 +186,13 @@ describe("DetailPageTemplate — usePageActions collision", () => {
 		expect(within(header).queryByText("Add B")).not.toBeInTheDocument();
 
 		// Navigating to the sibling route swaps the panel — and the action.
-		rerender(
-			<ChakraProvider value={defaultSystem}>
-				<AppShell sidebar={<div />}>
-					<DetailPageTemplate title="Jana Schmid">
-						<TabBody label="B" />
-					</DetailPageTemplate>
-				</AppShell>
-			</ChakraProvider>,
+		rerenderWithChakra(
+			rerender,
+			<AppShell sidebar={<div />}>
+				<DetailPageTemplate title="Jana Schmid" tabs={navTabs("b")}>
+					<TabBody label="B" />
+				</DetailPageTemplate>
+			</AppShell>,
 		);
 		header = screen.getByTestId("app-shell-header");
 		expect(within(header).getByText("Add B")).toBeInTheDocument();

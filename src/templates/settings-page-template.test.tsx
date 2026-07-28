@@ -109,14 +109,16 @@ function TabBody({ label }: { label: string }) {
 
 // The same "one mounted usePageActions caller" rule the DetailPageTemplate
 // tests pin (#175) — SettingsPageTemplate surfaces registered actions through
-// the identical slot, so the hazard and the fix apply here too.
+// the identical slot, so the hazard and the fix apply here too. The full set
+// of cases, including the body-owned `<Tabs.Root>` escape hatch, lives in
+// detail-page-template.test.tsx.
 describe("SettingsPageTemplate — usePageActions collision", () => {
 	it("shows the wrong action when two tab bodies are mounted at once", () => {
 		renderWithChakra(
 			<AppShell sidebar={<div />}>
 				<SettingsPageTemplate title="Einstellungen">
-					<TabBody key="a" label="A" />
-					<TabBody key="b" label="B" />
+					<TabBody label="A" />
+					<TabBody label="B" />
 				</SettingsPageTemplate>
 			</AppShell>,
 		);
