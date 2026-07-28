@@ -376,16 +376,20 @@ Additional rules:
 ## Peer Dependencies
 
 Consuming projects must install:
-- react >= 18
-- react-dom >= 18
+- react >= 19
+- react-dom >= 19
 - @chakra-ui/react ^3.0.0
 - react-hook-form ^7.0.0
 - @hookform/resolvers ^3.0.0
 - zod ^3.0.0
-- react-router-dom ^6.0.0
+- react-router-dom >= 6
 - react-i18next >= 12
 - @tanstack/react-table ^8.0.0 (required for DataTable component)
 - react-grid-layout ^2.2.3 (optional — required only for the Dashboard component)
+
+Note: React 18 is **not** a supported target. 4.0.0 raised the floor to `>= 19` as a breaking change because the ref-as-prop convention used across atoms and form wrappers has its refs silently stripped on React 18, which killed `setFocus()` and focus-on-first-error — see the **Breaking** entry under 4.0.0 in `CHANGELOG.md` (#150).
+
+This list is pinned to `package.json`'s `peerDependencies` by `src/test/peer-deps-docs.test.ts` — change both together.
 
 ## Agent skills
 
