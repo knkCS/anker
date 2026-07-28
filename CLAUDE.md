@@ -12,7 +12,7 @@ Anker is the shared UI component library for the knk software group, extracted a
 
 Single npm package (`@knkcs/anker`) with subpath exports organized in nine layers:
 
-1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 20 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
+1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 23 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
 2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
 3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox, MessageGroup/MessageBubble, VirtualizedMessageList, Composer.
 4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc.
@@ -42,7 +42,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in nine layer
 src/
 ├── theme/           # Design tokens + recipes
 │   ├── tokens/      # colors, semantic, shadows, spacing, radii, typography, animations, z-index
-│   ├── recipes/     # Chakra component recipes (20 files)
+│   ├── recipes/     # Chakra component recipes (22 files)
 │   ├── presets/     # Theme personality presets (ThemePreset, defaultPreset)
 │   ├── create-theme.ts  # createAnkerTheme() factory
 │   └── utils/       # Color manipulation helpers

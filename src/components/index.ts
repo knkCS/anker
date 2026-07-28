@@ -23,7 +23,7 @@ export type { ChipPickerProps } from "./chip-picker";
 export { ChipPicker } from "./chip-picker";
 // Composer
 export type {
-	ComposerMentionProps,
+	ComposerMentionConfig,
 	ComposerMentionState,
 	ComposerProps,
 } from "./composer";

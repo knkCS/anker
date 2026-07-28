@@ -5,7 +5,7 @@ import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { createAnkerTheme } from "../../theme/create-theme";
 import { Composer } from "./composer";
-import type { ComposerMentionProps } from "./types";
+import type { ComposerMentionConfig } from "./types";
 
 // The anker system is required (not defaultSystem): the `composer` slot
 // recipe only exists in anker's theme, and the recipe-consumption test
@@ -153,8 +153,8 @@ const MEMBERS: Member[] = [
 ];
 
 function makeMention(
-	overrides: Partial<ComposerMentionProps<Member>> = {},
-): ComposerMentionProps<Member> {
+	overrides: Partial<ComposerMentionConfig<Member>> = {},
+): ComposerMentionConfig<Member> {
 	return {
 		getSuggestions: vi.fn((query: string) =>
 			MEMBERS.filter((m) => m.name.toLowerCase().includes(query.toLowerCase())),
@@ -227,7 +227,11 @@ describe("Composer mention autocomplete", () => {
 		renderWithAnkerTheme(<Composer mention={mention} onSubmit={onSubmit} />);
 		type("hi @gra");
 		fireEvent.keyDown(textarea(), { key: "Enter" });
-		expect(mention.onSelect).toHaveBeenCalledWith(MEMBERS[1], { query: "gra" });
+		expect(mention.onSelect).toHaveBeenCalledWith(MEMBERS[1], {
+			query: "gra",
+			start: 3,
+			end: 7,
+		});
 		expect(onSubmit).not.toHaveBeenCalled();
 		expect(textarea()).toHaveValue("hi @Grace Hopper ");
 		expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
@@ -240,6 +244,8 @@ describe("Composer mention autocomplete", () => {
 		fireEvent.click(options()[0]);
 		expect(mention.onSelect).toHaveBeenCalledWith(MEMBERS[2], {
 			query: "annie",
+			start: 0,
+			end: 6,
 		});
 		expect(textarea()).toHaveValue("@Annie Easley ");
 	});
@@ -251,6 +257,30 @@ describe("Composer mention autocomplete", () => {
 		fireEvent.keyDown(textarea(), { key: "Enter" });
 		expect(textarea()).toHaveValue("@ada");
 		expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+	});
+
+	it("drops a pending insertion caret when a controlled value never echoes it", () => {
+		const { rerender } = renderWithAnkerTheme(
+			<Composer value="hello @ada" mention={makeMention()} />,
+		);
+		// User keystroke the parent ignores — opens the dropdown ("ad" matches).
+		fireEvent.change(textarea(), {
+			target: { value: "hello @ad", selectionStart: 9, selectionEnd: 9 },
+		});
+		fireEvent.keyDown(textarea(), { key: "Enter" });
+		// The insertion proposed caret 20 (after "hello @Ada Lovelace "), but
+		// the parent kept its own value. When it later renders an unrelated
+		// value, the stale caret must not be applied to it.
+		rerender(
+			<ChakraProvider value={system}>
+				<Composer
+					value="hello @ada, updated by parent"
+					mention={makeMention()}
+				/>
+			</ChakraProvider>,
+		);
+		const el = textarea() as HTMLTextAreaElement;
+		expect(el.selectionStart).not.toBe(20);
 	});
 
 	it("Escape dismisses the dropdown for the rest of that token; a fresh trigger reopens it", () => {

@@ -278,10 +278,10 @@ and all suggestion data.
   `renderSuggestion` + `getSuggestionKey`; empty results close it. The
   trigger (default `@`) only counts at a word boundary, so emails never open
   it.
-- **Insertion semantics are yours**: `onSelect(item, { query })` returns the
-  text that replaces the `@query` token verbatim (include trigger + trailing
-  space), or nothing to leave the input unchanged and rewrite a controlled
-  `value` yourself.
+- **Insertion semantics are yours**: `onSelect(item, { query, start, end })`
+  returns the text that replaces the `@query` token verbatim (include
+  trigger + trailing space), or nothing to leave the input unchanged and
+  rewrite a controlled `value` yourself — `start`/`end` locate the token.
 - Keyboard: arrows move the highlight (wrapping), Enter/Tab select, Escape
   dismisses for the rest of that token. Full combobox ARIA is wired in;
   label via `submitLabel`, `aria-label`, `mention["aria-label"]`.

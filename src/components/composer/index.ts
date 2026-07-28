@@ -1,6 +1,6 @@
 export { Composer } from "./composer";
 export type {
-	ComposerMentionProps,
+	ComposerMentionConfig,
 	ComposerMentionState,
 	ComposerProps,
 } from "./types";

@@ -4,7 +4,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { Avatar } from "../../primitives";
 import { Box, HStack, Stack } from "../../primitives/layout";
 import { Composer } from "./composer";
-import type { ComposerMentionProps } from "./types";
+import type { ComposerMentionConfig } from "./types";
 
 /**
  * Mixed referable kinds — the dropdown renders whatever the injected
@@ -45,7 +45,7 @@ const searchReferables = (query: string) =>
 
 function useDemoMention(
 	onPicked?: (item: Referable) => void,
-): ComposerMentionProps<Referable> {
+): ComposerMentionConfig<Referable> {
 	return useMemo(
 		() => ({
 			getSuggestions: searchReferables,
@@ -107,23 +107,55 @@ function MentionHarness() {
 	);
 }
 
+/** Types into the composer like a user: native value setter + input event. */
+function playType(canvasElement: HTMLElement, text: string) {
+	const textarea = canvasElement.querySelector<HTMLTextAreaElement>(
+		".composer__textarea",
+	);
+	if (!textarea) return null;
+	textarea.focus();
+	const setValue = Object.getOwnPropertyDescriptor(
+		HTMLTextAreaElement.prototype,
+		"value",
+	)?.set;
+	setValue?.call(textarea, text);
+	textarea.setSelectionRange(text.length, text.length);
+	textarea.dispatchEvent(new Event("input", { bubbles: true }));
+	return textarea;
+}
+
+function playKey(textarea: HTMLTextAreaElement, key: string) {
+	textarea.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+}
+
+const tick = () => new Promise((resolve) => setTimeout(resolve, 50));
+
 export const MentionAutocomplete: Story = {
 	render: () => <MentionHarness />,
 	play: async ({ canvasElement }) => {
-		// Pre-type "@a" so the dropdown is open on load. Write through the
-		// native setter so React's onChange sees the value.
-		const textarea = canvasElement.querySelector<HTMLTextAreaElement>(
-			".composer__textarea",
-		);
+		// Pre-type "@a" so the dropdown is open on load, then one ArrowDown so
+		// the keyboard-driven highlight is visible on the second suggestion.
+		const textarea = playType(canvasElement, "@a");
 		if (!textarea) return;
-		textarea.focus();
-		const setValue = Object.getOwnPropertyDescriptor(
-			HTMLTextAreaElement.prototype,
-			"value",
-		)?.set;
-		setValue?.call(textarea, "@a");
-		textarea.setSelectionRange(2, 2);
-		textarea.dispatchEvent(new Event("input", { bubbles: true }));
+		await tick();
+		playKey(textarea, "ArrowDown");
+	},
+};
+
+/**
+ * Keyboard navigation ending in a selection: `@a` → ArrowDown → Enter. The
+ * selection fires the `onSelect` callback — the pick lands in the log below
+ * and the returned text replaces the mention token in the input.
+ */
+export const MentionSelection: Story = {
+	render: () => <MentionHarness />,
+	play: async ({ canvasElement }) => {
+		const textarea = playType(canvasElement, "@a");
+		if (!textarea) return;
+		await tick();
+		playKey(textarea, "ArrowDown");
+		await tick();
+		playKey(textarea, "Enter");
 	},
 };
 

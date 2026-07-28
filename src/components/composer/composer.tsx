@@ -127,14 +127,21 @@ export const Composer = <T,>(props: ComposerProps<T>) => {
 	}, [value]);
 
 	// Place the caret after an applied mention insertion, once the new value
-	// has rendered.
-	const pendingCaretRef = useRef<number | null>(null);
-	// biome-ignore lint/correctness/useExhaustiveDependencies: `value` gates the effect to the render where the DOM carries the post-insertion text
+	// has rendered. The caret is pinned to the post-insertion text: if a
+	// controlled parent never echoes the insertion, it is dropped, not fired
+	// against an unrelated later value.
+	const pendingCaretRef = useRef<{ caretIndex: number; value: string } | null>(
+		null,
+	);
 	useLayoutEffect(() => {
-		const caret = pendingCaretRef.current;
-		if (caret === null) return;
+		const pending = pendingCaretRef.current;
+		if (pending === null) return;
 		pendingCaretRef.current = null;
-		textareaRef.current?.setSelectionRange(caret, caret);
+		if (value !== pending.value) return;
+		textareaRef.current?.setSelectionRange(
+			pending.caretIndex,
+			pending.caretIndex,
+		);
 	}, [value]);
 
 	const selectSuggestion = useCallback(
@@ -142,13 +149,20 @@ export const Composer = <T,>(props: ComposerProps<T>) => {
 			const m = mentionRef.current;
 			if (!m || active === null) return;
 			const trigger = m.trigger ?? "@";
-			const insert = m.onSelect(item, { query: active.query });
+			const insert = m.onSelect(item, {
+				query: active.query,
+				start: active.start,
+				end: active.start + trigger.length + active.query.length,
+			});
 			setDismissedStart(active.start);
 			if (typeof insert === "string") {
 				const applied = applyMentionInsertion(value, active, trigger, insert);
 				setValue(applied.value);
 				setActive(getActiveMention(applied.value, applied.caretIndex, trigger));
-				pendingCaretRef.current = applied.caretIndex;
+				pendingCaretRef.current = {
+					caretIndex: applied.caretIndex,
+					value: applied.value,
+				};
 			}
 			textareaRef.current?.focus();
 		},

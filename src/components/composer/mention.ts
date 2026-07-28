@@ -5,12 +5,13 @@ export interface ActiveMention {
 	query: string;
 }
 
+const MAX_QUERY_LENGTH = 64;
+
 /**
  * The mention token at the caret, or null when the caret is not inside one.
  * The trigger only counts at a word boundary (start of value or after
  * whitespace), so emails like "a@b" never open the dropdown.
  */
-const MAX_QUERY_LENGTH = 64;
 
 /**
  * Next highlighted index for keyboard navigation, wrapping at both ends.

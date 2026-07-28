@@ -3,9 +3,13 @@ import type React from "react";
 export interface ComposerMentionState {
 	/** The query text between the trigger and the caret at selection time. */
 	query: string;
+	/** Index of the trigger character in the value. */
+	start: number;
+	/** Index just past the query — with `start`, locates the whole token. */
+	end: number;
 }
 
-export interface ComposerMentionProps<T> {
+export interface ComposerMentionConfig<T> {
 	/** Character that opens the dropdown at a word boundary. @default "@" */
 	trigger?: string;
 	/**
@@ -64,5 +68,5 @@ export interface ComposerProps<T = unknown> {
 	/** Focus the textarea on mount. @default false */
 	autoFocus?: boolean;
 	/** Mention-autocomplete configuration. Omit to disable mentions. */
-	mention?: ComposerMentionProps<T>;
+	mention?: ComposerMentionConfig<T>;
 }

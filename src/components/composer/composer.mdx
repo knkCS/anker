@@ -63,14 +63,18 @@ is:
 
 - `getSuggestions(query)` is called as the query changes; an empty result
   closes the dropdown; stale async results (superseded queries) are dropped.
-- `onSelect(item, { query })` fires on selection. Return the text that
-  replaces the mention token (include the trigger and any trailing space —
-  it is inserted verbatim, caret placed after it). Return nothing to leave
-  the input unchanged and handle insertion yourself via a controlled `value`.
+- `onSelect(item, { query, start, end })` fires on selection. Return the text
+  that replaces the mention token (include the trigger and any trailing
+  space — it is inserted verbatim, caret placed after it). Return nothing to
+  leave the input unchanged and handle insertion yourself via a controlled
+  `value` — `start`/`end` locate the token (`start` = trigger index, `end` =
+  just past the query) so you don't have to re-find it.
 - Keyboard: ArrowUp/ArrowDown move the highlight (wrapping), Enter/Tab
   select, Escape dismisses the dropdown for the rest of that token.
 - Emails never trigger: `ada@example` stays closed because the trigger only
   counts at a word boundary.
+
+<Canvas of={Stories.MentionSelection} />
 
 ## Accessibility
 
