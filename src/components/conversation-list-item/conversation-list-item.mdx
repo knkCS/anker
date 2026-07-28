@@ -1,0 +1,58 @@
+import { Canvas, Meta } from "@storybook/blocks";
+import * as Stories from "./conversation-list-item.stories";
+
+<Meta of={Stories} />
+
+# ConversationListItem
+
+One row in a conversation list: title, a preview/subtitle slot, timestamp, an
+avatar slot, and a badge slot, with hover and selected states. Presentation-only
+and data-agnostic: props in, callbacks out — no fetching, no state hooks, no
+service types.
+
+The row renders as a native `<button>`, so keyboard activation (Enter/Space)
+and focus styling come for free. The selected row carries `aria-current="true"`
+and the soft primary tint (`primary.subtle`) — default text colors stay
+readable, so anything you put in the slots keeps its contrast.
+
+## Usage
+
+<Canvas of={Stories.ConversationList} />
+
+```tsx
+import { ConversationListItem } from "@knkcs/anker/components";
+
+<ConversationListItem
+  title="Design weekly"
+  preview="Grace: The new tokens are in the branch."
+  timestamp="14:03"
+  avatar={<Avatar name="Design weekly" size="sm" />}
+  badge={<UnreadBadge count={3} />}
+  isSelected={conversationId === selectedId}
+  onSelect={() => selectConversation(conversationId)}
+/>
+```
+
+## Slots, not data
+
+`preview`, `avatar`, and `badge` are opaque `ReactNode` slots — anker never
+knows what they contain. The preview can be a last-message line, a typing hint
+(`<em>Grace is typing…</em>`), or anything else the consumer derives. The badge
+slot is where an unread count goes; the avatar slot takes `<Avatar />`,
+`<Persona hideDetails />`, or nothing at all.
+
+<Canvas of={Stories.WithAndWithoutAvatar} />
+
+## Truncation
+
+Title and preview truncate to a single line with an ellipsis; the timestamp and
+badge never shrink. The row clamps to the width its container gives it — put it
+in a sized list column.
+
+<Canvas of={Stories.Truncation} />
+
+## Timestamps
+
+`timestamp` is a render slot like the others: pass a preformatted string
+("14:03", "Mon") or a `<DateTime />` element. The consumer decides locale and
+granularity; anker only places it.

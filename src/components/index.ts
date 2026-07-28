@@ -35,6 +35,9 @@ export type {
 	ContextRailSectionProps,
 } from "./context-rail/context-rail";
 export { ContextRail } from "./context-rail/context-rail";
+// ConversationListItem
+export type { ConversationListItemProps } from "./conversation-list-item";
+export { ConversationListItem } from "./conversation-list-item";
 // DataTable + DataTable Cells
 export type {
 	ActionCellAction,
