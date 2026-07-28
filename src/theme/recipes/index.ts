@@ -7,6 +7,7 @@ export { drawerTheme as drawer } from "./drawer";
 export { default as formLabel } from "./form-label";
 export { inputAddonTheme as inputAddon, inputTheme as input } from "./input";
 export { menuTheme as menu } from "./menu";
+export { messageTheme as message } from "./message";
 export { default as popover } from "./popover";
 export { proseTheme as prose } from "./prose";
 export { radioCardTheme as tsRadioCard } from "./radio-card";

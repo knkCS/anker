@@ -208,6 +208,30 @@ Full slot/prop tables: `docs/react-table-reference.md`. Mapping guide for common
 
 ---
 
+## Chat message primitives
+
+`MessageGroup` + `MessageBubble` (`@knkcs/anker/components`) render chat
+message runs. Presentation-only: props in, callbacks out — your service owns
+fetching, segment rendering, and time formatting.
+
+- **Group per consecutive same-author run**: `<MessageGroup author avatar>`
+  renders the author header and avatar once; child bubbles inherit
+  alignment/tint from the group. `isSelf` right-aligns the run with a soft
+  primary tint — bubbles never take an `isSelf` prop themselves. Self groups
+  typically omit `author`/`avatar`.
+- **The bubble body is an opaque segment slot**: `<MessageBubble>` renders
+  its `children` untouched (no typography reset, no content assumptions) —
+  pass your service's rendered segments.
+- **States are props**: `timestamp` (pre-formatted ReactNode), `isEdited` +
+  `editedLabel`, `isDeleted` + `deletedLabel` (tombstone line replaces the
+  bubble; children/actions not rendered).
+- **`actions` is a slot**: a floating pill toolbar shown on row hover /
+  `focus-within`. Supply your own buttons; icon-only buttons must carry an
+  `aria-label`. Touch has no hover — provide a touch affordance (e.g.
+  long-press) in your service if you target touch.
+
+---
+
 ## Pointers
 
 - Full spec: anker GitHub Pages docs site (`/design-system`, `/page-patterns`)
