@@ -254,6 +254,26 @@ conversation data, unread counts, and time formatting.
 
 ---
 
+## UnreadBadge
+
+`UnreadBadge` (`@knkcs/anker/atoms`) is the count pill that normally fills
+`ConversationListItem`'s `badge` slot. Presentation-only: your service owns the
+counts and what counts as a mention.
+
+- **Pass the count unconditionally** — `count={0}` (and any negative,
+  fractional-below-one, or non-finite value) renders `null`, so call sites
+  need no `{unread > 0 && …}` guard.
+- **`max` caps the label** (default 99): above it the badge reads `99+` and
+  stops growing. Narrow list columns often cap lower (`max={9}`).
+- **`hasMention` is the mention variant** — mentions-of-you get the accent
+  fill *and* an `@` glyph; plain unread counts stay neutral. Keep them
+  distinct: unread counts and mention badges mean different things.
+- **`label` overrides the announced name** (defaults `"{count} unread"` /
+  `"{count} unread, mentions you"`). The digits alone say nothing to a screen
+  reader, so pass a translated string rather than relying on the visible text.
+
+---
+
 ## VirtualizedMessageList
 
 `VirtualizedMessageList` (`@knkcs/anker/components`) renders virtualized

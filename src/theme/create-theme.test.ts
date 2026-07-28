@@ -49,4 +49,16 @@ describe("createAnkerTheme recipe registration (#153)", () => {
 		const dialog = system.getSlotRecipe("dialog", null);
 		expect(dialog?.base?.backdrop?.backdropFilter).toBe("blur(4px)");
 	});
+
+	it("resolves the PLAIN unreadBadge recipe with both count states (#161)", () => {
+		// UnreadBadge reads this key by hand via `useRecipe`, so a stray move to
+		// `slotRecipes` would leave the pill unstyled rather than erroring.
+		const unreadBadge = system.getRecipe("unreadBadge");
+		expect(unreadBadge?.base?.bg).toBe("gray.solid");
+		expect(unreadBadge?.variants?.mention?.true?.bg).toBe("primary.solid");
+	});
+
+	it("registers NO slot recipe under 'unreadBadge' (it is single-part)", () => {
+		expect(system.getSlotRecipe("unreadBadge", null)).toBeNull();
+	});
 });
