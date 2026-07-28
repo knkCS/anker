@@ -1,0 +1,85 @@
+import { Canvas, Meta } from "@storybook/blocks";
+import * as Stories from "./composer.stories";
+
+<Meta of={Stories} />
+
+# Composer
+
+The chat message input: an auto-growing multiline textarea, a send button
+with submit-on-enter, a disabled state for archived/read-only conversations,
+and an optional **mention-autocomplete dropdown**. Presentation-only and
+data-agnostic — suggestion data, typing signals, and message sending are all
+wired by the consumer through callbacks; the composer never fetches.
+
+## Usage
+
+<Canvas of={Stories.Default} />
+
+```tsx
+import { Composer } from "@knkcs/anker/components";
+
+<Composer
+  onSubmit={(text) => sendMessage(text)}
+  onInputActivity={notifyTyping} // throttle it yourself
+/>
+```
+
+- **Enter submits, Shift+Enter inserts a newline** (`submitOnEnter`, default
+  true). Blank text never submits; the send button stays disabled.
+- Uncontrolled composers clear after submit. Pass `value` + `onValueChange`
+  for a controlled composer (drafts, programmatic inserts) — then the reset
+  after send is yours.
+- `onInputActivity` fires on every keystroke. The composer never throttles or
+  emits typing signals itself — that is consumer wiring.
+
+<Canvas of={Stories.SubmitAndTypingSignals} />
+
+## Disabled / read-only conversations
+
+<Canvas of={Stories.Disabled} />
+
+`disabled` disables the textarea and send button and flattens the surface —
+use it for archived or read-only conversations.
+
+## Mention autocomplete
+
+<Canvas of={Stories.MentionAutocomplete} />
+
+Pass a `mention` config to enable the dropdown. It opens when the trigger
+character (default `@`) is typed at a word boundary, and renders **whatever
+items the injected callback returns** — anker never knows what a suggestion
+is:
+
+```tsx
+<Composer
+  mention={{
+    getSuggestions: (query) => searchMembers(query), // sync or async
+    getSuggestionKey: (m) => m.id,
+    renderSuggestion: (m) => <Persona name={m.name} hideDetails />,
+    onSelect: (m) => `@${m.name} `, // replaces the "@quer" token verbatim
+  }}
+/>
+```
+
+- `getSuggestions(query)` is called as the query changes; an empty result
+  closes the dropdown; stale async results (superseded queries) are dropped.
+- `onSelect(item, { query })` fires on selection. Return the text that
+  replaces the mention token (include the trigger and any trailing space —
+  it is inserted verbatim, caret placed after it). Return nothing to leave
+  the input unchanged and handle insertion yourself via a controlled `value`.
+- Keyboard: ArrowUp/ArrowDown move the highlight (wrapping), Enter/Tab
+  select, Escape dismisses the dropdown for the rest of that token.
+- Emails never trigger: `ada@example` stays closed because the trigger only
+  counts at a word boundary.
+
+## Accessibility
+
+- The textarea carries the autocomplete ARIA contract when mentions are
+  enabled: `aria-autocomplete="list"`, `aria-expanded`, `aria-controls`, and
+  `aria-activedescendant` following the highlighted option.
+- Suggestions render in a labeled `role="listbox"` (`mention["aria-label"]`,
+  default "Mention suggestions") with `aria-selected` on the highlighted
+  `role="option"`.
+- The send button is icon-only with a configurable `submitLabel` (default
+  "Send message") and a 44×44px touch target.
+- Enter-to-submit ignores in-progress IME composition.

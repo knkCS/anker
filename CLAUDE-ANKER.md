@@ -259,6 +259,35 @@ order, and all fetching.
 
 ---
 
+## Composer
+
+`Composer` (`@knkcs/anker/components`) is the chat message input: auto-growing
+multiline textarea, send button, submit-on-enter, optional mention
+autocomplete. Presentation-only: your service owns sending, typing signals,
+and all suggestion data.
+
+- **Submit**: `onSubmit(text)` fires on Enter (Shift+Enter = newline;
+  disable with `submitOnEnter={false}`) or the send button — never with blank
+  text. Uncontrolled composers clear afterwards; with a controlled
+  `value`/`onValueChange` pair the reset is yours.
+- **`onInputActivity` fires per keystroke** — throttle it yourself and wire
+  your typing signal; anker never emits one.
+- **`disabled`** is for archived/read-only conversations (input + send off).
+- **Mentions are injected**: `mention.getSuggestions(query)` (sync or async)
+  supplies the items — the dropdown renders whatever it is given via
+  `renderSuggestion` + `getSuggestionKey`; empty results close it. The
+  trigger (default `@`) only counts at a word boundary, so emails never open
+  it.
+- **Insertion semantics are yours**: `onSelect(item, { query })` returns the
+  text that replaces the `@query` token verbatim (include trigger + trailing
+  space), or nothing to leave the input unchanged and rewrite a controlled
+  `value` yourself.
+- Keyboard: arrows move the highlight (wrapping), Enter/Tab select, Escape
+  dismisses for the rest of that token. Full combobox ARIA is wired in;
+  label via `submitLabel`, `aria-label`, `mention["aria-label"]`.
+
+---
+
 ## Pointers
 
 - Full spec: anker GitHub Pages docs site (`/design-system`, `/page-patterns`)

@@ -21,6 +21,13 @@ export { CardListItem } from "./card-list-item";
 // ChipPicker
 export type { ChipPickerProps } from "./chip-picker";
 export { ChipPicker } from "./chip-picker";
+// Composer
+export type {
+	ComposerMentionProps,
+	ComposerMentionState,
+	ComposerProps,
+} from "./composer";
+export { Composer } from "./composer";
 // ContextRail
 export type {
 	ContextRailHeaderProps,

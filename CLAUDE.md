@@ -14,7 +14,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in nine layer
 
 1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 20 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
 2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
-3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox, MessageGroup/MessageBubble, VirtualizedMessageList.
+3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox, MessageGroup/MessageBubble, VirtualizedMessageList, Composer.
 4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc.
 5. **`/forms`** — Form controls built on React Hook Form + Zod: InputField, TextareaField, ArrayField, DatePickerField, CodeField, etc. Also the canonical home of SearchInput (`/atoms` re-exports it for backwards compatibility).
 6. **`/feedback`** — Feedback patterns: ConfirmModal with provider + `useConfirmModal` hook, UploadToastStack.
@@ -186,6 +186,19 @@ untouched; anker never knows what segment kinds exist). Styled by the
 text stays readable) — NOT `bg-accent-subtle`, which is an inverted accent
 surface. Usage guide: `src/components/message/message.mdx`.
 
+`src/components/composer/` provides `Composer`: the chat message input —
+auto-growing textarea, send button with submit-on-enter (IME-safe,
+Shift+Enter = newline, blank never submits; uncontrolled clears after
+submit), `disabled` for archived conversations, an `onInputActivity`
+keystroke callback (consumers throttle + wire typing signals), and an
+injected mention autocomplete: `mention.getSuggestions(query)` supplies
+opaque items (rendered via `renderSuggestion`/`getSuggestionKey`),
+`onSelect` returns the replacement text for the `@query` token (or nothing —
+insertion semantics are the consumer's). Trigger detection, insertion, and
+highlight movement are pure TDD-tested functions in `mention.ts`. Styled by
+the `composer` slot recipe; dropdown opens upward (composers sit at the
+bottom). Usage guide: `src/components/composer/composer.mdx`.
+
 `src/components/virtualized-message-list/` provides `VirtualizedMessageList`:
 virtualized history on `@tanstack/react-virtual` (regular dependency, API
 never exposed) — newest at the bottom via the virtualizer's `anchorTo: "end"`
@@ -331,7 +344,7 @@ Additional rules:
 `button`, `container`, `prose`, `separator`, `formLabel`, `input`, `inputAddon`, `textarea`, `tooltip`, `tsRadioCard`, `tag`
 
 ### Registered slot recipes (multi-part)
-`card`, `checkbox`, `dialog`, `drawer`, `field` (inline in create-theme.ts), `menu`, `message`, `messageList`, `popover`, `stepper`, `table`, `tabs`
+`card`, `checkbox`, `composer`, `dialog`, `drawer`, `field` (inline in create-theme.ts), `menu`, `message`, `messageList`, `popover`, `stepper`, `table`, `tabs`
 
 ## Breaking Changes
 
