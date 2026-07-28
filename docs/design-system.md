@@ -14,7 +14,7 @@ The system applies **only to web products**. Print and InDesign materials contin
 
 ### Tech foundation
 
-- React 18+ with Chakra UI v3 (recipes, slot recipes, semantic tokens)
+- React 19+ with Chakra UI v3 (recipes, slot recipes, semantic tokens)
 - Lucide React for icons
 - Inter Tight (UI) and JetBrains Mono (code) — consumers install both via Google Fonts
 - Light + dark mode supported via `next-themes`
