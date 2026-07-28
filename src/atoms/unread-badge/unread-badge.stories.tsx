@@ -17,8 +17,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** The common case: a small count, rendered as a circle. */
-export const SingleDigit: Story = {};
+/** The common case: a single digit, rendered as a circle. */
+export const Default: Story = {};
 
 /** Above `max` (default 99) the badge stops growing and reads `99+`. */
 export const CappedCount: Story = {

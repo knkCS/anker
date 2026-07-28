@@ -16,9 +16,9 @@ export function formatUnreadCount(count: number, max: number): string | null {
 	const total = Math.floor(count);
 	if (total < 1) return null;
 
-	// A non-finite max means "never cap" — comparing against the count itself
-	// keeps the branch below uniform.
-	const cap = Number.isFinite(max) ? Math.max(1, Math.floor(max)) : total;
+	// Clamping to a whole number >= 1 keeps the cap label sane for nonsense
+	// input, and leaves an infinite max meaning "never cap" for free.
+	const cap = Math.max(1, Math.floor(max));
 
 	return total > cap ? `${cap}+` : String(total);
 }

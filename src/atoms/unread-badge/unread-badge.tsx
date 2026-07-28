@@ -61,7 +61,7 @@ export const UnreadBadge = ({
 			role="img"
 			aria-label={label ?? defaultLabel(formatted, hasMention)}
 		>
-			{hasMention ? <AtSign size={10} aria-hidden="true" /> : null}
+			{hasMention ? <AtSign size={12} aria-hidden="true" /> : null}
 			{formatted}
 		</chakra.span>
 	);
