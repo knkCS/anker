@@ -163,4 +163,100 @@ describe("createAnkerTheme recipe registration (#153)", () => {
 		expect(system.getRecipe("reactionChips")).toBeUndefined();
 		expect(system.getRecipe("reactionQuickSet")).toBeUndefined();
 	});
+
+	it("resolves the message SLOT recipe with all nine slots (#157)", () => {
+		// MessageGroup/MessageBubble read this key by hand via `useSlotRecipe`;
+		// a dropped registration leaves every bubble unstyled rather than
+		// erroring — the whole chat surface would ship as bare text.
+		const message = system.getSlotRecipe("message", null);
+		expect(message?.slots).toEqual([
+			"group",
+			"header",
+			"avatar",
+			"content",
+			"bubbleRow",
+			"bubble",
+			"timestamp",
+			"toolbar",
+			"tombstone",
+		]);
+		expect(message?.base?.group?.display).toBe("flex");
+	});
+
+	it("keeps the self bubble on primary.subtle, not the inverted accent surface (#157)", () => {
+		// The same rule reacted chips and selected conversation rows follow:
+		// bg-accent-subtle is an inverted surface and would swallow the opaque
+		// segment content the bubble renders untouched.
+		const variants = system.getSlotRecipe("message", null)?.variants;
+		expect(variants?.variant?.self?.bubble?.bg).toBe("primary.subtle");
+		expect(variants?.variant?.other?.bubble?.bg).toBe("bg-surface");
+	});
+
+	it("resolves the messageList SLOT recipe with all seven slots (#158)", () => {
+		// VirtualizedMessageList reads this key by hand via `useSlotRecipe`. The
+		// viewport's scroll styles come from the recipe, so a dropped
+		// registration silently turns off scrolling — not just the paint.
+		const messageList = system.getSlotRecipe("messageList", null);
+		expect(messageList?.slots).toEqual([
+			"root",
+			"viewport",
+			"inner",
+			"item",
+			"divider",
+			"dividerLabel",
+			"jump",
+		]);
+		expect(messageList?.base?.viewport?.overflowY).toBe("auto");
+		// Virtual rows are absolutely positioned against `inner` — without this
+		// the whole history stacks in document flow.
+		expect(messageList?.base?.item?.position).toBe("absolute");
+	});
+
+	it("resolves the composer SLOT recipe with all five slots (#159)", () => {
+		// Composer reads this key by hand via `useSlotRecipe`; a dropped
+		// registration leaves the input, the send button and the mention
+		// dropdown unstyled rather than erroring.
+		const composer = system.getSlotRecipe("composer", null);
+		expect(composer?.slots).toEqual([
+			"root",
+			"textarea",
+			"send",
+			"dropdown",
+			"option",
+		]);
+		expect(composer?.base?.send?.bg).toBe("accent");
+	});
+
+	it("resolves the conversationListItem SLOT recipe with all nine slots (#160)", () => {
+		// ConversationListItem reads this key by hand via `useSlotRecipe`; a
+		// dropped registration would also drop the row's touch target, since the
+		// 44px minimum lives in the recipe rather than on the element.
+		const row = system.getSlotRecipe("conversationListItem", null);
+		expect(row?.slots).toEqual([
+			"root",
+			"avatar",
+			"content",
+			"titleRow",
+			"title",
+			"timestamp",
+			"previewRow",
+			"preview",
+			"badge",
+		]);
+		expect(row?.base?.root?.minHeight).toBe("44px");
+		expect(row?.variants?.selected?.true?.root?.bg).toBe("primary.subtle");
+	});
+
+	it("registers NO plain recipe under any of the four chat slot keys", () => {
+		// The mirror of the reactions pin, for the four largest chat recipes: a
+		// v3 slot recipe misfiled under `recipes` is just as silently dead.
+		for (const key of [
+			"message",
+			"messageList",
+			"composer",
+			"conversationListItem",
+		]) {
+			expect(system.getRecipe(key)).toBeUndefined();
+		}
+	});
 });
