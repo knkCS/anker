@@ -131,14 +131,33 @@ async function waitFor(assertion: () => void, timeoutMs = 2000) {
 }
 
 /**
- * The scroll container: the component renders its viewport as the `role="log"`
- * region — the same element ScrolledUpPreservesPosition reaches for by
- * data-testid.
+ * The scroll container — the same element ScrolledUpPreservesPosition reaches
+ * for, by the same testid.
  */
 function getViewport(canvasElement: HTMLElement): HTMLElement {
-	const viewport = canvasElement.querySelector<HTMLElement>('[role="log"]');
-	assert(viewport !== null, 'no role="log" scroll container rendered');
+	const viewport = canvasElement.querySelector<HTMLElement>(
+		'[data-testid="message-list-viewport"]',
+	);
+	assert(viewport !== null, "no scroll viewport rendered");
 	return viewport;
+}
+
+/**
+ * Waits until `scrollTop` stops moving.
+ *
+ * Revealing previously-unmounted rows makes the virtualizer measure them, and
+ * a first measurement that lands above the viewport is compensated by shifting
+ * `scrollTop`. So a scroll is not finished when the assignment returns — read
+ * an anchor too early and a later adjustment invalidates it, failing an
+ * assertion about a list that behaved correctly.
+ */
+async function waitForScrollToSettle(viewport: HTMLElement) {
+	let previous = Number.NaN;
+	for (let i = 0; i < 20; i++) {
+		if (viewport.scrollTop === previous) return;
+		previous = viewport.scrollTop;
+		await tick();
+	}
 }
 
 /** How far the bottom of the content sits below the bottom of the viewport. */
@@ -163,17 +182,23 @@ const offsetWithinViewport = (element: HTMLElement, viewport: HTMLElement) =>
 	element.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
 
 /**
- * The topmost message fully inside the viewport, plus where it sits — the
- * fixed point a prepend must not move.
+ * The topmost message whose top edge is inside the viewport, plus where it
+ * sits — the fixed point a prepend must not move.
  */
 function anchorMessage(viewport: HTMLElement) {
-	const element = Array.from(
-		viewport.querySelectorAll<HTMLElement>("[data-message-id]"),
-	).find((candidate) => offsetWithinViewport(candidate, viewport) >= 0);
-	assert(element !== undefined, "no message is fully inside the viewport");
-	const id = element.dataset.messageId;
-	assert(id !== undefined, "the anchored message carries no id");
-	return { id, offset: offsetWithinViewport(element, viewport) };
+	for (const candidate of viewport.querySelectorAll<HTMLElement>(
+		"[data-message-id]",
+	)) {
+		const offset = offsetWithinViewport(candidate, viewport);
+		// `dataset.messageId` is always set — the selector above is that
+		// attribute — so this is narrowing, not a condition that can fail.
+		if (offset >= 0 && candidate.dataset.messageId) {
+			return { id: candidate.dataset.messageId, offset };
+		}
+	}
+	throw new Error(
+		"VirtualizedMessageList: no message starts inside the viewport",
+	);
 }
 
 /**
@@ -255,6 +280,8 @@ const PREPEND_VISIBLE = 60;
 const MESSAGE_SPACING_MS = 47 * 60_000;
 /** Fixed clock: the fixture is byte-identical on every run of the play. */
 const PREPEND_END_AT = new Date("2026-01-15T12:00:00");
+/** Ditto for ReverseScroll, which asserts on a specific message id. */
+const REVERSE_SCROLL_END_AT = new Date("2026-01-15T12:00:00");
 
 /**
  * Prepends a page of older messages on demand. The button stands in for the
@@ -315,41 +342,42 @@ export const Default: Story = {
 };
 
 /**
- * Reverse scroll — the behaviour the component exists for. `items` stay in
- * their natural **oldest → newest** order (nothing is reversed in the data),
- * the newest message renders at the **bottom** of the frame, and the list
- * mounts already **scrolled to the bottom**: a reader starts at the latest
- * message and scrolls **up** into history, the way every chat client behaves.
- *
- * The play function pins it rather than leaving it to the eye: on mount the
- * `role="log"` scroll container's `scrollTop + clientHeight` is within 4px of
- * its `scrollHeight`, and the last message element in the DOM is the last item
- * in `items`.
+ * Reverse scroll: `items` stay in their natural oldest → newest order, the
+ * newest renders at the bottom, and the list mounts already scrolled to it —
+ * so a reader starts at the latest message and scrolls *up* into history.
  */
 export const ReverseScroll: Story = {
 	render: () => (
 		<Frame>
-			<VirtualizedMessageList items={makeMessages(48)} {...listProps} />
+			<VirtualizedMessageList
+				// Fixed clock so the day dividers land in the same places on every
+				// run — and so this story is not a second copy of Default.
+				items={makeMessages(48, { endAt: REVERSE_SCROLL_END_AT })}
+				{...listProps}
+			/>
 		</Frame>
 	),
 	play: async ({ canvasElement }) => {
 		const viewport = getViewport(canvasElement);
-		// Rows are measured after the first paint, so the anchored offset settles
-		// a frame or two in — poll rather than assert on tick zero.
+		// Both assertions poll together: `scrollTop` reaches the bottom
+		// synchronously, but the rendered window only catches up on the commit
+		// the scroll event triggers, so the newest row is briefly not yet mounted.
 		await waitFor(() => {
 			assertRestingAtBottom(viewport);
+			assertNewestRenderedLast(viewport);
 		});
-		// Newest at the bottom: the last item of the fixture (msg-47) is the last
-		// message rendered, and it is the one the mounted viewport is resting on.
-		const rendered =
-			viewport.querySelectorAll<HTMLElement>("[data-message-id]");
-		const newest = rendered[rendered.length - 1];
-		assert(
-			newest?.dataset.messageId === "msg-47",
-			`expected the newest message (msg-47) to render last, got ${newest?.dataset.messageId ?? "nothing"}`,
-		);
 	},
 };
+
+/** The last item of `makeMessages(48)` is the last message element in the DOM. */
+function assertNewestRenderedLast(viewport: HTMLElement) {
+	const rendered = viewport.querySelectorAll<HTMLElement>("[data-message-id]");
+	const newest = rendered[rendered.length - 1];
+	assert(
+		newest?.dataset.messageId === "msg-47",
+		`expected the newest message (msg-47) to render last, got ${newest?.dataset.messageId ?? "nothing"}`,
+	);
+}
 
 /** Stay at the bottom: appended messages keep the list pinned. */
 export const PinnedToBottom: Story = {
@@ -400,17 +428,10 @@ export const LoadOlderPages: Story = {
 
 /**
  * Prepend anchoring — the hard half of scroll anchoring. Older history is
- * inserted **above** what you are reading, which grows the scroll content:
- * without anchoring the viewport would keep its scroll offset and the text
- * under your eyes would jump up by the height of the whole new page. The list
- * anchors to the end (`anchorTo: "end"`), so the message you are reading stays
- * exactly where it is and only the scrollbar changes.
- *
- * The play function pins it: it scrolls up away from the bottom, records the
- * topmost fully-visible message and its offset inside the viewport, prepends a
- * page of 40 older messages, then asserts that same message is still rendered
- * at the same offset (within 4px) — and that the list has not snapped back to
- * the newest message.
+ * inserted *above* what you are reading, which grows the scroll content;
+ * without anchoring the text under your eyes would jump up by the height of
+ * the whole new page. Here it stays exactly where it is and only the scrollbar
+ * changes.
  */
 export const PrependPreservesPosition: Story = {
 	render: () => <PrependHarness />,
@@ -425,7 +446,11 @@ export const PrependPreservesPosition: Story = {
 		// registers the upward move (and unpins) now.
 		viewport.scrollTop -= 600;
 		viewport.dispatchEvent(new Event("scroll"));
-		await tick();
+		// Newly revealed rows get measured, and a first measurement above the
+		// viewport shifts scrollTop to compensate. Read the anchor before that
+		// settles and a later adjustment invalidates it — the assertion would
+		// then fail on a list that anchored perfectly.
+		await waitForScrollToSettle(viewport);
 		assert(
 			distanceFromBottom(viewport) > TOLERANCE_PX,
 			"expected to be scrolled away from the bottom before prepending",
@@ -447,26 +472,33 @@ export const PrependPreservesPosition: Story = {
 				"prepending a page did not grow the scrollable content",
 			);
 		});
-		await tick();
+		await waitForScrollToSettle(viewport);
 
-		const anchorAfter = viewport.querySelector<HTMLElement>(
-			`[data-message-id="${anchor.id}"]`,
-		);
-		assert(
-			anchorAfter !== null,
-			`prepending pushed ${anchor.id} out of the rendered window entirely`,
-		);
-		const drift = Math.abs(
-			offsetWithinViewport(anchorAfter, viewport) - anchor.offset,
-		);
-		assert(
-			drift <= TOLERANCE_PX,
-			`expected ${anchor.id} to stay put across the prepend, but it moved ${Math.round(drift)}px`,
-		);
-		assert(
-			distanceFromBottom(viewport) > TOLERANCE_PX,
-			"prepending snapped the list back to the newest message",
-		);
+		// Polled, for the same reason the pre-prepend read was: the restore and
+		// the measurements it triggers land across several frames.
+		await waitFor(() => {
+			const anchorAfter = viewport.querySelector<HTMLElement>(
+				`[data-message-id="${anchor.id}"]`,
+			);
+			assert(
+				anchorAfter !== null,
+				`prepending pushed ${anchor.id} out of the rendered window entirely`,
+			);
+			const drift = Math.abs(
+				offsetWithinViewport(anchorAfter, viewport) - anchor.offset,
+			);
+			assert(
+				drift <= TOLERANCE_PX,
+				`expected ${anchor.id} to stay put across the prepend, but it moved ${Math.round(drift)}px`,
+			);
+			// Catches the narrower regression of the list re-pinning itself to the
+			// newest message on a count change. The drift check above is what
+			// catches anchoring failing open.
+			assert(
+				distanceFromBottom(viewport) > TOLERANCE_PX,
+				"prepending snapped the list back to the newest message",
+			);
+		});
 	},
 };
 
