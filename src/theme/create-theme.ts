@@ -5,6 +5,7 @@ import {
 } from "@chakra-ui/react";
 import type { ThemePreset } from "./presets/types";
 import {
+	avatarPresence,
 	button,
 	card,
 	checkbox,
@@ -154,6 +155,7 @@ export function createAnkerTheme(preset?: ThemePreset) {
 			semanticTokens,
 
 			recipes: {
+				avatarPresence,
 				button,
 				container,
 				prose,

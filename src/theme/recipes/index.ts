@@ -1,3 +1,4 @@
+export { avatarPresenceTheme as avatarPresence } from "./avatar-presence";
 export { buttonTheme as button } from "./button";
 export { default as card } from "./card";
 export { default as checkbox } from "./checkbox";

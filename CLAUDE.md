@@ -12,7 +12,7 @@ Anker is the shared UI component library for the knk software group, extracted a
 
 Single npm package (`@knkcs/anker`) with subpath exports organized in nine layers:
 
-1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 27 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
+1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 28 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
 2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
 3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox, MessageGroup/MessageBubble, VirtualizedMessageList, Composer, ConversationListItem.
 4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, UnreadBadge, TypingIndicator, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc.
@@ -42,7 +42,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in nine layer
 src/
 ├── theme/           # Design tokens + recipes
 │   ├── tokens/      # colors, semantic, shadows, spacing, radii, typography, animations, z-index
-│   ├── recipes/     # Chakra component recipes (25 files)
+│   ├── recipes/     # Chakra component recipes (26 files)
 │   ├── presets/     # Theme personality presets (ThemePreset, defaultPreset)
 │   ├── create-theme.ts  # createAnkerTheme() factory
 │   └── utils/       # Color manipulation helpers
@@ -252,6 +252,28 @@ day labels, load-older gate) lives in separate TDD-tested modules. Styled by
 the `messageList` slot recipe. Usage guide:
 `src/components/virtualized-message-list/virtualized-message-list.mdx`.
 
+`src/primitives/avatar.tsx` grows the chat set's one primitive-layer piece:
+an optional `presence` prop on `Avatar` — a binary online/offline dot anchored
+to the bottom-inline-end corner. The prop is `"online" | "offline"` and
+omittable rather than a boolean, because **absent is not offline**: an avatar
+with no presence to report renders exactly today's markup (a test strips the
+dot and compares the two renders byte-for-byte, so the variant stays additive
+for every existing consumer). Online is a filled `success` dot and offline a
+hollow ring drawn with an inset shadow, so the states never rely on hue alone —
+the same WCAG 1.4.1 line unread-badge draws around its `@` glyph. The dot sizes
+itself from Chakra's `--avatar-size` custom property, so one ratio covers `2xs`
+through `2xl` and `size="full"` without per-size overrides; it carries that size
+on its own `font-size` (it holds no text) so both rings can be `em` and scale
+with it — flat 2px rings fill the 7.2px `2xs` dot completely and collapse the
+hollow variant into a solid disc. It carries `zIndex: 1` because `AvatarGroup`
+overlaps each avatar with the next (`spaceX: -3`, no stacking order) and would
+otherwise bury the corner the dot sits in; that lift does **not** survive
+`<AvatarGroup stacking="…">`, which z-indexes every avatar root into its own
+stacking context. Styled by the new single-part `avatarPresence` recipe, read by hand via
+`useRecipe` and pinned in `create-theme.test.ts`. It is a separate recipe rather
+than a slot on Chakra's `avatar` recipe: those slots come from `avatarAnatomy`,
+so an anker-only slot would have no Chakra component to render it.
+
 ### Dashboard & Widget Framework
 
 `src/dashboard/` provides a domain-free dashboard framework (exported
@@ -380,7 +402,7 @@ Additional rules:
 **Color palette tokens** (per-palette): `{palette}.contrast`, `{palette}.fg`, `{palette}.subtle`, `{palette}.muted`, `{palette}.emphasized`, `{palette}.solid`, `{palette}.focusRing`, `{palette}.border`
 
 ### Registered recipes (single-part)
-`button`, `container`, `prose`, `separator`, `formLabel`, `input`, `inputAddon`, `textarea`, `tooltip`, `tsRadioCard`, `tag`, `unreadBadge`
+`avatarPresence`, `button`, `container`, `prose`, `separator`, `formLabel`, `input`, `inputAddon`, `textarea`, `tooltip`, `tsRadioCard`, `tag`, `unreadBadge`
 
 ### Registered slot recipes (multi-part)
 `card`, `checkbox`, `composer`, `conversationListItem`, `dialog`, `drawer`, `field` (inline in create-theme.ts), `menu`, `message`, `messageList`, `popover`, `stepper`, `table`, `tabs`, `typingIndicator`
