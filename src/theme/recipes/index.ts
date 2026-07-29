@@ -15,6 +15,8 @@ export { messageListTheme as messageList } from "./message-list";
 export { default as popover } from "./popover";
 export { proseTheme as prose } from "./prose";
 export { radioCardTheme as tsRadioCard } from "./radio-card";
+export { reactionChipsTheme as reactionChips } from "./reaction-chips";
+export { reactionQuickSetTheme as reactionQuickSet } from "./reaction-quick-set";
 export { default as separator } from "./separator";
 export { stepperTheme as stepper } from "./stepper";
 export { tableTheme as table } from "./table";

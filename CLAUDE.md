@@ -12,9 +12,9 @@ Anker is the shared UI component library for the knk software group, extracted a
 
 Single npm package (`@knkcs/anker`) with subpath exports organized in nine layers:
 
-1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 28 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
+1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 30 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
 2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
-3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox, MessageGroup/MessageBubble, VirtualizedMessageList, Composer, ConversationListItem.
+3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox, MessageGroup/MessageBubble, VirtualizedMessageList, Composer, ConversationListItem, ReactionChips/ReactionQuickSetPopover.
 4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, UnreadBadge, TypingIndicator, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc.
 5. **`/forms`** — Form controls built on React Hook Form + Zod: InputField, TextareaField, ArrayField, DatePickerField, CodeField, etc. Also the canonical home of SearchInput (`/atoms` re-exports it for backwards compatibility).
 6. **`/feedback`** — Feedback patterns: ConfirmModal with provider + `useConfirmModal` hook, UploadToastStack.
@@ -42,7 +42,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in nine layer
 src/
 ├── theme/           # Design tokens + recipes
 │   ├── tokens/      # colors, semantic, shadows, spacing, radii, typography, animations, z-index
-│   ├── recipes/     # Chakra component recipes (26 files)
+│   ├── recipes/     # Chakra component recipes (28 files)
 │   ├── presets/     # Theme personality presets (ThemePreset, defaultPreset)
 │   ├── create-theme.ts  # createAnkerTheme() factory
 │   └── utils/       # Color manipulation helpers
@@ -252,6 +252,35 @@ day labels, load-older gate) lives in separate TDD-tested modules. Styled by
 the `messageList` slot recipe. Usage guide:
 `src/components/virtualized-message-list/virtualized-message-list.mdx`.
 
+`src/components/reactions/` provides the reaction pair: `ReactionChips` (a
+message's aggregated reactions — emoji, count, and whether the viewer is one of
+them) and `ReactionQuickSetPopover` (a curated grid of emoji to add one from).
+They are joined by a slot, not welded: the popover normally fills the chips'
+`addAction` slot, and either works alone. Each chip is a **toggle button** —
+`aria-pressed` carries reacted-by-me to assistive tech, while the
+`primary.subtle` tint (never `bg-accent-subtle`) and a bolder count carry it
+visually, so the state never rests on hue alone. `onToggle` reports the emoji
+only: add-or-remove is the consumer's decision, and an already-reacted chip
+reports exactly like a fresh one. `maxVisible` (default 8) is a hard cap and the
+tail folds into one `+N` chip, which is a real button only when `onShowAll` is
+supplied and an inert `role="img"` readout otherwise — the readout takes the
+recipe's `inert` variant, which hands back the pointer cursor, the hover tint,
+the focus ring and the 44px hit pseudo rather than patching them off inline. The pure, TDD-tested
+`partitionReactions()` does the dropping (counts below 1, fractional,
+non-finite), the merging of a repeated emoji, and the cap; it stays internal,
+the same line unread-badge draws around `formatUnreadCount`. Renders `null` when
+there is nothing to show *and* no `addAction` — the slot is how a message's
+first reaction gets added. The quick set is **sixteen hand-written glyphs**
+(`DEFAULT_REACTION_QUICK_SET`) with English accessible names, in two rows of
+eight; the searchable picker that would need an emoji catalogue is v2 behind an
+optional subpath (messengerhub ADR-0009), and
+`src/components/reactions/no-emoji-dependency.test.ts` pins that no emoji-data
+package and no foreign import reaches this directory. The popover is
+`lazyMount unmountOnExit`: one hangs off every message, so eager mounting would
+put sixteen hidden buttons in the DOM per message. Styled by the
+`reactionChips` and `reactionQuickSet` slot recipes, pinned in
+`create-theme.test.ts`. Usage guide: `src/components/reactions/reactions.mdx`.
+
 `src/primitives/avatar.tsx` grows the chat set's one primitive-layer piece:
 an optional `presence` prop on `Avatar` — a binary online/offline dot anchored
 to the bottom-inline-end corner. The prop is `"online" | "offline"` and
@@ -405,7 +434,7 @@ Additional rules:
 `avatarPresence`, `button`, `container`, `prose`, `separator`, `formLabel`, `input`, `inputAddon`, `textarea`, `tooltip`, `tsRadioCard`, `tag`, `unreadBadge`
 
 ### Registered slot recipes (multi-part)
-`card`, `checkbox`, `composer`, `conversationListItem`, `dialog`, `drawer`, `field` (inline in create-theme.ts), `menu`, `message`, `messageList`, `popover`, `stepper`, `table`, `tabs`, `typingIndicator`
+`card`, `checkbox`, `composer`, `conversationListItem`, `dialog`, `drawer`, `field` (inline in create-theme.ts), `menu`, `message`, `messageList`, `popover`, `reactionChips`, `reactionQuickSet`, `stepper`, `table`, `tabs`, `typingIndicator`
 
 ## Breaking Changes
 

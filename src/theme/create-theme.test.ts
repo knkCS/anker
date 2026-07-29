@@ -109,4 +109,58 @@ describe("createAnkerTheme recipe registration (#153)", () => {
 			system.getSlotRecipe("typingIndicator", null)?.base?.dot?.animation,
 		).toContain("typingBounce");
 	});
+
+	it("resolves the reactionChips SLOT recipe with all four slots (#164)", () => {
+		// ReactionChips reads this key by hand via `useSlotRecipe`; a stray move
+		// to `recipes` would leave every slot unstyled rather than erroring.
+		const reactionChips = system.getSlotRecipe("reactionChips", null);
+		expect(reactionChips?.slots).toEqual(["root", "chip", "emoji", "count"]);
+		expect(reactionChips?.base?.chip?.bg).toBe("bg-surface");
+	});
+
+	it("keeps the reacted chip on primary.subtle, not the inverted accent surface (#164)", () => {
+		// bg-accent-subtle is an inverted accent surface and would swallow the
+		// chip's own text — the same rule message self-bubbles and selected
+		// conversation rows follow.
+		const reacted = system.getSlotRecipe("reactionChips", null)?.variants
+			?.reacted?.true;
+		expect(reacted?.chip?.bg).toBe("primary.subtle");
+		// The second, non-colour signal for the same state (WCAG 1.4.1).
+		expect(reacted?.count?.fontWeight).toBe("bold");
+	});
+
+	it("gives the inert reactions readout back everything only a control should have (#164)", () => {
+		// The `+N` chip without an onShowAll is a readout, not a button. It
+		// keeps the chip's shape so the row stays even, so the variant is what
+		// removes the pointer cursor, the hover tint and the 44px hit pseudo.
+		const inert = system.getSlotRecipe("reactionChips", null)?.variants?.inert
+			?.true;
+		expect(inert?.chip?.cursor).toBe("default");
+		expect(inert?.chip?._after?.content).toBe("none");
+	});
+
+	it("focuses reaction chips and quick-set options with the focus-ring SHADOW token (#164)", () => {
+		// `focus-ring` is a shadow, not a colour: as `outlineColor` it resolves
+		// to the literal string and the declaration is dropped entirely.
+		const chip = system.getSlotRecipe("reactionChips", null)?.base?.chip;
+		const option = system.getSlotRecipe("reactionQuickSet", null)?.base?.option;
+		for (const slot of [chip, option]) {
+			expect(slot?._focusVisible?.boxShadow).toBe("focus-ring");
+			expect(slot?._focusVisible?.outlineColor).toBeUndefined();
+		}
+	});
+
+	it("resolves the reactionQuickSet SLOT recipe with both slots at the 44px target (#164)", () => {
+		const quickSet = system.getSlotRecipe("reactionQuickSet", null);
+		expect(quickSet?.slots).toEqual(["grid", "option"]);
+		expect(quickSet?.base?.option?.minWidth).toBe("44px");
+		expect(quickSet?.base?.option?.minHeight).toBe("44px");
+	});
+
+	it("registers NO plain recipe under either reactions key (both are multi-part)", () => {
+		// The mirror of the unreadBadge/avatarPresence pins: a v3 slot recipe
+		// misfiled under `recipes` is just as silently dead as the reverse.
+		expect(system.getRecipe("reactionChips")).toBeUndefined();
+		expect(system.getRecipe("reactionQuickSet")).toBeUndefined();
+	});
 });
