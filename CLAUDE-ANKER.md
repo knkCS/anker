@@ -303,6 +303,34 @@ Presentation-only: your service owns who is typing and for how long.
 
 ---
 
+## Avatar presence
+
+`Avatar` (`@knkcs/anker/primitives`) takes an optional `presence` prop — an
+online/offline dot anchored to its bottom-inline-end corner. Presentation-only:
+your service owns what "online" means and when it changes.
+
+- **Absent is not offline.** Leaving `presence` unset renders exactly the
+  Avatar you had before — no dot, no extra markup. Pass `"offline"` only when
+  you actually know somebody is away; pass nothing when you have no presence to
+  report. That is why it is `presence?: "online" | "offline"` and not a boolean.
+- **Binary only.** No idle, no away, no last-seen. A richer vocabulary is a
+  design decision, not a prop default — raise it as a ticket rather than
+  encoding it in a label.
+- **Online is filled, offline is a hollow ring.** The distinction survives
+  greyscale and colour-blindness (WCAG 1.4.1), so never re-style one of them
+  into a differently-coloured filled dot.
+- **`presenceLabel` overrides the announced name** (defaults `"Online"` /
+  `"Offline"`). A dot says nothing to a screen reader, so pass a translated
+  string.
+- **It scales itself.** The dot is sized from Chakra's `--avatar-size`, so it
+  works at every avatar `size` and inside `AvatarGroup`, where it is lifted
+  above the next avatar's overlap. Don't hand-size it per call site.
+- The dot's ring reads the `bg-surface` token. On a strongly off-surface
+  backdrop it will read as a hairline mismatch — put the avatar on a surface,
+  or accept it.
+
+---
+
 ## VirtualizedMessageList
 
 `VirtualizedMessageList` (`@knkcs/anker/components`) renders virtualized

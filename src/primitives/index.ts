@@ -4,7 +4,7 @@ export { AccordionItem, AccordionRoot } from "./accordion";
 export type { AlertProps } from "./alert";
 // Alert
 export { Alert } from "./alert";
-export type { AvatarProps } from "./avatar";
+export type { AvatarPresence, AvatarProps } from "./avatar";
 // Avatar
 export { Avatar, AvatarGroup } from "./avatar";
 // Badge

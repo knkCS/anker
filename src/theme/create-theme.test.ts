@@ -50,6 +50,29 @@ describe("createAnkerTheme recipe registration (#153)", () => {
 		expect(dialog?.base?.backdrop?.backdropFilter).toBe("blur(4px)");
 	});
 
+	it("resolves the PLAIN avatarPresence recipe with both states (#163)", () => {
+		// Avatar reads this key by hand via `useRecipe`, so a stray move to
+		// `slotRecipes` would leave the dot unstyled rather than erroring.
+		const avatarPresence = system.getRecipe("avatarPresence");
+		expect(avatarPresence?.variants?.status?.online?.bg).toBe("success");
+		expect(avatarPresence?.variants?.status?.offline?.boxShadow).toBe(
+			"inset 0 0 0 2px {colors.subtle}",
+		);
+	});
+
+	it("registers NO slot recipe under 'avatarPresence' (it is single-part)", () => {
+		expect(system.getSlotRecipe("avatarPresence", null)).toBeNull();
+	});
+
+	it("leaves Chakra's own `avatar` recipe alone (the dot is a separate key)", () => {
+		// The presence dot deliberately does not extend the avatar slot recipe:
+		// its slots come from `avatarAnatomy`, so an anker-only slot would have
+		// no Chakra component rendering it.
+		expect(system.getSlotRecipe("avatar", null)?.slots).not.toContain(
+			"presence",
+		);
+	});
+
 	it("resolves the PLAIN unreadBadge recipe with both count states (#161)", () => {
 		// UnreadBadge reads this key by hand via `useRecipe`, so a stray move to
 		// `slotRecipes` would leave the pill unstyled rather than erroring.
