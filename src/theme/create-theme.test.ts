@@ -54,10 +54,17 @@ describe("createAnkerTheme recipe registration (#153)", () => {
 		// Avatar reads this key by hand via `useRecipe`, so a stray move to
 		// `slotRecipes` would leave the dot unstyled rather than erroring.
 		const avatarPresence = system.getRecipe("avatarPresence");
-		expect(avatarPresence?.variants?.status?.online?.bg).toBe("success");
-		expect(avatarPresence?.variants?.status?.offline?.boxShadow).toBe(
-			"inset 0 0 0 2px {colors.subtle}",
+		expect(avatarPresence?.variants?.presence?.online?.bg).toBe("success");
+		expect(avatarPresence?.variants?.presence?.offline?.boxShadow).toBe(
+			"inset 0 0 0 0.17em {colors.subtle}",
 		);
+	});
+
+	it("gives avatarPresence no default variant — absent is not offline (#163)", () => {
+		// A resting default would make `useRecipe({ key: "avatarPresence" })()`
+		// resolve to a rendered offline dot, which is exactly the state the API
+		// keeps distinct from "no presence to report".
+		expect(system.getRecipe("avatarPresence")?.defaultVariants).toBeUndefined();
 	});
 
 	it("registers NO slot recipe under 'avatarPresence' (it is single-part)", () => {

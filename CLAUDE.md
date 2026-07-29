@@ -262,10 +262,14 @@ for every existing consumer). Online is a filled `success` dot and offline a
 hollow ring drawn with an inset shadow, so the states never rely on hue alone —
 the same WCAG 1.4.1 line unread-badge draws around its `@` glyph. The dot sizes
 itself from Chakra's `--avatar-size` custom property, so one ratio covers `2xs`
-through `2xl` and `size="full"` without per-size overrides, and it carries
-`zIndex: 1` because `AvatarGroup` overlaps each avatar with the next
-(`spaceX: -3`, no stacking order) and would otherwise bury the corner the dot
-sits in. Styled by the new single-part `avatarPresence` recipe, read by hand via
+through `2xl` and `size="full"` without per-size overrides; it carries that size
+on its own `font-size` (it holds no text) so both rings can be `em` and scale
+with it — flat 2px rings fill the 7.2px `2xs` dot completely and collapse the
+hollow variant into a solid disc. It carries `zIndex: 1` because `AvatarGroup`
+overlaps each avatar with the next (`spaceX: -3`, no stacking order) and would
+otherwise bury the corner the dot sits in; that lift does **not** survive
+`<AvatarGroup stacking="…">`, which z-indexes every avatar root into its own
+stacking context. Styled by the new single-part `avatarPresence` recipe, read by hand via
 `useRecipe` and pinned in `create-theme.test.ts`. It is a separate recipe rather
 than a slot on Chakra's `avatar` recipe: those slots come from `avatarAnatomy`,
 so an anker-only slot would have no Chakra component to render it.

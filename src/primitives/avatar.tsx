@@ -67,7 +67,7 @@ export const Avatar = function Avatar({
 			{children}
 			{presence ? (
 				<chakra.span
-					css={presenceRecipe({ status: presence })}
+					css={presenceRecipe({ presence })}
 					className="avatar__presence"
 					data-testid="avatar-presence"
 					data-presence={presence}

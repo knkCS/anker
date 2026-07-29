@@ -129,6 +129,12 @@ export const PresenceAcrossSizes: Story = {
  * presence stays legible for every member of the stack — not just the last.
  * The second row mixes a presence-less avatar in, which is the common case for
  * a group where only some members have presence to report.
+ *
+ * The lift does not survive `<AvatarGroup stacking="first-on-top">` (or
+ * `"last-on-top"`): that prop puts an explicit z-index on every avatar root,
+ * making each its own stacking context and trapping the dot inside it. The
+ * third row shows the resulting clipping — leave `stacking` unset when the
+ * group shows presence.
  */
 export const PresenceInGroup: Story = {
 	render: () => (
@@ -143,6 +149,11 @@ export const PresenceInGroup: Story = {
 				<Avatar name="Ada Lovelace" presence="online" />
 				<Avatar name="Alan Turing" presence="online" />
 				<Avatar name="Grace Hopper" />
+			</AvatarGroup>
+			<AvatarGroup stacking="last-on-top">
+				<Avatar name="Ada Lovelace" presence="online" />
+				<Avatar name="Alan Turing" presence="offline" />
+				<Avatar name="Grace Hopper" presence="online" />
 			</AvatarGroup>
 		</Stack>
 	),

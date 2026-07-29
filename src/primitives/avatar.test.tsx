@@ -38,8 +38,25 @@ describe("Avatar presence", () => {
 		renderWithAnkerTheme(<Avatar name="Jane Doe" presence="offline" />);
 		const rules = presenceRuleText();
 		// Hollow: an inward ring rather than the online fill. Greyscale-readable.
-		expect(rules).toContain("inset 0 0 0 2px var(--chakra-colors-subtle)");
+		expect(rules).toContain("inset 0 0 0 0.17em var(--chakra-colors-subtle)");
 		expect(rules).not.toContain("var(--chakra-colors-success)");
+	});
+
+	it("keeps both rings proportional, so the hollow survives the small sizes", () => {
+		// jsdom resolves no geometry, so this pins the mechanism instead: the dot
+		// carries its size on `font-size` and both rings are `em`, which keeps the
+		// hole open at every avatar size. Flat pixel rings do not — two 2px rings
+		// consume the entire 7.2px dot at `2xs` (24px × 0.3), and offline renders
+		// as a solid disc distinguishable from online by hue alone.
+		renderWithAnkerTheme(
+			<Avatar name="Jane Doe" size="2xs" presence="offline" />,
+		);
+		const rules = presenceRuleText();
+		expect(rules).toContain("calc(var(--avatar-size, 100%) * 0.3)");
+		expect(rules).toContain("border-width:0.17em");
+		expect(rules).toContain("inset 0 0 0 0.17em");
+		// A ring pinned in px would not scale with the dot.
+		expect(rules).not.toMatch(/border-width:\s*\d+px/);
 	});
 
 	it("names the offline dot distinctly", () => {
