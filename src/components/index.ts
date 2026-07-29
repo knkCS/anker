@@ -129,6 +129,18 @@ export { PageHeader } from "./page-header";
 // Pagination
 export type { PaginationProps } from "./pagination";
 export { Pagination } from "./pagination";
+// Reactions (ReactionChips + ReactionQuickSetPopover)
+export type {
+	ReactionChipsProps,
+	ReactionOption,
+	ReactionQuickSetPopoverProps,
+	ReactionSummary,
+} from "./reactions";
+export {
+	DEFAULT_REACTION_QUICK_SET,
+	ReactionChips,
+	ReactionQuickSetPopover,
+} from "./reactions";
 // SelectableCard
 export type {
 	SelectableCardBodyProps,

@@ -337,6 +337,56 @@ your service owns what "online" means and when it changes.
 
 ---
 
+## Reactions
+
+`ReactionChips` and `ReactionQuickSetPopover` (`@knkcs/anker/components`) are
+the reaction pair: the chips show a message's aggregated reactions, the popover
+offers a curated set to add one from. Presentation-only: your service owns the
+aggregate and what a reaction means.
+
+```tsx
+<ReactionChips
+  reactions={[{ emoji: "👍", count: 4, label: "thumbs up", reactedByMe: true }]}
+  onToggle={(emoji) => toggleReaction(messageId, emoji)}
+  addAction={<ReactionQuickSetPopover onSelect={(e) => addReaction(messageId, e)} />}
+/>
+```
+
+- **They are two components joined by a slot**, not one pair. `addAction`
+  renders last in the row and is the popover's normal home; a trigger in
+  `MessageBubble`'s `actions` toolbar works just as well. Use either alone.
+- **`onToggle` reports the emoji, not the intent.** Add or remove is yours to
+  decide — an already-reacted chip reports exactly like a fresh one.
+- **Pass the reactions unconditionally** — an empty list renders `null` (unless
+  you passed an `addAction`), so call sites need no
+  `{reactions.length > 0 && …}` guard. Counts below 1, fractional-below-one and
+  non-finite counts drop out the same way.
+- **Order is yours**; anker never re-sorts. A repeated emoji is merged, counts
+  summed, first position held — the list arrives aggregated, so a duplicate is
+  malformed input.
+- **`maxVisible` is a hard cap** (default 8): the tail folds into one `+N`.
+  Supply `onShowAll` and that chip is a real button; omit it and it is an inert
+  readout, because a button that does nothing takes a tab stop to promise an
+  action that never happens.
+- **Reacted-by-me is a pressed toggle button.** `aria-pressed` carries it; the
+  accent tint and bolder count are the sighted half. Don't repeat it in
+  `formatChipLabel` — screen readers would announce it twice.
+- **Give every emoji a `label`.** It *is* the accessible name — a bare glyph is
+  announced inconsistently across screen readers and sometimes not at all. On
+  the quick set it is required; on a chip it falls back to the glyph.
+- **The quick set is sixteen glyphs and no dependency.** Pass your own via
+  `options`. The full searchable picker is v2 behind an optional subpath — a
+  search index means an emoji catalogue in every consumer's bundle.
+- **The popover closes itself on pick** and mounts its grid only while open.
+  Open state is its own unless you pass `open`/`onOpenChange`.
+- **`disabled` covers only what each component owns.** Pass it to the popover
+  too when a conversation is archived.
+- Every announced string is a prop with an English default: `label` on each
+  reaction and option, `formatChipLabel`, `formatOverflowLabel`, and `label` on
+  both the row and the trigger.
+
+---
+
 ## VirtualizedMessageList
 
 `VirtualizedMessageList` (`@knkcs/anker/components`) renders virtualized

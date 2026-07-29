@@ -1,0 +1,112 @@
+import { Canvas, Meta } from "@storybook/blocks";
+import * as Stories from "./reactions.stories";
+
+<Meta of={Stories} />
+
+# Reactions
+
+Presentation-only reaction primitives: `ReactionChips` renders a message's
+aggregated reactions — emoji, count, and whether the viewer is one of them —
+and `ReactionQuickSetPopover` offers a curated set of emoji to add one from.
+
+Both are data-agnostic: props in, callbacks out. No fetching, no service types,
+no opinion about what a reaction *is*. Your service owns the aggregate; anker
+renders it and reports which emoji was hit.
+
+## Usage
+
+<Canvas of={Stories.Interactive} />
+
+```tsx
+import {
+  ReactionChips,
+  ReactionQuickSetPopover,
+} from "@knkcs/anker/components";
+
+<ReactionChips
+  reactions={[
+    { emoji: "👍", count: 4, label: "thumbs up", reactedByMe: true },
+    { emoji: "🎉", count: 2, label: "party popper" },
+  ]}
+  onToggle={(emoji) => toggleReaction(messageId, emoji)}
+  addAction={
+    <ReactionQuickSetPopover
+      onSelect={(emoji) => addReaction(messageId, emoji)}
+    />
+  }
+/>
+```
+
+The two are separate components joined by a slot, not one welded pair — use
+either without the other. `addAction` renders last in the row and is the normal
+home for the popover; a trigger in `MessageBubble`'s `actions` toolbar works
+equally well.
+
+## Chips
+
+<Canvas of={Stories.ReactedByMe} />
+
+- **`onToggle` reports the emoji, not the intent.** Add or remove is yours to
+  decide — the chip only knows which reaction was activated. The already-reacted
+  chip reports exactly like a fresh one.
+- **Reacted-by-me is a pressed toggle button.** `aria-pressed` carries it to
+  assistive tech; the accent tint and a bolder count carry it visually, so the
+  state never depends on hue alone. Don't repeat it in `formatChipLabel` — screen
+  readers would announce it twice.
+- **Pass the reactions unconditionally.** An empty list renders `null` (unless
+  you passed an `addAction`), so call sites need no `{reactions.length > 0 && …}`
+  guard. Counts below 1, fractional-below-one, and non-finite counts drop out
+  the same way.
+- **Order is yours.** anker never re-sorts: it cannot know whether you mean
+  "most popular first" or "first reacted first".
+- **A repeated emoji is merged**, counts summed and position held. The list
+  arrives aggregated, so a duplicate is malformed input — rendering it twice
+  would both collide the React key and show one reaction as two chips.
+
+## Overflow
+
+<Canvas of={Stories.ManyReactions} />
+
+- **`maxVisible` is a hard cap** (default 8): past it the tail folds into a
+  single `+N`, so a heavily-reacted message never blows out the row. Nine
+  reactions at `maxVisible={8}` render eight chips and `+1`, never nine.
+- **`onShowAll` decides what the `+N` chip is.** With it, a real button;
+  without it, an inert readout. What "show all" means — expanding the row,
+  opening a sheet — is yours, and a button that does nothing would take a tab
+  stop to promise an action that never happens.
+
+## Quick set
+
+<Canvas of={Stories.QuickSetOpen} />
+
+- **Sixteen emoji, in two rows of eight.** A quick set is scanned at a glance,
+  not searched; past two rows it stops being quicker than typing. Pass your own
+  via `options` — three shortcuts or a different sixteen.
+- **No emoji-data dependency, by design.** The full searchable picker is v2
+  behind an optional subpath (messengerhub ADR-0009), because a search index
+  means an emoji catalogue in every consumer's bundle. A test pins this.
+- **Every option carries a `label`** — it *is* the option's accessible name. A
+  bare glyph is announced inconsistently across screen readers and sometimes
+  not at all, and unlike a chip there is no count to fall back on.
+- **It closes itself on pick**, and mounts its grid only while open — one of
+  these hangs off every message, so an eagerly-mounted sheet would put sixteen
+  hidden buttons in the DOM per message.
+- Open state is the popover's own unless you pass `open`/`onOpenChange`.
+
+## Localisation
+
+<Canvas of={Stories.Localised} />
+
+Every announced string is a prop with an English default: the emoji names
+(`label` on each reaction and option), the chip sentence (`formatChipLabel`),
+the overflow sentence (`formatOverflowLabel`), the row's own name (`label`), and
+the trigger's (`label` on the popover). The two sentences are callbacks rather
+than strings so the truncation and plural rules stay with you.
+
+## Read-only conversations
+
+<Canvas of={Stories.Disabled} />
+
+`disabled` covers the chips each component owns. Anything you pass as
+`addAction` is yours to disable alongside it — pass `disabled` to the popover
+too.

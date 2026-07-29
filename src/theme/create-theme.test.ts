@@ -109,4 +109,37 @@ describe("createAnkerTheme recipe registration (#153)", () => {
 			system.getSlotRecipe("typingIndicator", null)?.base?.dot?.animation,
 		).toContain("typingBounce");
 	});
+
+	it("resolves the reactionChips SLOT recipe with all four slots (#164)", () => {
+		// ReactionChips reads this key by hand via `useSlotRecipe`; a stray move
+		// to `recipes` would leave every slot unstyled rather than erroring.
+		const reactionChips = system.getSlotRecipe("reactionChips", null);
+		expect(reactionChips?.slots).toEqual(["root", "chip", "emoji", "count"]);
+		expect(reactionChips?.base?.chip?.bg).toBe("bg-surface");
+	});
+
+	it("keeps the reacted chip on primary.subtle, not the inverted accent surface (#164)", () => {
+		// bg-accent-subtle is an inverted accent surface and would swallow the
+		// chip's own text — the same rule message self-bubbles and selected
+		// conversation rows follow.
+		const reacted = system.getSlotRecipe("reactionChips", null)?.variants
+			?.reacted?.true;
+		expect(reacted?.chip?.bg).toBe("primary.subtle");
+		// The second, non-colour signal for the same state (WCAG 1.4.1).
+		expect(reacted?.count?.fontWeight).toBe("bold");
+	});
+
+	it("resolves the reactionQuickSet SLOT recipe with both slots at the 44px target (#164)", () => {
+		const quickSet = system.getSlotRecipe("reactionQuickSet", null);
+		expect(quickSet?.slots).toEqual(["grid", "option"]);
+		expect(quickSet?.base?.option?.minWidth).toBe("44px");
+		expect(quickSet?.base?.option?.minHeight).toBe("44px");
+	});
+
+	it("registers NO plain recipe under either reactions key (both are multi-part)", () => {
+		// The mirror of the unreadBadge/avatarPresence pins: a v3 slot recipe
+		// misfiled under `recipes` is just as silently dead as the reverse.
+		expect(system.getRecipe("reactionChips")).toBeUndefined();
+		expect(system.getRecipe("reactionQuickSet")).toBeUndefined();
+	});
 });
