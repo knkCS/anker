@@ -161,5 +161,14 @@ export { TextOverflow, type TextOverflowProps } from "./text-overflow";
 // TypeBadge
 export { TypeBadge, type TypeBadgeProps } from "./type-badge";
 
+// TypingIndicator
+export {
+	defaultTypingLabel,
+	summarizeTypists,
+	TypingIndicator,
+	type TypingIndicatorProps,
+	type TypistSummary,
+} from "./typing-indicator";
+
 // UnreadBadge
 export { UnreadBadge, type UnreadBadgeProps } from "./unread-badge";

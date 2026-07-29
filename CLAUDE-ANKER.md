@@ -274,6 +274,36 @@ counts and what counts as a mention.
 
 ---
 
+## TypingIndicator
+
+`TypingIndicator` (`@knkcs/anker/atoms`) is the "who is typing" row — bouncing
+dots plus names — that sits between the message list and the composer.
+Presentation-only: your service owns who is typing and for how long.
+
+- **Pass the names unconditionally** — an empty list (and one of nothing but
+  blanks) renders `null`, so call sites need no `{typists.length > 0 && …}`
+  guard.
+- **Expiry is yours.** anker holds no timers: a name shows for exactly as long
+  as you pass it. Drop it from the array when its TTL lapses.
+- **`maxNames` is a hard cap** (default 2): past it the tail folds into "and N
+  others", so the row's width stays predictable. Three names at `maxNames={2}`
+  read "Alice, Bob and 1 other" — it never widens itself to avoid the count.
+- **`formatLabel(summary)` composes the sentence** (defaults to English,
+  `"Alice, Bob and 2 others are typing…"`). It is a callback rather than a
+  string so the truncation stays with anker: you get `{ named, overflowCount,
+  total }` already capped, and localise the wording and plural rules around
+  it. `summarizeTypists` and `defaultTypingLabel` are exported if you want the
+  same pieces elsewhere.
+- **`reserveSpace` holds the row's height** and fades between states instead of
+  unmounting. Prefer it directly under a message list — it stops the history
+  nudging every time somebody starts and stops typing, and it leaves the
+  `role="status"` live region mounted, which is where screen readers announce
+  the first name most reliably. The cost is a permanent row of vertical space.
+- The dots are decorative (`aria-hidden`); the sentence is what gets announced,
+  politely — never as an alert.
+
+---
+
 ## VirtualizedMessageList
 
 `VirtualizedMessageList` (`@knkcs/anker/components`) renders virtualized

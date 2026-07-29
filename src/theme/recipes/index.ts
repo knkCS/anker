@@ -21,4 +21,5 @@ export { tabTheme as tabs } from "./tabs";
 export { tagTheme as tag } from "./tag";
 export { default as textarea } from "./textarea";
 export { tooltipTheme as tooltip } from "./tooltip";
+export { typingIndicatorTheme as typingIndicator } from "./typing-indicator";
 export { unreadBadgeTheme as unreadBadge } from "./unread-badge";
