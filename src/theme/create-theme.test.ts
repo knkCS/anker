@@ -61,4 +61,22 @@ describe("createAnkerTheme recipe registration (#153)", () => {
 	it("registers NO slot recipe under 'unreadBadge' (it is single-part)", () => {
 		expect(system.getSlotRecipe("unreadBadge", null)).toBeNull();
 	});
+
+	it("resolves the typingIndicator SLOT recipe with all four slots (#162)", () => {
+		// TypingIndicator reads this key by hand via `useSlotRecipe`; a stray
+		// move to `recipes` would leave every slot unstyled rather than erroring.
+		const typingIndicator = system.getSlotRecipe("typingIndicator", null);
+		expect(typingIndicator?.slots).toEqual(["root", "dots", "dot", "label"]);
+		expect(typingIndicator?.base?.dot?.bg).toBe("currentColor");
+	});
+
+	it("registers the typingBounce keyframe the dot recipe animates against", () => {
+		// The recipe names a keyframe; globalCss defines it. A name that no
+		// @keyframes block backs animates nothing, silently.
+		const globalCss = system._config.globalCss as Record<string, unknown>;
+		expect(globalCss["@keyframes typingBounce"]).toBeDefined();
+		expect(
+			system.getSlotRecipe("typingIndicator", null)?.base?.dot?.animation,
+		).toContain("typingBounce");
+	});
 });

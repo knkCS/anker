@@ -29,6 +29,7 @@ import {
 	textarea,
 	tooltip,
 	tsRadioCard,
+	typingIndicator,
 	unreadBadge,
 } from "./recipes";
 import {
@@ -97,6 +98,7 @@ export function createAnkerTheme(preset?: ThemePreset) {
 			"@keyframes slideUp": keyframes.slideUp,
 			"@keyframes slideDown": keyframes.slideDown,
 			"@keyframes scaleIn": keyframes.scaleIn,
+			"@keyframes typingBounce": keyframes.typingBounce,
 			body: {
 				color: "default",
 				bg: { base: "white", _dark: "#000" },
@@ -194,6 +196,7 @@ export function createAnkerTheme(preset?: ThemePreset) {
 				stepper,
 				table,
 				tabs,
+				typingIndicator,
 			},
 		},
 	});

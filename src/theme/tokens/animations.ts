@@ -42,4 +42,13 @@ export const keyframes = {
 		from: { opacity: 0, transform: "scale(0.95)" },
 		to: { opacity: 1, transform: "scale(1)" },
 	},
+	/**
+	 * One dot of a typing indicator. Runs on a loop with a per-dot delay, so
+	 * the long resting stretch (0–80%) is what makes the three dots read as a
+	 * travelling wave rather than a pulse.
+	 */
+	typingBounce: {
+		"0%, 80%, 100%": { transform: "translateY(0)", opacity: 0.45 },
+		"40%": { transform: "translateY(-3px)", opacity: 1 },
+	},
 };
