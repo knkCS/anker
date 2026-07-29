@@ -3,6 +3,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { describe, expect, it } from "vitest";
+import { ruleTextFor } from "../../test/recipe-styles";
 import { createAnkerTheme } from "../../theme/create-theme";
 import { MessageBubble } from "./message-bubble";
 import { MessageGroup } from "./message-group";
@@ -15,17 +16,8 @@ function renderWithAnkerTheme(ui: ReactElement) {
 	return render(<ChakraProvider value={system}>{ui}</ChakraProvider>);
 }
 
-/** All injected CSS rule text attached to the rendered bubble's generated class. */
 function bubbleRuleText() {
-	const bubble = screen.getByTestId("message-bubble");
-	const cssClass = Array.from(bubble.classList).find((c) =>
-		c.startsWith("css-"),
-	);
-	expect(cssClass).toBeDefined();
-	const css = Array.from(document.querySelectorAll("style"))
-		.map((s) => s.textContent ?? "")
-		.join("\n");
-	return css.split(`.${cssClass}`).slice(1).join("\n");
+	return ruleTextFor(screen.getByTestId("message-bubble"));
 }
 
 describe("MessageBubble", () => {

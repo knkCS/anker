@@ -3,6 +3,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { ruleTextFor } from "../../test/recipe-styles";
 import { createAnkerTheme } from "../../theme/create-theme";
 import { VirtualizedMessageList } from "./virtualized-message-list";
 
@@ -38,15 +39,14 @@ const twoDays = [
 	msg("c", "2026-07-28T08:00:00"),
 ];
 
-/** All injected CSS rule text attached to an element's generated class. */
-function ruleTextFor(testId: string) {
-	const el = screen.getAllByTestId(testId)[0];
-	const cssClass = Array.from(el.classList).find((c) => c.startsWith("css-"));
-	expect(cssClass).toBeDefined();
-	const css = Array.from(document.querySelectorAll("style"))
-		.map((s) => s.textContent ?? "")
-		.join("\n");
-	return css.split(`.${cssClass}`).slice(1).join("\n");
+/**
+ * Rule text for the *first* element carrying `testId`. `getAll…[0]` rather than
+ * `getByTestId`: `message-list-divider` renders once per day boundary, so a
+ * singular query throws on multi-day fixtures; the recipe assertion needs only
+ * one of them.
+ */
+function firstRuleTextFor(testId: string) {
+	return ruleTextFor(screen.getAllByTestId(testId)[0]);
 }
 
 /** Fakes scroll metrics on the viewport, then fires a scroll event. */
@@ -172,8 +172,10 @@ describe("VirtualizedMessageList", () => {
 		// Viewport carries the recipe's scroll styles; the divider carries the
 		// boundary-line border token. Both only hold if the recipe is registered
 		// in create-theme.ts AND the component consumes it.
-		expect(ruleTextFor("message-list-viewport")).toContain("overflow-y:auto");
-		expect(ruleTextFor("message-list-divider")).toContain(
+		expect(firstRuleTextFor("message-list-viewport")).toContain(
+			"overflow-y:auto",
+		);
+		expect(firstRuleTextFor("message-list-divider")).toContain(
 			"var(--chakra-colors-border)",
 		);
 	});

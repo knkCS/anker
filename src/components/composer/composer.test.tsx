@@ -3,6 +3,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
+import { ruleTextFor } from "../../test/recipe-styles";
 import { createAnkerTheme } from "../../theme/create-theme";
 import { Composer } from "./composer";
 import type { ComposerMentionConfig } from "./types";
@@ -34,16 +35,9 @@ describe("Composer", () => {
 
 	it("consumes the registered `composer` slot recipe (guard against dead recipes)", () => {
 		renderWithAnkerTheme(<Composer />);
-		const root = screen.getByTestId("composer");
-		const cssClass = Array.from(root.classList).find((c) =>
-			c.startsWith("css-"),
+		expect(ruleTextFor(screen.getByTestId("composer"))).toContain(
+			"var(--chakra-colors-bg-surface)",
 		);
-		expect(cssClass).toBeDefined();
-		const css = Array.from(document.querySelectorAll("style"))
-			.map((s) => s.textContent ?? "")
-			.join("\n");
-		const ruleText = css.split(`.${cssClass}`).slice(1).join("\n");
-		expect(ruleText).toContain("var(--chakra-colors-bg-surface)");
 	});
 
 	it("reports input changes via onValueChange and onInputActivity", () => {
