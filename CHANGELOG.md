@@ -2,7 +2,125 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## 4.1.0 — 2026-07-28
+## 4.2.0 — 2026-07-29
+
+Completes the anker half of the messengerhub chat set (knkCS/messengerhub#27,
+messengerhub ADR-0009). Every component below is **presentation-only and
+data-agnostic** — props in, callbacks out; no fetching, no service types, and
+no state anker holds on your behalf. All are additive.
+
+### Added
+
+- **`VirtualizedMessageList`** (#158) in `@knkcs/anker/components`: virtualized
+  message history on `@tanstack/react-virtual` (a regular dependency — its API
+  is never exposed). Newest at the bottom via the virtualizer's
+  `anchorTo: "end"` plus component-owned follow-on-append driven by DOM-based
+  pinned state — deliberately *not* the virtualizer's
+  `followOnAppend`/`scrollEndThreshold`, because widening that threshold makes
+  measurement deltas re-anchor to the end and fight upward scrolls. Day
+  dividers come from a `getItemDate` accessor, plus a jump-to-latest pill and
+  an edge-triggered `onLoadOlder` (fires once per approach to the top; the
+  consumer prepends and scroll position is preserved). Items stay opaque:
+  `getItemKey` + a `renderItem` render prop. Styled by the new `messageList`
+  slot recipe.
+
+- **`Composer`** (#159): the chat message input — auto-growing textarea, send
+  button with submit-on-enter (IME-safe, `Shift+Enter` inserts a newline, blank
+  never submits, uncontrolled clears after submit), `disabled` for archived
+  conversations, and an `onInputActivity` keystroke callback so consumers can
+  throttle and wire their own typing signals. Mention autocomplete is
+  *injected*: `mention.getSuggestions(query)` supplies opaque items rendered
+  via `renderSuggestion`/`getSuggestionKey`, and `onSelect` returns the
+  replacement text for the `@query` token — or nothing, since insertion
+  semantics belong to the consumer. Trigger detection, insertion and highlight
+  movement are pure, TDD-tested functions. Styled by the new `composer` slot
+  recipe; the dropdown opens upward, because composers sit at the bottom.
+
+- **`ConversationListItem`** (#160): one row in a conversation list — title,
+  preview/subtitle slot, timestamp, avatar slot and badge slot, all opaque
+  `ReactNode`s with no data assumptions. The row is a native `<button>`
+  (`onSelect`, keyboard activation for free); `isSelected` sets
+  `aria-current="true"` and the soft `primary.subtle` tint — **not**
+  `bg-accent-subtle`, which is an inverted accent surface. Title and preview
+  truncate to one line via the new `conversationListItem` slot recipe.
+
+- **`UnreadBadge`** (#161) in `@knkcs/anker/atoms`: the count pill that
+  normally fills `ConversationListItem`'s badge slot. `max` caps the label at
+  `99+`; `hasMention` gives mentions-of-you the accent fill *plus* an `@`
+  glyph, so the two states never rely on hue alone. Renders `null` at zero —
+  and for negative, fractional-below-one and non-finite counts — so call sites
+  pass a count unconditionally instead of guarding. Plain counts stay on the
+  neutral `gray.solid` fill: an unread count is information, not an action.
+  Carries an overridable accessible name, since bare digits say nothing to a
+  screen reader. New single-part `unreadBadge` recipe.
+
+- **`TypingIndicator`** (#162) in `@knkcs/anker/atoms`: the "who is typing" row
+  — three staggered bouncing dots plus the names, truncated past `maxNames`
+  (default 2) with the tail folded into "and N others". The cap is hard, so
+  three names at `maxNames={2}` read "Alice, Bob and 1 other" rather than
+  widening unpredictably. anker holds no timers: a name shows for exactly as
+  long as you pass it, so TTL and expiry stay with you. The sentence is
+  composed by `formatLabel(summary)` — a callback, not a string, so a localised
+  label truncates identically to the English default. Renders `null` when
+  nobody is typing; `reserveSpace` instead keeps the row mounted and fades it,
+  which holds the message list still and leaves the `role="status"` live region
+  in the DOM before the first name arrives. New `typingIndicator` slot recipe
+  and a global `typingBounce` keyframe.
+
+- **`Avatar` presence variant** (#163) in `@knkcs/anker/primitives`: an
+  optional `presence` prop — a binary online/offline dot anchored to the
+  bottom-inline-end corner. It is `"online" | "offline"` and omittable rather
+  than a boolean, because **absent is not offline**: an avatar with no presence
+  to report renders exactly the markup it did before (a test compares the two
+  renders byte-for-byte, so the variant stays additive for every existing
+  consumer). Online is a filled `success` dot, offline a hollow ring, so the
+  states never differ by hue alone. The dot sizes itself from Chakra's
+  `--avatar-size`, covering `2xs` through `2xl` without per-size overrides. New
+  single-part `avatarPresence` recipe. **Known limitation:** the dot's lift
+  clears `AvatarGroup`'s overlap under default stacking but not under
+  `<AvatarGroup stacking="…">`, which traps it in a local stacking context.
+
+- **`ReactionChips` + `ReactionQuickSetPopover`** (#164) in
+  `@knkcs/anker/components`: `ReactionChips` renders a message's aggregated
+  reactions — emoji, count, and whether the viewer is one of them. Each chip is
+  a toggle button, so reacted-by-me rides on `aria-pressed`, with the
+  `primary.subtle` tint and a bolder count as the sighted half. `onToggle`
+  reports the emoji only — add-or-remove is your decision, and an
+  already-reacted chip reports exactly like a fresh one. `maxVisible`
+  (default 8) is a hard cap; the tail folds into one `+N` chip, which is a real
+  button when `onShowAll` is supplied and an inert readout otherwise.
+  `ReactionQuickSetPopover` offers a curated **sixteen** hand-written emoji in
+  two rows of eight, closes itself on pick, and mounts its grid only while open
+  — one of these hangs off every message. **No emoji-data dependency reaches
+  your bundle**, and a test pins that; the full searchable picker remains v2
+  behind an optional subpath. The two are joined by an `addAction` slot rather
+  than welded, so either works alone. New `reactionChips` and
+  `reactionQuickSet` slot recipes.
+
+### Docs
+
+- **`CLAUDE-ANKER.md` grows a consumer-facing section per component** (#158–#164)
+  — ConversationListItem, UnreadBadge, TypingIndicator, Avatar presence,
+  VirtualizedMessageList, Composer and Reactions — plus `.mdx` usage guides
+  beside each component in Storybook.
+- **The owned-panels tab rule was rewritten around the current API** (#175):
+  it still pointed at removed `bodyTabs` props and forbade the very pattern the
+  page templates now prescribe.
+- **The peer-dependency list is pinned to `package.json`** (#174) by a test.
+  It still advertised React >= 18 long after 4.0.0 raised the floor to >= 19,
+  so anyone reading it would have treated React 18 as supported.
+
+### Note on 4.1.0
+
+**4.1.0 was never published.** Its version bump and changelog entry landed on
+`main` on 2026-07-28, but no `v4.1.0` tag was ever pushed and the publish
+workflow triggers only on `v*` tags — so npm went from 4.0.1 straight to this
+release. Everything listed under 4.1.0 below (the `MessageGroup`/`MessageBubble`
+primitives, the live input-recipe fix, and the dead-registration sweep) reaches
+consumers for the first time in **4.2.0**. If you are upgrading from 4.0.1, read
+both sections.
+
+## 4.1.0 — 2026-07-28 (never published — see the note above)
 
 ### Added
 
