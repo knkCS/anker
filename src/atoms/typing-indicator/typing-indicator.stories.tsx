@@ -53,17 +53,12 @@ export const WiderCap: Story = {
 export const Localised: Story = {
 	args: {
 		names: ["Alice", "Bob", "Cara", "Dan"],
-		formatLabel: ({ named, overflowCount, total }) => {
-			const list = [
-				...named,
-				...(overflowCount > 0 ? [`${overflowCount} weitere`] : []),
-			];
-			const joined =
-				list.length > 1
-					? `${list.slice(0, -1).join(", ")} und ${list[list.length - 1]}`
-					: list[0];
-			return `${joined} ${total === 1 ? "schreibt" : "schreiben"}…`;
-		},
+		formatLabel: ({ named, overflowCount, total }) =>
+			[
+				named.join(", "),
+				overflowCount > 0 ? ` und ${overflowCount} weitere` : "",
+				total === 1 ? " schreibt…" : " schreiben…",
+			].join(""),
 	},
 };
 

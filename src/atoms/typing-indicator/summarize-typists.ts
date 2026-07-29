@@ -32,8 +32,10 @@ export function summarizeTypists(
 	if (present.length === 0) return null;
 
 	// Clamping to a whole number >= 1 keeps the label sane for nonsense input,
-	// and leaves an infinite maxNames meaning "never cap" for free.
-	const cap = Math.max(1, Math.floor(maxNames));
+	// and leaves an infinite maxNames meaning "never cap" for free. NaN needs
+	// its own branch: it survives both Math.floor and Math.max, and a NaN cap
+	// slices to nobody — the subjectless sentence this guard exists to prevent.
+	const cap = Number.isNaN(maxNames) ? 1 : Math.max(1, Math.floor(maxNames));
 
 	return {
 		named: present.slice(0, cap),

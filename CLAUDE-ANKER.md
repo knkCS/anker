@@ -290,10 +290,9 @@ Presentation-only: your service owns who is typing and for how long.
   read "Alice, Bob and 1 other" — it never widens itself to avoid the count.
 - **`formatLabel(summary)` composes the sentence** (defaults to English,
   `"Alice, Bob and 2 others are typing…"`). It is a callback rather than a
-  string so the truncation stays with anker: you get `{ named, overflowCount,
-  total }` already capped, and localise the wording and plural rules around
-  it. `summarizeTypists` and `defaultTypingLabel` are exported if you want the
-  same pieces elsewhere.
+  string so the truncation stays with anker: you get a `TypistSummary`
+  (`{ named, overflowCount, total }`) already capped, and localise the wording
+  and plural rules around it.
 - **`reserveSpace` holds the row's height** and fades between states instead of
   unmounting. Prefer it directly under a message list — it stops the history
   nudging every time somebody starts and stops typing, and it leaves the

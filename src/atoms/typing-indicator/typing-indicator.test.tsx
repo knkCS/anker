@@ -77,6 +77,20 @@ describe("TypingIndicator", () => {
 			expect(rules).toContain("min-height");
 			expect(rules).toMatch(/\[data-state="closed"\][^{}]*\{[^{}]*opacity:0/);
 		});
+
+		it("parks the dots while the reserved row is invisible", () => {
+			// A reserved row is hidden for as long as nobody types; three dots
+			// bouncing behind `opacity: 0` burn frames nobody can see.
+			const { container } = renderWithAnkerTheme(
+				<TypingIndicator names={[]} reserveSpace />,
+			);
+			const rules = ruleTextFor(
+				container.querySelector(".typing-indicator__dot") as Element,
+			);
+			expect(rules).toMatch(
+				/\[data-state="closed"\][^{}]*\{[^{}]*animation-play-state:paused/,
+			);
+		});
 	});
 
 	describe("localisation", () => {

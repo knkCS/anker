@@ -63,6 +63,11 @@ export const typingIndicatorTheme = defineSlotRecipe({
 			"&:nth-of-type(3)": {
 				animationDelay: "0.32s",
 			},
+			// A reserved row sits invisible for as long as nobody types — leaving
+			// three dots bouncing behind `opacity: 0` burns frames for nothing.
+			'[data-state="closed"] &': {
+				animationPlayState: "paused",
+			},
 		},
 		label: {
 			minWidth: 0,

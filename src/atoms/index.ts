@@ -163,8 +163,6 @@ export { TypeBadge, type TypeBadgeProps } from "./type-badge";
 
 // TypingIndicator
 export {
-	defaultTypingLabel,
-	summarizeTypists,
 	TypingIndicator,
 	type TypingIndicatorProps,
 	type TypistSummary,

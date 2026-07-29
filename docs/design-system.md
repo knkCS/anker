@@ -257,7 +257,14 @@ Used sparingly. Transitions emphasize functionality, never decoration. The `pref
 Easings: `ease-out` (entry), `ease-in` (exit), `ease-in-out` (movement), `spring` (rare micro-interactions only).
 
 **Rules:**
-- No animations over 300ms outside marketing/onboarding contexts.
+- No animations over 300ms outside marketing/onboarding contexts. This governs
+  *transitions* — one-shot moves between two states, which is what the table
+  above durations. **Looping ambient indicators are the exception**: a spinner,
+  a skeleton shimmer, or TypingIndicator's dots signal "still happening" and
+  have no end state to arrive at, so they run on their own cycle
+  (`typingBounce` is 1.2s) rather than a duration token. Keep them to genuine
+  progress/activity signals, and keep them subtle — the "never decoration" rule
+  above still binds.
 - No bouncy easings — they read as playful and don't fit enterprise B2B.
 
 ---

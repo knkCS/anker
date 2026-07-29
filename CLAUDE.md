@@ -12,7 +12,7 @@ Anker is the shared UI component library for the knk software group, extracted a
 
 Single npm package (`@knkcs/anker`) with subpath exports organized in nine layers:
 
-1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 26 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
+1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 27 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
 2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
 3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox, MessageGroup/MessageBubble, VirtualizedMessageList, Composer, ConversationListItem.
 4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, UnreadBadge, TypingIndicator, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc.
@@ -42,7 +42,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in nine layer
 src/
 ├── theme/           # Design tokens + recipes
 │   ├── tokens/      # colors, semantic, shadows, spacing, radii, typography, animations, z-index
-│   ├── recipes/     # Chakra component recipes (24 files)
+│   ├── recipes/     # Chakra component recipes (25 files)
 │   ├── presets/     # Theme personality presets (ThemePreset, defaultPreset)
 │   ├── create-theme.ts  # createAnkerTheme() factory
 │   └── utils/       # Color manipulation helpers
@@ -214,9 +214,11 @@ hard, so three names at `maxNames={2}` read "Alice, Bob and 1 other" rather
 than growing unpredictably. Names in, presentation out: TTL/expiry stays with
 the consumer, so a name shows for exactly as long as it is passed. The
 sentence is composed by `formatLabel(summary)` — a callback, not a string, so
-a localised label truncates identically to the English default; the pure,
+a localised label truncates identically to the English default. The pure,
 TDD-tested `summarizeTypists()` does the truncation and `defaultTypingLabel()`
-the English wording, both exported. Renders `null` when nobody is typing;
+the English wording; both stay internal (only `TypistSummary` is public, as
+`formatLabel`'s argument) — the same line unread-badge draws around
+`formatUnreadCount`. Renders `null` when nobody is typing;
 `reserveSpace` instead keeps the row mounted and fades it out, which holds the
 message list still and leaves the `role="status"` live region in the DOM
 before the first name arrives. Styled by the `typingIndicator` slot recipe

@@ -38,7 +38,9 @@ export interface TypingIndicatorProps {
 	reserveSpace?: boolean;
 }
 
-const DOTS = [0, 1, 2];
+// Three dots, staggered by the `dot` slot's `:nth-of-type(2)`/`(3)` delays —
+// change the count here and in `src/theme/recipes/typing-indicator.ts` together.
+const DOT_INDEXES = [0, 1, 2];
 
 /**
  * The "who is typing" row: three bouncing dots plus the names, truncated once
@@ -59,15 +61,16 @@ export const TypingIndicator = ({
 	const recipe = useSlotRecipe({ key: "typingIndicator" });
 	const styles = recipe();
 	const summary = summarizeTypists(names, maxNames);
+	const isTyping = summary !== null;
 
-	if (summary === null && !reserveSpace) return null;
+	if (!isTyping && !reserveSpace) return null;
 
 	return (
 		<chakra.div
 			css={styles.root}
 			className="typing-indicator"
 			data-testid="typing-indicator"
-			data-state={summary === null ? "closed" : "open"}
+			data-state={isTyping ? "open" : "closed"}
 			// A polite live region, not an alert: typing is ambient news and must
 			// never interrupt what a screen reader is already saying.
 			role="status"
@@ -78,7 +81,7 @@ export const TypingIndicator = ({
 				// Decorative: the sentence beside them already says "is typing".
 				aria-hidden="true"
 			>
-				{DOTS.map((index) => (
+				{DOT_INDEXES.map((index) => (
 					<chakra.span
 						key={index}
 						css={styles.dot}
@@ -86,11 +89,11 @@ export const TypingIndicator = ({
 					/>
 				))}
 			</chakra.span>
-			{summary === null ? null : (
+			{isTyping ? (
 				<chakra.span css={styles.label} className="typing-indicator__label">
 					{formatLabel(summary)}
 				</chakra.span>
-			)}
+			) : null}
 		</chakra.div>
 	);
 };

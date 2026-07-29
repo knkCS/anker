@@ -74,6 +74,17 @@ describe("summarizeTypists", () => {
 		});
 	});
 
+	it("falls back to naming one typist when maxNames is not a number", () => {
+		// `Math.max(1, NaN)` is NaN, and `slice(0, NaN)` names nobody — which is
+		// exactly the subjectless "… are typing…" the clamp exists to prevent.
+		// A cleared Storybook number control hands us NaN, so it is reachable.
+		expect(summarizeTypists(["Alice", "Bob", "Cara"], Number.NaN)).toEqual({
+			named: ["Alice"],
+			overflowCount: 2,
+			total: 3,
+		});
+	});
+
 	it("floors a fractional maxNames", () => {
 		expect(summarizeTypists(["Alice", "Bob", "Cara"], 2.7)?.named).toEqual([
 			"Alice",
