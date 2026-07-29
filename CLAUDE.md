@@ -263,7 +263,9 @@ visually, so the state never rests on hue alone. `onToggle` reports the emoji
 only: add-or-remove is the consumer's decision, and an already-reacted chip
 reports exactly like a fresh one. `maxVisible` (default 8) is a hard cap and the
 tail folds into one `+N` chip, which is a real button only when `onShowAll` is
-supplied and an inert `role="img"` readout otherwise. The pure, TDD-tested
+supplied and an inert `role="img"` readout otherwise — the readout takes the
+recipe's `inert` variant, which hands back the pointer cursor, the hover tint,
+the focus ring and the 44px hit pseudo rather than patching them off inline. The pure, TDD-tested
 `partitionReactions()` does the dropping (counts below 1, fractional,
 non-finite), the merging of a repeated emoji, and the cap; it stays internal,
 the same line unread-badge draws around `formatUnreadCount`. Renders `null` when

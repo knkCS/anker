@@ -24,8 +24,14 @@ export const reactionChipsTheme = defineSlotRecipe({
 			display: "flex",
 			flexWrap: "wrap",
 			alignItems: "center",
-			// Wide enough that the chips' 44px hit areas (below) stay clear of
-			// each other even where a chip is visually narrower than that.
+			// Known limitation: the chips' 44px hit areas (below) overhang a
+			// 28px chip by 8px on each side, which is more than this gap. Along
+			// a row that costs nothing — the pseudo is a fixed 44px box centred
+			// on a chip that is usually wider, so it sits inside its own chip —
+			// but once the row wraps, adjacent rows' hit areas overlap and the
+			// later chip in DOM order takes the hit. Closing that would need a
+			// 16px row gap, which reads as two separate rows rather than one
+			// wrapped one.
 			gap: 1.5,
 		},
 		chip: {
@@ -53,10 +59,12 @@ export const reactionChipsTheme = defineSlotRecipe({
 			_hover: {
 				bg: "bg-muted",
 			},
+			// `focus-ring` is a shadow token, not a colour — as `outlineColor`
+			// it resolves to the literal string and the declaration is dropped.
+			// Same shape as button, composer and conversation-list-item.
 			_focusVisible: {
-				outline: "2px solid",
-				outlineColor: "focus-ring",
-				outlineOffset: "1px",
+				boxShadow: "focus-ring",
+				outline: "none",
 			},
 			_disabled: {
 				opacity: 0.5,
@@ -109,8 +117,32 @@ export const reactionChipsTheme = defineSlotRecipe({
 				},
 			},
 		},
+		/**
+		 * The `+N` readout when no `onShowAll` makes it a control. It keeps the
+		 * chip's shape so the row stays even, and gives back everything that
+		 * only a control should have: the pointer cursor, the hover tint, the
+		 * focus ring, and the 44px hit area.
+		 */
+		inert: {
+			true: {
+				chip: {
+					cursor: "default",
+					color: "muted",
+					_hover: {
+						bg: "bg-surface",
+					},
+					_focusVisible: {
+						boxShadow: "none",
+					},
+					_after: {
+						content: "none",
+					},
+				},
+			},
+		},
 	},
 	defaultVariants: {
 		reacted: false,
+		inert: false,
 	},
 });

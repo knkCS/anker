@@ -23,11 +23,14 @@ const sample: ReactionSummary[] = [
 	{ emoji: "🚀", count: 1, label: "shipped" },
 ];
 
+// Counts descend but never reach zero: anything below 1 is dropped outright,
+// so a fixture that ran negative would quietly render fewer chips than the
+// caption claims.
 const crowded: ReactionSummary[] = DEFAULT_REACTION_QUICK_SET.map(
 	({ emoji, label }, index) => ({
 		emoji,
 		label,
-		count: 12 - index,
+		count: DEFAULT_REACTION_QUICK_SET.length - index,
 		reactedByMe: index === 0,
 	}),
 );
@@ -63,13 +66,13 @@ export const ManyReactions: Story = {
 		<Stack gap="4">
 			<Stack gap="1">
 				<Text fontSize="xs" color="muted">
-					Sixteen reactions, default cap of 8 — inert overflow
+					Sixteen reactions, default cap of 8 — inert `+8` readout
 				</Text>
 				<ReactionChips reactions={crowded} onToggle={noop} />
 			</Stack>
 			<Stack gap="1">
 				<Text fontSize="xs" color="muted">
-					Same list, narrow cap, expandable overflow
+					Same list at `maxVisible={4}` — `+12`, expandable
 				</Text>
 				<ReactionChips
 					reactions={crowded}

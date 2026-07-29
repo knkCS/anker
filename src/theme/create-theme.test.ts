@@ -129,6 +129,27 @@ describe("createAnkerTheme recipe registration (#153)", () => {
 		expect(reacted?.count?.fontWeight).toBe("bold");
 	});
 
+	it("gives the inert reactions readout back everything only a control should have (#164)", () => {
+		// The `+N` chip without an onShowAll is a readout, not a button. It
+		// keeps the chip's shape so the row stays even, so the variant is what
+		// removes the pointer cursor, the hover tint and the 44px hit pseudo.
+		const inert = system.getSlotRecipe("reactionChips", null)?.variants?.inert
+			?.true;
+		expect(inert?.chip?.cursor).toBe("default");
+		expect(inert?.chip?._after?.content).toBe("none");
+	});
+
+	it("focuses reaction chips and quick-set options with the focus-ring SHADOW token (#164)", () => {
+		// `focus-ring` is a shadow, not a colour: as `outlineColor` it resolves
+		// to the literal string and the declaration is dropped entirely.
+		const chip = system.getSlotRecipe("reactionChips", null)?.base?.chip;
+		const option = system.getSlotRecipe("reactionQuickSet", null)?.base?.option;
+		for (const slot of [chip, option]) {
+			expect(slot?._focusVisible?.boxShadow).toBe("focus-ring");
+			expect(slot?._focusVisible?.outlineColor).toBeUndefined();
+		}
+	});
+
 	it("resolves the reactionQuickSet SLOT recipe with both slots at the 44px target (#164)", () => {
 		const quickSet = system.getSlotRecipe("reactionQuickSet", null);
 		expect(quickSet?.slots).toEqual(["grid", "option"]);

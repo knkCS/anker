@@ -2,13 +2,18 @@ import { chakra, useSlotRecipe } from "@chakra-ui/react";
 import { partitionReactions } from "./partition-reactions";
 import type { ReactionChipsProps, ReactionSummary } from "./types";
 
+/** `3 reactions` / `1 reaction` — English only, and only for the defaults below. */
+function countedReactions(count: number): string {
+	return `${count} ${count === 1 ? "reaction" : "reactions"}`;
+}
+
 /**
  * The English name ReactionChips announces per chip: `"thumbs up, 3
  * reactions"`, falling back to the glyph when the consumer supplied no name
  * for the emoji.
  */
 function defaultChipLabel({ emoji, count, label }: ReactionSummary): string {
-	return `${label ?? emoji}, ${count} ${count === 1 ? "reaction" : "reactions"}`;
+	return `${label ?? emoji}, ${countedReactions(count)}`;
 }
 
 /** The English name for the `+N` chip: `"2 more reactions"`. */
@@ -37,10 +42,11 @@ export const ReactionChips = ({
 	label = "Reactions",
 }: ReactionChipsProps) => {
 	const recipe = useSlotRecipe({ key: "reactionChips" });
-	// Both variants are resolved once rather than per chip: only the `chip` and
-	// `count` slots differ between them.
+	// Resolved once each rather than per chip: only the `chip` and `count`
+	// slots differ between them.
 	const styles = recipe({ reacted: false });
 	const reactedStyles = recipe({ reacted: true });
+	const inertStyles = recipe({ inert: true });
 	const { visible, hiddenCount } = partitionReactions(reactions, maxVisible);
 
 	// The addAction slot is the one reason to keep an otherwise empty row: it
@@ -111,7 +117,10 @@ export const ReactionChips = ({
 					</chakra.button>
 				) : (
 					<chakra.span
-						css={styles.chip}
+						// The `inert` variant, not the interactive chip's styles:
+						// a readout must not carry a pointer cursor, a hover tint,
+						// a focus ring or a 44px hit area.
+						css={inertStyles.chip}
 						className="reaction-chips__overflow"
 						data-testid="reaction-chip-overflow"
 						// role="img" makes the label the whole accessible name: "+2"
@@ -119,10 +128,8 @@ export const ReactionChips = ({
 						// reliably exposed. Same treatment as UnreadBadge.
 						role="img"
 						aria-label={overflowLabel}
-						// Inert: it is a readout, not a control.
-						cursor="default"
 					>
-						<chakra.span css={styles.count} aria-hidden="true">
+						<chakra.span css={inertStyles.count} aria-hidden="true">
 							{`+${hiddenCount}`}
 						</chakra.span>
 					</chakra.span>

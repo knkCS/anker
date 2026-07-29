@@ -322,6 +322,63 @@ describe("ReactionChips", () => {
 		expect(ruleTextFor(chips()[0])).toContain("min-height:44px");
 	});
 
+	it("focuses with the shared focus-ring shadow, not a colour-token outline", () => {
+		// `focus-ring` is a shadow token: as `outlineColor` it resolves to the
+		// literal string and the declaration is dropped, leaving the ring at
+		// currentColor. Same shape as button/composer/conversation-list-item.
+		renderWithAnkerTheme(
+			<ReactionChips
+				reactions={[{ emoji: "\u{1F44D}", count: 1 }]}
+				onToggle={vi.fn()}
+			/>,
+		);
+
+		const rules = ruleTextFor(chips()[0]);
+		expect(rules).toContain("var(--chakra-shadows-focus-ring)");
+		expect(rules).not.toContain("outline-color:focus-ring");
+	});
+
+	it("strips the control affordances from the inert overflow readout", () => {
+		renderWithAnkerTheme(
+			<ReactionChips
+				reactions={["\u{1F44D}", "\u{1F389}", "\u{1F602}"].map((emoji) => ({
+					emoji,
+					count: 1,
+				}))}
+				onToggle={vi.fn()}
+				maxVisible={1}
+			/>,
+		);
+
+		// It keeps the chip's shape so the row stays even, but a readout must
+		// not claim a pointer cursor or a 44px hit area. The hit area is a
+		// generated ::after, so `content: none` is what removes it — the
+		// inherited min-width/min-height stay in the rule text but style a box
+		// that is never created.
+		const rules = ruleTextFor(screen.getByTestId("reaction-chip-overflow"));
+		expect(rules).toContain("cursor:default");
+		expect(rules).toContain("content:none");
+	});
+
+	it("keeps the 44px hit area on the overflow chip once it is a real button", () => {
+		renderWithAnkerTheme(
+			<ReactionChips
+				reactions={["\u{1F44D}", "\u{1F389}", "\u{1F602}"].map((emoji) => ({
+					emoji,
+					count: 1,
+				}))}
+				onToggle={vi.fn()}
+				maxVisible={1}
+				onShowAll={vi.fn()}
+			/>,
+		);
+
+		const rules = ruleTextFor(screen.getByTestId("reaction-chip-overflow"));
+		expect(rules).toContain("min-height:44px");
+		// The pseudo is actually generated here, unlike the inert readout.
+		expect(rules).not.toContain("content:none");
+	});
+
 	it("does not fire onToggle from a disabled chip", () => {
 		const onToggle = vi.fn();
 		renderWithAnkerTheme(
@@ -480,6 +537,20 @@ describe("ReactionQuickSetPopover", () => {
 		const rules = ruleTextFor(options()[0]);
 		expect(rules).toContain("min-width:44px");
 		expect(rules).toContain("min-height:44px");
+	});
+
+	it("focuses options with the shared focus-ring shadow", () => {
+		renderWithAnkerTheme(
+			<ReactionQuickSetPopover
+				onSelect={vi.fn()}
+				open
+				options={[{ emoji: "\u{1F44D}", label: "thumbs up" }]}
+			/>,
+		);
+
+		const rules = ruleTextFor(options()[0]);
+		expect(rules).toContain("var(--chakra-shadows-focus-ring)");
+		expect(rules).not.toContain("outline-color:focus-ring");
 	});
 
 	it("cannot be opened while disabled", () => {

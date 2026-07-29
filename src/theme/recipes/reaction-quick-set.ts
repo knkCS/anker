@@ -36,20 +36,22 @@ export const reactionQuickSetTheme = defineSlotRecipe({
 			lineHeight: "1",
 			bg: "transparent",
 			cursor: "pointer",
-			transitionProperty: "background-color, transform",
+			transitionProperty: "background-color",
 			transitionDuration: "fast",
 			transitionTimingFunction: "ease-out",
+			// The tint alone marks the hovered cell. A scale-up was tried and
+			// dropped: the global `_motionReduce` rule only zeroes durations,
+			// so the glyph would still jump under a reduced-motion preference,
+			// and design-system.md §3.6 wants transitions that emphasise
+			// function rather than decorate.
 			_hover: {
 				bg: "bg-muted",
-				// A small lift is what makes a dense grid of same-size glyphs
-				// readable under the pointer; the theme's global reduced-motion
-				// rule parks it, so never add a per-component media query.
-				transform: "scale(1.15)",
 			},
+			// `focus-ring` is a shadow token, not a colour — as `outlineColor`
+			// it resolves to the literal string and the declaration is dropped.
 			_focusVisible: {
-				outline: "2px solid",
-				outlineColor: "focus-ring",
-				outlineOffset: "-2px",
+				boxShadow: "focus-ring",
+				outline: "none",
 			},
 		},
 	},
