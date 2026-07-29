@@ -12,6 +12,12 @@ import type { ReactionSummary } from "./types";
 const meta = {
 	title: "Components/Reactions",
 	component: ReactionChips,
+	// Every story below drives its own props through `render`, but the required
+	// props still have to be declared once here — without them `StoryObj<typeof
+	// meta>` demands `args` on each story. `tsconfig.json` excludes
+	// `**/*.stories.tsx`, so `npm run typecheck` would not have caught it
+	// (anker#187); the unread-badge stories draw the same line.
+	args: { reactions: [], onToggle: () => {} },
 } satisfies Meta<typeof ReactionChips>;
 
 export default meta;
