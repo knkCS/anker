@@ -37,6 +37,12 @@ import { VirtualizedMessageList } from "@knkcs/anker/components";
 
 ## Scroll anchoring
 
+<Canvas of={Stories.ReverseScroll} />
+
+- `items` stay in their natural **oldest → newest** order: the newest message
+  renders at the **bottom**, and the list mounts already scrolled there, so a
+  reader starts at the latest message and scrolls **up** into history.
+
 <Canvas of={Stories.PinnedToBottom} />
 
 - While the user is at (or within `pinThreshold` of) the bottom, appended
@@ -56,6 +62,13 @@ import { VirtualizedMessageList } from "@knkcs/anker/components";
 away — the consumer loads the previous page and **prepends** it to `items`.
 The list preserves the visible scroll position across the prepend. The
 component never fetches; a list too short to scroll never fires.
+
+<Canvas of={Stories.PrependPreservesPosition} />
+
+Prepending inserts items **above** the viewport, which grows the scroll
+content: without anchoring the reader's place would jump up by the height of
+the whole new page. The message being read stays exactly where it is — only
+the scrollbar changes.
 
 ## Day dividers
 
