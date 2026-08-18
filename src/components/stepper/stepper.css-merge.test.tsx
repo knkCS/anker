@@ -2,7 +2,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import system from "../../theme";
-import { Stepper } from "./stepper";
+import { Stepper, StepperStep } from "./stepper";
 
 /**
  * Every Stepper slot carries its own recipe styles via `css`. Half the slots
@@ -32,7 +32,10 @@ function renderStepper(css?: Record<string, unknown>) {
 	// exists here, and without it there are no slot styles to preserve.
 	const { container } = render(
 		<ChakraProvider value={system}>
-			<Stepper steps={[{ title: "One" }, { title: "Two" }]} css={css} />
+			<Stepper step={0} css={css}>
+				<StepperStep name="one" title="One" />
+				<StepperStep name="two" title="Two" />
+			</Stepper>
 		</ChakraProvider>,
 	);
 	return rulesFor(container.querySelector(".stepper") as HTMLElement);
