@@ -105,8 +105,8 @@ export const StepperContainer = ({
 			<StepperProvider value={context}>
 				<chakra.div
 					ref={ref}
-					css={styles.container}
 					{...rest}
+					css={[styles.container, props.css]}
 					className={cx("stepper", props.className)}
 				>
 					{children}
@@ -185,8 +185,8 @@ export const StepperSteps: React.FC<StepperStepsProps> = (props) => {
 	return (
 		<>
 			<chakra.div
-				css={styles.steps}
 				{...rest}
+				css={[styles.steps, props.css]}
 				className={cx("stepper__steps", props.className)}
 			>
 				{elements}
@@ -214,8 +214,8 @@ export const StepperContent: React.FC<StepperContentProps> = (props) => {
 
 	return (
 		<chakra.div
-			css={styles.content}
 			{...rest}
+			css={[styles.content, props.css]}
 			className={cx("stepper__content", props.className)}
 		>
 			<Collapsible.Root open={open}>
@@ -245,8 +245,8 @@ export const StepperIcon: React.FC<StepperIconProps> = (props) => {
 
 	return (
 		<chakra.div
-			css={styles.icon}
 			{...rest}
+			css={[styles.icon, props.css]}
 			className={cx("stepper__icon", className)}
 			data-active={dataAttr(isActive)}
 		>
@@ -286,7 +286,7 @@ export const StepperStep: React.FC<StepperStepProps> = (props) => {
 	return (
 		<chakra.div
 			{...rest}
-			css={styles.step}
+			css={[styles.step, props.css]}
 			data-active={dataAttr(step.isActive)}
 			data-completed={dataAttr(step.isCompleted)}
 			aria-current={step.isActive ? "step" : undefined}
@@ -316,7 +316,7 @@ export const StepperSeparator: React.FC<StepperSeparatorProps> = (props) => {
 			{...rest}
 			data-active={dataAttr(isActive)}
 			className={cx("stepper__separator", props.className)}
-			css={styles.separator}
+			css={[styles.separator, props.css]}
 		/>
 	);
 };
@@ -331,7 +331,7 @@ export const StepperStepTitle: React.FC<HTMLChakraProps<"p">> = (props) => {
 	return (
 		<chakra.p
 			{...props}
-			css={styles.title}
+			css={[styles.title, props.css]}
 			className={cx("stepper__title", props.className)}
 		/>
 	);
@@ -346,8 +346,8 @@ export const StepperCompleted: React.FC<HTMLChakraProps<"div">> = (props) => {
 	const styles = useStyles();
 	return (
 		<chakra.div
-			css={styles.completed}
 			{...props}
+			css={[styles.completed, props.css]}
 			className={cx("stepper__completed", props.className)}
 		/>
 	);
