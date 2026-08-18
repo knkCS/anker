@@ -138,13 +138,13 @@ export {
 	type TableMenuListProps,
 	TableOption,
 } from "./select";
-
-// SplitButton
 export {
 	SplitButton,
 	type SplitButtonMenuItem,
 	type SplitButtonProps,
 } from "./split-button";
+// SplitButton
+export type { SplitButtonStyleProps } from "./split-button/resolve-half-props";
 
 // Stat
 export { Stat, type StatProps } from "./stat";

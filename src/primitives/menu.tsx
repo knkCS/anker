@@ -137,13 +137,16 @@ MenuSeparator.displayName = "MenuSeparator";
  */
 export const MenuItem = function MenuItem({
 	ref,
-	...props
+	disabled,
+	onClick,
+	...rest
 }: ChakraMenu.ItemProps & { ref?: React.Ref<HTMLDivElement> }) {
 	return (
 		<ChakraMenu.Item
 			ref={ref}
-			{...props}
-			onClick={props.disabled ? undefined : props.onClick}
+			{...rest}
+			disabled={disabled}
+			onClick={disabled ? undefined : onClick}
 		/>
 	);
 };

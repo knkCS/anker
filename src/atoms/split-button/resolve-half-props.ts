@@ -14,7 +14,7 @@ export type SplitButtonStyleProps = Pick<
 	"variant" | "size" | "colorPalette" | "loading" | "disabled"
 >;
 
-export interface HalfPropsInput extends SplitButtonStyleProps {
+export interface SplitButtonHalfInput extends SplitButtonStyleProps {
 	/** The default action, run by the action half. */
 	onClick: () => void;
 	/** Accessible name for the icon-only chevron half. */
@@ -50,7 +50,7 @@ export function resolveHalfProps({
 	onClick,
 	menuAriaLabel,
 	...styleProps
-}: HalfPropsInput): SplitButtonHalfProps {
+}: SplitButtonHalfInput): SplitButtonHalfProps {
 	return {
 		action: {
 			...styleProps,

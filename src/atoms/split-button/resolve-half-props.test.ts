@@ -69,6 +69,21 @@ describe("resolveHalfProps", () => {
 		expect(trigger.borderStartRadius).toBe("none");
 	});
 
+	it("does not let a consumer supply the seam radii", () => {
+		// The type already excludes them — `SplitButtonStyleProps` picks neither —
+		// so this pins the runtime half of that promise: the structural props are
+		// applied AFTER the forwarded ones and cannot be spread over. Casting is
+		// how a consumer would get here in JS, or via `as any` in TS.
+		const { action, trigger } = resolveHalfProps({
+			...base,
+			borderEndRadius: "full",
+			borderStartRadius: "full",
+		} as Parameters<typeof resolveHalfProps>[0]);
+
+		expect(action.borderEndRadius).toBe("none");
+		expect(trigger.borderStartRadius).toBe("none");
+	});
+
 	it("puts the spinner on the action half and only disables the trigger", () => {
 		// Two spinners would read as two pending actions, and the trigger's would
 		// replace the chevron.

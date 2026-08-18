@@ -133,12 +133,18 @@ describe("SplitButton", () => {
 					onClick={vi.fn()}
 					menuAriaLabel="Choose a task type"
 					menuItems={menuItems}
-					icon={<svg data-testid="leading-icon" role="img" aria-label="plus" />}
+					icon={<svg data-testid="leading-icon" aria-hidden="true" />}
 				/>
 			</ChakraProvider>,
 		);
 
-		expect(screen.getByTestId("leading-icon")).toBeInTheDocument();
+		// Scoped to the action half — a document-wide query would also pass if the
+		// icon landed on the chevron half.
+		expect(
+			screen
+				.getByRole("button", { name: "Create task" })
+				.querySelector("[data-testid='leading-icon']"),
+		).not.toBeNull();
 	});
 
 	it("disables the chevron half while the default action is loading", () => {
