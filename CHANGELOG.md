@@ -2,6 +2,64 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.0.0 — 2026-08-18
+
+### Breaking
+
+- **`SplitButton` is a true split button** (#192). It had four states, one of
+  which rendered nothing and one of which duplicated `MenuButton`. Both halves
+  are now required: `onClick` and `menuItems` are mandatory, so a control with
+  only a menu is `MenuButton`'s job and a control with only an action is
+  `Button`'s.
+
+  It also declared `extends ButtonProps` while discarding three of them —
+  `{...rest}` was spread *first*, then overwritten with `colorPalette="blue"`
+  and `size="lg"`, so `<SplitButton size="sm" colorPalette="gray" />`
+  type-checked and did nothing. `blue` is not an anker palette at all (only
+  `brand.blue` exists, as a single token), so the control could not be made to
+  match the buttons beside it, and `size="lg"` fought the density principle.
+  The props contract is now an explicit `Pick` of the props it forwards, and it
+  sets no visual defaults of its own — `variant` / `size` / `colorPalette` reach
+  both halves, and whatever you leave out falls back to `Button`'s defaults. See
+  ADR-0001.
+
+  The chevron half rendered icon-only with no accessible name (WCAG 4.1.2). It
+  now takes a required `menuAriaLabel`. It is deliberately not called
+  `menuLabel`: `MenuButton`'s prop of that name is *visible* face text.
+
+  | Before | After |
+  |--------|-------|
+  | `onClick?` | required |
+  | `menuItems?` | required |
+  | — | `menuAriaLabel` required |
+  | `SplitButtonMenuItem.color?: string` | `destructive?: boolean` (`error` token) |
+  | `extends ButtonProps` | `Pick<ButtonProps, "variant" \| "size" \| "colorPalette" \| "loading" \| "disabled">` |
+  | leading `<Plus/>` always | `icon?` — absent unless passed |
+  | `colorPalette="blue"`, `size="lg"` forced | consumer's values honoured |
+
+  Migration: move menu-only call sites to `MenuButton` and action-only call
+  sites to `Button`; add `menuAriaLabel` naming the choice the menu offers
+  ("Choose a task type", not "More actions"); pass `icon={<Plus size={16} />}`
+  where the plus was wanted; replace `color: "red"` with `destructive: true`.
+
+### Fixed
+
+- **Disabled `SplitButton` menu items are inert** (#192). A menu item is a
+  `div`, so `disabled` is not enforced by the platform, and the menu recipe's
+  `_disabled` is visual only (opacity + cursor) — a click on a disabled item
+  still ran its handler. The handler is now withheld entirely. `MenuButton` has
+  the same shape and is not yet fixed.
+
+### Added
+
+- `SplitButton` menu items take `value` (stable key and Ark value, defaults to
+  `label`) and `disabled`, matching `MenuButtonAction`. Two items sharing a
+  label no longer collide.
+- Docs: `split-button.mdx` usage guide with a which-control-do-I-want table, a
+  `CLAUDE-ANKER.md` section, `CONTEXT.md` glossary entries for **Split button**
+  and **Menu button**, and `docs/adr/0001-atoms-pick-button-props.md` — the
+  repo's first ADR.
+
 ## 4.2.0 — 2026-07-29
 
 Completes the anker half of the messengerhub chat set (knkCS/messengerhub#27,

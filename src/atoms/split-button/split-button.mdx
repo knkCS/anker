@@ -1,0 +1,71 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./split-button.stories";
+
+<Meta of={Stories} />
+
+# SplitButton
+
+A default action paired with a menu of alternatives to it. The left half runs
+the action; the right half opens the menu. Both halves are always present —
+that pairing is what makes it a split button.
+
+Use it when there is a clear default choice and the alternatives are variations
+on it: create a task of the workspace's default type, with other types behind
+the chevron.
+
+## Which control do I want?
+
+| You have | Use |
+|----------|-----|
+| A default action, plus alternatives to it | `SplitButton` |
+| A list of actions with no default among them | `MenuButton` |
+| A single action | `Button` |
+
+`MenuButton` is the one to reach for when there is no default — it renders one
+labelled face over the list, and collapses to a plain button when the list has
+only one entry. SplitButton deliberately cannot do that.
+
+## Default
+
+<Canvas of={Stories.Default} />
+
+SplitButton sets no `variant`, `size` or `colorPalette` of its own — whatever
+you pass reaches both halves, and what you leave out falls back to `Button`'s
+defaults. So the default look is `Button`'s, not a primary action.
+
+## With an icon
+
+<Canvas of={Stories.WithIcon} />
+
+There is no icon unless you pass one. A split button is not inherently a create
+button, so pass `icon={<Plus size={16} />}` when it is one.
+
+## Loading
+
+<Canvas of={Stories.Loading} />
+
+`loading` belongs to the default action: the spinner replaces the action label
+and the chevron half is disabled while it runs, keeping its chevron. `disabled`
+applies to both halves.
+
+## Destructive and disabled items
+
+<Canvas of={Stories.WithDestructiveItem} />
+
+`destructive` renders an item in the `error` token; `disabled` makes it inert.
+Give items a `value` when two of them can share a label.
+
+## Passing through size and palette
+
+<Canvas of={Stories.SmallSolid} />
+
+## Accessibility
+
+`menuAriaLabel` is required because the chevron half is icon-only. Name the
+choice the menu offers — "Choose a task type", not "More actions" or "Menu". It
+is the only thing a screen-reader user hears when they reach that half, and it
+is what tells them the two halves are related.
+
+## Props
+
+<ArgTypes of={Stories} />

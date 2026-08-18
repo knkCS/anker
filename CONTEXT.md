@@ -37,3 +37,13 @@ _Avoid_: modified, changed, touched ("touched" means focused-then-blurred in RHF
 
 **Unsaved changes**:
 The user-facing framing of dirty state, used by navigation guards when warning before leaving a dirty surface. Dirty is the state; unsaved changes is how the UI talks about it.
+
+### Actions
+
+**Split button**:
+A paired control: one half runs the default action, the other opens a menu of alternatives to it. Both halves are always present — a control offering only a menu is a Menu button, and one offering only an action is a button.
+_Avoid_: dropdown button, select action
+
+**Menu button**:
+A single button face that opens a menu of actions, collapsing to a plain button when there is only one. It has no default action — nothing happens until the user picks from the menu.
+_Avoid_: split button
