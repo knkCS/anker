@@ -2,6 +2,40 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.0.1 — 2026-08-18
+
+### Fixed
+
+- **Slot components merge your `css` instead of dropping or replacing it**
+  (#194, #195). Nine slots across `Stepper` and `ColorModeButton` declared a
+  `css` prop and then failed to honour it, in two mirrored ways: those
+  applying `css` after `{...rest}` discarded the consumer's value outright,
+  and those applying it before let the consumer's value replace the slot's
+  own recipe styling. All nine now merge — `css={[styles.slot, props.css]}` —
+  which puts your declarations outside `@layer recipes`, so they win on
+  conflict while the slot keeps everything you don't touch.
+
+  Note the behaviour change if you were working around the old behaviour: a
+  `css` passed to a `Stepper` slot no longer wipes that slot's styling. That
+  was never the intent, and `<Stepper css={undefined} />` used to blank the
+  root slot entirely — a value set before a spread is clobbered by an
+  explicit `undefined` inside it.
+
+  Affected: `Stepper` (root), `StepperSteps`, `StepperContent`,
+  `StepperIcon`, `StepperStep`, `StepperSeparator`, `StepperStepTitle`,
+  `StepperCompleted`, `ColorModeButton`.
+
+### Changed
+
+- **ADR-0001 scoped to props that are actually discarded** (#194, #196). The
+  rule read as an absolute — atoms `Pick` rather than `extends` — while its
+  rationale was about types that promise what they discard. `extends
+  ButtonProps` is now explicitly legal where a component genuinely forwards
+  everything, as `CommentAction` does. The ADR also records the general rule
+  the `Pick` was one instance of: declare a prop and you must honour it, by
+  forwarding it, by merging it, or by not declaring it. Docs only — no atom
+  changed.
+
 ## 5.0.0 — 2026-08-18
 
 ### Breaking
