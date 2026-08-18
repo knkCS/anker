@@ -443,6 +443,30 @@ and all suggestion data.
 
 ---
 
+## SplitButton
+
+`SplitButton` (`@knkcs/anker/atoms`) is a default action paired with a menu of
+alternatives to it. Both halves are always present — that pairing is what makes
+it a split button.
+
+- **Pick the right control**: a default action plus alternatives → `SplitButton`;
+  a list of actions with no default among them → `MenuButton` (it collapses to a
+  plain button at one action); a single action → `Button`.
+- **`menuAriaLabel` is required** — the chevron half is icon-only. Name the
+  choice the menu offers ("Choose a task type"), not the icon and not "More
+  actions".
+- **It sets no visual defaults.** `variant` / `size` / `colorPalette` reach both
+  halves; anything you leave out falls back to `Button`'s defaults, so the bare
+  control is not a primary action until you make it one.
+- **No icon unless you pass one** — `icon={<Plus size={16} />}` for create
+  buttons.
+- **`loading` is the default action's**: spinner on the action half, chevron
+  half disabled but still a chevron. `disabled` applies to both.
+- **Menu items** take `value` (give one when labels can collide), `disabled`,
+  and `destructive` (renders in the `error` token). There is no raw `color`.
+
+---
+
 ## Pointers
 
 - Full spec: anker GitHub Pages docs site (`/design-system`, `/page-patterns`)

@@ -129,7 +129,7 @@ interface InputFieldProps {
 - **Error messages** use `aria-live="polite"` so screen readers announce validation errors when they appear
 - **Stepper** uses `aria-current="step"` on the active step
 - **Touch targets**: All interactive elements (buttons, icon buttons) must meet the 44×44px minimum — use `minWidth="44px"` and `minHeight="44px"` if the visual size is smaller
-- **Icon-only buttons**: Must always have an `aria-label` prop (configurable, with English default)
+- **Icon-only buttons**: Must always have an `aria-label` prop (configurable, with English default). **Exception — require it with no default when a generic name would be meaningless**: a default is right only when one wording is correct at every call site (Composer's `"Message"`). Where the button's meaning varies per usage, a default becomes the name everyone ships, and "More actions" passes an automated audit while telling a screen-reader user nothing. `SplitButton.menuAriaLabel` is required for this reason — it names the choice the menu offers ("Choose a task type"), which only the call site knows.
 
 ### Theme Recipes
 

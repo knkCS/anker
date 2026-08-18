@@ -66,4 +66,36 @@ describe("MenuButton", () => {
 		fireEvent.click(await screen.findByRole("menuitem", { name: "In Review" }));
 		expect(onInReview).toHaveBeenCalledTimes(1);
 	});
+
+	it("does not fire a disabled action from the menu", async () => {
+		// A menu item is a div, so `disabled` is not enforced by the platform and
+		// the menu recipe's `_disabled` is visual only (opacity + cursor).
+		const onApproved = vi.fn();
+		renderWithChakra(
+			<MenuButton
+				menuLabel="Move to…"
+				actions={[
+					{ label: "In Review", onClick: vi.fn() },
+					{ label: "Approved", onClick: onApproved, disabled: true },
+				]}
+			/>,
+		);
+		fireEvent.click(screen.getByRole("button", { name: "Move to…" }));
+		fireEvent.click(await screen.findByRole("menuitem", { name: "Approved" }));
+		expect(onApproved).not.toHaveBeenCalled();
+	});
+
+	it("does not fire a disabled single action", () => {
+		// The single-action face is a real <button>, so the platform enforces this
+		// one — but it is the same promise, and it should stay true.
+		const onClick = vi.fn();
+		renderWithChakra(
+			<MenuButton
+				menuLabel="Move to…"
+				actions={[{ label: "Move to In Review", onClick, disabled: true }]}
+			/>,
+		);
+		fireEvent.click(screen.getByRole("button", { name: "Move to In Review" }));
+		expect(onClick).not.toHaveBeenCalled();
+	});
 });
