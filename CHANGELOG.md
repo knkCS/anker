@@ -44,11 +44,14 @@ All notable changes to `@knkcs/anker` are documented in this file. The format fo
 
 ### Fixed
 
-- **Disabled `SplitButton` menu items are inert** (#192). A menu item is a
-  `div`, so `disabled` is not enforced by the platform, and the menu recipe's
-  `_disabled` is visual only (opacity + cursor) — a click on a disabled item
-  still ran its handler. The handler is now withheld entirely. `MenuButton` has
-  the same shape and is not yet fixed.
+- **Disabled menu items are inert** (#192, #194). A menu item renders as a
+  `div`, so `disabled` is not enforced by the platform the way it is on a
+  `<button>`, and the menu recipe's `_disabled` is visual only (opacity +
+  cursor). Ark already guarded the keyboard path, but a *pointer* click reached
+  the element and fired any `onClick` attached to it — so clicking a greyed-out
+  item ran its action. The `MenuItem` primitive now withholds the handler when
+  the item is disabled, which fixes every call site at once: `MenuButton`,
+  `SplitButton`, and `MenuCell`'s row actions.
 
 ### Added
 

@@ -77,11 +77,7 @@ export const SplitButton: React.FC<SplitButtonProps> = ({
 						<MenuItem
 							key={menuItem.value ?? menuItem.label}
 							value={menuItem.value ?? menuItem.label}
-							// A menu item is a div, so `disabled` is not enforced by the
-							// platform, and the menu recipe's `_disabled` is visual only
-							// (opacity + cursor). Withholding the handler is what actually
-							// makes a disabled item inert.
-							onClick={menuItem.disabled ? undefined : menuItem.onClick}
+							onClick={menuItem.onClick}
 							disabled={menuItem.disabled}
 							color={menuItem.destructive ? "error" : undefined}
 						>

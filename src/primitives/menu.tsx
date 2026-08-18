@@ -126,7 +126,27 @@ MenuRoot.displayName = "MenuRoot";
 export const MenuSeparator = ChakraMenu.Separator;
 MenuSeparator.displayName = "MenuSeparator";
 
-export const MenuItem = ChakraMenu.Item;
+/**
+ * A menu item, with `disabled` actually made inert.
+ *
+ * A menu item renders as a `div`, so `disabled` is not enforced by the
+ * platform the way it is on a `<button>`, and the menu recipe's `_disabled` is
+ * visual only (opacity + cursor). Ark guards the keyboard path, but a pointer
+ * click still reaches the element and fires an `onClick` handler attached to
+ * it. Withholding the handler is what makes a disabled item inert.
+ */
+export const MenuItem = function MenuItem({
+	ref,
+	...props
+}: ChakraMenu.ItemProps & { ref?: React.Ref<HTMLDivElement> }) {
+	return (
+		<ChakraMenu.Item
+			ref={ref}
+			{...props}
+			onClick={props.disabled ? undefined : props.onClick}
+		/>
+	);
+};
 MenuItem.displayName = "MenuItem";
 export const MenuItemText = ChakraMenu.ItemText;
 MenuItemText.displayName = "MenuItemText";
