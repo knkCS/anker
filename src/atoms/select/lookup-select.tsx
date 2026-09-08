@@ -124,6 +124,14 @@ export interface LookupSelectProps<T extends BaseOption>
 const BOTTOM_THRESHOLD_PX = 24;
 
 /**
+ * Joins ids into one effect key. NUL rather than a space: an id is opaque and
+ * may contain one, and a key that splits back into the wrong ids would ask the
+ * resolver about things nobody stored. Written as an escape — a literal
+ * control character in source is invisible to a reader and to grep.
+ */
+const ID_SEPARATOR = "\u0000";
+
+/**
  * A searchable select whose options come from somewhere else.
  *
  * It owns the interaction — debounce, menu-open gating, cancellation, stale-
@@ -223,6 +231,13 @@ export const LookupSelect = <T extends BaseOption>({
 		[runSearch, debounceMs],
 	);
 	useEffect(() => () => debouncedSearch.cancel(), [debouncedSearch]);
+	// Leaving the page is as good a reason to drop a request as any.
+	useEffect(
+		() => () => {
+			controllerRef.current?.abort();
+		},
+		[],
+	);
 
 	const handleMenuOpen = useCallback(() => {
 		openRef.current = true;
@@ -290,7 +305,7 @@ export const LookupSelect = <T extends BaseOption>({
 	// once per set rather than once per render.
 	const unresolvedKey = entries
 		.filter((entry): entry is string => typeof entry === "string")
-		.join(" ");
+		.join(ID_SEPARATOR);
 	const requestedRef = useRef<Set<string>>(new Set());
 	const canResolve = resolve != null;
 
@@ -302,7 +317,7 @@ export const LookupSelect = <T extends BaseOption>({
 		if (!resolver) return;
 
 		const missing = unresolvedKey
-			.split(" ")
+			.split(ID_SEPARATOR)
 			.filter(Boolean)
 			.filter((id) => !requestedRef.current.has(id));
 		if (missing.length === 0) return;
@@ -371,6 +386,7 @@ export const LookupSelect = <T extends BaseOption>({
 					innerProps={{
 						...props.innerProps,
 						onScroll: (event: React.UIEvent<HTMLDivElement>) => {
+							props.innerProps?.onScroll?.(event);
 							const list = event.currentTarget;
 							const remaining =
 								list.scrollHeight - list.scrollTop - list.clientHeight;

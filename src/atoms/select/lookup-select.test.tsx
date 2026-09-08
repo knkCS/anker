@@ -249,6 +249,26 @@ describe("LookupSelect — the value", () => {
 		expect(search).not.toHaveBeenCalled();
 	});
 
+	it("treats a stored id as opaque, spaces and all", async () => {
+		const search = tableSource();
+		const resolve = vi.fn(async ({ ids }: LookupResolveArgs) =>
+			ids.map((id) => ({ id, label: `Team ${id}` })),
+		);
+
+		renderWithChakra(
+			<LookupSelect
+				isMulti
+				value={["north east", "south"]}
+				search={search}
+				resolve={resolve}
+			/>,
+		);
+
+		expect(await screen.findByText("Team north east")).toBeInTheDocument();
+		expect(screen.getByText("Team south")).toBeInTheDocument();
+		expect(resolve.mock.calls[0][0].ids).toEqual(["north east", "south"]);
+	});
+
 	it("falls back to the just-picked label when there is no resolver", async () => {
 		const user = userEvent.setup();
 		const search = tableSource();
