@@ -29,9 +29,10 @@ All notable changes to `@knkcs/anker` are documented in this file. The format fo
 
   It **composes `BaseSelect`**, so options, single values and multi values
   render through exactly the same renderers — the two are alike by
-  construction. The two menu slots it owns (`MenuList`, carrying paging and the
-  failure line, and `NoOptionsMessage`) are absent from its `components` prop
-  and cannot be replaced by accident.
+  construction. The two menu slots it owns (`Menu`, carrying the failure line,
+  and `MenuList`, carrying paging) are absent from its `components` prop and
+  cannot be replaced by accident, as are the `default*` props react-select's
+  state manager contributes and this control could not honour.
 
   It is deliberately not called `AsyncSelect`: `chakra-react-select` exports
   `AsyncSelect` and `AsyncCreatableSelect`, and `@knkcs/anker/atoms` re-exports

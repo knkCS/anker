@@ -482,8 +482,10 @@ you supply and knows nothing about transports, endpoints or auth.
   `{ items, nextCursor }`. `items` are `BaseOption`s (`id`, `label`, and
   optionally `avatar` / `color` / `icon`) — the same shape `BaseSelect` takes,
   rendered by the same renderers.
-- **Nothing is asked until the menu opens.** Forty of these on a page issue
-  zero requests until someone uses one.
+- **The Source is not asked until the menu opens.** Forty of these on a page
+  issue zero searches until someone uses one. `resolve` is the exception and
+  runs on mount — a stored id has to be readable before anyone touches the
+  control.
 - **Typing is debounced** (`debounceMs`, default 300) and superseded requests
   are aborted; a late answer for an abandoned query is discarded even if your
   Source ignores the signal. Honour it anyway and the request is really
@@ -498,10 +500,11 @@ you supply and knows nothing about transports, endpoints or auth.
   `onChange` emits the item(s); store the ids and hand them back.
 - **`resolve({ ids, signal })` runs on mount, not on open** — a stored id has to
   be readable before anyone touches the control.
-- **Don't pass `options`, `filterOption`, `inputValue`, `loading` or the menu
-  callbacks** — this control owns them and they are not on its type. The same
-  goes for the `MenuList` and `NoOptionsMessage` renderers, which carry paging
-  and the failure line.
+- **Don't reach for `options`, `filterOption`, `inputValue`, `loading`, the
+  menu callbacks, or `defaultValue` / `defaultInputValue` / `defaultMenuIsOpen`**
+  — this control owns all of them, and they are absent from its type rather
+  than accepted and ignored. The same goes for the `Menu` and `MenuList`
+  renderers, which carry the failure line and paging.
 - **Strings are props**: `emptyMessage`, `errorMessage`, `loadingMessage`.
 - Not named `AsyncSelect`: `chakra-react-select` exports one, and the select
   module re-exports vendor names directly.

@@ -4,13 +4,21 @@ import {
 	type GroupBase,
 	type InputActionMeta,
 	type MenuListProps,
+	type MenuProps,
 	type MultiValue,
-	type NoticeProps,
 	type SingleValue,
 } from "chakra-react-select";
 import debounce from "lodash.debounce";
 import type React from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { Text } from "../../primitives/typography";
 import { BaseSelect, type BaseSelectProps } from "./base-select";
 import type { BaseOption } from "./types";
@@ -67,7 +75,16 @@ export type LookupValue<T extends BaseOption> = T | string;
 export interface LookupSelectProps<T extends BaseOption>
 	extends Omit<
 		BaseSelectProps<T>,
+		// Owned by this control. Declaring one and then discarding it is the
+		// defect ADR-0001 is about, so they are unreachable rather than ignored.
+		// The `default*` three come from react-select's state manager and are
+		// just as unhonourable here: `defaultInputValue` would show a query this
+		// control never ran, `defaultValue` is dead because `value` is always
+		// passed, and `defaultMenuIsOpen` would open a menu without opening it.
 		| "components"
+		| "defaultInputValue"
+		| "defaultMenuIsOpen"
+		| "defaultValue"
 		| "filterOption"
 		| "inputValue"
 		| "loading"
@@ -103,20 +120,18 @@ export interface LookupSelectProps<T extends BaseOption>
 	debounceMs?: number;
 	/** Shown when the Source answered with nothing. @default "No matches" */
 	emptyMessage?: string;
-	/**
-	 * Shown when the Source failed. @default "Could not load options"
-	 */
+	/** Shown when the Source failed. @default "Could not load options" */
 	errorMessage?: string;
 	/** Shown while the Source is answering. @default "Loading…" */
 	loadingMessage?: string;
 	/**
-	 * Extra renderers, merged over the shared select's own. `MenuList` and
-	 * `NoOptionsMessage` are not among them: paging and failure reporting live
-	 * there, so this control owns both.
+	 * Extra renderers, merged over the shared select's own. `Menu` and
+	 * `MenuList` are not among them: the failure line and paging live there, so
+	 * this control owns both.
 	 */
 	components?: Omit<
 		NonNullable<BaseSelectProps<T>["components"]>,
-		"MenuList" | "NoOptionsMessage"
+		"Menu" | "MenuList"
 	>;
 }
 
@@ -130,6 +145,86 @@ const BOTTOM_THRESHOLD_PX = 24;
  * control character in source is invisible to a reader and to grep.
  */
 const ID_SEPARATOR = "\u0000";
+
+interface LookupMenuState {
+	failed: boolean;
+	errorMessage: string;
+	hasOptions: boolean;
+	loadNextPage: () => void;
+}
+
+/**
+ * What the menu renderers need from the control around them. A context rather
+ * than a closure: these two components are defined once, at module scope, so
+ * react-select never remounts an open menu (which would drop its scroll
+ * position mid-page) — and rather than a ref mirror, which would mean writing
+ * during render and reading state the components do not subscribe to.
+ */
+const LookupMenuContext = createContext<LookupMenuState>({
+	failed: false,
+	errorMessage: "",
+	hasOptions: false,
+	loadNextPage: () => {},
+});
+
+/**
+ * The menu, plus the live region that reports a Source failure. It sits here
+ * rather than inside `MenuList` because that element is the `role="listbox"`,
+ * whose children must be options — an alert among them is announced
+ * unreliably and may be exposed as a bogus choice.
+ *
+ * With no options to show, react-select's own notice slot carries the visible
+ * message (that is what the slot is for, and the menu collapses entirely if it
+ * renders nothing), so this one goes screen-reader-only to avoid saying it
+ * twice. With options on screen there is no notice slot, so it is the message.
+ */
+const LookupMenu = <T extends BaseOption>(
+	props: MenuProps<T, boolean, GroupBase<T>>,
+) => {
+	const { failed, errorMessage, hasOptions } = useContext(LookupMenuContext);
+	return (
+		<chakraComponents.Menu {...props}>
+			{props.children}
+			{failed ? (
+				<Text
+					role="alert"
+					srOnly={!hasOptions}
+					color="error"
+					fontSize="sm"
+					px={3}
+					py={2}
+				>
+					{errorMessage}
+				</Text>
+			) : null}
+		</chakraComponents.Menu>
+	);
+};
+LookupMenu.displayName = "LookupMenu";
+
+/** The option list, plus the scroll position that asks for the next page. */
+const LookupMenuList = <T extends BaseOption>(
+	props: MenuListProps<T, boolean, GroupBase<T>>,
+) => {
+	const { loadNextPage } = useContext(LookupMenuContext);
+	return (
+		<chakraComponents.MenuList
+			{...props}
+			innerProps={{
+				...props.innerProps,
+				onScroll: (event: React.UIEvent<HTMLDivElement>) => {
+					props.innerProps?.onScroll?.(event);
+					const list = event.currentTarget;
+					const remaining =
+						list.scrollHeight - list.scrollTop - list.clientHeight;
+					if (remaining > BOTTOM_THRESHOLD_PX) return;
+					loadNextPage();
+				},
+			}}
+		/>
+	);
+};
+LookupMenuList.displayName = "LookupMenuList";
 
 /**
  * A searchable select whose options come from somewhere else.
@@ -192,6 +287,8 @@ export const LookupSelect = <T extends BaseOption>({
 	const controllerRef = useRef<AbortController | null>(null);
 	const loadingRef = useRef(false);
 	const openRef = useRef(false);
+	/** Whether a debounced search is already queued for the current input. */
+	const pendingRef = useRef(false);
 
 	const runSearch = useCallback(async (query: string, cursor?: string) => {
 		controllerRef.current?.abort();
@@ -234,6 +331,7 @@ export const LookupSelect = <T extends BaseOption>({
 	const debouncedSearch = useMemo(
 		() =>
 			debounce((query: string) => {
+				pendingRef.current = false;
 				if (!openRef.current) return;
 				cursorRef.current = null;
 				void runSearch(query);
@@ -252,11 +350,17 @@ export const LookupSelect = <T extends BaseOption>({
 	const handleMenuOpen = useCallback(() => {
 		openRef.current = true;
 		cursorRef.current = null;
+		// Typing into a closed menu opens it: react-select reports the input
+		// change and *then* the open, so a keystroke would otherwise search
+		// immediately here and again when the debounce fires. The queued call
+		// is the one that should win.
+		if (pendingRef.current) return;
 		void runSearch(queryRef.current);
 	}, [runSearch]);
 
 	const handleMenuClose = useCallback(() => {
 		openRef.current = false;
+		pendingRef.current = false;
 		debouncedSearch.cancel();
 		controllerRef.current?.abort();
 		controllerRef.current = null;
@@ -276,6 +380,7 @@ export const LookupSelect = <T extends BaseOption>({
 			// Closing and picking also report an input change; only typing is one.
 			if (meta.action !== "input-change") return;
 			queryRef.current = next;
+			pendingRef.current = true;
 			debouncedSearch(next);
 		},
 		[debouncedSearch],
@@ -312,12 +417,15 @@ export const LookupSelect = <T extends BaseOption>({
 		return Array.isArray(value) ? value : [value];
 	}, [value]);
 
-	// A stable key over the ids still lacking a label, so the resolver is asked
-	// once per set rather than once per render.
+	// A stable key over the ids lacking a label, so the resolver is asked once
+	// per set rather than once per render.
 	const unresolvedKey = entries
 		.filter((entry): entry is string => typeof entry === "string")
 		.join(ID_SEPARATOR);
-	const requestedRef = useRef<Set<string>>(new Set());
+	/** Ids a resolve ran to completion for — asked and answered, never re-asked. */
+	const askedRef = useRef<Set<string>>(new Set());
+	/** Ids being asked about right now, and by which request. */
+	const inFlightRef = useRef<Map<string, AbortController>>(new Map());
 	const canResolve = resolve != null;
 
 	useEffect(() => {
@@ -330,14 +438,31 @@ export const LookupSelect = <T extends BaseOption>({
 		const missing = unresolvedKey
 			.split(ID_SEPARATOR)
 			.filter(Boolean)
-			.filter((id) => !requestedRef.current.has(id));
+			.filter(
+				(id) => !askedRef.current.has(id) && !inFlightRef.current.has(id),
+			);
 		if (missing.length === 0) return;
-		for (const id of missing) requestedRef.current.add(id);
 
 		const controller = new AbortController();
+		for (const id of missing) inFlightRef.current.set(id, controller);
+		// An attempt that was abandoned must not count as one that happened, or
+		// the id is stuck showing itself forever — which is what a StrictMode
+		// double-invoke, and any change to the value mid-flight, would cause.
+		const release = () => {
+			for (const id of missing) {
+				if (inFlightRef.current.get(id) === controller) {
+					inFlightRef.current.delete(id);
+				}
+			}
+		};
+
 		resolver({ ids: missing, signal: controller.signal })
 			.then((items) => {
+				release();
 				if (controller.signal.aborted) return;
+				// Every id in this batch is answered, including ones the resolver
+				// had nothing for — asking again would get the same silence.
+				for (const id of missing) askedRef.current.add(id);
 				setResolved((previous) => {
 					const merged = { ...previous };
 					for (const item of items) merged[item.id] = item;
@@ -345,12 +470,15 @@ export const LookupSelect = <T extends BaseOption>({
 				});
 			})
 			.catch(() => {
-				// The raw id keeps showing. Forget the attempt so a later change
-				// to the value can try again.
-				for (const id of missing) requestedRef.current.delete(id);
+				// The raw id keeps showing, and the attempt is forgotten so a
+				// later change to the value can try again.
+				release();
 			});
 
-		return () => controller.abort();
+		return () => {
+			controller.abort();
+			release();
+		};
 	}, [unresolvedKey, canResolve]);
 
 	const toOption = useCallback(
@@ -370,95 +498,40 @@ export const LookupSelect = <T extends BaseOption>({
 		return entries.length > 0 ? toOption(entries[0]) : null;
 	}, [entries, isMulti, toOption]);
 
-	// The two menu renderers below are built once, so react-select never
-	// remounts the open menu (which would drop its scroll position mid-page).
-	// They read the changing bits from this mirror, written here in the render
-	// body — before any child of this component renders, so what they read is
-	// always this render's state.
-	const menuStateRef = useRef({
-		failed,
-		errorMessage,
-		emptyMessage,
-		hasOptions: options.length > 0,
-	});
-	menuStateRef.current = {
-		failed,
-		errorMessage,
-		emptyMessage,
-		hasOptions: options.length > 0,
-	};
-
-	const LookupMenuList = useMemo(() => {
-		const Component = (props: MenuListProps<T, boolean, GroupBase<T>>) => {
-			const state = menuStateRef.current;
-			return (
-				<chakraComponents.MenuList
-					{...props}
-					innerProps={{
-						...props.innerProps,
-						onScroll: (event: React.UIEvent<HTMLDivElement>) => {
-							props.innerProps?.onScroll?.(event);
-							const list = event.currentTarget;
-							const remaining =
-								list.scrollHeight - list.scrollTop - list.clientHeight;
-							if (remaining > BOTTOM_THRESHOLD_PX) return;
-							loadNextPage();
-						},
-					}}
-				>
-					{props.children}
-					{state.failed && state.hasOptions ? (
-						<Text role="alert" color="error" fontSize="sm" px={3} py={2}>
-							{state.errorMessage}
-						</Text>
-					) : null}
-				</chakraComponents.MenuList>
-			);
-		};
-		Component.displayName = "LookupMenuList";
-		return Component;
-	}, [loadNextPage]);
-
-	const LookupNoOptionsMessage = useMemo(() => {
-		const Component = (props: NoticeProps<T, boolean, GroupBase<T>>) => {
-			const state = menuStateRef.current;
-			return (
-				<chakraComponents.NoOptionsMessage {...props}>
-					{state.failed ? (
-						<Text role="alert" color="error">
-							{state.errorMessage}
-						</Text>
-					) : (
-						state.emptyMessage
-					)}
-				</chakraComponents.NoOptionsMessage>
-			);
-		};
-		Component.displayName = "LookupNoOptionsMessage";
-		return Component;
-	}, []);
+	const hasOptions = options.length > 0;
+	const menuState = useMemo<LookupMenuState>(
+		() => ({ failed, errorMessage, hasOptions, loadNextPage }),
+		[failed, errorMessage, hasOptions, loadNextPage],
+	);
 
 	return (
-		<BaseSelect<T>
-			{...restSelectProps}
-			isMulti={isMulti}
-			value={selected}
-			onChange={handleChange}
-			options={options}
-			loading={loading}
-			// The Source already decided what matches; filtering again here
-			// would hide answers whose label does not contain the query.
-			filterOption={null}
-			onInputChange={handleInputChange}
-			onMenuOpen={handleMenuOpen}
-			onMenuClose={handleMenuClose}
-			loadingMessage={() => loadingMessage}
-			components={{
-				...components,
-				MenuList: LookupMenuList,
-				NoOptionsMessage: LookupNoOptionsMessage,
-			}}
-		/>
+		<LookupMenuContext.Provider value={menuState}>
+			<BaseSelect<T>
+				{...restSelectProps}
+				isMulti={isMulti}
+				value={selected}
+				onChange={handleChange}
+				options={options}
+				loading={loading}
+				// The Source already decided what matches; filtering again here
+				// would hide answers whose label does not contain the query.
+				filterOption={null}
+				onInputChange={handleInputChange}
+				onMenuOpen={handleMenuOpen}
+				onMenuClose={handleMenuClose}
+				loadingMessage={() => loadingMessage}
+				// react-select's notice slot: the reason there is nothing to
+				// show. On a failure that reason is the failure, not "No
+				// matches" — and it must not be null, which collapses the whole
+				// menu and takes the alert above with it.
+				noOptionsMessage={() => (failed ? errorMessage : emptyMessage)}
+				components={{
+					...components,
+					Menu: LookupMenu,
+					MenuList: LookupMenuList,
+				}}
+			/>
+		</LookupMenuContext.Provider>
 	);
 };
 (LookupSelect as { displayName?: string }).displayName = "LookupSelect";

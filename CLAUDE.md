@@ -316,9 +316,11 @@ courtesy the Source may decline), page accumulation on scroll-to-bottom, and
 the label fallback chain resolved → just-picked → raw id.
 
 It composes `BaseSelect` rather than re-declaring renderers, which is what
-makes the two identical; the two menu slots it owns (`MenuList` for paging and
-the failure line, `NoOptionsMessage`) are `Omit`ted from its `components` prop
-so they cannot be replaced by accident (ADR-0001). It is **not** called
+makes the two identical; the two menu slots it owns (`Menu` for the failure
+line, `MenuList` for paging) are `Omit`ted from its `components` prop so they
+cannot be replaced by accident — as are `defaultValue` / `defaultInputValue` /
+`defaultMenuIsOpen`, which `react-select`'s state manager contributes and this
+control could not honour (ADR-0001). It is **not** called
 `AsyncSelect` — `chakra-react-select` exports one and the select barrel
 re-exports vendor names directly. `lookup-select.never-fetches.test.ts` pins
 the charter: no transport, no endpoint or credential, no foreign import, no
@@ -424,6 +426,16 @@ Additional rules:
 3. Set `displayName` via cast: `(Component as { displayName?: string }).displayName = "Name"`
 4. Create `src/forms/{name}-field.stories.tsx` — include `FormProvider` decorator with `useForm`
 5. Add export to `src/forms/index.ts`
+
+### Testing note — StrictMode does not survive `ChakraProvider`
+
+Effects double-invoke under `<StrictMode>` only when it wraps the provider.
+`<ChakraProvider><StrictMode><Thing /></StrictMode></ChakraProvider>` renders
+`Thing`'s effects **once**, so a test written that way passes on code that
+cannot survive a remount — measured, not assumed: 2 invocations bare, 1 inside
+the provider, 2 with `StrictMode` outside it (or with RTL's
+`{ reactStrictMode: true }`). Put `StrictMode` outermost, as
+`lookup-select.test.tsx` does.
 
 ### All layers
 - Every exported component must have `displayName` set. For generic function components (e.g., form fields with `<T extends FieldValues>`), use the cast pattern: `(Component as { displayName?: string }).displayName = "Name"`

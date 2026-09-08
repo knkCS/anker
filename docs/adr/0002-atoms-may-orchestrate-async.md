@@ -60,10 +60,13 @@ a return value it waits on. That is the only genuinely new thing here.
   anyone honours the signal. An atom that only aborts has a race; an atom that
   only guards leaks requests. Do both.
 - **The charter needs a test, not a convention.** "Never fetches" is now a
-  claim about a file that a person could break in one line, so
-  `lookup-select.never-fetches.test.ts` pins it: no transport, no endpoint or
-  credential, no foreign import, no HTTP client in `package.json`. A new
-  async-orchestrating atom should bring one.
+  claim a person could break in one line, so
+  `lookup-select.never-fetches.test.ts` pins it. The transport scan covers the
+  whole of `src/`, not the one component: scoping it to a file is bypassed by
+  the first `import { get } from "./transport"`, and the charter was never
+  about one component anyway. The narrower checks — no endpoint or credential,
+  no foreign import, no dynamic `import()` or `require()`, no HTTP client in
+  `package.json` — stay with the module that prompted them.
 - **Async orchestration is not a licence for domain knowledge.** The atom knows
   a query, a cursor and a signal. It does not know what is being looked up,
   what an id means, or who is allowed to see it.

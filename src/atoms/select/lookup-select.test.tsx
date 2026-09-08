@@ -8,7 +8,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type React from "react";
-import { useState } from "react";
+import { StrictMode, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { BaseSelect } from "./base-select";
 import {
@@ -248,6 +248,243 @@ describe("LookupSelect — the Source", () => {
 
 		expect(await screen.findByText("Ada Lovelace")).toBeInTheDocument();
 		expect(screen.queryByRole("alert")).toBeNull();
+	});
+});
+
+describe("LookupSelect — the menu and its lifecycle", () => {
+	it("says so when the Source answered with nothing", async () => {
+		const user = userEvent.setup();
+		const search = vi.fn(
+			async (): Promise<LookupPage<BaseOption>> => ({
+				items: [],
+			}),
+		);
+
+		const { rerender } = renderWithChakra(
+			<LookupSelect value={null} search={search} debounceMs={10} />,
+		);
+
+		await user.click(screen.getByRole("combobox"));
+		expect(await screen.findByText("No matches")).toBeInTheDocument();
+
+		await user.keyboard("{Escape}");
+		rerender(
+			<ChakraProvider value={defaultSystem}>
+				<LookupSelect
+					value={null}
+					search={search}
+					debounceMs={10}
+					emptyMessage="Nobody by that name"
+				/>
+			</ChakraProvider>,
+		);
+		await user.click(screen.getByRole("combobox"));
+
+		expect(await screen.findByText("Nobody by that name")).toBeInTheDocument();
+		expect(screen.queryByText("No matches")).toBeNull();
+	});
+
+	it("says so while the Source is still answering", async () => {
+		const user = userEvent.setup();
+		const answer = deferred<LookupPage<BaseOption>>();
+		const search = vi.fn(async () => answer.promise);
+
+		renderWithChakra(
+			<LookupSelect
+				value={null}
+				search={search}
+				debounceMs={10}
+				loadingMessage="Asking…"
+			/>,
+		);
+
+		await user.click(screen.getByRole("combobox"));
+
+		expect(await screen.findByText("Asking…")).toBeInTheDocument();
+
+		answer.resolve({ items: [ada] });
+		expect(await screen.findByText("Ada Lovelace")).toBeInTheDocument();
+		expect(screen.queryByText("Asking…")).toBeNull();
+	});
+
+	it("reports a failed page beside the options already on screen", async () => {
+		const user = userEvent.setup();
+		const search = vi.fn(
+			async ({ cursor }: LookupSearchArgs): Promise<LookupPage<BaseOption>> => {
+				if (cursor === "p2") throw new Error("upstream is down");
+				return { items: [ada, grace], nextCursor: "p2" };
+			},
+		);
+
+		renderWithChakra(
+			<LookupSelect value={null} search={search} debounceMs={10} />,
+		);
+
+		await user.click(screen.getByRole("combobox"));
+		expect(await screen.findByText("Ada Lovelace")).toBeInTheDocument();
+
+		const listbox = screen.getByRole("listbox");
+		setScrollGeometry(listbox, {
+			scrollTop: 300,
+			scrollHeight: 400,
+			clientHeight: 100,
+		});
+		fireEvent.scroll(listbox);
+
+		expect(await screen.findByRole("alert")).toHaveTextContent(
+			"Could not load options",
+		);
+		// The page that did arrive is still there to pick from.
+		expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
+		expect(screen.getByText("Grace Hopper")).toBeInTheDocument();
+	});
+
+	it("abandons the request when the menu closes, and starts over on reopen", async () => {
+		const user = userEvent.setup();
+		const first = deferred<LookupPage<BaseOption>>();
+		const signals: AbortSignal[] = [];
+		let call = 0;
+		const search = vi.fn(async ({ signal }: LookupSearchArgs) => {
+			signals.push(signal);
+			call += 1;
+			return call === 1 ? first.promise : { items: [grace] };
+		});
+
+		renderWithChakra(
+			<LookupSelect value={null} search={search} debounceMs={10} />,
+		);
+
+		await user.click(screen.getByRole("combobox"));
+		await waitFor(() => expect(search).toHaveBeenCalledTimes(1));
+
+		await user.keyboard("{Escape}");
+		expect(signals[0].aborted).toBe(true);
+
+		first.resolve({ items: [ada] });
+		await settle();
+		expect(screen.queryByText("Ada Lovelace")).toBeNull();
+
+		await user.click(screen.getByRole("combobox"));
+
+		expect(await screen.findByText("Grace Hopper")).toBeInTheDocument();
+		expect(search.mock.calls[1][0]).toMatchObject({ query: "" });
+		expect(search.mock.calls[1][0].cursor).toBeUndefined();
+	});
+
+	it("asks nothing when typing is abandoned before it settles", async () => {
+		const user = userEvent.setup();
+		const search = tableSource();
+
+		renderWithChakra(
+			<LookupSelect value={null} search={search} debounceMs={100} />,
+		);
+
+		await user.click(screen.getByRole("combobox"));
+		await waitFor(() => expect(search).toHaveBeenCalledTimes(1));
+
+		await user.type(screen.getByRole("combobox"), "gra");
+		await user.keyboard("{Escape}");
+		await settle();
+		await settle();
+
+		expect(search).toHaveBeenCalledTimes(1);
+	});
+
+	it("drops the request when the control goes away", async () => {
+		const user = userEvent.setup();
+		const answer = deferred<LookupPage<BaseOption>>();
+		const signals: AbortSignal[] = [];
+		const search = vi.fn(async ({ signal }: LookupSearchArgs) => {
+			signals.push(signal);
+			return answer.promise;
+		});
+
+		const { unmount } = renderWithChakra(
+			<LookupSelect value={null} search={search} debounceMs={10} />,
+		);
+
+		await user.click(screen.getByRole("combobox"));
+		await waitFor(() => expect(search).toHaveBeenCalledTimes(1));
+
+		unmount();
+
+		expect(signals[0].aborted).toBe(true);
+	});
+
+	it("asks once when a keystroke is what opens the menu", async () => {
+		const user = userEvent.setup();
+		const search = tableSource();
+
+		renderWithChakra(
+			<LookupSelect value={null} search={search} debounceMs={30} />,
+		);
+
+		await user.click(screen.getByRole("combobox"));
+		await waitFor(() => expect(search).toHaveBeenCalledTimes(1));
+		await user.keyboard("{Escape}");
+
+		// react-select reports the input change and *then* opens the menu, so
+		// this one keystroke reaches both handlers. skipClick keeps it a
+		// keystroke — clicking would be a legitimate second open.
+		await user.type(screen.getByRole("combobox"), "gra", { skipClick: true });
+
+		await waitFor(() => expect(search).toHaveBeenCalledTimes(2));
+		await settle();
+		expect(queriesSeen(search)).toEqual(["", "gra"]);
+	});
+});
+
+describe("LookupSelect — the resolver", () => {
+	it("resolves under StrictMode, whose double-invoked effects abort the first try", async () => {
+		const search = tableSource();
+		const resolve = vi.fn(async ({ ids }: LookupResolveArgs) =>
+			ids.map((id) => ({ id, label: "Grace Hopper" })),
+		);
+
+		// StrictMode must wrap the provider, not sit inside it: ChakraProvider
+		// renders its children without the StrictMode flag, so a StrictMode
+		// nested within it double-invokes nothing and the test would pass on
+		// code that cannot survive a remount.
+		render(
+			<StrictMode>
+				<ChakraProvider value={defaultSystem}>
+					<LookupSelect value="u2" search={search} resolve={resolve} />
+				</ChakraProvider>
+			</StrictMode>,
+		);
+
+		expect(await screen.findByText("Grace Hopper")).toBeInTheDocument();
+	});
+
+	it("still resolves an id whose request was abandoned by a change of value", async () => {
+		const search = tableSource();
+		const known: Record<string, string> = {
+			u1: "Ada Lovelace",
+			u2: "Grace Hopper",
+		};
+		const resolve = vi.fn(async ({ ids }: LookupResolveArgs) =>
+			ids.map((id) => ({ id, label: known[id] ?? id })),
+		);
+
+		const { rerender } = renderWithChakra(
+			<LookupSelect isMulti value={["u2"]} search={search} resolve={resolve} />,
+		);
+
+		// A second id arrives before the first answer does, which aborts the
+		// request that was going to name u2.
+		rerender(
+			<ChakraProvider value={defaultSystem}>
+				<LookupSelect
+					isMulti
+					value={["u2", "u1"]}
+					search={search}
+					resolve={resolve}
+				/>
+			</ChakraProvider>,
+		);
+
+		expect(await screen.findByText("Grace Hopper")).toBeInTheDocument();
+		expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
 	});
 });
 

@@ -83,8 +83,10 @@ alive: the next query tries again.
   pattern this control replaces.
 - **Do** pass a `resolve` as soon as stored ids can reach the control from
   somewhere other than a pick (a loaded form, a deep link).
-- **Don't** pass `options`, `filterOption`, `inputValue`, `isLoading` or the
-  menu callbacks — this control owns them and the props are not on its type.
+- **Don't** look for `options`, `filterOption`, `inputValue`, `loading`, the
+  menu callbacks, or `defaultValue` / `defaultInputValue` / `defaultMenuIsOpen`
+  — this control owns all of them, and they are absent from its type rather
+  than accepted and ignored.
 - **Do** translate `emptyMessage`, `errorMessage` and `loadingMessage`; they
   are props with English defaults, like every string in anker.
 
@@ -94,12 +96,16 @@ alive: the next query tries again.
 values render through exactly the same renderers — avatars, colour dots and
 icons included. The two are alike by construction, not by discipline.
 
-The two menu slots it owns — `MenuList` (paging, failure line) and
-`NoOptionsMessage` — are absent from its `components` prop, so they cannot be
-replaced by accident.
+The two menu slots it owns — `Menu` (the failure line) and `MenuList` (paging)
+— are absent from its `components` prop, so they cannot be replaced by
+accident.
 
 ## Accessibility
 
 - Keyboard navigable: arrows browse, Enter selects, Escape closes.
-- A Source failure is announced: the message is a `role="alert"` live region.
+- A Source failure is announced: the message is a `role="alert"` live region,
+  and it sits in the menu *outside* the `role="listbox"` — an alert among the
+  options is announced unreliably and can be exposed as a bogus choice. When
+  the list is empty the visible text comes from the notice slot and the live
+  region goes screen-reader-only, so it is never said twice.
 - Combobox/listbox/option roles come from chakra-react-select.
