@@ -15,6 +15,16 @@ export {
 } from "chakra-react-select";
 export { BaseSelect, type BaseSelectProps } from "./base-select";
 export {
+	type LookupPage,
+	type LookupResolve,
+	type LookupResolveArgs,
+	type LookupSearch,
+	type LookupSearchArgs,
+	LookupSelect,
+	type LookupSelectProps,
+	type LookupValue,
+} from "./lookup-select";
+export {
 	type CreateTableMenuComponentsOptions,
 	createTableMenuComponents,
 	type TableMenuColumn,

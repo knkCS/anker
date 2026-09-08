@@ -1,0 +1,105 @@
+import { Canvas, Meta } from "@storybook/blocks";
+import * as Stories from "./lookup-select.stories";
+
+<Meta of={Stories} />
+
+# LookupSelect
+
+A searchable select whose options come from somewhere else. Every "pick one
+thing from a server-owned collection" control should be this one.
+
+It owns the **interaction** and none of the **data**: query state, debounce,
+menu-open gating, request cancellation, stale-answer guarding, page
+accumulation, loading and failure presentation, and turning a stored id back
+into a readable label. It calls two functions you supply and knows nothing
+about transports, endpoints or auth — see
+[ADR-0002](https://github.com/knkCS/anker/blob/main/docs/adr/0002-atoms-may-orchestrate-async.md).
+
+<Canvas of={Stories.Default} />
+
+## The Source
+
+`search` is required. It is handed the debounced query, a cursor for pages
+after the first, and an `AbortSignal`, and answers with one page:
+
+```tsx
+async function searchPeople({ query, cursor, signal }) {
+  const res = await api.people.list({ q: query, after: cursor, signal });
+  return {
+    items: res.items.map((p) => ({ id: p.id, label: p.name, avatar: p.name })),
+    nextCursor: res.nextPage ?? null,
+  };
+}
+```
+
+- **It is not called until the menu opens.** A screen with forty of these
+  controls issues no requests until someone uses one.
+- **Typing is debounced** (`debounceMs`, default 300) into a single request for
+  the final query.
+- **Superseded requests are aborted**, and their answers are discarded even if
+  the abort is ignored — a slow answer for an old query can never overwrite a
+  fast answer for the current one.
+- **Scrolling to the bottom asks for `nextCursor`** and appends the result.
+  Return `nextCursor: null` (or omit it) when there is no more.
+- **The Source is the filter.** Client-side filtering is off, so an item whose
+  label does not contain the query still shows if the Source returned it.
+
+## The value
+
+`value` is the full item, or just its id, or an array of either when `isMulti`.
+Three fallbacks, in order:
+
+1. **The resolved label** — `resolve({ ids, signal })` turns stored ids into
+   items. It runs on mount, not on open: the label has to be readable before
+   anyone touches the control.
+2. **The just-picked label** — an id the person selected in this session shows
+   the label it was picked with, with no round trip.
+3. **The raw id** — with no resolver and nothing picked, an id displays as
+   itself. A consumer that has not implemented resolution degrades visibly
+   rather than rendering an empty control.
+
+<Canvas of={Stories.StoredValue} />
+<Canvas of={Stories.WithoutResolver} />
+
+`onChange` emits the item (single) or the items (multi) — store the ids and
+hand them back as `value`.
+
+## Multi-selection
+
+<Canvas of={Stories.Multi} />
+
+## Failure
+
+A Source that rejects puts its failure in the menu and leaves the control
+alive: the next query tries again.
+
+<Canvas of={Stories.SourceFailure} />
+
+## Guidelines
+
+- **Do** use `LookupSelect` whenever the options live on a server. Use
+  `BaseSelect` when you already hold the whole list.
+- **Don't** fetch the whole table and filter in the browser — that is the
+  pattern this control replaces.
+- **Do** pass a `resolve` as soon as stored ids can reach the control from
+  somewhere other than a pick (a loaded form, a deep link).
+- **Don't** pass `options`, `filterOption`, `inputValue`, `isLoading` or the
+  menu callbacks — this control owns them and the props are not on its type.
+- **Do** translate `emptyMessage`, `errorMessage` and `loadingMessage`; they
+  are props with English defaults, like every string in anker.
+
+## Relationship to `BaseSelect`
+
+`LookupSelect` **composes** `BaseSelect`, so options, single values and multi
+values render through exactly the same renderers — avatars, colour dots and
+icons included. The two are alike by construction, not by discipline.
+
+The two menu slots it owns — `MenuList` (paging, failure line) and
+`NoOptionsMessage` — are absent from its `components` prop, so they cannot be
+replaced by accident.
+
+## Accessibility
+
+- Keyboard navigable: arrows browse, Enter selects, Escape closes.
+- A Source failure is announced: the message is a `role="alert"` live region.
+- Combobox/listbox/option roles come from chakra-react-select.
