@@ -332,6 +332,10 @@ export const LookupSelect = <T extends BaseOption>({
 		() =>
 			debounce((query: string) => {
 				pendingRef.current = false;
+				// Redundant with the cancel in `handleMenuClose`, deliberately:
+				// remove either one and "typing abandoned before it settles asks
+				// nothing" still holds, remove both and it does not. Neither is
+				// dead code; each covers the other's absence.
 				if (!openRef.current) return;
 				cursorRef.current = null;
 				void runSearch(query);
@@ -364,7 +368,10 @@ export const LookupSelect = <T extends BaseOption>({
 		debouncedSearch.cancel();
 		controllerRef.current?.abort();
 		controllerRef.current = null;
-		// Nothing in flight speaks for the menu any more.
+		// Nothing in flight speaks for the menu any more. Defensive rather than
+		// load-bearing — any later request bumps the id past it anyway — but
+		// without it an abandoned answer still writes options into a closed
+		// menu on its way out.
 		requestIdRef.current += 1;
 		queryRef.current = "";
 		committedQueryRef.current = "";

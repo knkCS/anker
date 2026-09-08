@@ -65,6 +65,14 @@ function setScrollGeometry(
 /** A wait long enough for a debounce plus a microtask flush to have happened. */
 const settle = () => new Promise((r) => setTimeout(r, 60));
 
+/**
+ * The debounce window the coalescing tests use. Long enough that a slow runner
+ * cannot slip a keystroke round trip past it — a 30ms window turns those tests
+ * into a measurement of the machine — and short enough to wait out twice.
+ */
+const COALESCE_MS = 400;
+const waitPast = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 const queriesSeen = (search: ReturnType<typeof tableSource>) =>
 	search.mock.calls.map((call) => call[0].query);
 
@@ -93,7 +101,7 @@ describe("LookupSelect — the Source", () => {
 		const search = tableSource();
 
 		renderWithChakra(
-			<LookupSelect value={null} search={search} debounceMs={50} />,
+			<LookupSelect value={null} search={search} debounceMs={COALESCE_MS} />,
 		);
 
 		await user.click(screen.getByRole("combobox"));
@@ -101,8 +109,10 @@ describe("LookupSelect — the Source", () => {
 
 		await user.type(screen.getByRole("combobox"), "gra");
 
-		await waitFor(() => expect(search).toHaveBeenCalledTimes(2));
-		await settle();
+		await waitFor(() => expect(search).toHaveBeenCalledTimes(2), {
+			timeout: COALESCE_MS * 4,
+		});
+		await waitPast(COALESCE_MS * 2);
 
 		expect(queriesSeen(search)).toEqual(["", "gra"]);
 		expect(await screen.findByText("Grace Hopper")).toBeInTheDocument();
@@ -376,7 +386,7 @@ describe("LookupSelect — the menu and its lifecycle", () => {
 		const search = tableSource();
 
 		renderWithChakra(
-			<LookupSelect value={null} search={search} debounceMs={100} />,
+			<LookupSelect value={null} search={search} debounceMs={COALESCE_MS} />,
 		);
 
 		await user.click(screen.getByRole("combobox"));
@@ -384,8 +394,8 @@ describe("LookupSelect — the menu and its lifecycle", () => {
 
 		await user.type(screen.getByRole("combobox"), "gra");
 		await user.keyboard("{Escape}");
-		await settle();
-		await settle();
+		// Past the window the abandoned keystrokes would have fired in.
+		await waitPast(COALESCE_MS * 2);
 
 		expect(search).toHaveBeenCalledTimes(1);
 	});
@@ -416,7 +426,7 @@ describe("LookupSelect — the menu and its lifecycle", () => {
 		const search = tableSource();
 
 		renderWithChakra(
-			<LookupSelect value={null} search={search} debounceMs={30} />,
+			<LookupSelect value={null} search={search} debounceMs={COALESCE_MS} />,
 		);
 
 		await user.click(screen.getByRole("combobox"));
@@ -428,8 +438,10 @@ describe("LookupSelect — the menu and its lifecycle", () => {
 		// keystroke — clicking would be a legitimate second open.
 		await user.type(screen.getByRole("combobox"), "gra", { skipClick: true });
 
-		await waitFor(() => expect(search).toHaveBeenCalledTimes(2));
-		await settle();
+		await waitFor(() => expect(search).toHaveBeenCalledTimes(2), {
+			timeout: COALESCE_MS * 4,
+		});
+		await waitPast(COALESCE_MS * 2);
 		expect(queriesSeen(search)).toEqual(["", "gra"]);
 	});
 });
