@@ -395,6 +395,36 @@ describe("LookupSelect — the shared renderers", () => {
 		expect(fromLookupSelect).toEqual(fromBaseSelect);
 	});
 
+	it("renders a single value exactly as BaseSelect renders it", async () => {
+		const fromBaseSelect = renderWithChakra(
+			<BaseSelect value={ada} options={[ada]} />,
+		);
+		const baseMarkup = normalize(fromBaseSelect.container.innerHTML);
+		cleanup();
+
+		const fromLookupSelect = renderWithChakra(
+			<LookupSelect value={ada} search={tableSource()} />,
+		);
+		await screen.findByText("Ada Lovelace");
+
+		expect(normalize(fromLookupSelect.container.innerHTML)).toEqual(baseMarkup);
+	});
+
+	it("renders multi values exactly as BaseSelect renders them", async () => {
+		const fromBaseSelect = renderWithChakra(
+			<BaseSelect isMulti value={[ada, grace]} options={[ada, grace]} />,
+		);
+		const baseMarkup = normalize(fromBaseSelect.container.innerHTML);
+		cleanup();
+
+		const fromLookupSelect = renderWithChakra(
+			<LookupSelect isMulti value={[ada, grace]} search={tableSource()} />,
+		);
+		await screen.findByText("Grace Hopper");
+
+		expect(normalize(fromLookupSelect.container.innerHTML)).toEqual(baseMarkup);
+	});
+
 	it("shows an option's avatar, as the shared Option renderer does", async () => {
 		const user = userEvent.setup();
 		renderWithChakra(
