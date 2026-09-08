@@ -15,7 +15,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in nine layer
 1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 30 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
 2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
 3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox, MessageGroup/MessageBubble, VirtualizedMessageList, Composer, ConversationListItem, ReactionChips/ReactionQuickSetPopover.
-4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, UnreadBadge, TypingIndicator, DateTime, EmptyState, Comment, Select, Clipboard, DataList, etc.
+4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, UnreadBadge, TypingIndicator, DateTime, EmptyState, Comment, Select, LookupSelect, Clipboard, DataList, etc.
 5. **`/forms`** — Form controls built on React Hook Form + Zod: InputField, TextareaField, ArrayField, DatePickerField, CodeField, etc. Also the canonical home of SearchInput (`/atoms` re-exports it for backwards compatibility).
 6. **`/feedback`** — Feedback patterns: ConfirmModal with provider + `useConfirmModal` hook, UploadToastStack.
 7. **`/dashboard`** — Domain-free dashboard framework: the widget contract (`WidgetDefinition`, `WidgetInstance`), `createWidgetRegistry`, and the `<Dashboard>` grid engine (see Dashboard & Widget Framework below).
@@ -81,7 +81,7 @@ The knk Brand Guidelines (October 2021) define six brand colors. The theme inclu
 
 ## Design Principles
 
-- **No domain coupling**: Components must not import from any service codebase (no @root/, no API calls, no service-specific types)
+- **No domain coupling**: Components must not import from any service codebase (no @root/, no API calls, no service-specific types). The line is the *connection*, not the `Promise` — a component may own async orchestration (debounce, cancellation, paging) as long as every request leaving it is a call to a consumer-supplied function. See `docs/adr/0002-atoms-may-orchestrate-async.md`.
 - **Token-first styling**: Use semantic tokens (bg-canvas, accent, border, etc.) instead of hardcoded colors
 - **Props over i18n**: User-facing strings are props with English defaults, not i18n keys
 - **Lucide icons only**: All icons use lucide-react. No FontAwesome.
@@ -303,6 +303,31 @@ stacking context. Styled by the new single-part `avatarPresence` recipe, read by
 than a slot on Chakra's `avatar` recipe: those slots come from `avatarAnatomy`,
 so an anker-only slot would have no Chakra component to render it.
 
+### Server-backed selects
+
+`src/atoms/select/` holds two controls on one set of renderers. `BaseSelect`
+takes the options you already have. `LookupSelect` composes `BaseSelect` and
+gets them from a **Source** — a consumer-supplied
+`search({ query, cursor, signal }) => { items, nextCursor }` — plus an optional
+**Resolver** that turns stored ids into labels. It owns query state, the
+`lodash.debounce` timer (the `SearchInput` precedent), menu-open gating,
+`AbortController` cancellation *and* a request-id stale guard (cancellation is a
+courtesy the Source may decline), page accumulation on scroll-to-bottom, and
+the label fallback chain resolved → just-picked → raw id.
+
+It composes `BaseSelect` rather than re-declaring renderers, which is what
+makes the two identical; the two menu slots it owns (`Menu` for the failure
+line, `MenuList` for paging) are `Omit`ted from its `components` prop so they
+cannot be replaced by accident — as are `defaultValue` / `defaultInputValue` /
+`defaultMenuIsOpen`, which `react-select`'s state manager contributes and this
+control could not honour (ADR-0001). It is **not** called
+`AsyncSelect` — `chakra-react-select` exports one and the select barrel
+re-exports vendor names directly. `lookup-select.never-fetches.test.ts` pins
+the charter: no transport, no endpoint or credential, no foreign import, no
+HTTP client in `package.json`. Rationale:
+`docs/adr/0002-atoms-may-orchestrate-async.md`. Usage guide:
+`src/atoms/select/lookup-select.mdx`.
+
 ### Dashboard & Widget Framework
 
 `src/dashboard/` provides a domain-free dashboard framework (exported
@@ -401,6 +426,16 @@ Additional rules:
 3. Set `displayName` via cast: `(Component as { displayName?: string }).displayName = "Name"`
 4. Create `src/forms/{name}-field.stories.tsx` — include `FormProvider` decorator with `useForm`
 5. Add export to `src/forms/index.ts`
+
+### Testing note — StrictMode does not survive `ChakraProvider`
+
+Effects double-invoke under `<StrictMode>` only when it wraps the provider.
+`<ChakraProvider><StrictMode><Thing /></StrictMode></ChakraProvider>` renders
+`Thing`'s effects **once**, so a test written that way passes on code that
+cannot survive a remount — measured, not assumed: 2 invocations bare, 1 inside
+the provider, 2 with `StrictMode` outside it (or with RTL's
+`{ reactStrictMode: true }`). Put `StrictMode` outermost, as
+`lookup-select.test.tsx` does.
 
 ### All layers
 - Every exported component must have `displayName` set. For generic function components (e.g., form fields with `<T extends FieldValues>`), use the cast pattern: `(Component as { displayName?: string }).displayName = "Name"`

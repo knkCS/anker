@@ -467,6 +467,50 @@ it a split button.
 
 ---
 
+## LookupSelect
+
+`LookupSelect` (`@knkcs/anker/atoms`) is the searchable select for options that
+live on a server. It owns the interaction — debounce, menu-open gating,
+cancellation, stale-answer guarding, paging, loading and failure presentation,
+and turning a stored id into a label — and owns no data: it calls two functions
+you supply and knows nothing about transports, endpoints or auth.
+
+- **Pick the right control**: options already in hand → `BaseSelect`; options
+  on a server → `LookupSelect`. Do not fetch a whole table and filter in the
+  browser.
+- **`search` is required** and is handed `{ query, cursor, signal }`, answering
+  `{ items, nextCursor }`. `items` are `BaseOption`s (`id`, `label`, and
+  optionally `avatar` / `color` / `icon`) — the same shape `BaseSelect` takes,
+  rendered by the same renderers.
+- **The Source is not asked until the menu opens.** Forty of these on a page
+  issue zero searches until someone uses one. `resolve` is the exception and
+  runs on mount — a stored id has to be readable before anyone touches the
+  control.
+- **Typing is debounced** (`debounceMs`, default 300) and superseded requests
+  are aborted; a late answer for an abandoned query is discarded even if your
+  Source ignores the signal. Honour it anyway and the request is really
+  cancelled.
+- **Scrolling to the bottom asks for `nextCursor`** and appends. Return
+  `nextCursor: null` (or omit it) at the end.
+- **The Source is the filter** — client-side filtering is off, so whatever you
+  return is shown.
+- **`value` is the item, its id, or an array of either** (with `isMulti`). The
+  label shown is the resolved one, then the just-picked one, then the raw id —
+  so a control with no `resolve` degrades visibly instead of rendering blank.
+  `onChange` emits the item(s); store the ids and hand them back.
+- **`resolve({ ids, signal })` runs on mount, not on open** — a stored id has to
+  be readable before anyone touches the control.
+- **Don't reach for `options`, `filterOption`, `inputValue`, `loading`, the
+  menu callbacks, or `defaultValue` / `defaultInputValue` / `defaultMenuIsOpen`**
+  — this control owns all of them, and they are absent from its type rather
+  than accepted and ignored. The same goes for the `Menu` and `MenuList`
+  renderers, which carry the failure line and paging.
+- **Strings are props**: `emptyMessage`, `errorMessage`, `loadingMessage`.
+- Not named `AsyncSelect`: `chakra-react-select` exports one, and the select
+  module re-exports vendor names directly.
+
+---
+
 ## Pointers
 
 - Full spec: anker GitHub Pages docs site (`/design-system`, `/page-patterns`)

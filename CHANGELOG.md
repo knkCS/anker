@@ -2,6 +2,56 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.1.0 — 2026-09-08
+
+### Added
+
+- **`LookupSelect` — one searchable select for options that live on a server**
+  (#200). There were at least three hand-rolled versions of this across the
+  product — one in the form library, one in the layout package on a raw HTML
+  `<select>`, one in core that fetched an entire table and filtered in the
+  browser — and they looked and behaved differently. This is the one they
+  should all become.
+
+  It owns the interaction and none of the data: query state, debounce
+  (`debounceMs`, default 300), menu-open gating (nothing is asked until someone
+  opens the menu), request cancellation, stale-answer guarding, page
+  accumulation on scroll-to-bottom, loading and failure presentation, and
+  turning a stored id back into a readable label. It calls two functions you
+  supply — a required `search({ query, cursor, signal })` and an optional
+  `resolve({ ids, signal })` — and knows nothing about transports, endpoints or
+  auth.
+
+  `value` is the full item, its id, or an array of either with `isMulti`. The
+  label shown is the resolved one, then the just-picked one, then the raw id,
+  so a consumer that has not implemented resolution degrades visibly rather
+  than rendering a blank control.
+
+  It **composes `BaseSelect`**, so options, single values and multi values
+  render through exactly the same renderers — the two are alike by
+  construction. The two menu slots it owns (`Menu`, carrying the failure line,
+  and `MenuList`, carrying paging) are absent from its `components` prop and
+  cannot be replaced by accident, as are the `default*` props react-select's
+  state manager contributes and this control could not honour.
+
+  It is deliberately not called `AsyncSelect`: `chakra-react-select` exports
+  `AsyncSelect` and `AsyncCreatableSelect`, and `@knkcs/anker/atoms` re-exports
+  vendor names directly.
+
+  Exported from `@knkcs/anker/atoms` alongside `LookupSearch`,
+  `LookupSearchArgs`, `LookupResolve`, `LookupResolveArgs`, `LookupPage`,
+  `LookupValue` and `LookupSelectProps`.
+
+- **ADR-0002: an atom may own async orchestration, provided it never fetches**
+  (#200). The never-fetches charter has always meant two things at once —
+  anker opens no connections, and anker holds no asynchrony — and only the
+  first is load-bearing. The line is the connection, not the `Promise`.
+  `SearchInput` (owns a debounce, emits a callback) and
+  `VirtualizedMessageList` (owns scroll thresholds, emits a load-older
+  callback) were already on the near side of it; `LookupSelect` is the same
+  shape with a return value it waits on. Docs only — no existing component
+  changed.
+
 ## 5.0.1 — 2026-08-18
 
 ### Fixed
