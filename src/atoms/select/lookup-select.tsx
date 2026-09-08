@@ -177,7 +177,16 @@ export const LookupSelect = <T extends BaseOption>({
 		onChangeRef.current = onChange;
 	});
 
+	/** What is in the input right now. */
 	const queryRef = useRef("");
+	/**
+	 * The query the options on screen actually answer — set when a request goes
+	 * out, not when a key goes down. A cursor belongs to the query that produced
+	 * it, so paging asks with this one; between a keystroke and the debounce
+	 * firing they differ, and paging with the typed-but-unsent query would ask
+	 * for page two of a search nobody has run.
+	 */
+	const committedQueryRef = useRef("");
 	const cursorRef = useRef<string | null>(null);
 	const requestIdRef = useRef(0);
 	const controllerRef = useRef<AbortController | null>(null);
@@ -194,6 +203,7 @@ export const LookupSelect = <T extends BaseOption>({
 		const requestId = requestIdRef.current + 1;
 		requestIdRef.current = requestId;
 
+		committedQueryRef.current = query;
 		loadingRef.current = true;
 		setLoading(true);
 		setFailed(false);
@@ -253,6 +263,7 @@ export const LookupSelect = <T extends BaseOption>({
 		// Nothing in flight speaks for the menu any more.
 		requestIdRef.current += 1;
 		queryRef.current = "";
+		committedQueryRef.current = "";
 		cursorRef.current = null;
 		loadingRef.current = false;
 		setOptions([]);
@@ -274,7 +285,7 @@ export const LookupSelect = <T extends BaseOption>({
 		if (loadingRef.current) return;
 		const cursor = cursorRef.current;
 		if (!cursor) return;
-		void runSearch(queryRef.current, cursor);
+		void runSearch(committedQueryRef.current, cursor);
 	}, [runSearch]);
 
 	const handleChange = useCallback(

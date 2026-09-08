@@ -193,6 +193,38 @@ describe("LookupSelect — the Source", () => {
 		expect(search).toHaveBeenCalledTimes(2);
 	});
 
+	it("pages the query the options answer, not the one being typed", async () => {
+		const user = userEvent.setup();
+		const search = vi.fn(
+			async (): Promise<LookupPage<BaseOption>> => ({
+				items: [ada, grace],
+				nextCursor: "p2",
+			}),
+		);
+
+		renderWithChakra(
+			// Long enough that the keystroke below is still sitting in the debounce
+			// when the scroll happens.
+			<LookupSelect value={null} search={search} debounceMs={100_000} />,
+		);
+
+		await user.click(screen.getByRole("combobox"));
+		expect(await screen.findByText("Ada Lovelace")).toBeInTheDocument();
+
+		await user.type(screen.getByRole("combobox"), "x");
+
+		const listbox = screen.getByRole("listbox");
+		setScrollGeometry(listbox, {
+			scrollTop: 300,
+			scrollHeight: 400,
+			clientHeight: 100,
+		});
+		fireEvent.scroll(listbox);
+
+		await waitFor(() => expect(search).toHaveBeenCalledTimes(2));
+		expect(search.mock.calls[1][0]).toMatchObject({ query: "", cursor: "p2" });
+	});
+
 	it("surfaces a Source failure without losing the control", async () => {
 		const user = userEvent.setup();
 		let failing = true;
