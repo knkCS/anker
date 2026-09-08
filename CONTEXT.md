@@ -17,6 +17,16 @@ _Avoid_: wrapper, base component
 **Atom**:
 An anker-original small UI unit that composes primitives and owns its own API — it has no single Chakra counterpart.
 
+### Data-backed controls
+
+**Source**:
+The consumer-supplied async function a control calls to get its options — one query and one cursor in, one page out. The control owns the asking (debounce, gating, cancellation, paging); the Source owns the answering, and is the only thing in the arrangement that knows a transport. A control never has a Source of its own, and a Source is never a URL as far as the control is concerned.
+_Avoid_: fetcher, data source, provider, endpoint
+
+**Resolver**:
+The consumer-supplied async function that turns stored ids back into readable items, so a control mounted holding an id can show a label. Distinct from the Source: it answers "what is this one?", not "what matches this query?", and it runs on mount rather than on open.
+_Avoid_: hydrator, lookup, label fetcher
+
 ### Dashboard
 
 **Widget**:

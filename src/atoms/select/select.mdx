@@ -20,6 +20,7 @@ Set `isMulti` to allow selecting multiple values. Selected items appear as tags.
 ## Variants
 
 - **`BaseSelect`** — The primary select component. Wraps chakra-react-select with custom `SingleValue`, `MultiValue`, and `Option` renderers that display avatar, color circle, icon, and label.
+- **`LookupSelect`** — `BaseSelect` for options that live on a server: it composes `BaseSelect` (so the two render identically) and adds debounce, menu-open gating, cancellation, paging and id-to-label resolution around a consumer-supplied `search`. See `Atoms/LookupSelect`.
 - **`CreatableSelect`** — Re-exported from chakra-react-select. Allows users to create new options on the fly.
 - **`TableMenuList` / `TableOption`** — Specialized components for rendering options as table rows with multiple columns. Use `createTableMenuComponents()` to configure.
 
