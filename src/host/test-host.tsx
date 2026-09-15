@@ -17,6 +17,7 @@ import {
 	type HostIdentity,
 	HostProvider,
 	type PageFrame,
+	type PageRailSink,
 } from "./host-contract";
 
 export interface TestHostHandle {
@@ -36,7 +37,7 @@ export interface TestHostProps {
 	/** Also receives every report, for tests that prefer a spy over the handle. */
 	onFrameChange?: (frame: PageFrame | null) => void;
 	/** Also receives every rail report. */
-	onRailChange?: (rail: ReactNode) => void;
+	onRailChange?: PageRailSink;
 	ref?: Ref<TestHostHandle>;
 	children: ReactNode;
 }
@@ -52,7 +53,7 @@ export interface TestHostProps {
  * `host.current?.rail` is the last reported rail node — render it to assert
  * on its content.
  *
- * The frame and rail live in refs, not state: reading it never re-renders the
+ * The frame and rail live in refs, not state: reading them never re-renders the
  * screens under test, so a report is observable the moment `render`
  * returns without an `act()` wait.
  */

@@ -139,7 +139,9 @@ Rules that follow:
 - **A nested provider without an identity inherits its parent's**; frames
   and rails are captured by the nearest provider. So `<HostProvider identity=…>`
   above an `<AppShell>` supplies identity to everything inside the shell,
-  while the shell keeps drawing the header.
+  while the shell keeps drawing the header and rail. The reverse does not
+  hold: a provider mounted *inside* the shell captures (and, without sinks,
+  drops) the frames and rails of the screens beneath it.
 - **Bespoke chrome wins.** A node registered through the opaque header slot
   below is rendered instead of the reported frame.
 - **`usePageActions` is a slot, not part of the contract.** A template

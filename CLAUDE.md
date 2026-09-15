@@ -21,7 +21,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in ten layers
 7. **`/dashboard`** — Domain-free dashboard framework: the widget contract (`WidgetDefinition`, `WidgetInstance`), `createWidgetRegistry`, and the `<Dashboard>` grid engine (see Dashboard & Widget Framework below).
 8. **`/templates`** — Page-level layouts: AppShell, SubNavLayout, and page templates (index, detail, settings, auth, dashboard, marketing, error/loading/maintenance).
 9. **`/navigation`** — Unsaved-changes navigation guards: `UnsavedChangesGuard`, `useUnsavedChangesBlocker`, tab dirty context.
-10. **`/host`** — The host contract (ADR 0003): `HostProvider` (mounted once by whoever draws the page frame), `usePageFrame` (a screen reports structured page-frame state mirroring `PageHeaderProps`), `useHostIdentity` (`HostIdentity`: user id, workspace id, members accessor), `TestHost` for package tests. No-op / empty default without a provider. The page templates report through it; `AppShell` is its first consumer.
+10. **`/host`** — The host contract (ADR 0003): `HostProvider` (mounted once by whoever draws the page frame), `usePageFrame` (a screen reports structured page-frame state mirroring `PageHeaderProps`), `usePageRail` (a screen reports its side-rail node on its own channel; re-exported by `/templates`), `useHostIdentity` (`HostIdentity`: user id, workspace id, members accessor), `TestHost` for package tests. No-op / empty default without a provider. The page templates report through it; `AppShell` is its first consumer.
 
 ### Key Technology Choices
 

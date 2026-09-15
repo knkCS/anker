@@ -26,7 +26,9 @@ All notable changes to `@knkcs/anker` are documented in this file. The format fo
   `rail` prop, and a rail reported inside an `AppShell` does not leak to a host
   above it (the same nearest-provider rule as frames). One consequence of
   that rule: a `HostProvider`/`TestHost` mounted *inside* an `AppShell` now
-  captures the rails beneath it, as it already captured frames.
+  captures the rails beneath it, as it already captured frames — including
+  one mounted only to provide `identity` (a provider without a sink drops
+  what it captures). Provide identity *above* the `AppShell` instead.
 
 ### Documented
 

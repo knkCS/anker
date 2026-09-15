@@ -188,15 +188,15 @@ export function HostProvider({
 	// The sinks are read through refs so an inline `onFrameChange` arrow does
 	// not change the context value — and therefore does not re-run every
 	// reporting screen's effect — on each host render.
-	const sink = useRef<PageFrameSink | undefined>(onFrameChange);
-	sink.current = onFrameChange;
+	const frameSink = useRef<PageFrameSink | undefined>(onFrameChange);
+	frameSink.current = onFrameChange;
 	const railSink = useRef<PageRailSink | undefined>(onRailChange);
 	railSink.current = onRailChange;
 	const resolvedIdentity = identity ?? parent?.identity ?? emptyHostIdentity;
 	const value = useMemo<HostContextValue>(
 		() => ({
 			identity: resolvedIdentity,
-			reportFrame: (frame) => sink.current?.(frame),
+			reportFrame: (frame) => frameSink.current?.(frame),
 			reportRail: (rail) => railSink.current?.(rail),
 		}),
 		[resolvedIdentity],

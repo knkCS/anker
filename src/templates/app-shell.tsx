@@ -78,8 +78,8 @@ import {
 } from "../host/host-contract";
 import { Box, Flex, Grid } from "../primitives/layout";
 
-// `usePageRail` is the host contract's rail channel; re-exported here so the
-// `@knkcs/anker/templates` import keeps working.
+// `usePageRail` is the host contract's rail channel; re-exported here for
+// in-package imports from "./app-shell".
 export { usePageRail };
 
 type SlotName = "actions" | "frame" | "header" | "rail";
