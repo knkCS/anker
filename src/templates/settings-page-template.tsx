@@ -15,9 +15,10 @@
 // `tabs`; let the router (or parent) render the active panel as `children`.
 
 import type { ReactNode } from "react";
-import { PageHeader, type PageHeaderProps } from "../components/page-header";
+import type { PageHeaderProps } from "../components/page-header";
+import { usePageFrame } from "../host/host-contract";
 import { Box, Flex } from "../primitives/layout";
-import { usePageHeader, useRegisteredPageActions } from "./app-shell";
+import { useRegisteredPageActions } from "./app-shell";
 
 export interface SettingsPageTemplateProps
 	extends Pick<
@@ -73,21 +74,21 @@ export function SettingsPageTemplate({
 	stickyHeader = true,
 }: SettingsPageTemplateProps) {
 	const registered = useRegisteredPageActions();
-	const resolvedActions = actions ?? registered;
-	usePageHeader(
-		<PageHeader
-			breadcrumbs={breadcrumbs}
-			title={title}
-			subtitle={subtitle}
-			eyebrow={eyebrow}
-			actions={resolvedActions}
-			avatar={avatar}
-			badges={badges}
-			meta={meta}
-			tabs={tabs}
-		/>,
-		{ sticky: stickyHeader },
-	);
+	// `registered` is `null` when nothing is registered; the frame carries
+	// `undefined` so a host sees an absent field, not a null one.
+	const resolvedActions = actions ?? registered ?? undefined;
+	usePageFrame({
+		breadcrumbs,
+		title,
+		subtitle,
+		eyebrow,
+		actions: resolvedActions,
+		avatar,
+		badges,
+		meta,
+		tabs,
+		sticky: stickyHeader,
+	});
 
 	const bodyPx = bodyPadding === "none" ? "0" : "8";
 	const bodyPt = bodyPadding === "none" ? "0" : "6";

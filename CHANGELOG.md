@@ -2,6 +2,46 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.2.0 — 2026-09-15
+
+### Added
+
+- **`@knkcs/anker/host` — the host contract: a page frame every screen
+  reports and a `HostIdentity` every host provides once** (#208, from
+  knkcms/core ADR 0003 and spec knkcms/core#814). The packages core embeds —
+  template-ui, taskhub-ui, layout-ui — build their screens on anker's page
+  templates, and those templates drew their header into `AppShell`'s slot
+  store: a documented no-op under a host that has no `AppShell`, which is
+  every host that draws its own page frame. Core's workaround was a nested
+  shell around every embedded screen and a double heading.
+
+  A screen now reports its frame as **state**, not markup:
+  `usePageFrame({ title, subtitle, eyebrow, breadcrumbs, avatar, badges,
+  meta, tabs, actions, sticky })` — a `PageFrame` that mirrors
+  `PageHeaderProps` one-to-one (plus the `sticky` hint), so a host spreads it
+  into a header of its own. `actions`, `avatar`, `badges`, `meta` and `tabs`
+  stay `ReactNode`: the screen owns what an action is, the host only where it
+  goes. `<HostProvider identity onFrameChange>` is mounted once at the host's
+  root; `useHostIdentity()` reads the viewer's `userId`, `workspaceId` and a
+  synchronous `members` accessor (`list()`, `byId(userId)`;
+  `createHostMembers(list)` builds one). Without a provider the reporting hook
+  is a no-op and identity is `emptyHostIdentity` — stories and isolated tests
+  keep working. `<TestHost ref>` captures the last reported frame and takes a
+  settable identity, so a package asserts what its screen reports in a
+  render-smoke test.
+
+  `DetailPageTemplate`, `IndexPageTemplate` and `SettingsPageTemplate` report
+  through the new hook. `AppShell` mounts the provider itself and renders its
+  `<PageHeader>` band from the reported frame — pinned by a byte-for-byte
+  comparison per template, so nothing looks different under anker's own
+  shell. A nested provider without an identity inherits its parent's, so a
+  host providing identity above an `AppShell` is not shadowed. The opaque
+  `usePageHeader`, `usePageActions` and `usePageRail` slots stay for bespoke
+  chrome and rails; a header node registered through `usePageHeader` wins
+  over a reported frame. Rationale:
+  `docs/adr/0003-host-owns-the-frame-anker-owns-the-contract.md`; usage:
+  `docs/page-patterns.md` §2 "Host contract".
+
 ## 5.1.0 — 2026-09-08
 
 ### Added

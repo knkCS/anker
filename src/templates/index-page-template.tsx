@@ -19,9 +19,10 @@
 // that need padded content should wrap children in a `<Box px="8" py="6">`.
 
 import type { ReactNode } from "react";
-import { PageHeader, type PageHeaderProps } from "../components/page-header";
+import type { PageHeaderProps } from "../components/page-header";
+import { usePageFrame } from "../host/host-contract";
 import { Box, Flex } from "../primitives/layout";
-import { usePageHeader, useRegisteredPageActions } from "./app-shell";
+import { useRegisteredPageActions } from "./app-shell";
 
 export interface IndexPageTemplateProps
 	extends Pick<
@@ -79,18 +80,18 @@ export function IndexPageTemplate({
 	stickyHeader = true,
 }: IndexPageTemplateProps) {
 	const registered = useRegisteredPageActions();
-	const resolvedActions = actions ?? registered;
-	usePageHeader(
-		<PageHeader
-			breadcrumbs={breadcrumbs}
-			title={title}
-			subtitle={subtitle}
-			eyebrow={eyebrow}
-			actions={resolvedActions}
-			tabs={tabs}
-		/>,
-		{ sticky: stickyHeader },
-	);
+	// `registered` is `null` when nothing is registered; the frame carries
+	// `undefined` so a host sees an absent field, not a null one.
+	const resolvedActions = actions ?? registered ?? undefined;
+	usePageFrame({
+		breadcrumbs,
+		title,
+		subtitle,
+		eyebrow,
+		actions: resolvedActions,
+		tabs,
+		sticky: stickyHeader,
+	});
 	return (
 		<Flex
 			data-testid="index-page-template"
