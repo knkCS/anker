@@ -24,12 +24,16 @@ Whoever draws the page frame a screen sits in and provides identity to it — an
 _Avoid_: shell (for a host that is not `AppShell`), container
 
 **Host contract**:
-The `host` layer's agreement between a host and the screens under it: screens report a Page Frame, the host provides a Host Identity. Owned by anker so every host and every package speaks one vocabulary; anker's `AppShell` is a consumer of it, not its owner.
+The `host` layer's agreement between a host and the screens under it: screens report a Page Frame and a Side Rail, the host provides a Host Identity. Owned by anker so every host and every package speaks one vocabulary; anker's `AppShell` is a consumer of it, not its owner.
 _Avoid_: slot store, AppShell context
 
 **Page frame**:
 The structured header state a screen reports — title, subtitle, eyebrow, breadcrumbs, avatar, badges, meta, tabs, actions, a sticky hint — mirroring the page header's props. State, never markup: the host decides where each field is drawn; the screen decides what an action is (actions stay nodes).
 _Avoid_: header node, page header (that is the component that renders one)
+
+**Side rail**:
+The node a screen reports through `usePageRail` for the host's side column — status tiles, activity, secondary actions. Travels on its own channel of the host contract, not inside the Page Frame; the host decides where rails go (`AppShell`: its rail column). Like the frame's nodes, it is drawn outside the screen's own providers.
+_Avoid_: rail slot (for the contract channel; the slot is `AppShell`'s internal store)
 
 **Host identity**:
 Who is looking: the viewer's user id, the workspace id and a synchronous members accessor, provided once by the host and read by screens through the host contract. Has an empty default outside any provider, never null.

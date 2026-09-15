@@ -9,14 +9,12 @@
 //
 // See `docs/page-patterns.md` for the full specification.
 
+// usePageRail is canonically the host contract's (`@knkcs/anker/host`);
+// re-exported here so existing `/templates` imports keep working.
+export { usePageRail } from "../host/host-contract";
 // AppShell + slot hooks
 export type { AppShellProps } from "./app-shell";
-export {
-	AppShell,
-	usePageActions,
-	usePageHeader,
-	usePageRail,
-} from "./app-shell";
+export { AppShell, usePageActions, usePageHeader } from "./app-shell";
 // Unauthenticated / chromeless templates
 export type { AuthPageTemplateProps } from "./auth-page-template";
 export { AuthPageTemplate } from "./auth-page-template";

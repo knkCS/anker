@@ -10,6 +10,7 @@ import {
 	type PageFrame,
 	useHostIdentity,
 	usePageFrame,
+	usePageRail,
 } from "./host-contract";
 
 const alice: HostIdentity = {
@@ -161,6 +162,153 @@ describe("usePageFrame", () => {
 			</Host>,
 		);
 		expect(screen.getByTestId("host-title")).toHaveTextContent("Tasks");
+	});
+});
+
+function RailScreen({ rail }: { rail: ReactNode }) {
+	usePageRail(rail);
+	return <div data-testid="body">body</div>;
+}
+
+describe("usePageRail", () => {
+	it("reports the rail node to the provider's rail sink", () => {
+		const onRailChange = vi.fn();
+		const rail = <div data-testid="rail">claim</div>;
+		render(
+			<HostProvider onRailChange={onRailChange}>
+				<RailScreen rail={rail} />
+			</HostProvider>,
+		);
+		expect(onRailChange).toHaveBeenLastCalledWith(rail);
+	});
+
+	it("reports again when the node changes, not when an unchanged node re-renders", () => {
+		const onRailChange = vi.fn();
+		const first = <span>first</span>;
+		const second = <span>second</span>;
+		function Page() {
+			const [useSecond, setUseSecond] = useState(false);
+			const [count, setCount] = useState(0);
+			usePageRail(useSecond ? second : first);
+			return (
+				<>
+					<button type="button" onClick={() => setCount((c) => c + 1)}>
+						bump {count}
+					</button>
+					<button type="button" onClick={() => setUseSecond(true)}>
+						swap
+					</button>
+				</>
+			);
+		}
+		render(
+			<HostProvider onRailChange={onRailChange}>
+				<Page />
+			</HostProvider>,
+		);
+		expect(onRailChange).toHaveBeenCalledTimes(1);
+		act(() => {
+			screen.getByRole("button", { name: /bump/ }).click();
+		});
+		expect(onRailChange).toHaveBeenCalledTimes(1);
+		act(() => {
+			screen.getByRole("button", { name: "swap" }).click();
+		});
+		expect(onRailChange).toHaveBeenLastCalledWith(second);
+	});
+
+	it("reports null when the reporting screen unmounts", () => {
+		const onRailChange = vi.fn();
+		function Host({ children }: { children: ReactNode }) {
+			return (
+				<HostProvider onRailChange={onRailChange}>{children}</HostProvider>
+			);
+		}
+		const { rerender } = render(
+			<Host>
+				<RailScreen rail={<div>rail</div>} />
+			</Host>,
+		);
+		expect(onRailChange).toHaveBeenLastCalledWith(expect.anything());
+		rerender(
+			<Host>
+				<div>nothing reports</div>
+			</Host>,
+		);
+		expect(onRailChange).toHaveBeenLastCalledWith(null);
+	});
+
+	it("survives a StrictMode remount with the rail still reported", () => {
+		const onRailChange = vi.fn();
+		const rail = <div>rail</div>;
+		render(
+			<StrictMode>
+				<HostProvider onRailChange={onRailChange}>
+					<RailScreen rail={rail} />
+				</HostProvider>
+			</StrictMode>,
+		);
+		expect(onRailChange).toHaveBeenLastCalledWith(rail);
+	});
+
+	it("is a no-op without a provider", () => {
+		expect(() => render(<RailScreen rail={<div>rail</div>} />)).not.toThrow();
+		expect(screen.getByTestId("body")).toBeInTheDocument();
+	});
+
+	it("travels on its own channel: the frame sink never sees the rail", () => {
+		const onFrameChange = vi.fn();
+		const onRailChange = vi.fn();
+		function Page() {
+			usePageFrame({ title: "Task" });
+			usePageRail(<div>activity</div>);
+			return null;
+		}
+		render(
+			<HostProvider onFrameChange={onFrameChange} onRailChange={onRailChange}>
+				<Page />
+			</HostProvider>,
+		);
+		expect(onFrameChange).toHaveBeenCalledTimes(1);
+		expect(onFrameChange).toHaveBeenLastCalledWith({ title: "Task" });
+		expect(onRailChange).toHaveBeenCalledTimes(1);
+	});
+
+	it("keeps a host that stores the rail in state out of a render loop", () => {
+		function Host({ children }: { children: ReactNode }) {
+			const [rail, setRail] = useState<ReactNode>(null);
+			return (
+				<>
+					<aside data-testid="host-rail">{rail}</aside>
+					<HostProvider onRailChange={setRail}>{children}</HostProvider>
+				</>
+			);
+		}
+		function Page() {
+			// A fresh element every render.
+			usePageRail(<span>status tile</span>);
+			return null;
+		}
+		render(
+			<Host>
+				<Page />
+			</Host>,
+		);
+		expect(screen.getByTestId("host-rail")).toHaveTextContent("status tile");
+	});
+
+	it("a nested provider captures rails instead of the outer one", () => {
+		const outer = vi.fn();
+		const inner = vi.fn();
+		render(
+			<HostProvider onRailChange={outer}>
+				<HostProvider onRailChange={inner}>
+					<RailScreen rail={<div>inner</div>} />
+				</HostProvider>
+			</HostProvider>,
+		);
+		expect(inner).toHaveBeenCalledTimes(1);
+		expect(outer).not.toHaveBeenCalled();
 	});
 });
 

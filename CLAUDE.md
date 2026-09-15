@@ -21,7 +21,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in ten layers
 7. **`/dashboard`** — Domain-free dashboard framework: the widget contract (`WidgetDefinition`, `WidgetInstance`), `createWidgetRegistry`, and the `<Dashboard>` grid engine (see Dashboard & Widget Framework below).
 8. **`/templates`** — Page-level layouts: AppShell, SubNavLayout, and page templates (index, detail, settings, auth, dashboard, marketing, error/loading/maintenance).
 9. **`/navigation`** — Unsaved-changes navigation guards: `UnsavedChangesGuard`, `useUnsavedChangesBlocker`, tab dirty context.
-10. **`/host`** — The host contract (ADR 0003): `HostProvider` (mounted once by whoever draws the page frame), `usePageFrame` (a screen reports structured page-frame state mirroring `PageHeaderProps`), `useHostIdentity` (`HostIdentity`: user id, workspace id, members accessor), `TestHost` for package tests. No-op / empty default without a provider. The page templates report through it; `AppShell` is its first consumer.
+10. **`/host`** — The host contract (ADR 0003): `HostProvider` (mounted once by whoever draws the page frame), `usePageFrame` (a screen reports structured page-frame state mirroring `PageHeaderProps`), `usePageRail` (a screen reports its side-rail node on its own channel; re-exported by `/templates`), `useHostIdentity` (`HostIdentity`: user id, workspace id, members accessor), `TestHost` for package tests. No-op / empty default without a provider. The page templates report through it; `AppShell` is its first consumer.
 
 ### Key Technology Choices
 
@@ -364,11 +364,16 @@ one-to-one (pinned by `src/host/page-frame.mirror.test.ts`). `AppShell`
 mounts `HostProvider` itself and renders `<PageHeader>` from the reported
 frame; a foreign host (core) mounts the provider once and renders its own
 header from the same state. `useHostIdentity()` reads `HostIdentity` the host
-provided. Outside any provider the hook is a no-op and identity is
+provided. `usePageRail(node)` reports the side rail on its own channel
+(`HostProvider`'s `onRailChange`; `PageFrame` stays a pure header mirror);
+`AppShell`'s provider writes it into the shell's rail slot, and
+`templates` re-exports the hook. Reported nodes (frame `actions`, the rail)
+are drawn outside the screen's providers and must not read screen-local
+context. Outside any provider the hooks are no-ops and identity is
 `emptyHostIdentity`. A nested provider without an identity inherits its
-parent's; frames go to the nearest provider. The opaque `usePageHeader` /
-`usePageActions` / `usePageRail` slots remain `AppShell`'s, for bespoke
-chrome and rails — a header node wins over a reported frame. `templates`
+parent's; frames and rails go to the nearest provider. The opaque
+`usePageHeader` / `usePageActions` slots remain `AppShell`'s, for bespoke
+chrome — a header node wins over a reported frame. `templates`
 depends on `host`, never the reverse. Rationale:
 `docs/adr/0003-host-owns-the-frame-anker-owns-the-contract.md`; usage:
 `docs/page-patterns.md` §2 "Host contract".

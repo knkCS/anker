@@ -7,6 +7,7 @@ import {
 	emptyHostIdentity,
 	useHostIdentity,
 	usePageFrame,
+	usePageRail,
 } from "./host-contract";
 import { TestHost, type TestHostHandle } from "./test-host";
 
@@ -87,5 +88,49 @@ describe("TestHost", () => {
 			</TestHost>,
 		);
 		expect(host.current?.frame).toBeNull();
+	});
+
+	it("exposes the last rail a screen reported, and clears it on unmount", () => {
+		const host = createRef<TestHostHandle>();
+		function TaskDetail() {
+			usePageRail(<div data-testid="claim-tile">Claim</div>);
+			return null;
+		}
+		const { rerender } = render(
+			<TestHost ref={host}>
+				<TaskDetail />
+			</TestHost>,
+		);
+		const { getByTestId } = render(<div>{host.current?.rail}</div>);
+		expect(getByTestId("claim-tile")).toHaveTextContent("Claim");
+		rerender(
+			<TestHost ref={host}>
+				<div>gone</div>
+			</TestHost>,
+		);
+		expect(host.current?.rail).toBeNull();
+	});
+
+	it("starts with no rail, and hands reports to an onRailChange spy", () => {
+		const host = createRef<TestHostHandle>();
+		const seen: unknown[] = [];
+		const { rerender } = render(
+			<TestHost ref={host} onRailChange={(rail) => seen.push(rail)}>
+				<div>no screen</div>
+			</TestHost>,
+		);
+		expect(host.current?.rail).toBeNull();
+		expect(seen).toEqual([]);
+		function Screen() {
+			usePageRail("rail text");
+			return null;
+		}
+		rerender(
+			<TestHost ref={host} onRailChange={(rail) => seen.push(rail)}>
+				<Screen />
+			</TestHost>,
+		);
+		expect(seen).toEqual(["rail text"]);
+		expect(host.current?.rail).toBe("rail text");
 	});
 });

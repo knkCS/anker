@@ -420,6 +420,46 @@ describe("AppShell — host contract", () => {
 		).toBeInTheDocument();
 	});
 
+	it("does not leak a page's rail to a host above the shell", () => {
+		// Same rule as the frame: the shell that draws the rail column is the
+		// one that receives the rail.
+		const host = createRef<TestHostHandle>();
+		renderWithChakra(
+			<TestHost ref={host}>
+				<AppShell sidebar={<div data-testid="sb" />}>
+					<RailRegistrar />
+				</AppShell>
+			</TestHost>,
+		);
+		expect(host.current?.rail).toBeNull();
+		expect(
+			within(screen.getByTestId("app-shell-rail")).getByTestId("rail-content"),
+		).toBeInTheDocument();
+	});
+
+	it("a rail reported through the host contract clears the column on unmount", () => {
+		const { rerender } = renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<RailRegistrar />
+			</AppShell>,
+		);
+		expect(screen.getByTestId("app-shell")).toHaveAttribute(
+			"data-rail",
+			"true",
+		);
+		rerender(
+			<ChakraProvider value={defaultSystem}>
+				<AppShell sidebar={<div data-testid="sb" />}>
+					<div>no rail</div>
+				</AppShell>
+			</ChakraProvider>,
+		);
+		expect(screen.getByTestId("app-shell")).toHaveAttribute(
+			"data-rail",
+			"false",
+		);
+	});
+
 	// The header AppShell renders IS the reported state: for each template,
 	// capture what it reports under a TestHost, render `<PageHeader>` from that
 	// frame by hand, and compare the markup byte-for-byte with the band AppShell

@@ -2,6 +2,43 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.3.0 — 2026-09-15
+
+### Added
+
+- **The host contract carries the side rail** (#213, spec knkcms/core#814).
+  `usePageRail(node)` wrote only into `AppShell`'s slot store, so under a host
+  that draws its own page frame without `AppShell` (core) every rail a package
+  registers — taskhub-ui's task-detail status and claim tile and activity
+  feed, the Make default / Delete actions on its task type, group and
+  calendar pages, template-ui's detail rails — reached nothing.
+  `usePageRail` now lives in `@knkcs/anker/host` (still exported from
+  `/templates`, same function) and reports the node to the nearest provider:
+  `<HostProvider onRailChange>` receives it, and `null` when the reporting
+  screen unmounts; a host renders it wherever its layout puts rails. It is a
+  channel of its own — `PageFrame` is unchanged and still mirrors
+  `PageHeaderProps`. New type `PageRailSink`. `<TestHost ref>` exposes
+  `host.current.rail` beside `frame` and takes an `onRailChange` spy. Without a
+  provider the hook stays a no-op.
+
+  Under `AppShell` nothing changes: the shell's own `HostProvider` feeds the
+  reported rail into its rail column, registered content still wins over the
+  `rail` prop, and a rail reported inside an `AppShell` does not leak to a host
+  above it (the same nearest-provider rule as frames). One consequence of
+  that rule: a `HostProvider`/`TestHost` mounted *inside* an `AppShell` now
+  captures the rails beneath it, as it already captured frames — including
+  one mounted only to provide `identity` (a provider without a sink drops
+  what it captures). Provide identity *above* the `AppShell` instead.
+
+### Documented
+
+- **Reported nodes render outside the screen's providers.** A host draws a
+  reported frame's `actions` and a reported rail node away from the providers
+  the screen mounts, so such nodes must not read screen-local context (form
+  context, screen-local providers) — they close over state or take handlers.
+  `<DirtyCounter />` reported as a toolbar action is the example.
+  `docs/page-patterns.md` §2 "Host contract", CLAUDE-ANKER.md "Host contract".
+
 ## 5.2.0 — 2026-09-15
 
 ### Added
