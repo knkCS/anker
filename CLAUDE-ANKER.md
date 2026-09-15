@@ -86,7 +86,7 @@ Available templates:
 
 | Template | Use for |
 |---|---|
-| `<AppShell>` | Authenticated chrome (sidebar · main · rail). Mounts the host contract (see **Host contract** below) and renders a `<PageHeader>` band spanning main + rail from the frame the page templates report. Also provides the opaque `usePageActions(node)`, `usePageHeader(node)` and `usePageRail(node)` slots for bespoke chrome and rails. |
+| `<AppShell>` | Authenticated chrome (sidebar · main · rail). Mounts the host contract (see **Host contract** below) and renders a `<PageHeader>` band spanning main + rail from the frame the page templates report. Renders the rail each screen reports via `usePageRail(node)` in its rail column. Also provides the opaque `usePageActions(node)` and `usePageHeader(node)` slots for bespoke chrome. |
 | `<ContextRail>` | Right-rail container with sticky positioning, collapse toggle on the leading edge, and five mode-aware atom subcomponents for compact rendering at 44px: `IconButton`, `ValueTile`, `StatusIcon`, `Avatar`, `Divider`. Sections (`<ContextRail.Section>`) keep their expanded-mode chrome; in collapsed mode, only atom-tagged children render. See `docs/page-patterns.md` §ContextRail patterns. |
 | `<PageHeader>` | Three-row page header band (breadcrumb · detail · tabs). Props: `breadcrumbs`, `title`, `subtitle`, `eyebrow`, `actions`, `avatar`, `badges`, `meta`, `tabs`. Each row is independently optional except title. See `docs/page-patterns.md` §Page header anatomy. |
 | `<IndexPageTemplate>` | List pages — header + optional tabs + toolbar + DataTable |
@@ -127,21 +127,34 @@ frame reports itself.
   frame carrying a fresh element re-renders itself forever. `onFrameChange`
   gets `null` when the reporting screen unmounts. `<AppShell>` is a host:
   under it nothing changes, the band is drawn from the frame.
+- **The side rail travels on the contract too.** `usePageRail(node)` (from
+  `/host`, also re-exported from `/templates`) reports the screen's rail —
+  status tiles, activity, secondary actions — to the provider's
+  `onRailChange` (`null` on unmount). The host renders it where its layout
+  puts rails; `<AppShell>` renders it in the rail column, over its `rail`
+  prop. It is not a `PageFrame` field.
+- **Reported nodes render outside your screen's providers.** A host draws
+  the frame's `actions` and the rail node away from the providers your
+  screen mounts, so those nodes must not read screen-local context (form
+  context, a provider the screen mounts) — close over state or pass
+  handlers. Example: `<DirtyCounter />` reads `useFormContext`, so reported as a
+  toolbar action it silently renders nothing under a host — build the chip
+  from `formState` read inside the screen instead.
 - **Identity comes from the contract, not props.** `useHostIdentity()` returns
   `{ userId, workspaceId, members }`; `members.list()` and `members.byId(userId)`
   are synchronous over what the host already fetched. Build one with
   `createHostMembers(list)`. Don't take a current-user or members prop on a
   screen any more.
-- **No provider is fine.** The hook is a no-op and identity is
+- **No provider is fine.** The reporting hooks are no-ops and identity is
   `emptyHostIdentity` (`""` ids, no members) — never null, so compare against
   `userId` and get no match rather than null-checking. Stories and isolated
   tests need no wrapper.
 - **A nested provider without `identity` inherits its parent's.** Wrap your
   standalone `<AppShell>` in `<HostProvider identity=…>` to provide identity;
   an `AppShell` nested under a host does not shadow the host's identity, but
-  it does capture the frames beneath it.
+  it does capture the frames and rails beneath it.
 - **Test with `<TestHost ref>`** from the same subpath: `host.current.frame` is
-  the last reported frame, `host.current.setIdentity(…)` (in `act()`) changes
+  the last reported frame, `host.current.rail` the last reported rail node, `host.current.setIdentity(…)` (in `act()`) changes
   who is looking. Assert the title, breadcrumbs and actions your screen
   reports; never reach into the slot store.
 - **`usePageActions` from a tab body reaches `AppShell` only.** Under a foreign

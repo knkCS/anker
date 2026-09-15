@@ -4,7 +4,7 @@
 // reports. Rationale: docs/adr/0003-host-owns-the-frame-anker-owns-the-contract.md
 // (origin: knkcms/core ADR 0003).
 //
-// Two things flow through one context:
+// Three things flow through one context:
 //
 //   - **Page frame** (screen → host). A screen built on anker's page
 //     templates calls `usePageFrame(frame)` with structured state — title,
@@ -13,12 +13,18 @@
 //     its own page frame however it likes; anker's `<AppShell>` renders it
 //     as a `<PageHeader>` band, so a screen behaves identically under its
 //     standalone shell and under a foreign host.
+//   - **Side rail** (screen → host). A screen calls `usePageRail(node)`
+//     with the content of its side rail — status tiles, activity, secondary
+//     actions. The rail is not part of `PageFrame` (which mirrors the page
+//     header exactly); it travels on its own channel of the same contract.
+//     The host renders it wherever its layout puts rails; `<AppShell>`
+//     renders it in its rail column.
 //   - **Identity** (host → screen). `HostIdentity` — the user id, the
 //     workspace id, and a members accessor — provided once at the app root
 //     and read through `useHostIdentity()` instead of arriving as props on
 //     every mount.
 //
-// Outside any provider the reporting hook is a no-op and the identity hook
+// Outside any provider the reporting hooks are no-ops and the identity hook
 // returns `emptyHostIdentity`, so stories and isolated tests keep working.
 
 import {
@@ -78,6 +84,12 @@ export interface PageFrame {
 /** The host's frame sink: the current frame, or `null` once no screen reports. */
 export type PageFrameSink = (frame: PageFrame | null) => void;
 
+/**
+ * The host's rail sink: the current rail node, or `null` once no screen
+ * reports one.
+ */
+export type PageRailSink = (rail: ReactNode) => void;
+
 // ---------------------------------------------------------------------------
 // Identity
 // ---------------------------------------------------------------------------
@@ -133,6 +145,7 @@ export const emptyHostIdentity: HostIdentity = Object.freeze({
 interface HostContextValue {
 	identity: HostIdentity;
 	reportFrame: PageFrameSink;
+	reportRail: PageRailSink;
 }
 
 const HostContext = createContext<HostContextValue | null>(null);
@@ -152,29 +165,39 @@ export interface HostProviderProps {
 	 * re-create the screen tree.
 	 */
 	onFrameChange?: PageFrameSink;
+	/**
+	 * Receives every side-rail node a descendant screen reports through
+	 * `usePageRail`, and `null` when the reporting screen unmounts. The same
+	 * state-placement rule as `onFrameChange` applies.
+	 */
+	onRailChange?: PageRailSink;
 	children: ReactNode;
 }
 
 /**
  * Mount once, at the host's root. Descendant screens report their page
- * frame into `onFrameChange` and read `identity` through `useHostIdentity()`.
+ * frame into `onFrameChange`, their side rail into `onRailChange`, and read `identity` through `useHostIdentity()`.
  */
 export function HostProvider({
 	identity,
 	onFrameChange,
+	onRailChange,
 	children,
 }: HostProviderProps) {
 	const parent = useContext(HostContext);
-	// The sink is read through a ref so an inline `onFrameChange` arrow does
+	// The sinks are read through refs so an inline `onFrameChange` arrow does
 	// not change the context value — and therefore does not re-run every
 	// reporting screen's effect — on each host render.
 	const sink = useRef<PageFrameSink | undefined>(onFrameChange);
 	sink.current = onFrameChange;
+	const railSink = useRef<PageRailSink | undefined>(onRailChange);
+	railSink.current = onRailChange;
 	const resolvedIdentity = identity ?? parent?.identity ?? emptyHostIdentity;
 	const value = useMemo<HostContextValue>(
 		() => ({
 			identity: resolvedIdentity,
 			reportFrame: (frame) => sink.current?.(frame),
+			reportRail: (rail) => railSink.current?.(rail),
 		}),
 		[resolvedIdentity],
 	);
@@ -258,6 +281,38 @@ export function usePageFrame(frame: PageFrame): void {
 		return () => {
 			reported.current = null;
 			ctx.reportFrame(null);
+		};
+	}, [ctx]);
+}
+
+/**
+ * Report the screen's side rail to the host — status tiles, activity,
+ * secondary actions. The host renders the node wherever its layout puts
+ * rails; `<AppShell>` renders it in its rail column, where it wins over the
+ * shell's `rail` prop. Re-reports when the node changes (by identity) and
+ * reports `null` on unmount. A no-op outside any provider.
+ *
+ * The host draws the node outside the screen's own providers: it must not
+ * read screen-local context (a form context, a provider the screen mounts).
+ * Close over the state it needs, or pass handlers.
+ *
+ * Only one screen should report at a time — the most recent report wins and
+ * any reporting screen's unmount clears the rail.
+ */
+export function usePageRail(content: ReactNode): void {
+	const ctx = useContext(HostContext);
+	const reported = useRef<{ node: ReactNode } | null>(null);
+	useEffect(() => {
+		if (!ctx) return;
+		if (reported.current && Object.is(reported.current.node, content)) return;
+		reported.current = { node: content };
+		ctx.reportRail(content);
+	});
+	useEffect(() => {
+		if (!ctx) return;
+		return () => {
+			reported.current = null;
+			ctx.reportRail(null);
 		};
 	}, [ctx]);
 }

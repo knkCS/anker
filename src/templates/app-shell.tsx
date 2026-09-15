@@ -32,7 +32,7 @@
 // Slot mechanism
 // --------------
 // AppShell also installs an external slot store on its descendants via
-// context. Three opaque slots are exposed for bespoke chrome and rails:
+// context. Three slots are exposed for bespoke chrome and rails:
 //
 //   - "actions" — registered via `usePageActions(node)` — surfaced by page
 //     templates inside their reported frame's `actions` when the template
@@ -41,8 +41,12 @@
 //     AppShell as the content of grid row 1 (spanning the main + rail
 //     columns). Bespoke chrome: when both a header node and a frame are
 //     present, the node wins.
-//   - "rail"    — registered via `usePageRail(node)`    — surfaced by
-//     AppShell as the content of the right rail column (row 2 column 3).
+//   - "rail"    — filled from the host contract: `usePageRail(node)`
+//     (`@knkcs/anker/host`) reports to the nearest `HostProvider`, which
+//     under AppShell is the shell's own; its rail sink writes this slot,
+//     surfaced as the content of the right rail column (row 2 column 3).
+//     Under a foreign host with no AppShell the same call reaches that
+//     host's `onRailChange`.
 //
 // A fourth, internal slot ("frame") carries the reported page frame from
 // the shell's HostProvider sink to the renderer.
@@ -67,8 +71,16 @@ import {
 	useSyncExternalStore,
 } from "react";
 import { PageHeader } from "../components/page-header";
-import { HostProvider, type PageFrame } from "../host/host-contract";
+import {
+	HostProvider,
+	type PageFrame,
+	usePageRail,
+} from "../host/host-contract";
 import { Box, Flex, Grid } from "../primitives/layout";
+
+// `usePageRail` is the host contract's rail channel; re-exported here so the
+// `@knkcs/anker/templates` import keeps working.
+export { usePageRail };
 
 type SlotName = "actions" | "frame" | "header" | "rail";
 
@@ -180,31 +192,6 @@ export function usePageActions(content: ReactNode): void {
 }
 
 /**
- * Register context-rail content from any descendant of `<AppShell>`. The
- * content is rendered in the rail column (assuming the AppShell has a rail
- * slot enabled).
- *
- * Pass `null` (or omit) to clear the registration. The hook is a no-op when
- * called outside an AppShell.
- */
-export function usePageRail(content: ReactNode): void {
-	const store = useContext(SlotStoreContext);
-	const latest = useRef<ReactNode>(content);
-	latest.current = content;
-	useEffect(() => {
-		if (!store) return;
-		store.set("rail", latest.current);
-		return () => {
-			store.clear("rail");
-		};
-	}, [store]);
-	useEffect(() => {
-		if (!store) return;
-		store.set("rail", content);
-	}, [store, content]);
-}
-
-/**
  * Register page-header content (typically a <PageHeader>) from any descendant
  * of `<AppShell>`. The content is rendered by AppShell in grid row 1, spanning
  * the main column and the rail column (when present).
@@ -290,9 +277,13 @@ export function AppShell({ sidebar, rail, children }: AppShellProps) {
 		(frame: PageFrame | null) => store.set("frame", frame),
 		[store],
 	);
+	const onRailChange = useCallback(
+		(rail: ReactNode) => store.set("rail", rail),
+		[store],
+	);
 	return (
 		<SlotStoreContext.Provider value={store}>
-			<HostProvider onFrameChange={onFrameChange}>
+			<HostProvider onFrameChange={onFrameChange} onRailChange={onRailChange}>
 				<AppShellInner sidebar={sidebar} rail={rail}>
 					{children}
 				</AppShellInner>

@@ -89,9 +89,13 @@ breadcrumbs, avatar, badges, meta, tabs, actions, sticky })` — the same
 fields as `<PageHeader>` — and the nearest provider decides how to render
 that state. Under `<AppShell>` it becomes a `<PageHeader>`; under a host that
 draws its own frame (core) it becomes that host's header, with no
-`<AppShell>` anywhere on the page. The same contract carries `HostIdentity`
-(user id, workspace id, members) from the host to every screen through
-`useHostIdentity()`.
+`<AppShell>` anywhere on the page. The same contract carries each screen's
+**side rail** on a channel of its own — `usePageRail(node)` reports to the
+provider's `onRailChange`, and the host renders the node wherever its layout
+puts rails (`<AppShell>`: the rail column) — and `HostIdentity` (user id,
+workspace id, members) from the host to every screen through
+`useHostIdentity()`. The rail is deliberately not a `PageFrame` field: the
+frame mirrors `<PageHeader>`'s props exactly.
 
 ```tsx
 // A host that is not AppShell: provide once, render the frame yourself.
@@ -99,12 +103,14 @@ import { HostProvider, type PageFrame } from "@knkcs/anker/host";
 
 function CoreFrame({ identity, children }) {
   const [frame, setFrame] = useState<PageFrame | null>(null);
+  const [rail, setRail] = useState<ReactNode>(null);
   return (
     <>
       <CoreHeader title={frame?.title} crumbs={frame?.breadcrumbs} actions={frame?.actions} />
-      <HostProvider identity={identity} onFrameChange={setFrame}>
+      <HostProvider identity={identity} onFrameChange={setFrame} onRailChange={setRail}>
         {children /* screens built on the page templates */}
       </HostProvider>
+      {rail ? <CoreRightColumn>{rail}</CoreRightColumn> : null}
     </>
   );
 }
@@ -116,11 +122,22 @@ Rules that follow:
   `children`** (as above, and as `<AppShell>` does). A frame may carry a
   fresh element each render; a host whose re-render re-created the screen
   tree would loop.
-- **Without a provider `usePageFrame` is a no-op** and `useHostIdentity()`
+- **Reported nodes render outside the screen's providers.** A host draws
+  a reported frame's `actions` (and its other node fields) and a reported
+  rail node where its layout puts them — outside the providers the screen
+  mounts. Such a node must not read screen-local context (a form context,
+  a provider the screen itself mounts); it closes over the state it needs
+  or takes handlers instead. The case to avoid: `<DirtyCounter />` reads
+  `useFormContext`, so reported as a toolbar action it counts only where a
+  form provider happens to sit above the spot the host draws it, and under
+  a host that draws it elsewhere silently renders nothing. Build the chip
+  from the dirty state the screen already holds (`formState` read inside
+  the screen) instead.
+- **Without a provider `usePageFrame` and `usePageRail` are no-ops** and `useHostIdentity()`
   returns `emptyHostIdentity` — a template rendered in a story or an
   isolated test needs no wrapper.
 - **A nested provider without an identity inherits its parent's**; frames
-  are captured by the nearest provider. So `<HostProvider identity=…>`
+  and rails are captured by the nearest provider. So `<HostProvider identity=…>`
   above an `<AppShell>` supplies identity to everything inside the shell,
   while the shell keeps drawing the header.
 - **Bespoke chrome wins.** A node registered through the opaque header slot
@@ -129,12 +146,14 @@ Rules that follow:
   reports registered actions only under `<AppShell>`; under a foreign host
   pass `actions` to the template.
 - **`<TestHost ref>`** (same subpath) captures the last reported frame and
-  takes a settable identity for a package's render-smoke tests.
+  rail (`host.current.frame`, `host.current.rail`) and takes a settable
+  identity for a package's render-smoke tests.
 
 ### Slot mechanism
 
 `<AppShell>` also installs a slot store on its descendants via React
-context, for bespoke chrome and rails. Three named slots are exposed:
+context, for bespoke chrome and rails. Three named slots are exposed
+(`rail` is filled from the host contract):
 
 - **`actions`** — registered via `usePageActions(content)`. Surfaced by
   the active page template as its reported frame's `actions` when the
@@ -144,8 +163,11 @@ context, for bespoke chrome and rails. Three named slots are exposed:
   same row the reported frame's `<PageHeader>` occupies, which it replaces.
   For header chrome a template cannot express; the templates themselves no
   longer use it.
-- **`rail`**    — registered via `usePageRail(content)`. Surfaced as the
-  body of the right rail column.
+- **`rail`**    — reported via `usePageRail(content)` (`@knkcs/anker/host`,
+  also re-exported from `/templates`) to the nearest `HostProvider` — under
+  `<AppShell>` the shell's own, whose rail sink fills this slot. Surfaced as
+  the body of the right rail column. Under a host without `<AppShell>` the
+  same call reaches that host's `onRailChange`.
 
 `<AppShell>` is an **internal-scroll** shell: the grid is exactly `100vh` and
 never scrolls the document (`overflow: hidden`). The header band is fixed in
@@ -1785,8 +1807,9 @@ register content into the shell:
 - `usePageActions(content: ReactNode)` — registers content into the
   page-actions slot, surfaced inside the active page template's
   `<PageHeader actions={…}>`.
-- `usePageRail(content: ReactNode)` — registers content into the rail
-  slot, surfaced as the body of the right rail column.
+- `usePageRail(content: ReactNode)` — reports content through the host
+  contract; `<AppShell>`'s provider writes it into the rail slot, surfaced
+  as the body of the right rail column (§2 Host contract).
 
 ### How it works
 
