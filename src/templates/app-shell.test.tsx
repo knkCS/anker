@@ -1,10 +1,15 @@
 // src/templates/app-shell.test.tsx
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { describe, expect, it } from "vitest";
 import { createAnkerTheme } from "../theme/create-theme";
-import { AppShell, usePageHeader, usePageRail } from "./app-shell";
+import {
+	AppShell,
+	usePageActions,
+	usePageHeader,
+	usePageRail,
+} from "./app-shell";
 
 function renderWithChakra(ui: ReactElement) {
 	return render(<ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>);
@@ -286,5 +291,247 @@ describe("AppShell — sticky page header", () => {
 		);
 		const sidebarBox = screen.getByTestId("app-shell-sidebar");
 		expect(sidebarBox).toHaveStyle({ zIndex: "11" });
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Host contract — AppShell provides it and renders its header from the frame
+// the page templates report. See docs/adr/0003 and docs/page-patterns.md
+// §2 "Host contract".
+// ---------------------------------------------------------------------------
+
+import { createRef, type ReactNode } from "react";
+import { Button } from "../atoms/button";
+import { PageHeader } from "../components/page-header";
+import {
+	type PageFrame,
+	TestHost,
+	type TestHostHandle,
+	usePageFrame,
+} from "../host";
+import { DetailPageTemplate } from "./detail-page-template";
+import { IndexPageTemplate } from "./index-page-template";
+import { SettingsPageTemplate } from "./settings-page-template";
+
+function FrameReporter({ frame }: { frame: PageFrame }) {
+	usePageFrame(frame);
+	return <div data-testid="page-body">body</div>;
+}
+
+describe("AppShell — host contract", () => {
+	it("renders a PageHeader from the frame a descendant reports via usePageFrame", () => {
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<FrameReporter
+					frame={{
+						title: "Users",
+						eyebrow: "Identity",
+						breadcrumbs: [
+							{ label: "Identity", to: "/identity" },
+							{ label: "Users" },
+						],
+						actions: <button type="button">Invite</button>,
+						tabs: <div data-testid="tabs">tabs</div>,
+					}}
+				/>
+			</AppShell>,
+		);
+		const header = screen.getByTestId("app-shell-header");
+		expect(
+			within(header).getByRole("heading", { name: "Users" }),
+		).toBeInTheDocument();
+		expect(
+			within(header).getByTestId("page-header-breadcrumbs"),
+		).toHaveTextContent("Identity");
+		expect(
+			within(header).getByRole("button", { name: "Invite" }),
+		).toBeInTheDocument();
+		expect(within(header).getByTestId("tabs")).toBeInTheDocument();
+		expect(header).toHaveAttribute("data-sticky-header", "true");
+	});
+
+	it("honours the frame's sticky hint", () => {
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<FrameReporter frame={{ title: "Users", sticky: false }} />
+			</AppShell>,
+		);
+		expect(screen.getByTestId("app-shell-header")).toHaveAttribute(
+			"data-sticky-header",
+			"false",
+		);
+	});
+
+	it("drops the header row again when the reporting screen unmounts", () => {
+		function Shell({ children }: { children: ReactNode }) {
+			return <AppShell sidebar={<div data-testid="sb" />}>{children}</AppShell>;
+		}
+		const { rerender } = renderWithChakra(
+			<Shell>
+				<FrameReporter frame={{ title: "Users" }} />
+			</Shell>,
+		);
+		expect(screen.getByTestId("app-shell-header")).toBeInTheDocument();
+		rerender(
+			<ChakraProvider value={defaultSystem}>
+				<Shell>
+					<div>no screen</div>
+				</Shell>
+			</ChakraProvider>,
+		);
+		expect(screen.queryByTestId("app-shell-header")).not.toBeInTheDocument();
+	});
+
+	it("an opaque usePageHeader registration is bespoke chrome and wins over a reported frame", () => {
+		function Both() {
+			usePageHeader(<div data-testid="bespoke">bespoke header</div>, {
+				sticky: false,
+			});
+			usePageFrame({ title: "Reported" });
+			return <div>body</div>;
+		}
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<Both />
+			</AppShell>,
+		);
+		const header = screen.getByTestId("app-shell-header");
+		expect(within(header).getByTestId("bespoke")).toBeInTheDocument();
+		expect(
+			within(header).queryByRole("heading", { name: "Reported" }),
+		).not.toBeInTheDocument();
+		expect(header).toHaveAttribute("data-sticky-header", "false");
+	});
+
+	it("does not leak a page's frame to a host above the shell", () => {
+		// A host nesting an AppShell (core's bridge shell) keeps its own frame
+		// untouched: AppShell is the consumer of everything reported beneath it.
+		const host = createRef<TestHostHandle>();
+		renderWithChakra(
+			<TestHost ref={host}>
+				<AppShell sidebar={<div data-testid="sb" />}>
+					<FrameReporter frame={{ title: "Inside the shell" }} />
+				</AppShell>
+			</TestHost>,
+		);
+		expect(host.current?.frame).toBeNull();
+		expect(
+			screen.getByRole("heading", { name: "Inside the shell" }),
+		).toBeInTheDocument();
+	});
+
+	// The header AppShell renders IS the reported state: for each template,
+	// capture what it reports under a TestHost, render `<PageHeader>` from that
+	// frame by hand, and compare the markup byte-for-byte with the band AppShell
+	// draws for the same template.
+	const templates: Array<[string, ReactNode]> = [
+		[
+			"DetailPageTemplate",
+			<DetailPageTemplate
+				key="detail"
+				breadcrumbs={[
+					{ label: "Identity", to: "/identity" },
+					{ label: "Jana Schmid" },
+				]}
+				title="Jana Schmid"
+				subtitle="Product"
+				eyebrow="User"
+				avatar={<span data-testid="av">JS</span>}
+				badges={<span>Active</span>}
+				meta={<span>jana@example.test</span>}
+				actions={<Button>Edit</Button>}
+				tabs={<div>tab list</div>}
+				stickyHeader={false}
+			>
+				<div>body</div>
+			</DetailPageTemplate>,
+		],
+		[
+			"IndexPageTemplate",
+			<IndexPageTemplate
+				key="index"
+				breadcrumbs={[{ label: "Identity" }, { label: "Users" }]}
+				title="Users"
+				subtitle="Everyone with access"
+				eyebrow="Identity"
+				actions={<Button>Invite</Button>}
+				tabs={<div>tab list</div>}
+				toolbar={<div>toolbar</div>}
+			>
+				<div>body</div>
+			</IndexPageTemplate>,
+		],
+		[
+			"SettingsPageTemplate",
+			<SettingsPageTemplate
+				key="settings"
+				breadcrumbs={[{ label: "Settings" }]}
+				title="Workspace"
+				eyebrow="Settings"
+				avatar={<span>WS</span>}
+				badges={<span>Pro</span>}
+				meta={<span>ws-1</span>}
+				actions={<Button>Save</Button>}
+				tabs={<div>tab list</div>}
+			>
+				<div>body</div>
+			</SettingsPageTemplate>,
+		],
+	];
+
+	it.each(
+		templates,
+	)("%s: the header AppShell renders equals the frame the template reports", (_name, template) => {
+		const host = createRef<TestHostHandle>();
+		const captured = renderWithChakra(
+			<TestHost ref={host}>{template}</TestHost>,
+		);
+		const frame = host.current?.frame;
+		expect(frame).not.toBeNull();
+		captured.unmount();
+
+		const { sticky: _sticky, ...headerProps } = frame as PageFrame;
+		const expected = renderWithChakra(
+			<div data-testid="expected">
+				<PageHeader {...headerProps} />
+			</div>,
+		);
+		const expectedHtml = screen.getByTestId("expected").innerHTML;
+		expected.unmount();
+
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>{template}</AppShell>,
+		);
+		expect(screen.getByTestId("app-shell-header").innerHTML).toBe(expectedHtml);
+	});
+
+	it("a template's frame carries its stickyHeader prop", () => {
+		const host = createRef<TestHostHandle>();
+		renderWithChakra(
+			<TestHost ref={host}>
+				<DetailPageTemplate title="Pinned off" stickyHeader={false}>
+					<div>body</div>
+				</DetailPageTemplate>
+			</TestHost>,
+		);
+		expect(host.current?.frame?.sticky).toBe(false);
+	});
+
+	it("a template reports the actions registered via usePageActions when none are given", () => {
+		function Registrar() {
+			usePageActions(<button type="button">Registered</button>);
+			return <div>pane</div>;
+		}
+		renderWithChakra(
+			<AppShell sidebar={<div data-testid="sb" />}>
+				<IndexPageTemplate title="Users">
+					<Registrar />
+				</IndexPageTemplate>
+			</AppShell>,
+		);
+		const header = screen.getByTestId("app-shell-header");
+		expect(
+			within(header).getByRole("button", { name: "Registered" }),
+		).toBeInTheDocument();
 	});
 });

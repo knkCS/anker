@@ -19,18 +19,33 @@
 //     │         │                       │           │
 //     └─────────┴───────────────────────┴───────────┘
 //
+// Host contract
+// -------------
+// AppShell is a *host* in the sense of the host contract
+// (`@knkcs/anker/host`, ADR 0003): it mounts `<HostProvider>` itself and
+// renders a `<PageHeader>` in grid row 1 from the structured frame the page
+// templates report through `usePageFrame`. The same templates report the
+// same frame under a foreign host (core), which draws its own header from
+// it — so a screen looks the same under either. AppShell passes no identity
+// of its own: a `<HostProvider identity=…>` above the shell is inherited.
+//
 // Slot mechanism
 // --------------
-// AppShell installs an external slot store on its descendants via context.
-// Three named slots are exposed:
+// AppShell also installs an external slot store on its descendants via
+// context. Three opaque slots are exposed for bespoke chrome and rails:
 //
 //   - "actions" — registered via `usePageActions(node)` — surfaced by page
-//     templates inside their <PageHeader actions=…> slot.
+//     templates inside their reported frame's `actions` when the template
+//     was given none explicitly.
 //   - "header"  — registered via `usePageHeader(node)`  — surfaced by
 //     AppShell as the content of grid row 1 (spanning the main + rail
-//     columns). Page templates push their <PageHeader> here.
+//     columns). Bespoke chrome: when both a header node and a frame are
+//     present, the node wins.
 //   - "rail"    — registered via `usePageRail(node)`    — surfaced by
 //     AppShell as the content of the right rail column (row 2 column 3).
+//
+// A fourth, internal slot ("frame") carries the reported page frame from
+// the shell's HostProvider sink to the renderer.
 //
 // The store uses `useSyncExternalStore` so that producers (deep child
 // components rendered after the consumer) and consumers (AppShell, the page
@@ -51,9 +66,11 @@ import {
 	useRef,
 	useSyncExternalStore,
 } from "react";
+import { PageHeader } from "../components/page-header";
+import { HostProvider, type PageFrame } from "../host/host-contract";
 import { Box, Flex, Grid } from "../primitives/layout";
 
-type SlotName = "actions" | "header" | "rail";
+type SlotName = "actions" | "frame" | "header" | "rail";
 
 interface HeaderSlotValue {
 	node: ReactNode;
@@ -70,11 +87,13 @@ interface SlotStore {
 function createSlotStore(): SlotStore {
 	const values: Record<SlotName, unknown> = {
 		actions: null,
+		frame: null,
 		header: null,
 		rail: null,
 	};
 	const listeners: Record<SlotName, Set<() => void>> = {
 		actions: new Set(),
+		frame: new Set(),
 		header: new Set(),
 		rail: new Set(),
 	};
@@ -250,9 +269,10 @@ export interface AppShellProps {
  * the slot context that powers `usePageActions` and `usePageRail`, and
  * arranges sidebar / main / rail in a 3-column CSS grid.
  *
- * AppShell is layout-only — it does not render a PageHeader, and it does not
- * inject any business chrome. Pages compose `<IndexPageTemplate>`,
- * `<DetailPageTemplate>`, etc. inside `children`.
+ * AppShell injects no business chrome of its own. It provides the host
+ * contract (`@knkcs/anker/host`) and renders a `<PageHeader>` band from the
+ * frame the page templates report — pages compose `<IndexPageTemplate>`,
+ * `<DetailPageTemplate>`, etc. inside `children` and the band follows.
  *
  * Rail precedence: content registered by a descendant via `usePageRail` wins
  * over the static `rail` prop. The prop is the fallback when no descendant
@@ -266,11 +286,17 @@ export function AppShell({ sidebar, rail, children }: AppShellProps) {
 	// and consumes the context at the same level reads the parent context —
 	// the Provider only takes effect for descendants.)
 	const store = useMemo(() => createSlotStore(), []);
+	const onFrameChange = useCallback(
+		(frame: PageFrame | null) => store.set("frame", frame),
+		[store],
+	);
 	return (
 		<SlotStoreContext.Provider value={store}>
-			<AppShellInner sidebar={sidebar} rail={rail}>
-				{children}
-			</AppShellInner>
+			<HostProvider onFrameChange={onFrameChange}>
+				<AppShellInner sidebar={sidebar} rail={rail}>
+					{children}
+				</AppShellInner>
+			</HostProvider>
 		</SlotStoreContext.Provider>
 	);
 }
@@ -279,9 +305,13 @@ AppShell.displayName = "AppShell";
 function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 	const railNode = useSlotValue("rail") as ReactNode;
 	const headerSlot = useSlotValue("header") as HeaderSlotValue | null;
+	const frame = useSlotValue("frame") as PageFrame | null;
 
-	const headerNode: ReactNode = headerSlot?.node ?? null;
-	const headerSticky = headerSlot?.sticky ?? true;
+	// Bespoke chrome registered through the opaque header slot wins over the
+	// reported frame; otherwise the frame is rendered as a PageHeader.
+	const headerNode: ReactNode =
+		headerSlot?.node ?? (frame ? renderFrame(frame) : null);
+	const headerSticky = headerSlot ? headerSlot.sticky : (frame?.sticky ?? true);
 
 	const renderedRail = railNode ?? rail;
 	const showRailColumn =
@@ -365,3 +395,7 @@ function AppShellInner({ sidebar, rail, children }: AppShellProps) {
 	);
 }
 AppShellInner.displayName = "AppShellInner";
+
+function renderFrame({ sticky: _sticky, ...header }: PageFrame): ReactNode {
+	return <PageHeader {...header} />;
+}
