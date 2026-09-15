@@ -199,17 +199,26 @@ function sameBreadcrumbs(
 	return a.every((c, i) => c.label === b[i].label && c.to === b[i].to);
 }
 
-const FRAME_KEYS = [
-	"title",
-	"subtitle",
-	"eyebrow",
-	"actions",
-	"avatar",
-	"badges",
-	"meta",
-	"tabs",
-	"sticky",
-] as const;
+// Every field compared by identity. A `Record` over `PageFrame`'s keys, so a
+// field added to `PageFrame` and forgotten here is a type error rather than a
+// frame change that silently never reaches the host.
+const IDENTITY_COMPARED: Record<
+	Exclude<keyof PageFrame, "breadcrumbs">,
+	true
+> = {
+	title: true,
+	subtitle: true,
+	eyebrow: true,
+	actions: true,
+	avatar: true,
+	badges: true,
+	meta: true,
+	tabs: true,
+	sticky: true,
+};
+const FRAME_KEYS = Object.keys(IDENTITY_COMPARED) as Array<
+	keyof typeof IDENTITY_COMPARED
+>;
 
 /**
  * Shallow frame equality: primitives and nodes by identity, breadcrumbs by
