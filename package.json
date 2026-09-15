@@ -1,6 +1,6 @@
 {
   "name": "@knkcs/anker",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "UI component library for the knk software group",
   "repository": {
     "type": "git",
@@ -46,6 +46,10 @@
     "./navigation": {
       "import": "./dist/navigation/index.js",
       "types": "./dist/navigation/index.d.ts"
+    },
+    "./host": {
+      "import": "./dist/host/index.js",
+      "types": "./dist/host/index.d.ts"
     }
   },
   "files": [

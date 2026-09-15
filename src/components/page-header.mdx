@@ -15,10 +15,11 @@ a single white-bg band with up to three vertically-stacked rows:
 3. **Tabs** — in-page navigation or filter state. Sits flush with the
    band's bottom border.
 
-Each row is independently optional except the title. Pages register the
-component via `usePageHeader` from a page template (`IndexPageTemplate`,
-`DetailPageTemplate`, `SettingsPageTemplate`) — see `app-shell.tsx` and
-`docs/page-patterns.md` for the slot mechanism.
+Each row is independently optional except the title. Page templates
+(`IndexPageTemplate`, `DetailPageTemplate`, `SettingsPageTemplate`) do not
+render it directly: they report its props as a page frame through
+`usePageFrame` from `@knkcs/anker/host`, and `AppShell` renders the
+component from that frame — see `docs/page-patterns.md` §2 "Host contract".
 
 ## Detail slots — avatar, badges, meta
 

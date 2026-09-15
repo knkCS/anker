@@ -80,7 +80,9 @@ export function IndexPageTemplate({
 	stickyHeader = true,
 }: IndexPageTemplateProps) {
 	const registered = useRegisteredPageActions();
-	const resolvedActions = actions ?? registered;
+	// `registered` is `null` when nothing is registered; the frame carries
+	// `undefined` so a host sees an absent field, not a null one.
+	const resolvedActions = actions ?? registered ?? undefined;
 	usePageFrame({
 		breadcrumbs,
 		title,

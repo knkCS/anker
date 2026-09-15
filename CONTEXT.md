@@ -7,7 +7,7 @@ The shared UI component library (`@knkcs/anker`) for the knk software group: des
 ### Architecture
 
 **Layer**:
-One of the package's nine subpath exports: `theme`, `primitives`, `atoms`, `components`, `forms`, `feedback`, `dashboard`, `templates`, `navigation`. Every component has exactly one layer as its canonical home; any other layer may only re-export it.
+One of the package's ten subpath exports: `theme`, `primitives`, `atoms`, `components`, `forms`, `feedback`, `dashboard`, `templates`, `navigation`, `host`. Every component has exactly one layer as its canonical home; any other layer may only re-export it.
 _Avoid_: module, section
 
 **Primitive**:
@@ -16,6 +16,28 @@ _Avoid_: wrapper, base component
 
 **Atom**:
 An anker-original small UI unit that composes primitives and owns its own API — it has no single Chakra counterpart.
+
+### Host contract
+
+**Host**:
+Whoever draws the page frame a screen sits in and provides identity to it — anker's own `AppShell`, or a consuming application such as core with a frame of its own. A host mounts the host contract once.
+_Avoid_: shell (for a host that is not `AppShell`), container
+
+**Host contract**:
+The `host` layer's agreement between a host and the screens under it: screens report a Page Frame, the host provides a Host Identity. Owned by anker so every host and every package speaks one vocabulary; anker's `AppShell` is a consumer of it, not its owner.
+_Avoid_: slot store, AppShell context
+
+**Page frame**:
+The structured header state a screen reports — title, subtitle, eyebrow, breadcrumbs, avatar, badges, meta, tabs, actions, a sticky hint — mirroring the page header's props. State, never markup: the host decides where each field is drawn; the screen decides what an action is (actions stay nodes).
+_Avoid_: header node, page header (that is the component that renders one)
+
+**Host identity**:
+Who is looking: the viewer's user id, the workspace id and a synchronous members accessor, provided once by the host and read by screens through the host contract. Has an empty default outside any provider, never null.
+_Avoid_: current user props, session
+
+**Screen**:
+A page-level component a package exports for a host to mount — body content plus a reported Page Frame, no routes of its own.
+_Avoid_: page (ambiguous with the host's route), view
 
 ### Data-backed controls
 

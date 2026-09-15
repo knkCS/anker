@@ -11,6 +11,7 @@ export default defineConfig({
     "feedback/index": "src/feedback/index.ts",
     "templates/index": "src/templates/index.ts",
     "navigation/index": "src/navigation/index.ts",
+    "host/index": "src/host/index.ts",
   },
   format: ["esm"],
   dts: true,

@@ -79,17 +79,71 @@ for the 1.x knkCMS surface — these are power-user web tools). On tablet
 viewports (768–1439px) both columns default to collapsed. On desktop
 (≥ 1440px) both default to expanded.
 
+### Host contract
+
+`<AppShell>` is a **host** in the sense of `@knkcs/anker/host` (ADR 0003):
+it mounts `<HostProvider>` itself and renders the page header band in grid
+row 1 from the **page frame** the page templates report. A template does
+not draw its header; it calls `usePageFrame({ title, subtitle, eyebrow,
+breadcrumbs, avatar, badges, meta, tabs, actions, sticky })` — the same
+fields as `<PageHeader>` — and the nearest provider decides how to render
+that state. Under `<AppShell>` it becomes a `<PageHeader>`; under a host that
+draws its own frame (core) it becomes that host's header, with no
+`<AppShell>` anywhere on the page. The same contract carries `HostIdentity`
+(user id, workspace id, members) from the host to every screen through
+`useHostIdentity()`.
+
+```tsx
+// A host that is not AppShell: provide once, render the frame yourself.
+import { HostProvider, type PageFrame } from "@knkcs/anker/host";
+
+function CoreFrame({ identity, children }) {
+  const [frame, setFrame] = useState<PageFrame | null>(null);
+  return (
+    <>
+      <CoreHeader title={frame?.title} crumbs={frame?.breadcrumbs} actions={frame?.actions} />
+      <HostProvider identity={identity} onFrameChange={setFrame}>
+        {children /* screens built on the page templates */}
+      </HostProvider>
+    </>
+  );
+}
+```
+
+Rules that follow:
+
+- **Keep the frame state in a component that receives the screens as
+  `children`** (as above, and as `<AppShell>` does). A frame may carry a
+  fresh element each render; a host whose re-render re-created the screen
+  tree would loop.
+- **Without a provider `usePageFrame` is a no-op** and `useHostIdentity()`
+  returns `emptyHostIdentity` — a template rendered in a story or an
+  isolated test needs no wrapper.
+- **A nested provider without an identity inherits its parent's**; frames
+  are captured by the nearest provider. So `<HostProvider identity=…>`
+  above an `<AppShell>` supplies identity to everything inside the shell,
+  while the shell keeps drawing the header.
+- **Bespoke chrome wins.** A node registered through the opaque header slot
+  below is rendered instead of the reported frame.
+- **`usePageActions` is a slot, not part of the contract.** A template
+  reports registered actions only under `<AppShell>`; under a foreign host
+  pass `actions` to the template.
+- **`<TestHost ref>`** (same subpath) captures the last reported frame and
+  takes a settable identity for a package's render-smoke tests.
+
 ### Slot mechanism
 
-`<AppShell>` installs a slot store on its descendants via React context.
-Two named slots are exposed:
+`<AppShell>` also installs a slot store on its descendants via React
+context, for bespoke chrome and rails. Three named slots are exposed:
 
 - **`actions`** — registered via `usePageActions(content)`. Surfaced by
-  the active page template inside its `<PageHeader>` `actions` slot.
+  the active page template as its reported frame's `actions` when the
+  template was given none explicitly.
 - **`header`**  — registered via `usePageHeader(content)`. Surfaced as the
-  body of grid row 1, spanning the main column and the rail column. Page
-  templates push their `<PageHeader>` here so the header band crosses both
-  columns and the rail's content begins below it.
+  body of grid row 1, spanning the main column and the rail column — the
+  same row the reported frame's `<PageHeader>` occupies, which it replaces.
+  For header chrome a template cannot express; the templates themselves no
+  longer use it.
 - **`rail`**    — registered via `usePageRail(content)`. Surfaced as the
   body of the right rail column.
 
@@ -175,8 +229,9 @@ contextual side panel.
 
 ## Page header anatomy
 
-The page header band is one `<PageHeader>` instance, registered into the
-header slot via `usePageHeader(...)` from a page template. It renders up
+The page header band is one `<PageHeader>` instance, rendered by
+`<AppShell>` from the page frame a page template reports through
+`usePageFrame` (see §2 "Host contract"). It renders up
 to three vertically-stacked rows on `bg-surface`, separated by spacing
 (not borders). The bottom border of the band marks the transition to
 the body and rail.

@@ -86,11 +86,11 @@ Available templates:
 
 | Template | Use for |
 |---|---|
-| `<AppShell>` | Authenticated chrome (sidebar · main · rail). Provides `usePageActions(node)`, `usePageHeader(node)`, and `usePageRail(node)` hooks. Page templates register their `<PageHeader>` via `usePageHeader`, which renders it as a band spanning main + rail. |
+| `<AppShell>` | Authenticated chrome (sidebar · main · rail). Mounts the host contract (see **Host contract** below) and renders a `<PageHeader>` band spanning main + rail from the frame the page templates report. Also provides the opaque `usePageActions(node)`, `usePageHeader(node)` and `usePageRail(node)` slots for bespoke chrome and rails. |
 | `<ContextRail>` | Right-rail container with sticky positioning, collapse toggle on the leading edge, and five mode-aware atom subcomponents for compact rendering at 44px: `IconButton`, `ValueTile`, `StatusIcon`, `Avatar`, `Divider`. Sections (`<ContextRail.Section>`) keep their expanded-mode chrome; in collapsed mode, only atom-tagged children render. See `docs/page-patterns.md` §ContextRail patterns. |
 | `<PageHeader>` | Three-row page header band (breadcrumb · detail · tabs). Props: `breadcrumbs`, `title`, `subtitle`, `eyebrow`, `actions`, `avatar`, `badges`, `meta`, `tabs`. Each row is independently optional except title. See `docs/page-patterns.md` §Page header anatomy. |
 | `<IndexPageTemplate>` | List pages — header + optional tabs + toolbar + DataTable |
-| `<DetailPageTemplate>` | Single-entity pages — registers a three-row header band via `usePageHeader`. Props: `avatar`, `badges`, `meta`, `tabs`. Removed in v2.2.0: `subheader` (migrate to the `avatar` / `badges` / `meta` slots) and `bodyTabs` (migrate to nav-link tabs — see the `usePageActions` rule under Don't). |
+| `<DetailPageTemplate>` | Single-entity pages — reports a three-row header frame via `usePageFrame`. Props: `avatar`, `badges`, `meta`, `tabs`. Removed in v2.2.0: `subheader` (migrate to the `avatar` / `badges` / `meta` slots) and `bodyTabs` (migrate to nav-link tabs — see the `usePageActions` rule under Don't). |
 | `<SettingsPageTemplate>` | Tabbed settings pages with form Cards |
 | `<DashboardPageTemplate>` | Widget-grid overview pages |
 | `<AuthPageTemplate>` | Login, register, MFA, verify — centered card, no shell |
@@ -105,6 +105,48 @@ Available templates:
 - For multi-resource navigation inside a tab body, use `<SubNavLayout>` rather than rolling your own master-detail. It owns collapse state, persistence, and the divider — wire `<NavList.Item asChild>` to `<NavLink>` for URL deep-linking.
 
 Full spec with composition diagrams, slot tables, and authoring rules: `docs/page-patterns.md` in the anker repo (linked from the GitHub Pages docs site).
+
+---
+
+## Host contract
+
+`@knkcs/anker/host` is how a screen and the host that draws its page frame
+talk. **If your screens are mounted by another application (core), the host
+renders the header — not you.** Build screens on the page templates and the
+frame reports itself.
+
+- **Screens report state, hosts render it.** `usePageFrame({ title, subtitle,
+  eyebrow, breadcrumbs, avatar, badges, meta, tabs, actions, sticky })` — the
+  same fields as `<PageHeader>`. `DetailPageTemplate`, `IndexPageTemplate` and
+  `SettingsPageTemplate` call it for you; call it yourself only on a screen
+  that uses none of them. `actions`, `avatar`, `badges`, `meta`, `tabs` are
+  `ReactNode`s: you own what an action does, the host owns where it goes.
+- **A host mounts `<HostProvider identity onFrameChange>` once**, at its root,
+  and keeps the frame it receives in a component that gets the screens as
+  `children` — never in a component that re-creates the screen tree, or a
+  frame carrying a fresh element re-renders itself forever. `onFrameChange`
+  gets `null` when the reporting screen unmounts. `<AppShell>` is a host:
+  under it nothing changes, the band is drawn from the frame.
+- **Identity comes from the contract, not props.** `useHostIdentity()` returns
+  `{ userId, workspaceId, members }`; `members.list()` and `members.byId(userId)`
+  are synchronous over what the host already fetched. Build one with
+  `createHostMembers(list)`. Don't take a current-user or members prop on a
+  screen any more.
+- **No provider is fine.** The hook is a no-op and identity is
+  `emptyHostIdentity` (`""` ids, no members) — never null, so compare against
+  `userId` and get no match rather than null-checking. Stories and isolated
+  tests need no wrapper.
+- **A nested provider without `identity` inherits its parent's.** Wrap your
+  standalone `<AppShell>` in `<HostProvider identity=…>` to provide identity;
+  an `AppShell` nested under a host does not shadow the host's identity, but
+  it does capture the frames beneath it.
+- **Test with `<TestHost ref>`** from the same subpath: `host.current.frame` is
+  the last reported frame, `host.current.setIdentity(…)` (in `act()`) changes
+  who is looking. Assert the title, breadcrumbs and actions your screen
+  reports; never reach into the slot store.
+- **`usePageActions` from a tab body reaches `AppShell` only.** Under a foreign
+  host it registers into nothing; a screen that needs its actions everywhere
+  passes them to the template's `actions` prop.
 
 ---
 
