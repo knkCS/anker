@@ -29,6 +29,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in ten layers
 |---------|--------|
 | UI framework | Chakra UI v3 (recipes, slot recipes, semantic tokens) |
 | Data tables | TanStack React Table v8 (headless, generic DataTable wrapper) |
+| Drag and drop | dnd-kit (`@dnd-kit/core` + `@dnd-kit/sortable`, regular dependencies) — DataTable row reorder |
 | Icons | Lucide React (replacing FontAwesome from Core) |
 | Form state | React Hook Form (replacing Formik from Core) |
 | Validation | Zod (replacing Yup from Core) |
@@ -418,6 +419,7 @@ Additional rules:
 - Prefer `createColumnHelper<T>()` over inline `ColumnDef` objects for full TypeScript inference
 - Cell components are plain React — they receive extracted values and return JSX, with no TanStack imports
 - Every cell must handle `null`/`undefined` → `emptyCellValue` (em-dash `—`)
+- Row reorder is opt-in: pass `onRowReorder(fromIndex, toIndex)` and DataTable injects a `_reorder` drag-handle column and a dnd-kit `DndContext`. Without the prop nothing is injected. The table stays controlled — the consumer applies the move to its own `data`. See `docs/react-table-reference.md` § Row Reorder
 
 ## Component Scaffolding Checklist
 

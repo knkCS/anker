@@ -2,6 +2,27 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- **DataTable rows can be reordered by drag and drop** (#728). Pass the new
+  optional `onRowReorder(fromIndex, toIndex)` and `<DataTable>` injects a
+  drag-handle column at the start of the table and wraps itself in a dnd-kit
+  `DndContext` — pointer *and* keyboard sensors, with pick-up, move and drop
+  announced in an `aria-live` region. Without the callback no handle column is
+  rendered and nothing else changes.
+
+  The table stays controlled, like sorting and selection: it reports the move
+  and the consumer applies it to its own array (`arrayMove` from
+  `@dnd-kit/sortable`, say). Both indices are `row.index` values — indices into
+  the `data` you passed. Reordering works within the rows currently rendered;
+  because pagination is external, moving a row across pages is out of scope,
+  and a manual order should not be offered on a table that also sorts.
+
+  `@dnd-kit/core`, `@dnd-kit/sortable` and `@dnd-kit/utilities` are new regular
+  dependencies (bundled, not peers) — consumers install nothing.
+
 ## 5.3.0 — 2026-09-15
 
 ### Added
