@@ -187,7 +187,6 @@ export const CustomCells: Story = {
 
 type LineItem = {
 	id: string;
-	position: string;
 	description: string;
 	quantity: string;
 };
@@ -195,17 +194,22 @@ type LineItem = {
 const lineItemColumns = createColumnHelper<LineItem>();
 
 const reorderColumns = [
-	lineItemColumns.accessor("position", { header: "Position" }),
+	// Position is derived, so it renumbers itself after every move.
+	lineItemColumns.display({
+		id: "position",
+		header: "Position",
+		cell: (info) => String(info.row.index + 1),
+	}),
 	lineItemColumns.accessor("description", { header: "Description" }),
 	lineItemColumns.accessor("quantity", { header: "Quantity" }),
 ];
 
 const initialLineItems: LineItem[] = [
-	{ id: "1", position: "1", description: "Cover design", quantity: "1" },
-	{ id: "2", position: "2", description: "Typesetting", quantity: "240" },
-	{ id: "3", position: "3", description: "Proofreading", quantity: "240" },
-	{ id: "4", position: "4", description: "Printing", quantity: "2000" },
-	{ id: "5", position: "5", description: "Binding", quantity: "2000" },
+	{ id: "1", description: "Cover design", quantity: "1" },
+	{ id: "2", description: "Typesetting", quantity: "240" },
+	{ id: "3", description: "Proofreading", quantity: "240" },
+	{ id: "4", description: "Printing", quantity: "2000" },
+	{ id: "5", description: "Binding", quantity: "2000" },
 ];
 
 const RowReorderDemo = () => {
