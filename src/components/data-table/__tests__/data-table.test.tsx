@@ -1,7 +1,7 @@
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import type { DataTableProps } from "../data-table";
 import { DataTable } from "../data-table";
 
@@ -164,5 +164,267 @@ describe("DataTable", () => {
 		const checkboxes = screen.getAllByRole("checkbox");
 		// Row with id="1" (Alice) should be selected
 		expect(checkboxes[1]).toBeChecked();
+	});
+});
+
+/**
+ * jsdom gives every element a zero-sized rect, and dnd-kit needs real geometry
+ * to decide which row a keyboard move lands on. Give each body row a 50px band.
+ */
+function layoutRows(): void {
+	const rows = Array.from(document.querySelectorAll("tbody tr"));
+	rows.forEach((row, index) => {
+		const top = index * 50;
+		(row as HTMLElement).getBoundingClientRect = () =>
+			({
+				x: 0,
+				y: top,
+				top,
+				bottom: top + 50,
+				left: 0,
+				right: 300,
+				width: 300,
+				height: 50,
+				toJSON: () => ({}),
+			}) as DOMRect;
+	});
+}
+
+/**
+ * Sortable headers carry role="button", so the columnheader role query does not
+ * see them — count the `th` elements directly.
+ */
+function headerCells(): Element[] {
+	return Array.from(document.querySelectorAll("thead th"));
+}
+
+/**
+ * jsdom ships no PointerEvent, so dnd-kit's pointer sensor never sees a usable
+ * event. A MouseEvent subclass carrying the pointer fields is enough for it.
+ */
+class PointerEventPolyfill extends MouseEvent {
+	readonly pointerId: number;
+	readonly pointerType: string;
+	readonly isPrimary: boolean;
+
+	constructor(
+		type: string,
+		init: MouseEventInit & {
+			pointerId?: number;
+			pointerType?: string;
+			isPrimary?: boolean;
+		} = {},
+	) {
+		super(type, init);
+		this.pointerId = init.pointerId ?? 1;
+		this.pointerType = init.pointerType ?? "mouse";
+		this.isPrimary = init.isPrimary ?? true;
+	}
+}
+
+describe("DataTable row reorder", () => {
+	beforeAll(() => {
+		if (!("PointerEvent" in window)) {
+			(window as unknown as { PointerEvent: unknown }).PointerEvent =
+				PointerEventPolyfill;
+		}
+	});
+
+	it("renders no drag handle column without onRowReorder", () => {
+		renderWithChakra(<DataTable columns={sampleColumns} data={sampleData} />);
+
+		expect(screen.queryByRole("button", { name: /reorder row/i })).toBeNull();
+		expect(screen.queryByText("Reorder")).toBeNull();
+		// Only the two consumer columns are rendered.
+		expect(headerCells()).toHaveLength(2);
+	});
+
+	it("renders one labelled drag handle per row when onRowReorder is set", () => {
+		renderWithChakra(
+			<DataTable
+				columns={sampleColumns}
+				data={sampleData}
+				onRowReorder={vi.fn()}
+			/>,
+		);
+
+		expect(headerCells()).toHaveLength(3);
+		expect(
+			screen.getAllByRole("button", { name: /reorder row/i }),
+		).toHaveLength(3);
+		expect(
+			screen.getByRole("button", { name: "Reorder row 2" }),
+		).toBeInTheDocument();
+	});
+
+	it("reports the move to onRowReorder when a row is dragged down by keyboard", async () => {
+		const handleReorder = vi.fn();
+		const user = userEvent.setup();
+
+		renderWithChakra(
+			<DataTable
+				columns={sampleColumns}
+				data={sampleData}
+				onRowReorder={handleReorder}
+			/>,
+		);
+		layoutRows();
+
+		const handle = screen.getByRole("button", { name: "Reorder row 1" });
+		handle.focus();
+		await user.keyboard("[Space]");
+		await user.keyboard("[ArrowDown]");
+		await user.keyboard("[Space]");
+
+		expect(handleReorder).toHaveBeenCalledWith(0, 1);
+	});
+
+	it("reports the move to onRowReorder when a row is dragged by pointer", async () => {
+		const handleReorder = vi.fn();
+
+		renderWithChakra(
+			<DataTable
+				columns={sampleColumns}
+				data={sampleData}
+				onRowReorder={handleReorder}
+			/>,
+		);
+		layoutRows();
+
+		const handle = screen.getByRole("button", { name: "Reorder row 1" });
+		// Each step gets its own act(): the sensor only attaches its document
+		// listeners once React has re-rendered after the activating pointerdown.
+		await act(async () => {
+			fireEvent.pointerDown(handle, {
+				button: 0,
+				isPrimary: true,
+				clientX: 10,
+				clientY: 25,
+			});
+		});
+		await act(async () => {
+			// The pointer sensor needs movement past its 4px threshold to engage.
+			fireEvent.pointerMove(document, { clientX: 10, clientY: 40 });
+			fireEvent.pointerMove(document, { clientX: 10, clientY: 125 });
+		});
+		await act(async () => {
+			fireEvent.pointerUp(document, { clientX: 10, clientY: 125 });
+		});
+
+		expect(handleReorder).toHaveBeenCalledWith(0, 2);
+	});
+
+	it("reports the move when a row is dragged up by keyboard", async () => {
+		const handleReorder = vi.fn();
+		const user = userEvent.setup();
+
+		renderWithChakra(
+			<DataTable
+				columns={sampleColumns}
+				data={sampleData}
+				onRowReorder={handleReorder}
+			/>,
+		);
+		layoutRows();
+
+		const handle = screen.getByRole("button", { name: "Reorder row 3" });
+		handle.focus();
+		await user.keyboard("[Space]");
+		await user.keyboard("[ArrowUp]");
+		await user.keyboard("[Space]");
+
+		expect(handleReorder).toHaveBeenCalledWith(2, 1);
+	});
+
+	it("does not report a move when the drag is cancelled", async () => {
+		const handleReorder = vi.fn();
+		const user = userEvent.setup();
+
+		renderWithChakra(
+			<DataTable
+				columns={sampleColumns}
+				data={sampleData}
+				onRowReorder={handleReorder}
+			/>,
+		);
+		layoutRows();
+
+		const handle = screen.getByRole("button", { name: "Reorder row 1" });
+		handle.focus();
+		await user.keyboard("[Space]");
+		await user.keyboard("[ArrowDown]");
+		await user.keyboard("[Escape]");
+
+		expect(handleReorder).not.toHaveBeenCalled();
+	});
+
+	it("announces the reorder for screen readers", async () => {
+		const user = userEvent.setup();
+
+		renderWithChakra(
+			<DataTable
+				columns={sampleColumns}
+				data={sampleData}
+				onRowReorder={vi.fn()}
+			/>,
+		);
+		layoutRows();
+
+		const handle = screen.getByRole("button", { name: "Reorder row 1" });
+		expect(handle).toHaveAttribute("aria-describedby");
+
+		handle.focus();
+		await user.keyboard("[Space]");
+		// dnd-kit follows the pick-up with an immediate "over itself" event, so
+		// the live region already holds the position readout at this point.
+		expect(screen.getByRole("status")).toHaveTextContent(
+			"Row 1 moved to position 1 of 3.",
+		);
+
+		await user.keyboard("[ArrowDown]");
+		expect(screen.getByRole("status")).toHaveTextContent(
+			"Row 1 moved to position 2 of 3.",
+		);
+
+		await user.keyboard("[Space]");
+		expect(screen.getByRole("status")).toHaveTextContent(
+			"Row dropped at position 2 of 3.",
+		);
+	});
+
+	it("does not trigger onRowClick when the handle is clicked", async () => {
+		const handleRowClick = vi.fn();
+		const user = userEvent.setup();
+
+		renderWithChakra(
+			<DataTable
+				columns={sampleColumns}
+				data={sampleData}
+				onRowClick={handleRowClick}
+				onRowReorder={vi.fn()}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: "Reorder row 1" }));
+		expect(handleRowClick).not.toHaveBeenCalled();
+	});
+
+	it("keeps the selection column alongside the handle column", () => {
+		renderWithChakra(
+			<DataTable
+				columns={sampleColumns}
+				data={sampleData}
+				selectable
+				rowSelection={{}}
+				onRowSelectionChange={vi.fn()}
+				onRowReorder={vi.fn()}
+			/>,
+		);
+
+		expect(headerCells()).toHaveLength(4);
+		expect(
+			screen.getAllByRole("button", { name: /reorder row/i }),
+		).toHaveLength(3);
+		expect(screen.getAllByRole("checkbox")).toHaveLength(4);
 	});
 });

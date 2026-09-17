@@ -37,12 +37,39 @@ Set `selectable` to add checkbox columns. Provide controlled `rowSelection` and 
 
 Use the `cell` property in column definitions to render custom content. Any React component works — badges, icons, formatted values.
 
+## Row reorder
+
+<Canvas of={Stories.RowReorder} />
+
+Pass `onRowReorder(fromIndex, toIndex)` to let users reorder rows by dragging
+the handle in the injected first column, or with the keyboard. Without the
+callback no handle column is rendered and nothing else changes.
+
+The table stays **controlled**: it reports the move, you apply it to your own
+data (e.g. with `arrayMove` from `@dnd-kit/sortable`). Both indices address the
+`data` array you passed in, so they stay meaningful even when the visible order
+is sorted — although sorting and a manual order are rarely both useful at once.
+
+Pair it with `getRowId` so row identity survives the re-render after the move.
+
+**Paging:** reordering works within the rows currently rendered. Dragging a row
+onto another page is out of scope — page the data yourself and, if you need
+cross-page moves, offer a "move to position" action instead.
+
 ## Accessibility
 
 - Sortable column headers have `aria-sort` (`ascending`, `descending`, or `none`).
 - Sort icons use `aria-hidden="true"` — the sort state is conveyed via `aria-sort`.
 - Selection checkboxes have `aria-label` for each row and the select-all header.
 - Loading skeleton rows are marked `aria-hidden="true"`.
+- Each drag handle has an `aria-label` naming its row ("Reorder row 2"), an
+  `aria-roledescription` of `sortable`, and an `aria-describedby` pointing at
+  the keyboard instructions.
+- Reordering is driven by dnd-kit's keyboard sensor: focus a handle, press
+  space or enter to pick the row up, arrow keys to move it, space or enter to
+  drop it, escape to cancel.
+- Pick-up, each move and the drop are announced in an `aria-live` region
+  ("Row 1 moved to position 2 of 5.").
 
 ## Gaps & Migration
 
@@ -53,7 +80,7 @@ Use the `cell` property in column definitions to render custom content. Any Reac
 | Row virtualization | Not yet | For very large datasets. Consider `@tanstack/react-virtual`. |
 | Row expansion | Not yet | Expandable row detail is not implemented. |
 | Server-side sorting example | Gap | `onSortingChange` enables manual sorting, but no example docs for API integration. |
-| Drag-and-drop row reorder | Not yet | Not available in anker yet. |
+| Row reorder across pages | Not yet | `onRowReorder` moves rows within the rendered page only. |
 
 ## Props
 

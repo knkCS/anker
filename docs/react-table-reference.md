@@ -6,7 +6,7 @@ This document describes how anker uses TanStack React Table v8. Read this before
 
 **Version:** `@tanstack/react-table ^8.0.0` (peer dependency). Consumers install their own copy. The library externalizes it in `tsup.config.ts`.
 
-**Core file:** `src/components/data-table/data-table.tsx` — the only file that imports TanStack runtime APIs. Cell components have zero TanStack coupling.
+**Core file:** `src/components/data-table/data-table.tsx` — the only file that calls TanStack runtime APIs. Its sibling `row-reorder.tsx` takes a `ColumnDef` type and reads the row model inside one cell renderer; cell components have zero TanStack coupling.
 
 ## DataTable Architecture
 
@@ -27,6 +27,7 @@ The `DataTable<T>` component is a thin wrapper around `useReactTable`. It handle
 - Loading skeleton rows
 - Empty state
 - External pagination via the `Pagination` component
+- Optional drag-and-drop / keyboard row reorder (handle column injected when `onRowReorder` is set)
 
 Features **not** in DataTable (handled by consumers): filtering, column resizing, row expansion, grouping, virtualization.
 
@@ -227,7 +228,37 @@ When `selectable={true}`, DataTable injects a `_select` checkbox column at the s
 
 ### Row identity
 
-DataTable currently does not expose a `getRowId` prop. TanStack defaults to row index as the ID, which means `RowSelectionState` keys are `"0"`, `"1"`, etc. If data order changes (after re-sort or re-fetch), selections may point to wrong rows. For stable selection across data changes, `getRowId` should be added to DataTable's props.
+TanStack defaults to the row index as the row ID, which means `RowSelectionState` keys are `"0"`, `"1"`, etc. If data order changes (after re-sort, a reorder, or a re-fetch), selections may point at the wrong rows. Pass `getRowId` for stable identity:
+
+```tsx
+<DataTable columns={columns} data={data} getRowId={(row) => row.id} />
+```
+
+## Row Reorder
+
+Controlled via a single optional callback:
+
+```tsx
+const [items, setItems] = useState(initialItems);
+
+<DataTable
+  columns={columns}
+  data={items}
+  getRowId={(row) => row.id}
+  onRowReorder={(fromIndex, toIndex) =>
+    setItems((current) => arrayMove(current, fromIndex, toIndex))
+  }
+/>
+```
+
+When `onRowReorder` is provided, DataTable injects a `_reorder` drag-handle column at the start (before `_select`) and wraps the table in a dnd-kit `DndContext` + `SortableContext` with a pointer sensor and a keyboard sensor. Without the callback nothing is injected and nothing is wrapped.
+
+- **Controlled, like sorting and selection.** DataTable reports the move; the consumer applies it to its own array. Anker never mutates `data`.
+- **Indices address `data`.** `fromIndex` / `toIndex` are `row.index` values, not visible positions, so a sorted table still reports a move the consumer can apply. (Sorting plus a manual order is rarely a coherent combination — prefer one or the other.)
+- **Within the rendered page.** Pagination is external, so a drag can only land on a row that is currently rendered. Cross-page moves are out of scope.
+- **Accessibility** is dnd-kit's: each handle is a labelled button with `aria-roledescription="sortable"` and keyboard instructions, and pick-up/move/drop are announced in a live region. The announcement wording lives in `buildReorderAnnouncements`.
+
+The pure part of the feature — mapping a dnd-kit drag result onto `(fromIndex, toIndex)` and phrasing the announcements — lives in `row-reorder.tsx` as `resolveRowReorder` and `buildReorderAnnouncements`, and is unit-tested without a DOM.
 
 ## Performance
 
@@ -296,11 +327,13 @@ When passing columns as a prop, type them as `ColumnDef<T, unknown>[]`. The seco
 ```
 src/components/data-table/
 ├── data-table.tsx          # useReactTable wrapper, renders Chakra Table.*
-├── data-table.stories.tsx  # Usage examples with sorting, selection, pagination
+├── row-reorder.tsx         # Drag-handle column, sortable row, reorder/announcement logic
+├── data-table.stories.tsx  # Usage examples with sorting, selection, pagination, reorder
 ├── data-table.mdx          # Component documentation
 ├── index.ts                # Barrel: DataTable + all cells + utilities
 ├── __tests__/
-│   └── data-table.test.tsx # Rendering, empty state, loading, pagination
+│   ├── data-table.test.tsx # Rendering, empty state, loading, pagination, reorder
+│   └── row-reorder.test.ts # Pure reorder resolution + announcement wording
 └── cells/
     ├── cell-utils.ts       # emptyCellValue, truncateText, pluralize
     ├── user-agent.ts       # parseUserAgent, formatUserAgent (used by DeviceCell)

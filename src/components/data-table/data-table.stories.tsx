@@ -1,3 +1,4 @@
+import { arrayMove } from "@dnd-kit/sortable";
 import type { Meta, StoryObj } from "@storybook/react";
 import type { RowSelectionState, SortingState } from "@tanstack/react-table";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -182,4 +183,49 @@ const customCellColumns = [
 
 export const CustomCells: Story = {
 	render: () => <DataTable columns={customCellColumns} data={sampleUsers} />,
+};
+
+type LineItem = {
+	id: string;
+	position: string;
+	description: string;
+	quantity: string;
+};
+
+const lineItemColumns = createColumnHelper<LineItem>();
+
+const reorderColumns = [
+	lineItemColumns.accessor("position", { header: "Position" }),
+	lineItemColumns.accessor("description", { header: "Description" }),
+	lineItemColumns.accessor("quantity", { header: "Quantity" }),
+];
+
+const initialLineItems: LineItem[] = [
+	{ id: "1", position: "1", description: "Cover design", quantity: "1" },
+	{ id: "2", position: "2", description: "Typesetting", quantity: "240" },
+	{ id: "3", position: "3", description: "Proofreading", quantity: "240" },
+	{ id: "4", position: "4", description: "Printing", quantity: "2000" },
+	{ id: "5", position: "5", description: "Binding", quantity: "2000" },
+];
+
+const RowReorderDemo = () => {
+	const [items, setItems] = useState(initialLineItems);
+
+	// The table stays controlled — it reports the move, we apply it.
+	const handleReorder = (fromIndex: number, toIndex: number) => {
+		setItems((current) => arrayMove(current, fromIndex, toIndex));
+	};
+
+	return (
+		<DataTable
+			columns={reorderColumns}
+			data={items}
+			getRowId={(row) => row.id}
+			onRowReorder={handleReorder}
+		/>
+	);
+};
+
+export const RowReorder: Story = {
+	render: () => <RowReorderDemo />,
 };
