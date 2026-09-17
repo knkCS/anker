@@ -29,7 +29,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in ten layers
 |---------|--------|
 | UI framework | Chakra UI v3 (recipes, slot recipes, semantic tokens) |
 | Data tables | TanStack React Table v8 (headless, generic DataTable wrapper) |
-| Drag and drop | dnd-kit (`@dnd-kit/core` + `@dnd-kit/sortable`, regular dependencies) — DataTable row reorder |
+| Drag and drop | dnd-kit (`@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities`, peer dependencies) — DataTable row reorder |
 | Icons | Lucide React (replacing FontAwesome from Core) |
 | Form state | React Hook Form (replacing Formik from Core) |
 | Validation | Zod (replacing Yup from Core) |
@@ -518,6 +518,9 @@ Consuming projects must install:
 - react-router-dom >= 6
 - react-i18next >= 12
 - @tanstack/react-table ^8.0.0 (required for DataTable component)
+- @dnd-kit/core ^6.3.1 (required for DataTable row reorder)
+- @dnd-kit/sortable ^8.0.0 (required for DataTable row reorder)
+- @dnd-kit/utilities ^3.2.2 (required for DataTable row reorder)
 - react-grid-layout ^2.2.3 (optional — required only for the Dashboard component)
 
 Note: React 18 is **not** a supported target. 4.0.0 raised the floor to `>= 19` as a breaking change because the ref-as-prop convention used across atoms and form wrappers relies on React 19's ref-as-prop semantics — on React 18 those refs are silently stripped, so every ref-based API in the library is dead without an error. See the **Breaking** entry under 4.0.0 in `CHANGELOG.md` (#150).

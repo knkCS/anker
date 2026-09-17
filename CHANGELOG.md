@@ -20,8 +20,12 @@ All notable changes to `@knkcs/anker` are documented in this file. The format fo
   because pagination is external, moving a row across pages is out of scope,
   and a manual order should not be offered on a table that also sorts.
 
-  `@dnd-kit/core`, `@dnd-kit/sortable` and `@dnd-kit/utilities` are new regular
-  dependencies (bundled, not peers) — consumers install nothing.
+  `@dnd-kit/core`, `@dnd-kit/sortable` and `@dnd-kit/utilities` are new **peer**
+  dependencies: a consumer installs them alongside anker. They are peers rather
+  than bundled dependencies because fieldkit also ships dnd-kit, and a project
+  using anker and fieldkit together would otherwise load two dnd-kit runtimes —
+  whose contexts do not interoperate. Since no released anker ever bundled
+  dnd-kit, this adds a requirement rather than changing one (#743).
 
 ## 5.3.0 — 2026-09-15
 
