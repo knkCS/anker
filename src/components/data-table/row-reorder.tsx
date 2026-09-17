@@ -23,9 +23,22 @@ export interface ReorderableRow {
 }
 
 /**
+ * 1-based position of a row in the visible order — what a person sees and what
+ * a screen reader is told. The single source for both the handle labels and the
+ * live-region announcements, so the two can never disagree.
+ */
+export function rowPosition(
+	rows: readonly { id: UniqueIdentifier }[],
+	id: UniqueIdentifier,
+): number {
+	return rows.findIndex((row) => row.id === id) + 1;
+}
+
+/**
  * Translates a dnd-kit drag result into the `(fromIndex, toIndex)` pair that
- * `onRowReorder` reports. Both indices address the consumer's `data` array, so
- * the move stays meaningful even when the visible order is sorted.
+ * `onRowReorder` reports. Both indices address the consumer's `data` array —
+ * which is the visible order too, because a manually ordered table is not also
+ * sorted (see the prop docs).
  *
  * Returns `null` when the drag is a no-op: no drop target, an unknown row, or
  * a row dropped on itself.
@@ -40,7 +53,6 @@ export function resolveRowReorder(
 	const from = rows.find((row) => row.id === activeId);
 	const to = rows.find((row) => row.id === overId);
 	if (!from || !to) return null;
-	if (from.index === to.index) return null;
 
 	return { fromIndex: from.index, toIndex: to.index };
 }
@@ -58,32 +70,56 @@ export const reorderScreenReaderInstructions: ScreenReaderInstructions = {
  * positions because that is what a screen-reader user perceives.
  */
 export function buildReorderAnnouncements(
-	getRows: () => ReorderableRow[],
+	rows: readonly ReorderableRow[],
 ): Announcements {
-	const positionOf = (id: UniqueIdentifier) =>
-		getRows().findIndex((row) => row.id === id) + 1;
-	const cancelled = (activeId: UniqueIdentifier) =>
-		`Reordering cancelled. Row ${String(positionOf(activeId))} returned to its original position.`;
+	const total = String(rows.length);
+	// A row that is no longer rendered has no position to announce; saying
+	// nothing beats announcing "Row 0".
+	const at = (id: UniqueIdentifier): string | undefined => {
+		const position = rowPosition(rows, id);
+		return position === 0 ? undefined : String(position);
+	};
+	const cancelled = (activeId: UniqueIdentifier) => {
+		const from = at(activeId);
+		return from === undefined
+			? undefined
+			: `Reordering cancelled. Row ${from} returned to its original position.`;
+	};
 
 	return {
-		onDragStart: ({ active }) =>
-			`Picked up row ${String(positionOf(active.id))} of ${String(getRows().length)}. Use the arrow keys to move it, space to drop it, escape to cancel.`,
-		onDragOver: ({ active, over }) =>
-			over
-				? `Row ${String(positionOf(active.id))} moved to position ${String(positionOf(over.id))} of ${String(getRows().length)}.`
-				: undefined,
-		onDragEnd: ({ active, over }) =>
-			over
-				? `Row dropped at position ${String(positionOf(over.id))} of ${String(getRows().length)}.`
-				: cancelled(active.id),
+		onDragStart: ({ active }) => {
+			const from = at(active.id);
+			return from === undefined
+				? undefined
+				: `Picked up row ${from} of ${total}. Use the arrow keys to move it, space to drop it, escape to cancel.`;
+		},
+		onDragOver: ({ active, over }) => {
+			if (!over) return undefined;
+			const from = at(active.id);
+			const to = at(over.id);
+			return from === undefined || to === undefined
+				? undefined
+				: `Row ${from} moved to position ${to} of ${total}.`;
+		},
+		onDragEnd: ({ active, over }) => {
+			if (!over) return cancelled(active.id);
+			const to = at(over.id);
+			if (to === undefined) return undefined;
+			// Dropped where it started — say so rather than imply a move.
+			return active.id === over.id
+				? `Row returned to position ${to} of ${total}.`
+				: `Row dropped at position ${to} of ${total}.`;
+		},
 		onDragCancel: ({ active }) => cancelled(active.id),
 	};
 }
 
+type Sortable = ReturnType<typeof useSortable>;
+
 interface RowDragHandleValue {
-	attributes: Record<string, unknown>;
-	listeners: Record<string, unknown> | undefined;
-	setActivatorNodeRef: (element: HTMLElement | null) => void;
+	attributes: Sortable["attributes"];
+	listeners: Sortable["listeners"];
+	setActivatorNodeRef: Sortable["setActivatorNodeRef"];
 }
 
 const RowDragHandleContext = createContext<RowDragHandleValue | null>(null);
@@ -151,11 +187,7 @@ export const SortableTableRow: React.FC<SortableTableRowProps> = ({
 	} = useSortable({ id });
 
 	const value = useMemo<RowDragHandleValue>(
-		() => ({
-			attributes: attributes as unknown as Record<string, unknown>,
-			listeners: listeners as unknown as Record<string, unknown> | undefined,
-			setActivatorNodeRef,
-		}),
+		() => ({ attributes, listeners, setActivatorNodeRef }),
 		[attributes, listeners, setActivatorNodeRef],
 	);
 
@@ -189,10 +221,10 @@ export function createRowReorderColumn<
 		maxSize: 52,
 		enableSorting: false,
 		header: () => <Box srOnly>Reorder</Box>,
-		cell: ({ row, table }) => {
-			const position =
-				table.getRowModel().rows.findIndex((r) => r.id === row.id) + 1;
-			return <RowDragHandle label={`Reorder row ${String(position)}`} />;
-		},
+		cell: ({ row, table }) => (
+			<RowDragHandle
+				label={`Reorder row ${String(rowPosition(table.getRowModel().rows, row.id))}`}
+			/>
+		),
 	};
 }

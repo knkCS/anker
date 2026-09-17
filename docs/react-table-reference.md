@@ -254,7 +254,9 @@ const [items, setItems] = useState(initialItems);
 When `onRowReorder` is provided, DataTable injects a `_reorder` drag-handle column at the start (before `_select`) and wraps the table in a dnd-kit `DndContext` + `SortableContext` with a pointer sensor and a keyboard sensor. Without the callback nothing is injected and nothing is wrapped.
 
 - **Controlled, like sorting and selection.** DataTable reports the move; the consumer applies it to its own array. Anker never mutates `data`.
-- **Indices address `data`.** `fromIndex` / `toIndex` are `row.index` values, not visible positions, so a sorted table still reports a move the consumer can apply. (Sorting plus a manual order is rarely a coherent combination — prefer one or the other.)
+- **Indices address `data`.** `fromIndex` / `toIndex` are `row.index` values, so the consumer can apply them to the array it passed in without translating anything.
+- **Not alongside sorting.** A manual order and a sort order are two different orders. Reorder assumes an unsorted table, where the visible order *is* `data`'s order; under an active sort the reported indices still address `data`, so the row will not land where it was visually dropped. Offer one or the other, never both on the same table.
+- **`data-dragging`** is set on the `<tr>` in flight, for styling.
 - **Within the rendered page.** Pagination is external, so a drag can only land on a row that is currently rendered. Cross-page moves are out of scope.
 - **Accessibility** is dnd-kit's: each handle is a labelled button with `aria-roledescription="sortable"` and keyboard instructions, and pick-up/move/drop are announced in a live region. The announcement wording lives in `buildReorderAnnouncements`.
 

@@ -409,6 +409,42 @@ describe("DataTable row reorder", () => {
 		expect(handleRowClick).not.toHaveBeenCalled();
 	});
 
+	it("reports indices into the rendered page, not the whole dataset", async () => {
+		const handleReorder = vi.fn();
+		const user = userEvent.setup();
+		const allRows: SampleRow[] = Array.from({ length: 9 }, (_, i) => ({
+			id: String(i + 1),
+			name: `Row ${String(i + 1)}`,
+			age: 20 + i,
+		}));
+		// Pagination is external: the consumer slices, so page 2 is rows 4-6 and
+		// the table only ever sees — and only ever reports — those three.
+		const pageTwo = allRows.slice(3, 6);
+
+		renderWithChakra(
+			<DataTable
+				columns={sampleColumns}
+				data={pageTwo}
+				total={allRows.length}
+				page={2}
+				pageSize={3}
+				onPageChange={vi.fn()}
+				getRowId={(row) => row.id}
+				onRowReorder={handleReorder}
+			/>,
+		);
+		layoutRows();
+
+		const handle = screen.getByRole("button", { name: "Reorder row 1" });
+		handle.focus();
+		await user.keyboard("[Space]");
+		await user.keyboard("[ArrowDown]");
+		await user.keyboard("[Space]");
+
+		// "Row 4" moved one down within the page — 0 and 1 of the slice, not 3 and 4.
+		expect(handleReorder).toHaveBeenCalledWith(0, 1);
+	});
+
 	it("keeps the selection column alongside the handle column", () => {
 		renderWithChakra(
 			<DataTable

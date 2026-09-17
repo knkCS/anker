@@ -16,9 +16,9 @@ All notable changes to `@knkcs/anker` are documented in this file. The format fo
   The table stays controlled, like sorting and selection: it reports the move
   and the consumer applies it to its own array (`arrayMove` from
   `@dnd-kit/sortable`, say). Both indices are `row.index` values — indices into
-  the `data` you passed — so a sorted table still reports a move that can be
-  applied. Reordering works within the rows currently rendered; because
-  pagination is external, moving a row across pages is out of scope.
+  the `data` you passed. Reordering works within the rows currently rendered;
+  because pagination is external, moving a row across pages is out of scope,
+  and a manual order should not be offered on a table that also sorts.
 
   `@dnd-kit/core`, `@dnd-kit/sortable` and `@dnd-kit/utilities` are new regular
   dependencies (bundled, not peers) — consumers install nothing.

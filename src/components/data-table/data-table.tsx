@@ -42,6 +42,9 @@ import {
 	SortableTableRow,
 } from "./row-reorder";
 
+/** Column id of the checkbox column injected when `selectable` is set. */
+const SELECT_COLUMN_ID = "_select";
+
 export interface DataTableProps<T extends Record<string, unknown>> {
 	/** Column definitions for TanStack Table */
 	columns: ColumnDef<T, unknown>[];
@@ -82,12 +85,19 @@ export interface DataTableProps<T extends Record<string, unknown>> {
 	 * Both indices address the `data` array you passed in — the table stays
 	 * controlled, so apply the move to your own data yourself. Reordering works
 	 * within the rows currently rendered; moving a row across pages is out of scope.
+	 *
+	 * A manual order and a sort order are two different orders: reorder assumes an
+	 * unsorted table, where the visible order *is* `data`'s order. Don't offer both
+	 * on the same table.
 	 */
 	onRowReorder?: (fromIndex: number, toIndex: number) => void;
 }
 
 /** Internal columns rendered at a fixed width rather than flexing. */
-const FIXED_WIDTH_COLUMN_IDS = new Set<string>(["_select", REORDER_COLUMN_ID]);
+const FIXED_WIDTH_COLUMN_IDS = new Set<string>([
+	SELECT_COLUMN_ID,
+	REORDER_COLUMN_ID,
+]);
 
 const LOADING_ROW_COUNT = 5;
 
@@ -118,7 +128,7 @@ function DataTableInner<T extends Record<string, unknown>>(
 
 	const selectionColumn = useMemo<ColumnDef<T, unknown>>(
 		() => ({
-			id: "_select",
+			id: SELECT_COLUMN_ID,
 			size: 40,
 			minSize: 40,
 			maxSize: 40,
@@ -199,7 +209,7 @@ function DataTableInner<T extends Record<string, unknown>>(
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
-			// Let a click on the handle still reach the row; only a real drag wins.
+			// A press that never travels this far stays a click, not a drag.
 			activationConstraint: { distance: 4 },
 		}),
 		useSensor(KeyboardSensor, {
@@ -207,30 +217,32 @@ function DataTableInner<T extends Record<string, unknown>>(
 		}),
 	);
 
-	const getReorderableRows = useCallback(
-		(): ReorderableRow[] =>
-			table.getRowModel().rows.map((row) => ({ id: row.id, index: row.index })),
-		[table],
+	const reorderableRows = useMemo<ReorderableRow[]>(
+		() => rows.map((row) => ({ id: row.id, index: row.index })),
+		[rows],
 	);
 
 	const announcements = useMemo(
-		() => buildReorderAnnouncements(getReorderableRows),
-		[getReorderableRows],
+		() => buildReorderAnnouncements(reorderableRows),
+		[reorderableRows],
 	);
 
 	const handleDragEnd = useCallback(
 		(event: DragEndEvent) => {
 			const move = resolveRowReorder(
-				getReorderableRows(),
+				reorderableRows,
 				event.active.id,
 				event.over?.id,
 			);
 			if (move) onRowReorder?.(move.fromIndex, move.toIndex);
 		},
-		[getReorderableRows, onRowReorder],
+		[reorderableRows, onRowReorder],
 	);
 
-	const rowIds = useMemo(() => rows.map((row) => row.id), [rows]);
+	const rowIds = useMemo(
+		() => reorderableRows.map((row) => row.id),
+		[reorderableRows],
+	);
 
 	const renderRow = (row: (typeof rows)[number]) => {
 		const rowProps = {

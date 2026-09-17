@@ -47,10 +47,17 @@ callback no handle column is rendered and nothing else changes.
 
 The table stays **controlled**: it reports the move, you apply it to your own
 data (e.g. with `arrayMove` from `@dnd-kit/sortable`). Both indices address the
-`data` array you passed in, so they stay meaningful even when the visible order
-is sorted — although sorting and a manual order are rarely both useful at once.
+`data` array you passed in.
 
 Pair it with `getRowId` so row identity survives the re-render after the move.
+
+**Don't combine reorder with sorting.** A manual order and a sort order are two
+different orders. Reorder assumes an unsorted table, where the visible order
+*is* `data`'s order; under an active sort the reported indices still address
+`data`, so the row will not land where it was visually dropped.
+
+While a row is being dragged its `<tr>` carries `data-dragging` — a hook for
+styling the row in flight.
 
 **Paging:** reordering works within the rows currently rendered. Dragging a row
 onto another page is out of scope — page the data yourself and, if you need

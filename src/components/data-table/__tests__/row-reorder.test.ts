@@ -3,6 +3,7 @@ import {
 	buildReorderAnnouncements,
 	type ReorderableRow,
 	resolveRowReorder,
+	rowPosition,
 } from "../row-reorder";
 
 const rows: ReorderableRow[] = [
@@ -23,15 +24,17 @@ describe("resolveRowReorder", () => {
 		});
 	});
 
-	it("reports the data index, not the visible position, when rows are sorted", () => {
-		// Visible order c, a, b — each row keeps its index into `data`.
-		const sorted: ReorderableRow[] = [
+	it("reports the data index, never the visible position", () => {
+		// Visible order c, a, b — each row keeps its index into `data`. Reorder is
+		// not meant to be offered alongside sorting, but the contract is still that
+		// the indices address `data`, so a consumer never has to translate them.
+		const shuffled: ReorderableRow[] = [
 			{ id: "c", index: 2 },
 			{ id: "a", index: 0 },
 			{ id: "b", index: 1 },
 		];
 
-		expect(resolveRowReorder(sorted, "c", "b")).toEqual({
+		expect(resolveRowReorder(shuffled, "c", "b")).toEqual({
 			fromIndex: 2,
 			toIndex: 1,
 		});
@@ -52,8 +55,19 @@ describe("resolveRowReorder", () => {
 	});
 });
 
+describe("rowPosition", () => {
+	it("reports the 1-based visible position", () => {
+		expect(rowPosition(rows, "a")).toBe(1);
+		expect(rowPosition(rows, "c")).toBe(3);
+	});
+
+	it("reports 0 for a row that is not rendered", () => {
+		expect(rowPosition(rows, "zzz")).toBe(0);
+	});
+});
+
 describe("buildReorderAnnouncements", () => {
-	const announcements = buildReorderAnnouncements(() => rows);
+	const announcements = buildReorderAnnouncements(rows);
 	const active = { id: "a" } as never;
 	const over = { id: "c" } as never;
 
@@ -71,6 +85,23 @@ describe("buildReorderAnnouncements", () => {
 		expect(announcements.onDragEnd({ active, over })).toBe(
 			"Row dropped at position 3 of 3.",
 		);
+	});
+
+	it("says the row came back when it is dropped where it started", () => {
+		expect(announcements.onDragEnd({ active, over: active })).toBe(
+			"Row returned to position 1 of 3.",
+		);
+	});
+
+	it("says nothing about a row that is no longer rendered", () => {
+		const gone = { id: "zzz" } as never;
+
+		expect(announcements.onDragStart({ active: gone })).toBeUndefined();
+		expect(announcements.onDragOver({ active, over: gone })).toBeUndefined();
+		expect(announcements.onDragEnd({ active, over: gone })).toBeUndefined();
+		expect(
+			announcements.onDragCancel({ active: gone, over: null }),
+		).toBeUndefined();
 	});
 
 	it("announces a cancelled drag", () => {
