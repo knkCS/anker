@@ -193,7 +193,7 @@ import system from "@knkcs/anker/theme";
 import { Accordion, Alert, Avatar, Breadcrumb, Menu, Popover, Skeleton, Spinner, Tooltip } from "@knkcs/anker/primitives";
 
 // Higher-level composites (card, drawer, modal, pagination, stepper, table, timeline)
-import { Card, Drawer, Modal, Pagination, Stepper, Timeline } from "@knkcs/anker/components";
+import { Card, DrawerRoot, Modal, Pagination, Stepper, Timeline } from "@knkcs/anker/components";
 
 // Small reusable units (persona, badges, search, datetime, clipboard, data list)
 import { StatusBadge, Persona, SearchInput, ClipboardButton, DataList } from "@knkcs/anker/atoms";
@@ -230,7 +230,7 @@ The UI primary anchor (`primary.700` = `#134788`) is intentionally one step ligh
 
 | Component | Prop | Description |
 |-----------|------|-------------|
-| `Modal`, `Drawer` | `loading` | Shows spinner on save button during async operations |
+| `Modal`, `DrawerRoot` | `loading` | Shows spinner on save button during async operations |
 | `Table`, `ArrayField` | `emptyState` | Content to display when there are no items |
 | `Card` | `title`, `header`, `footer` | Slot props for structured card layout |
 | `Persona` | `interactive` | Adds hover state and pointer cursor |
