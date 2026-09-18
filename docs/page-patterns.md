@@ -25,6 +25,13 @@ templates may be added as new page types are discovered, but existing
 templates will not change their slot contract within a 1.x line. Major
 contract changes ride a major version.
 
+**Process.** Check this document — and `design-system.md` for the visual
+language — before adding a new screen or component pattern, not only once
+something already looks wrong. A component that exists and is used (e.g.
+`Drawer`, §10) but isn't covered here yet is exactly the gap this document
+exists to close; ask here first rather than shipping the divergence and
+writing it down after the fact.
+
 **Relationship to other docs.**
 
 - [`docs/design-system.md`](./design-system.md) — token system, typography,
@@ -1114,13 +1121,48 @@ Two patterns:
 Never both. A PageHeader save + a Card save on the same screen is a UX
 trap (which one persists?).
 
-### Inline edit vs. full-page edit
+### Inline edit vs. drawer edit vs. full-page edit
 
 - **Inline edit (modal)**: small forms, ≤ 6 fields, no nested data.
   Use `<Modal>`.
+- **Drawer edit (`DrawerRoot`)**: editing a *child item that has no route
+  of its own* — something that only ever exists nested inside a parent's
+  detail page (a field on a spec, a step inside a template). Use
+  `DrawerRoot` from `@knkcs/anker/components`.
 - **Full-page edit (DetailPageTemplate)**: large forms, nested data,
-  dependent fields. Use a separate page rendered by
+  dependent fields — or the thing being edited is itself an independently
+  addressable entity (see the rule below). Use a separate page rendered by
   `DetailPageTemplate` with the form Card-wrapped in the body.
+
+> **The index/detail rule (required):** an index page whose rows are
+> independently addressable entities — each has its own identity and
+> belongs in its own breadcrumb — gets `onRowClick` wired to a
+> `DetailPageTemplate` route (see §12.1's contract line: *"`onRowClick` —
+> when a detail page exists"*). It never gets a drawer for the primary edit
+> action. A drawer is for the other case: editing something with **no
+> route of its own**, nested inside a parent's detail page.
+>
+> The evidence already in the codebase: taskhub-ui's Task Types, Groups
+> and Calendars index screens all wire `DataTable onRowClick` to a
+> `DetailPageTemplate` route rather than a drawer, and each detail page
+> reports a `ContextRail` (via `usePageRail`) for its quick actions —
+> `Delete`, plus `Set-default` where the entity has one. Save placement on
+> the detail side follows the "Save-button placement" rule above rather
+> than a single shape: `task-type-detail.tsx` saves from a Card footer
+> because its page holds several tab sections, while `group-detail.tsx`
+> and `calendar-detail.tsx` save from the `PageHeader`'s `actions` slot
+> because the form is the whole page. What's constant across all three is
+> narrower and is the point of this rule: none of their index screens ever
+> offers `Edit` in the "…" row menu — only secondary actions do (`Delete`
+> on all three, plus `Set-default` on Calendars) — and opening/editing is
+> the row click's job.
+>
+> Getting this backwards doesn't fail to compile or to render — a drawer
+> mounted over an index of independently addressable rows works fine on
+> its own. What it costs is exactly what §1 warns about: the record has no
+> address of its own, so it can't be deep-linked or breadcrumbed the way
+> every other top-level entity in the shell is, and it will look out of
+> place once module federation renders solutions side by side.
 
 ---
 
