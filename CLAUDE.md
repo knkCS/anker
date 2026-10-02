@@ -10,7 +10,7 @@ Anker is the shared UI component library for the knk software group, extracted a
 
 ### Package Structure
 
-Single npm package (`@knkcs/anker`) with subpath exports organized in ten layers:
+Single npm package (`@knkcs/anker`) with subpath exports organized in eleven layers:
 
 1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 30 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
 2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
@@ -22,6 +22,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in ten layers
 8. **`/templates`** — Page-level layouts: AppShell, SubNavLayout, and page templates (index, detail, settings, auth, dashboard, marketing, error/loading/maintenance).
 9. **`/navigation`** — Unsaved-changes navigation guards: `UnsavedChangesGuard`, `useUnsavedChangesBlocker`, tab dirty context.
 10. **`/host`** — The host contract (ADR 0003): `HostProvider` (mounted once by whoever draws the page frame), `usePageFrame` (a screen reports structured page-frame state mirroring `PageHeaderProps`), `usePageRail` (a screen reports its side-rail node on its own channel; re-exported by `/templates`), `useHostIdentity` (`HostIdentity`: user id, workspace id, members accessor), `TestHost` for package tests. No-op / empty default without a provider. The page templates report through it; `AppShell` is its first consumer.
+11. **`/rules`** — `checkAnkerRules(sources)`: the mechanical half of `CLAUDE-ANKER.md` (raw Chakra import, hex colour, `SettingsPageTemplate` without `tabs`, `maxW` on a `Card`) for a consuming package's `anker-rules.test.ts`. Pure string checks — no React, no Chakra, no file system; the package reads its own sources. No components.
 
 ### Key Technology Choices
 
@@ -57,6 +58,7 @@ src/
 ├── templates/       # AppShell, SubNavLayout, page templates
 ├── navigation/      # Unsaved-changes guards, tab dirty context
 ├── host/            # Host contract: HostProvider, usePageFrame, useHostIdentity, TestHost
+├── rules/           # checkAnkerRules — CLAUDE-ANKER.md's checkable rules for consumers' tests
 └── (no root index.ts — consumers use subpath imports)
 ```
 

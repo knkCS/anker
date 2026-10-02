@@ -50,6 +50,10 @@
     "./host": {
       "import": "./dist/host/index.js",
       "types": "./dist/host/index.d.ts"
+    },
+    "./rules": {
+      "import": "./dist/rules/index.js",
+      "types": "./dist/rules/index.d.ts"
     }
   },
   "files": [

@@ -12,6 +12,7 @@ export default defineConfig({
     "templates/index": "src/templates/index.ts",
     "navigation/index": "src/navigation/index.ts",
     "host/index": "src/host/index.ts",
+    "rules/index": "src/rules/index.ts",
   },
   format: ["esm"],
   dts: true,

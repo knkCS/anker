@@ -7,7 +7,7 @@ The shared UI component library (`@knkcs/anker`) for the knk software group: des
 ### Architecture
 
 **Layer**:
-One of the package's ten subpath exports: `theme`, `primitives`, `atoms`, `components`, `forms`, `feedback`, `dashboard`, `templates`, `navigation`, `host`. Every component has exactly one layer as its canonical home; any other layer may only re-export it.
+One of the package's eleven subpath exports: `theme`, `primitives`, `atoms`, `components`, `forms`, `feedback`, `dashboard`, `templates`, `navigation`, `host`, `rules` (the one that holds no components — `checkAnkerRules` for a consuming package's tests). Every component has exactly one layer as its canonical home; any other layer may only re-export it.
 _Avoid_: module, section
 
 **Primitive**:
