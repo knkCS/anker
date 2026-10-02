@@ -13,6 +13,13 @@ All notable changes to `@knkcs/anker` are documented in this file. The format fo
   handler that persists them, and to feed `UnsavedChangesGuard`. Additive for
   every caller of the hook; code that constructs a `TabDirtyState` by hand
   (a test double, say) now has to supply the field.
+- **`@knkcs/anker/rules` — `checkAnkerRules(sources)`** (#230): the mechanical
+  half of `CLAUDE-ANKER.md` for a consuming package's `anker-rules.test.ts`.
+  It flags a raw `@chakra-ui` import, a hex colour, a `SettingsPageTemplate`
+  rendered without `tabs`, and `maxW` on a `Card`, with file and line. Pure
+  string checks with no React or file-system access: the package reads its
+  own sources and asserts the result is empty, so the checks follow the
+  installed anker version instead of a hand-copied list.
 
 ### Documentation
 
@@ -26,6 +33,12 @@ All notable changes to `@knkcs/anker` are documented in this file. The format fo
   tabs are forms keeps that rail. `docs/page-patterns.md` §4 and §10,
   `CLAUDE-ANKER.md` and the Dirty-surfaces guide (which no longer clears a
   tab's dirty mark on unmount) are updated to match.
+- **`CLAUDE-ANKER.md` states the page-layout rules package authors kept
+  missing** (#230), each with its reason: tab bodies are flush and a form tab
+  pads itself, `SettingsPageTemplate` needs ≥ 2 tabs, no `maxW` on a Card,
+  quick actions go in the rail. It names which of them `checkAnkerRules`
+  checks and which stay prose, and points at taskhub-ui's task type detail as
+  the worked example.
 
 ## 5.4.0 — 2026-09-17
 

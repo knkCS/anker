@@ -71,7 +71,7 @@ consumers run React 19. See `CHANGELOG.md` for migration notes if you're on 18.
 - **No animations over 300ms.** Outside marketing/onboarding. Why: long animations slow down power users; the design language values immediacy.
 - **No Chakra v2 patterns.** No `extendTheme`, `colorScheme`, `useColorMode` from `@chakra-ui/react`. Use `createSystem`, `colorPalette`, `next-themes`. Why: anker is built on Chakra v3 throughout; v2 patterns either error at build time or silently no-op.
 - **No new color introductions.** If a color isn't in `colors.ts`, it doesn't exist. Why: the palette is closed by design — adding ad-hoc colors fragments the system.
-- **No `maxW` on a Card inside a settings/detail template body.** The template controls width; per-card overrides break visual rhythm and produce orphaned narrow cards on full-width pages. Why: the template is the contract for body width — cards are the contract for content surfacing.
+- **No `maxW` on a Card inside a settings/detail template body.** See **Page layout** under Page templates.
 - **No inline create-forms above a DataTable.** Use a header-action button (or `usePageActions` from a tab — the tab's `<Toolbar>` when the header carries the page's Save) that opens a `Modal`. Why: inline forms steal vertical space, drift from the master pattern, and split form state from the rest of the page.
 - **Don't leave two `usePageActions` callers mounted at once.** For a tab page use nav-link tabs: a `<Tabs.Root value={current}>` containing only a `<Tabs.List>`, passed to the template's `tabs` prop, with the router rendering the active panel as `children` — only the active panel is ever mounted. If you own a `<Tabs.Root>` with `<Tabs.Content>` panels in the body, set `lazyMount unmountOnExit` yourself. Why: the page-header actions slot holds a single unkeyed registration, so mounted callers overwrite each other on every render — the header ends up showing an inactive tab's button (the "stuck Add button" fixed in anker 1.12). No template enforces this any more; `bodyTabs`, which applied the guard for you, was removed with the page-header redesign in v2.2.0. Pinned by the `usePageActions collision` tests in `detail-page-template.test.tsx`, mirrored for `SettingsPageTemplate`.
 - **Don't wrap Card children in `<Box p="N">`.** `<Card>` body has built-in padding via Chakra's CardBody (~24px). Wrapping in `<Box p>` doubles it. Pass content directly (use `<Stack>` for layout). Why: a uniform Card body padding is the visual contract; per-Card overrides break visual rhythm and make Cards look heavier than the rest of the design system.
@@ -105,6 +105,83 @@ Available templates:
 - For multi-resource navigation inside a tab body, use `<SubNavLayout>` rather than rolling your own master-detail. It owns collapse state, persistence, and the divider — wire `<NavList.Item asChild>` to `<NavLink>` for URL deep-linking.
 
 Full spec with composition diagrams, slot tables, and authoring rules: `docs/page-patterns.md` in the anker repo (linked from the GitHub Pages docs site).
+
+### Page layout: the rules packages most often break
+
+- **Tab bodies are flush; a form tab pads itself.** `DetailPageTemplate` and
+  `IndexPageTemplate` render the body unpadded. A tab that is a `DataTable` or
+  a full-width editor renders as it is, reaching both edges. A form tab wraps
+  its own content in `<Box px="8" py="6">`. **Never pad every tab in one
+  wrapper** around the router outlet or `children`. Why: a shared wrapper
+  insets every table on the page, and undoing it from inside with `mx="-8"`
+  couples the tab to the wrapper's exact value. `px="8"` is the `PageHeader`'s
+  own inset, so a padded card lines up with the title above it.
+- **`SettingsPageTemplate` needs ≥ 2 tabs**; with one tab or none, use
+  `DetailPageTemplate`. Why: the settings template assumes a tab strip that
+  switches between settings sections. Without tabs it is a detail page with
+  the wrong body defaults (padded, capped at `3xl`). On a settings page with a
+  table tab, pass `bodyPadding="none"` and let the form tabs pad themselves,
+  as above.
+- **No `maxW` on a Card in a template body.** Why: the template owns the body
+  width (`maxBodyWidth`). A Card that caps itself sits orphaned and narrow on
+  a full-width page, next to siblings that don't.
+- **Quick actions go in the rail, not the header.** What you do *to* the
+  entity (cut a release, duplicate, archive) belongs in the rail's Actions
+  section, and the header keeps the one Save. Why, and how: the next section
+  and ADR 0004 (`docs/adr/0004-one-save-in-the-header-entity-actions-in-the-rail.md`).
+
+**Worked example:** taskhub-ui's task type detail
+(`packages/taskhub-ui/src/components/task-types/task-type-detail.tsx` in
+knkCS/taskhub). Its form tabs sit in a `DetailBody` (`<Box px="8" py="6">`),
+its Versions `DataTable` is flush, and its quick actions are in a
+`ContextRail`. Copy its layout but not its Save: it saves from a Card footer,
+which predates ADR 0004.
+
+**Checked, or prose.** `checkAnkerRules` (below) catches `SettingsPageTemplate`
+without `tabs` and `maxW` on a `Card`. Padding and rail placement are judgement
+calls, not checkable from source text, so they stay prose. Read them before
+you lay out a page.
+
+### Checking the rules: `anker-rules.test.ts`
+
+`@knkcs/anker/rules` exports `checkAnkerRules(sources)`, the mechanical half of
+this file. Hand it your package's sources and assert the result is empty:
+
+```ts
+// src/anker-rules.test.ts
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { checkAnkerRules } from "@knkcs/anker/rules";
+import { expect, it } from "vitest";
+
+const SRC = path.resolve(__dirname);
+const sources = (dir: string): string[] =>
+	readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+		const full = path.join(dir, e.name);
+		if (e.isDirectory()) return sources(full);
+		return /\.(ts|tsx)$/.test(e.name) && !/\.test\.tsx?$/.test(e.name) ? [full] : [];
+	});
+
+it("follows anker's rules", () => {
+	const files = sources(SRC).map((f) => ({ file: path.relative(SRC, f), text: readFileSync(f, "utf8") }));
+	expect(files.length).toBeGreaterThan(0);
+	expect(checkAnkerRules(files)).toEqual([]);
+});
+```
+
+Each violation carries `rule`, `file`, `line` and a `message` that gives the
+reason. The rules are:
+
+| `rule` | Flags |
+|---|---|
+| `no-raw-chakra` | an import from `@chakra-ui/*` |
+| `no-hex-colour` | a quoted hex colour literal |
+| `settings-template-needs-tabs` | `<SettingsPageTemplate>` without a `tabs` prop (a `{...spread}` passes) |
+| `no-card-max-width` | `maxW` / `maxWidth` on `<Card>` |
+
+The checks read text, not an AST, and skip comments. Because the checks come
+from the installed anker, a new rule reaches your test when you upgrade, with
+no copy-paste.
 
 ### One Save in the header; the entity's actions in the rail (ADR 0004)
 
@@ -609,6 +686,7 @@ you supply and knows nothing about transports, endpoints or auth.
 - Templates: `import { AppShell, IndexPageTemplate, … } from "@knkcs/anker/templates"`
 - Theme entry: `import system from "@knkcs/anker/theme"`
 - Provider entry: `import { Provider } from "@knkcs/anker/primitives"`
+- Rules check: `import { checkAnkerRules } from "@knkcs/anker/rules"` (see **Checking the rules** under Page templates)
 - Anker development rules (for working *on* anker, not consuming it): `node_modules/@knkcs/anker/CLAUDE.md` is **not** included in the package; see the anker GitHub repo
 
 ## Dashboard & Widgets
