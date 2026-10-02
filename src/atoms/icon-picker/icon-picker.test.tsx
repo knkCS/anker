@@ -267,6 +267,18 @@ describe("IconPicker", () => {
 		).not.toBeInTheDocument();
 	});
 
+	it("reports a blur when a pick closes the popover", async () => {
+		const onBlur = vi.fn();
+		const { user } = renderPicker({ onBlur });
+		await open(user);
+		await user.type(
+			screen.getByRole("combobox", { name: "Search icons" }),
+			"banknote",
+		);
+		await user.click(await screen.findByRole("option", { name: "banknote" }));
+		expect(onBlur).toHaveBeenCalled();
+	});
+
 	it("does not open when disabled or read-only", async () => {
 		const { user } = renderPicker({ disabled: true });
 		expect(screen.getByTestId("icon-picker-trigger")).toBeDisabled();

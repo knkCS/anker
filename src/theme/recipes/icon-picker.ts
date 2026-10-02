@@ -78,8 +78,9 @@ export const iconPickerTheme = defineSlotRecipe({
 			display: "flex",
 			flexDirection: "column",
 			gap: 2,
-			// Eight 44px cells plus gaps, plus the panel's padding.
-			width: "calc(8 * 44px + 7 * 4px + 2 * var(--chakra-spacing-3))",
+			// Eight 44px cells plus gaps, the panel's padding, and the gutter the
+			// viewport reserves for an always-visible scrollbar (Windows).
+			width: "calc(8 * 44px + 7 * 4px + 2 * var(--chakra-spacing-3) + 16px)",
 			maxWidth: "calc(100vw - 2rem)",
 			padding: 3,
 		},
@@ -115,6 +116,9 @@ export const iconPickerTheme = defineSlotRecipe({
 		viewport: {
 			height: "18rem",
 			overflowY: "auto",
+			overflowX: "hidden",
+			// Reserve the scrollbar's room so it never squeezes the 8th column.
+			scrollbarGutter: "stable",
 			position: "relative",
 			borderRadius: "md",
 			_focusVisible: { boxShadow: "focus-ring", outline: "none" },

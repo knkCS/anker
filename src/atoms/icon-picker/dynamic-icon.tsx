@@ -30,15 +30,22 @@ export const DynamicIcon = ({
 	...props
 }: DynamicIconProps) => {
 	const key = name?.trim() ?? "";
+	// The key whose load settled without an answer in the cache — a chunk
+	// that failed. It renders the fallback now; a later mount retries.
+	const [failedKey, setFailedKey] = useState<string | null>(null);
 	const [, setLoaded] = useState(0);
-	const icon: LucideIcon | null | undefined = key ? getLoadedIcon(key) : null;
+	const cached: LucideIcon | null | undefined = key ? getLoadedIcon(key) : null;
+	const icon = cached === undefined && failedKey === key ? null : cached;
 
 	useEffect(() => {
 		if (!key || getLoadedIcon(key) !== undefined) return;
 		let live = true;
 		loadIcon(key).then(() => {
-			// The module cache now holds the answer; re-render to read it.
-			if (live) setLoaded((n) => n + 1);
+			if (!live) return;
+			// The module cache now holds the answer; re-render to read it. No
+			// answer means the chunk failed: show the fallback meanwhile.
+			if (getLoadedIcon(key) === undefined) setFailedKey(key);
+			else setLoaded((n) => n + 1);
 		});
 		return () => {
 			live = false;

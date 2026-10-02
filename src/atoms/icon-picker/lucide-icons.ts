@@ -50,9 +50,11 @@ export async function resolveIconName(name: string): Promise<string | null> {
 	try {
 		const target = (await aliasesPromise)[name];
 		return target && isIconName(target) ? target : null;
-	} catch {
+	} catch (error) {
+		// A failed alias chunk is not "unknown": rethrow so `loadIcon` leaves
+		// the name uncached and a later mount retries.
 		aliasesPromise = null;
-		return null;
+		throw error;
 	}
 }
 

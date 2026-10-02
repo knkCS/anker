@@ -133,9 +133,12 @@ export const IconPicker = ({
 				);
 			}
 			onChange(picked);
+			// A close driven by `open` never reaches onOpenChange, so the blur
+			// that marks a form field touched is reported here.
 			setOpen(false);
+			onBlur?.();
 		},
-		[onChange, recentStorageKey, maxRecent],
+		[onChange, onBlur, recentStorageKey, maxRecent],
 	);
 
 	const describedBy =
