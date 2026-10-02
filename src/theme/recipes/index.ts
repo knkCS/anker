@@ -8,6 +8,7 @@ export { conversationListItemTheme as conversationListItem } from "./conversatio
 export { dialog } from "./dialog";
 export { drawerTheme as drawer } from "./drawer";
 export { default as formLabel } from "./form-label";
+export { iconPickerTheme as iconPicker } from "./icon-picker";
 export { inputAddonTheme as inputAddon, inputTheme as input } from "./input";
 export { menuTheme as menu } from "./menu";
 export { messageTheme as message } from "./message";

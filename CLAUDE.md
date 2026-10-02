@@ -15,8 +15,8 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in eleven lay
 1. **`/theme`** — Chakra UI v3 design tokens, color scales, semantic tokens, shadows, typography, spacing, motion tokens, z-index scale, 30 component recipes, and a preset system (`createAnkerTheme()` + `ThemePreset`). Consumers use `<Provider>` (defaults to anker's system) or create a custom system via `createAnkerTheme(preset)`.
 2. **`/primitives`** — Thin wrappers around Chakra UI components with consistent defaults (Accordion, Alert, Avatar, Breadcrumb, HoverCard, Menu, PinInput, Popover, Progress, SegmentedControl, Skeleton, Slider, Spinner, Tooltip, Switch, etc.). 23 components.
 3. **`/components`** — Higher-level composites: Card, Drawer, Modal, NavList, Pagination, Stepper, Table, Timeline, TreeView, Widget, FactBox, MessageGroup/MessageBubble, VirtualizedMessageList, Composer, ConversationListItem, ReactionChips/ReactionQuickSetPopover.
-4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, UnreadBadge, TypingIndicator, DateTime, EmptyState, Comment, Select, LookupSelect, Clipboard, DataList, etc.
-5. **`/forms`** — Form controls built on React Hook Form + Zod: InputField, TextareaField, ArrayField, DatePickerField, CodeField, etc. Also the canonical home of SearchInput (`/atoms` re-exports it for backwards compatibility).
+4. **`/atoms`** — Small reusable UI units: Persona, StatusBadge, TypeBadge, UnreadBadge, TypingIndicator, DateTime, EmptyState, Comment, Select, LookupSelect, IconPicker, DynamicIcon, Clipboard, DataList, etc.
+5. **`/forms`** — Form controls built on React Hook Form + Zod: InputField, TextareaField, ArrayField, DatePickerField, CodeField, IconPickerField, etc. Also the canonical home of SearchInput (`/atoms` re-exports it for backwards compatibility).
 6. **`/feedback`** — Feedback patterns: ConfirmModal with provider + `useConfirmModal` hook, UploadToastStack.
 7. **`/dashboard`** — Domain-free dashboard framework: the widget contract (`WidgetDefinition`, `WidgetInstance`), `createWidgetRegistry`, and the `<Dashboard>` grid engine (see Dashboard & Widget Framework below).
 8. **`/templates`** — Page-level layouts: AppShell, SubNavLayout, and page templates (index, detail, settings, auth, dashboard, marketing, error/loading/maintenance).
@@ -333,6 +333,28 @@ HTTP client in `package.json`. Rationale:
 `docs/adr/0002-atoms-may-orchestrate-async.md`. Usage guide:
 `src/atoms/select/lookup-select.mdx`.
 
+### Icon picker
+
+`src/atoms/icon-picker/` provides `IconPicker` (popover: search, lucide
+category chips, a recently-used row in `localStorage`, a virtualised
+`@tanstack/react-virtual` grid of every lucide icon) and `DynamicIcon`
+(renders a stored lucide name, neutral `CircleDashed` fallback, renamed names
+followed to their successor); `src/forms/icon-picker-field.tsx` is the RHF
+binding. The stored value is the lucide name string. The name list is
+lucide-react's `dynamicIconImports` (imported as
+`lucide-react/dynamicIconImports.js` — lucide-react has no `exports` map, so
+Node's ESM resolver needs the extension); each icon is its own dynamic
+import, cached in `lucide-icons.ts`. lucide-react ships no tags or
+categories, so `scripts/generate-lucide-metadata.ts` downloads the matching
+lucide release and writes `lucide-metadata.generated.ts` (tags, categories)
+and `lucide-aliases.generated.ts` (former names); both are dynamically
+imported, so tsup emits them as separate chunks. Re-run the script after
+bumping lucide-react — `lucide-icons.test.ts` fails until you do. Search,
+grid layout/keyboard movement and recent history are pure, TDD-tested
+modules (`search-icons.ts`, `grid-layout.ts`, `recent-icons.ts`). Styled by
+the `iconPicker` slot recipe, pinned in `create-theme.test.ts`. Usage guide:
+`src/atoms/icon-picker/icon-picker.mdx`.
+
 ### Dashboard & Widget Framework
 
 `src/dashboard/` provides a domain-free dashboard framework (exported
@@ -500,7 +522,7 @@ the provider, 2 with `StrictMode` outside it (or with RTL's
 `avatarPresence`, `button`, `container`, `prose`, `separator`, `formLabel`, `input`, `inputAddon`, `textarea`, `tooltip`, `tsRadioCard`, `tag`, `unreadBadge`
 
 ### Registered slot recipes (multi-part)
-`card`, `checkbox`, `composer`, `conversationListItem`, `dialog`, `drawer`, `field` (inline in create-theme.ts), `menu`, `message`, `messageList`, `popover`, `reactionChips`, `reactionQuickSet`, `stepper`, `table`, `tabs`, `typingIndicator`
+`card`, `checkbox`, `composer`, `conversationListItem`, `dialog`, `drawer`, `field` (inline in create-theme.ts), `iconPicker`, `menu`, `message`, `messageList`, `popover`, `reactionChips`, `reactionQuickSet`, `stepper`, `table`, `tabs`, `typingIndicator`
 
 ## Breaking Changes
 

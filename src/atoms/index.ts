@@ -92,6 +92,16 @@ export { DirtyDot, type DirtyDotProps } from "./dirty-dot";
 // EmptyState
 export { EmptyState, type EmptyStateProps } from "./empty-state";
 
+// IconPicker + DynamicIcon
+export {
+	DEFAULT_ICON_PICKER_LABELS,
+	DynamicIcon,
+	type DynamicIconProps,
+	IconPicker,
+	type IconPickerLabels,
+	type IconPickerProps,
+} from "./icon-picker";
+
 // MenuButton
 export {
 	MenuButton,
