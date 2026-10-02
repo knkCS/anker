@@ -121,6 +121,37 @@ export const Screen = () => (
 		});
 	});
 
+	describe("no-select-field", () => {
+		it("flags SelectField imported from anker, on the name's own line", () => {
+			const [v] = check(
+				`import {\n\tInputField,\n\tSelectField,\n} from "@knkcs/anker/forms";`,
+			);
+			expect(v).toMatchObject({ rule: "no-select-field", line: 3 });
+			expect(v.message).toMatch(/BaseSelectField/);
+			expect(v.message).toMatch(/LookupSelectField/);
+		});
+
+		it("flags an aliased import, its props type and a re-export", () => {
+			expect(
+				rules(`import { SelectField as Pick } from "@knkcs/anker/forms";`),
+			).toEqual(["no-select-field"]);
+			expect(
+				rules(`import type { SelectFieldProps } from "@knkcs/anker/forms";`),
+			).toEqual(["no-select-field"]);
+			expect(
+				rules(`export { SelectField } from '@knkcs/anker/forms';`),
+			).toEqual(["no-select-field"]);
+		});
+
+		it("leaves the replacements, other packages and comments alone", () => {
+			expect(
+				rules(
+					`import { BaseSelectField, LookupSelectField, type BaseSelectFieldProps } from "@knkcs/anker/forms";\nimport { SelectField } from "./local/select-field";\n// import { SelectField } from "@knkcs/anker/forms";\nconst SelectField = 1;`,
+				),
+			).toEqual([]);
+		});
+	});
+
 	it("reports every violation across files, in file order", () => {
 		const violations = checkAnkerRules([
 			{ file: "a.tsx", text: `<Card maxW="sm" />` },

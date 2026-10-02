@@ -21,7 +21,8 @@ export type AnkerRuleId =
 	| "no-raw-chakra"
 	| "no-hex-colour"
 	| "settings-template-needs-tabs"
-	| "no-card-max-width";
+	| "no-card-max-width"
+	| "no-select-field";
 
 export interface AnkerRuleViolation {
 	rule: AnkerRuleId;
@@ -40,6 +41,8 @@ const MESSAGES: Record<AnkerRuleId, string> = {
 		"SettingsPageTemplate needs `tabs` (≥ 2 tabs); a page without tabs is a DetailPageTemplate.",
 	"no-card-max-width":
 		"No maxW on a Card — the template owns the body width, and a capped Card sits orphaned on a full-width page.",
+	"no-select-field":
+		"SelectField is deprecated — a select in a form is BaseSelectField, or LookupSelectField when the options come from a server. A native select is only for toolbar filters.",
 };
 
 /**
@@ -75,6 +78,23 @@ export function checkAnkerRules(
 				tag.attributes.includes("maxWidth")
 			) {
 				found.push({ rule: "no-card-max-width", index: tag.index });
+			}
+		}
+
+		// Named imports (and re-exports) from any anker subpath. Each offending
+		// name is reported on its own line, which in a multi-line import is not
+		// the line the `import` keyword sits on.
+		for (const m of code.matchAll(
+			/\b(?:import|export)(?:\s+type)?\s*\{([^}]*)\}\s*from\s*["']@knkcs\/anker(?:\/[\w-]+)?["']/g,
+		)) {
+			const namesStart = m.index + m[0].indexOf("{") + 1;
+			for (const name of m[1].matchAll(
+				/(?<![\w$])(?:type\s+)?(SelectField(?:Props)?)(?![\w$])/g,
+			)) {
+				found.push({
+					rule: "no-select-field",
+					index: namesStart + name.index + name[0].indexOf(name[1]),
+				});
 			}
 		}
 

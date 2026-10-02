@@ -6,6 +6,7 @@ import {
 	type MenuListProps,
 	type MenuProps,
 	type MultiValue,
+	type SelectInstance,
 	type SingleValue,
 } from "chakra-react-select";
 import debounce from "lodash.debounce";
@@ -240,6 +241,7 @@ LookupMenuList.displayName = "LookupMenuList";
  * this composes — the two look alike by construction, not by discipline.
  */
 export const LookupSelect = <T extends BaseOption>({
+	ref,
 	value,
 	onChange,
 	search,
@@ -251,7 +253,10 @@ export const LookupSelect = <T extends BaseOption>({
 	components,
 	isMulti = false,
 	...restSelectProps
-}: LookupSelectProps<T>) => {
+}: LookupSelectProps<T> & {
+	/** The underlying select — `focus()` is what a form library needs. */
+	ref?: React.Ref<SelectInstance<T, boolean, GroupBase<T>>>;
+}) => {
 	const [options, setOptions] = useState<T[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [failed, setFailed] = useState(false);
@@ -515,6 +520,7 @@ export const LookupSelect = <T extends BaseOption>({
 		<LookupMenuContext.Provider value={menuState}>
 			<BaseSelect<T>
 				{...restSelectProps}
+				ref={ref}
 				isMulti={isMulti}
 				value={selected}
 				onChange={handleChange}
