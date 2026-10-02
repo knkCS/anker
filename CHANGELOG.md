@@ -6,6 +6,16 @@ All notable changes to `@knkcs/anker` are documented in this file. The format fo
 
 ### Added
 
+- **`BaseSelectField` and `LookupSelectField`** (#233, `@knkcs/anker/forms`):
+  the form-bound `BaseSelect` and `LookupSelect`. Single, multi, clearable
+  and grouped options; label, helper, description and error text wired as
+  for `InputField`, including `aria-describedby`, `aria-invalid` and
+  focus-on-first-error. The form value is the option's `id` (an array of ids
+  with `isMulti`, `null` when cleared).
+- **`LookupSelect` takes a `ref`** (#233) to the underlying select, which is
+  what lets `LookupSelectField` register with react-hook-form. Additive.
+- **`no-select-field` rule** (#233) in `checkAnkerRules`: flags `SelectField`
+  / `SelectFieldProps` imported or re-exported from `@knkcs/anker`.
 - **`useTabDirty().dirtyTabs`** (#231): the keys of every dirty tab, in the
   order they became dirty, with a stable reference while nothing changes
   (`[]` without a provider). It is what a tabbed detail page's one header Save
@@ -20,6 +30,12 @@ All notable changes to `@knkcs/anker` are documented in this file. The format fo
   string checks with no React or file-system access: the package reads its
   own sources and asserts the result is empty, so the checks follow the
   installed anker version instead of a hand-copied list.
+
+### Deprecated
+
+- **`SelectField`** (#233): a select in a form is `BaseSelectField`, or
+  `LookupSelectField` when the options come from a server; a native select is
+  only for toolbar filters. Removed in the next major.
 
 ### Documentation
 

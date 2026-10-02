@@ -4,6 +4,10 @@ import type { FieldValues } from "react-hook-form";
 import { NativeSelect } from "../primitives/native-select";
 import { FormField, type FormFieldProps } from "./form-field";
 
+/**
+ * @deprecated Use `BaseSelectFieldProps` (or `LookupSelectFieldProps`).
+ * `SelectField` is removed in the next major.
+ */
 export interface SelectFieldProps<T extends FieldValues>
 	extends Omit<FormFieldProps<T>, "children"> {
 	placeholder?: string;
@@ -11,6 +15,14 @@ export interface SelectFieldProps<T extends FieldValues>
 	children: React.ReactNode;
 }
 
+/**
+ * A form-bound native `<select>`.
+ *
+ * @deprecated A select in a form is `BaseSelectField`, or `LookupSelectField`
+ * when the options come from a server. A native select is only for toolbar
+ * filters (`NativeSelect` from `@knkcs/anker/primitives`). Removed in the next
+ * major; `checkAnkerRules` flags new imports (`no-select-field`).
+ */
 export function SelectField<T extends FieldValues>({
 	ref,
 	...props

@@ -5,6 +5,15 @@ import { SelectField } from "./select-field";
 const meta = {
 	title: "Forms/SelectField",
 	component: SelectField,
+	tags: ["deprecated"],
+	parameters: {
+		docs: {
+			description: {
+				component:
+					"**Deprecated** — removed in the next major. A select in a form is `BaseSelectField`, or `LookupSelectField` when the options come from a server. A native select is only for toolbar filters (`NativeSelect`).",
+			},
+		},
+	},
 	decorators: [
 		(Story) => {
 			const methods = useForm({

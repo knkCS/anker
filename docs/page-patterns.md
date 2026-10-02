@@ -1126,6 +1126,10 @@ Use `<InputField>`, `<TextareaField>`, `<DatePickerField>`, etc. from
 `@knkcs/anker/forms` — they wrap React Hook Form's `Controller` and
 attach `aria-describedby` automatically.
 
+A select in a form is `<BaseSelectField>`, or `<LookupSelectField>` when the
+options come from a server; both store the option's `id`. A native select is
+only for toolbar filters (§ Toolbar). `<SelectField>` (native) is deprecated.
+
 ### Required vs. optional treatment
 
 - **Required**: append a small `*` after the label, no extra text.

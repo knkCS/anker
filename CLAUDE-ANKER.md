@@ -178,6 +178,7 @@ reason. The rules are:
 | `no-hex-colour` | a quoted hex colour literal |
 | `settings-template-needs-tabs` | `<SettingsPageTemplate>` without a `tabs` prop (a `{...spread}` passes) |
 | `no-card-max-width` | `maxW` / `maxWidth` on `<Card>` |
+| `no-select-field` | `SelectField` / `SelectFieldProps` imported (or re-exported) from `@knkcs/anker/*` — use `BaseSelectField` or `LookupSelectField` |
 
 The checks read text, not an AST, and skip comments. Because the checks come
 from the installed anker, a new rule reaches your test when you upgrade, with
@@ -313,6 +314,24 @@ Full slot/prop tables: `docs/react-table-reference.md`. Mapping guide for common
 
 ## Form fields
 
+- **A select in a form is `BaseSelectField`, or `LookupSelectField` when the
+  options come from a server; a native select only for toolbar filters**
+  (`NativeSelect` from `@knkcs/anker/primitives`). `SelectField` (a native
+  select) is **deprecated** and removed in the next major; the
+  `no-select-field` rule flags new imports of it.
+- **`BaseSelectField`** (`@knkcs/anker/forms`) is a form-bound `BaseSelect`:
+  `options` are `BaseOption`s (`id`, `label`, …), flat or as
+  `{ label, options }` groups; `isMulti`, `isClearable` (default `true`) and
+  `placeholder` are props, everything else of `BaseSelect` goes in
+  `selectProps`. **The form value is the option's `id`** — a string, `null`
+  when cleared, or an array of ids (`[]` when empty) with `isMulti` — so a
+  schema reads `z.string()` / `z.array(z.string())`. A stored id with no
+  matching option shows as the raw id rather than blank. Label, helper,
+  description and error text are wired as for `InputField`
+  (`aria-describedby`, `aria-invalid`, focus-on-first-error).
+- **`LookupSelectField`** is the same over `LookupSelect`: pass `search`
+  (and `resolve`, so a stored id loads with its label) instead of `options`.
+  It stores ids the same way.
 - `FormField`/`ControlledFormField` render §10 label markers: `required`
   shows `*` (suppress with `showRequiredIndicator={false}`);
   `optionalText` renders a muted marker after non-required labels.
@@ -645,7 +664,8 @@ you supply and knows nothing about transports, endpoints or auth.
 
 - **Pick the right control**: options already in hand → `BaseSelect`; options
   on a server → `LookupSelect`. Do not fetch a whole table and filter in the
-  browser.
+  browser. Inside a react-hook-form form, use the form-bound
+  `BaseSelectField` / `LookupSelectField` (see **Form fields**).
 - **`search` is required** and is handed `{ query, cursor, signal }`, answering
   `{ items, nextCursor }`. `items` are `BaseOption`s (`id`, `label`, and
   optionally `avatar` / `color` / `icon`) — the same shape `BaseSelect` takes,

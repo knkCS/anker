@@ -1,5 +1,11 @@
 // ArrayField
 export { ArrayField, type ArrayFieldProps } from "./array-field";
+// BaseSelectField
+export {
+	BaseSelectField,
+	type BaseSelectFieldOptions,
+	type BaseSelectFieldProps,
+} from "./base-select-field";
 // CheckboxField
 export { CheckboxField, type CheckboxFieldProps } from "./checkbox-field";
 // CodeField
@@ -40,6 +46,11 @@ export {
 } from "./inline-edit";
 // InputField
 export { InputField, type InputFieldProps } from "./input-field";
+// LookupSelectField
+export {
+	LookupSelectField,
+	type LookupSelectFieldProps,
+} from "./lookup-select-field";
 // MarkdownField
 export { MarkdownField, type MarkdownFieldProps } from "./markdown-field";
 // NumberInputField
@@ -59,7 +70,7 @@ export {
 	type SearchInputHandle,
 	type SearchInputProps,
 } from "./search-input";
-// SelectField
+// SelectField — deprecated: use BaseSelectField (or LookupSelectField)
 export { SelectField, type SelectFieldProps } from "./select-field";
 // SwitchField
 export { SwitchField, type SwitchFieldProps } from "./switch-field";
