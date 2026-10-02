@@ -146,7 +146,7 @@ export const Screen = () => (
 		it("leaves the replacements, other packages and comments alone", () => {
 			expect(
 				rules(
-					`import { BaseSelectField, LookupSelectField, type BaseSelectFieldProps } from "@knkcs/anker/forms";\nimport { SelectField } from "./local/select-field";\n// import { SelectField } from "@knkcs/anker/forms";\nconst SelectField = 1;`,
+					`import { BaseSelectField, LookupSelectField, type BaseSelectFieldProps } from "@knkcs/anker/forms";\nimport { SelectField } from "./local/select-field";\nimport { BaseSelectField as SelectField } from "@knkcs/anker/forms";\n// import { SelectField } from "@knkcs/anker/forms";\nconst SelectField = 1;`,
 				),
 			).toEqual([]);
 		});

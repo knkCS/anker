@@ -88,8 +88,10 @@ export function checkAnkerRules(
 			/\b(?:import|export)(?:\s+type)?\s*\{([^}]*)\}\s*from\s*["']@knkcs\/anker(?:\/[\w-]+)?["']/g,
 		)) {
 			const namesStart = m.index + m[0].indexOf("{") + 1;
+			// Anchored to the start of a specifier, so only the imported name
+			// counts: `BaseSelectField as SelectField` is the replacement.
 			for (const name of m[1].matchAll(
-				/(?<![\w$])(?:type\s+)?(SelectField(?:Props)?)(?![\w$])/g,
+				/(?:^|,)\s*(?:type\s+)?(SelectField(?:Props)?)(?![\w$])/g,
 			)) {
 				found.push({
 					rule: "no-select-field",
