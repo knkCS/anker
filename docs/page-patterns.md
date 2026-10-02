@@ -483,7 +483,15 @@ setting.
 
 The context rail is the **right column** of the app shell — a fixed-width
 secondary surface for at-a-glance information that supports the main
-content without being part of it.
+content without being part of it, and on a detail page for the things you
+do *to* the entity.
+
+> **The header/rail rule (ADR 0004, required):** the `PageHeader` holds the
+> page's **one primary action** — Save on an edit page. What you do **to**
+> the entity as a whole — cut a release, duplicate, archive, delete, make
+> default — goes in the rail's **Actions** section, and an **About** section
+> may show at-a-glance facts. The rail never holds Save. See
+> `docs/adr/0004-one-save-in-the-header-entity-actions-in-the-rail.md`.
 
 ### When to render
 
@@ -494,6 +502,10 @@ Indicators that a rail belongs:
 - A list page with > 50 items (rail shows aggregate stats / filters).
 - A detail page with related entities (rail shows links to siblings,
   parent records, audit summary).
+- A detail page with verbs that act on the entity as a whole (rail's
+  Actions section — see §4.2). This holds when the page's tabs are forms:
+  such a page **keeps** its quick-actions rail, collapsible, with a
+  `storageKey`.
 - A page where bulk-selection is a primary action (rail substitutes for
   the bulk-action bar — see below).
 
@@ -501,8 +513,10 @@ Indicators that a rail belongs:
 
 - The page is one screen of content (no scroll). The rail would be empty
   air.
-- The page is a form or settings tab. Rails compete with form fields for
-  the user's attention; settings should be read top-to-bottom.
+- The page is a settings page with nothing to show or do beyond its
+  forms. A rail of padding competes with the fields for attention. (A
+  detail page whose tabs are forms is *not* this case when its entity has
+  actions — keep the rail; see above.)
 - The page is a dashboard. Dashboards already aggregate — a rail is
   redundant.
 - The page is unauthenticated (auth, marketing, error). These templates
@@ -530,23 +544,41 @@ filter shortcuts.
 
 #### 4.2 Detail-context rail
 
-Used on detail pages. Shows the entity's relationships and metadata
-(parent record, sibling records, audit-log shortcut).
+Used on detail pages. Two sections, in this order: **Actions** — the verbs
+that act on the entity as a whole — and **About** — its at-a-glance facts
+(created, owner, status, parent record, audit-log shortcut). Either may be
+omitted; Save is never among the actions (it is the header's, §10).
 
 ```tsx
-<ContextRail>
-  <ContextRail.Header eyebrow="USER" title="Jana Schmid" />
-  <ContextRail.Section id="meta" label="Metadata">
-    <DataList items={[
-      { label: "Created", value: <RelativeDateTime value={createdAt} /> },
-      { label: "Last sign-in", value: <RelativeDateTime value={lastSignIn} /> },
-    ]} />
-  </ContextRail.Section>
-  <ContextRail.Section id="related" label="Related">
-    <Link href="/users/jana/sessions">Active sessions →</Link>
-  </ContextRail.Section>
-</ContextRail>
+const [cutOpen, setCutOpen] = useState(false);
+
+usePageRail(
+  <ContextRail storageKey="blueprint-rail">
+    <ContextRail.Header eyebrow="BLUEPRINT" title={blueprint.name} />
+    <ContextRail.Section id="actions" label="Actions">
+      <ContextRail.IconButton label="Cut a release" icon={<Tag />} onClick={() => setCutOpen(true)} />
+      <ContextRail.IconButton label="Duplicate" icon={<Copy />} onClick={() => setDuplicateOpen(true)} />
+      <ContextRail.IconButton label="Delete" icon={<Trash2 />} tone="outline-red" onClick={confirmDelete} />
+    </ContextRail.Section>
+    <ContextRail.Section id="about" label="About">
+      <DataList items={[
+        { label: "Created", value: <RelativeDateTime value={createdAt} /> },
+        { label: "Owner", value: owner.name },
+      ]} />
+    </ContextRail.Section>
+  </ContextRail>,
+);
+
+// The dialog renders in the screen, not in the rail — see below.
+return <CutReleaseModal open={cutOpen} onClose={() => setCutOpen(false)} />;
 ```
+
+> **Rail actions that open dialogs keep the dialog in the screen.** The
+> rail renders outside the screen's providers (§2 "Host contract"), so a
+> dialog rendered *inside* the rail node loses the form, query and router
+> context it needs. The rail button sets state the screen owns; the screen
+> renders the dialog. (knkCS/anker#212 tracks a host rendering that would
+> keep the screen's context.)
 
 #### 4.3 Bulk-selection rail
 
@@ -687,13 +719,14 @@ non-atom JSX inside sections are hidden — only atom-tagged children render.
    between the PageHeader bottom border and the rail content. Always
    start a rail with `<ContextRail.Header>` — see the rail-header
    contract above.
-3. **Rendering a rail on a settings/form page.** Rails compete with
-   form fields for the user's attention; settings should be read
-   top-to-bottom. See "When to hide" above.
-4. **Stuffing primary actions in the rail.** Primary actions belong in
-   the PageHeader's `actions` slot (via `usePageActions` or the
-   `actions` prop). The rail is for at-a-glance information, not the
-   page's main verbs.
+3. **Rendering an empty-air rail on a settings page.** A rail with
+   nothing to show or do beside the forms competes with them for
+   attention. See "When to hide" above — and note the opposite mistake:
+   dropping a detail page's quick-actions rail because its tabs are forms.
+4. **Putting the primary action in the rail.** The page's one primary
+   action — Save on an edit page — belongs in the PageHeader's `actions`
+   (the template's `actions` prop). The rail never holds Save; it holds
+   what you do *to* the entity (§4.2).
 
 ---
 
@@ -1109,17 +1142,66 @@ mostly-required forms).
 
 ### Save-button placement
 
-Two patterns:
+> **One Save, in the header (ADR 0004, required):** the `PageHeader` Save
+> is the one Save on a detail or settings page. A card footer never saves.
 
-1. **Card-internal save** — settings tab cards have their save button
-   inside the card footer (`<Card footer={…}>`). Use when the form is
-   one of several independent sections on the page.
-2. **PageHeader actions save** — full-page edit forms have their save
-   button in the PageHeader's `actions` slot. Use when the form is the
-   entire page.
+- **Tabs keep a draft each; Save persists every changed tab at once.**
+  With nav-link tabs only the active panel is mounted (§12.2), so a draft
+  held in the tab's own form state is lost on every switch. Hold the
+  drafts above the router outlet, at the page's layout level, and let the
+  header Save write every changed tab in one go (in blueprinthub: one
+  Revision, not one per tab).
+- **The Save shows there are unsaved changes.** It says how many tabs
+  changed and is disabled when none did. Leaving with drafts asks first
+  (`UnsavedChangesGuard`, with a `safePathPrefix` so moving between the
+  page's own tabs does not).
+- **Settings that genuinely save on their own get a tab of their own** —
+  not a second Save on a shared tab.
+- **The rail never holds Save** (§4). Modals keep their own Save/Cancel
+  footer (§9) — a modal is its own scope, not a section of the page.
 
-Never both. A PageHeader save + a Card save on the same screen is a UX
-trap (which one persists?).
+Wire it from the tab-dirty registry. The Save is reported as the
+template's `actions`, which a host renders outside the screen's providers
+(§2 "Host contract"), so it **closes over** the dirty state rather than
+reading it from context: mount `TabDirtyProvider` *above* the component
+that renders the template.
+
+```tsx
+import { TabDirtyProvider, UnsavedChangesGuard, useTabDirty } from "@knkcs/anker/navigation";
+
+export function BlueprintDetail() {
+  return (
+    <TabDirtyProvider>
+      <BlueprintDetailLayout />
+    </TabDirtyProvider>
+  );
+}
+
+function BlueprintDetailLayout() {
+  const { dirtyTabs, isTabDirty } = useTabDirty(); // dirtyTabs: ["general", "schema"], in the order they became dirty
+  const drafts = useBlueprintDrafts();   // yours: one draft per tab, held here, above the outlet
+  const n = dirtyTabs.length;
+  return (
+    <DetailPageTemplate
+      title={blueprint.name}
+      tabs={/* nav-link tabs, each trigger with <DirtyDot active={isTabDirty(t.value)} /> */}
+      actions={
+        <Button disabled={n === 0} onClick={() => drafts.saveAll(dirtyTabs)}>
+          {n === 0 ? "Save" : `Save · ${n} ${n === 1 ? "tab" : "tabs"} changed`}
+        </Button>
+      }
+    >
+      <UnsavedChangesGuard isDirty={n > 0} safePathPrefix={`/blueprints/${id}/`} />
+      <Outlet />
+    </DetailPageTemplate>
+  );
+}
+```
+
+A tab publishes `setTabDirty(key, isDirty)` from its draft and does **not**
+clear it on unmount — the draft outlives the tab. It clears when the draft
+is saved or discarded. No new template or `PageFrame` field is involved:
+`actions` is an ordinary node, and a fresh one re-notifies the host.
 
 ### Inline edit vs. drawer edit vs. full-page edit
 
@@ -1146,13 +1228,12 @@ trap (which one persists?).
 > and Calendars index screens all wire `DataTable onRowClick` to a
 > `DetailPageTemplate` route rather than a drawer, and each detail page
 > reports a `ContextRail` (via `usePageRail`) for its quick actions —
-> `Delete`, plus `Set-default` where the entity has one. Save placement on
-> the detail side follows the "Save-button placement" rule above rather
-> than a single shape: `task-type-detail.tsx` saves from a Card footer
-> because its page holds several tab sections, while `group-detail.tsx`
-> and `calendar-detail.tsx` save from the `PageHeader`'s `actions` slot
-> because the form is the whole page. What's constant across all three is
-> narrower and is the point of this rule: none of their index screens ever
+> `Delete`, plus `Set-default` where the entity has one — which is the
+> header/rail rule of §4 (ADR 0004). Save follows the one-header-Save rule
+> above: `group-detail.tsx` and `calendar-detail.tsx` save from the
+> `PageHeader`'s `actions`; `task-type-detail.tsx` still saves from a Card
+> footer, which predates ADR 0004 and is out of compliance. What's
+> constant across all three, and the point of this rule: none of their index screens ever
 > offers `Edit` in the "…" row menu — only secondary actions do (`Delete`
 > on all three, plus `Set-default` on Calendars) — and opening/editing is
 > the row click's job.

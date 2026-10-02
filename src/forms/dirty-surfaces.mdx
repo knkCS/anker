@@ -69,17 +69,23 @@ function DetailLayoutInner() {
   );
 }
 
-// A tab that publishes its dirty state (form example)
+// A tab that publishes its dirty state. Its draft is held above the
+// router outlet (the page's one header Save persists every changed tab —
+// ADR 0004), so leaving the tab must NOT clear the mark: no cleanup.
 function GeneralTab() {
   const { setTabDirty } = useTabDirty();
-  const { formState } = useFormContext();
+  const draft = useGeneralDraft(); // yours, held at the layout level
   useEffect(() => {
-    setTabDirty("general", formState.isDirty);
-    return () => setTabDirty("general", false);
-  }, [formState.isDirty, setTabDirty]);
+    setTabDirty("general", draft.isDirty);
+  }, [draft.isDirty, setTabDirty]);
   // …
 }
 ```
+
+`useTabDirty().dirtyTabs` lists the dirty keys in the order they became
+dirty — read it in the layout to build the header Save ("Save · 2 tabs
+changed") and to feed `<UnsavedChangesGuard isDirty={dirtyTabs.length > 0} />`.
+See `docs/page-patterns.md` §10 "Save-button placement".
 
 ## Leave-page guard
 

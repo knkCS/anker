@@ -2,6 +2,31 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- **`useTabDirty().dirtyTabs`** (#231): the keys of every dirty tab, in the
+  order they became dirty, with a stable reference while nothing changes
+  (`[]` without a provider). It is what a tabbed detail page's one header Save
+  reads to say "Save · 2 tabs changed", to hand the changed tabs to the
+  handler that persists them, and to feed `UnsavedChangesGuard`. Additive for
+  every caller of the hook; code that constructs a `TabDirtyState` by hand
+  (a test double, say) now has to supply the field.
+
+### Documentation
+
+- **ADR 0004 — one Save in the page header; the entity's actions in the rail**
+  (#231). The `PageHeader` Save is the one Save on a detail or settings page:
+  a card footer never saves, tabs keep a draft each and Save persists every
+  changed tab at once, and settings that save on their own get a tab of their
+  own. The header holds the page's one primary action; what you do *to* the
+  entity (cut a release, duplicate, archive, delete) goes in the rail's
+  Actions section, next to an optional About section, and a detail page whose
+  tabs are forms keeps that rail. `docs/page-patterns.md` §4 and §10,
+  `CLAUDE-ANKER.md` and the Dirty-surfaces guide (which no longer clears a
+  tab's dirty mark on unmount) are updated to match.
+
 ## 5.4.0 — 2026-09-17
 
 ### Added

@@ -106,6 +106,37 @@ Available templates:
 
 Full spec with composition diagrams, slot tables, and authoring rules: `docs/page-patterns.md` in the anker repo (linked from the GitHub Pages docs site).
 
+### One Save in the header; the entity's actions in the rail (ADR 0004)
+
+- **The `PageHeader` Save is the one Save on a detail or settings page.** Pass
+  it as the template's `actions`. A Card footer never saves; settings that
+  genuinely save on their own get a tab of their own. (Modals keep their own
+  Save/Cancel footer — a modal is its own scope.)
+- **Tabs keep a draft each; Save persists every changed tab at once.** Only
+  the active nav-link tab is mounted, so hold the drafts above the router
+  outlet, not in each tab's form state. A tab publishes
+  `setTabDirty(key, isDirty)` from its draft and does **not** clear it on
+  unmount.
+- **The Save shows unsaved changes and leaving asks first.** Mount
+  `TabDirtyProvider` (`@knkcs/anker/navigation`) *above* the component that
+  renders the template; there read `const { dirtyTabs } = useTabDirty()` and
+  build the Save from it — `disabled={dirtyTabs.length === 0}`, label
+  "Save · 2 tabs changed", `onClick={() => saveAll(dirtyTabs)}` — plus
+  `<UnsavedChangesGuard isDirty={dirtyTabs.length > 0} safePathPrefix=…>`.
+  The Save closes over that state because a reported action renders outside
+  the screen's providers (Host contract below); never read dirty state from
+  context inside the action.
+- **The header holds the one primary action; what you do *to* the entity goes
+  in the rail.** Cut a release, duplicate, archive, delete, make default →
+  the rail's **Actions** section (`ContextRail.IconButton`); at-a-glance facts
+  → an **About** section. The rail never holds Save. A detail page whose tabs
+  are forms **keeps** its quick-actions rail — `<ContextRail storageKey=…>`.
+- **A rail action that opens a dialog sets screen state; the screen renders
+  the dialog.** The rail renders outside the screen's providers, so a dialog
+  inside the rail node loses its form/query/router context.
+
+Spec and example: `docs/page-patterns.md` §4.2 and §10 "Save-button placement".
+
 ---
 
 ## Host contract
@@ -129,7 +160,7 @@ frame reports itself.
   under it nothing changes, the band is drawn from the frame.
 - **The side rail travels on the contract too.** `usePageRail(node)` (from
   `/host`, also re-exported from `/templates`) reports the screen's rail —
-  status tiles, activity, secondary actions — to the provider's
+  status tiles, activity, the entity's actions (never Save) — to the provider's
   `onRailChange` (`null` on unmount). The host renders it where its layout
   puts rails; `<AppShell>` renders it in the rail column, over its `rail`
   prop. It is not a `PageFrame` field.
