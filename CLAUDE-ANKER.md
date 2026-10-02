@@ -72,7 +72,7 @@ consumers run React 19. See `CHANGELOG.md` for migration notes if you're on 18.
 - **No Chakra v2 patterns.** No `extendTheme`, `colorScheme`, `useColorMode` from `@chakra-ui/react`. Use `createSystem`, `colorPalette`, `next-themes`. Why: anker is built on Chakra v3 throughout; v2 patterns either error at build time or silently no-op.
 - **No new color introductions.** If a color isn't in `colors.ts`, it doesn't exist. Why: the palette is closed by design — adding ad-hoc colors fragments the system.
 - **No `maxW` on a Card inside a settings/detail template body.** The template controls width; per-card overrides break visual rhythm and produce orphaned narrow cards on full-width pages. Why: the template is the contract for body width — cards are the contract for content surfacing.
-- **No inline create-forms above a DataTable.** Use a header-action button (or `usePageActions` from a tab) that opens a `Modal`. Why: inline forms steal vertical space, drift from the master pattern, and split form state from the rest of the page.
+- **No inline create-forms above a DataTable.** Use a header-action button (or `usePageActions` from a tab — the tab's `<Toolbar>` when the header carries the page's Save) that opens a `Modal`. Why: inline forms steal vertical space, drift from the master pattern, and split form state from the rest of the page.
 - **Don't leave two `usePageActions` callers mounted at once.** For a tab page use nav-link tabs: a `<Tabs.Root value={current}>` containing only a `<Tabs.List>`, passed to the template's `tabs` prop, with the router rendering the active panel as `children` — only the active panel is ever mounted. If you own a `<Tabs.Root>` with `<Tabs.Content>` panels in the body, set `lazyMount unmountOnExit` yourself. Why: the page-header actions slot holds a single unkeyed registration, so mounted callers overwrite each other on every render — the header ends up showing an inactive tab's button (the "stuck Add button" fixed in anker 1.12). No template enforces this any more; `bodyTabs`, which applied the guard for you, was removed with the page-header redesign in v2.2.0. Pinned by the `usePageActions collision` tests in `detail-page-template.test.tsx`, mirrored for `SettingsPageTemplate`.
 - **Don't wrap Card children in `<Box p="N">`.** `<Card>` body has built-in padding via Chakra's CardBody (~24px). Wrapping in `<Box p>` doubles it. Pass content directly (use `<Stack>` for layout). Why: a uniform Card body padding is the visual contract; per-Card overrides break visual rhythm and make Cards look heavier than the rest of the design system.
 
@@ -118,8 +118,9 @@ Full spec with composition diagrams, slot tables, and authoring rules: `docs/pag
   `setTabDirty(key, isDirty)` from its draft and does **not** clear it on
   unmount.
 - **The Save shows unsaved changes and leaving asks first.** Mount
-  `TabDirtyProvider` (`@knkcs/anker/navigation`) *above* the component that
-  renders the template; there read `const { dirtyTabs } = useTabDirty()` and
+  `<TabDirtyProvider key={id}>` (`@knkcs/anker/navigation`; the key starts
+  a clean registry per record) *above* the component that renders the
+  template; there read `const { dirtyTabs } = useTabDirty()` and
   build the Save from it — `disabled={dirtyTabs.length === 0}`, label
   "Save · 2 tabs changed", `onClick={() => saveAll(dirtyTabs)}` — plus
   `<UnsavedChangesGuard isDirty={dirtyTabs.length > 0} safePathPrefix=…>`.
@@ -131,6 +132,10 @@ Full spec with composition diagrams, slot tables, and authoring rules: `docs/pag
   the rail's **Actions** section (`ContextRail.IconButton`); at-a-glance facts
   → an **About** section. The rail never holds Save. A detail page whose tabs
   are forms **keeps** its quick-actions rail — `<ContextRail storageKey=…>`.
+- **An explicit `actions` Save hides `usePageActions`.** On a page whose
+  header carries Save, a tab's add goes in that tab's `<Toolbar>`, not
+  `usePageActions`. A drawer editing a nested child applies into the tab's
+  draft ("Apply"); it never persists on its own.
 - **A rail action that opens a dialog sets screen state; the screen renders
   the dialog.** The rail renders outside the screen's providers, so a dialog
   inside the rail node loses its form/query/router context.

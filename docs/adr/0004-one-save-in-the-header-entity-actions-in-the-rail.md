@@ -86,10 +86,21 @@ room to explain itself.
   feeds `UnsavedChangesGuard` with a `safePathPrefix` covering the sibling
   tabs. A frame carrying a fresh `actions` element re-notifies the host
   (ADR 0003), so the count stays current with no extra wiring.
+- **An explicit Save hides `usePageActions`.** A template resolves
+  `actions ?? registered`, so once a page passes its Save as `actions`, a
+  tab's `usePageActions(<Add/>)` reaches nothing. That is the rule working —
+  the header holds one primary action — and the tab's add moves into its own
+  toolbar (page-patterns §12.1 "Index-in-Tab"). A page with no Save keeps
+  the old lift.
+- **A drawer applies, the header saves.** A drawer that edits a nested child
+  (page-patterns §10) writes into the tab's draft and closes; it does not
+  persist. A modal is its own scope and keeps its own Save.
 - **A tab does not clear its dirty mark on unmount.** The Dirty-surfaces
   guide used to clear it in the effect cleanup; with drafts that outlive the
   tab, clearing it would hide unsaved work from the header and the guard.
-  The mark clears when the draft is saved or discarded.
+  The mark clears when the draft is saved or discarded, and the registry is
+  keyed to the entity (`<TabDirtyProvider key={id}>`) so a route change to
+  another record starts clean.
 - **Rail actions that open a dialog keep the dialog in the screen.** The
   rail, like `actions`, renders outside the screen's providers, so a rail
   button that rendered its own dialog would lose the form, query and router

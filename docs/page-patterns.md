@@ -551,6 +551,8 @@ omitted; Save is never among the actions (it is the header's, §10).
 
 ```tsx
 const [cutOpen, setCutOpen] = useState(false);
+const [duplicateOpen, setDuplicateOpen] = useState(false);
+const confirmDelete = useDeleteBlueprintConfirm(); // yours, e.g. built on useConfirmModal
 
 usePageRail(
   <ContextRail storageKey="blueprint-rail">
@@ -1159,6 +1161,12 @@ mostly-required forms).
   not a second Save on a shared tab.
 - **The rail never holds Save** (§4). Modals keep their own Save/Cancel
   footer (§9) — a modal is its own scope, not a section of the page.
+- **A drawer editing a nested child writes into the tab's draft.** Its
+  footer button applies the edit ("Apply", "Done") and closes; the header
+  Save persists it with the rest of the tab. A drawer that persisted on its
+  own would be the second Save this rule removes.
+- **A tab whose header carries Save moves its add into its own toolbar**
+  (§12.1 "Index-in-Tab").
 
 Wire it from the tab-dirty registry. The Save is reported as the
 template's `actions`, which a host renders outside the screen's providers
@@ -1170,8 +1178,11 @@ that renders the template.
 import { TabDirtyProvider, UnsavedChangesGuard, useTabDirty } from "@knkcs/anker/navigation";
 
 export function BlueprintDetail() {
+  const { id } = useParams();
+  // key={id}: a route change to another blueprint starts a clean registry
+  // (and clean drafts) instead of carrying this one's dirty marks over.
   return (
-    <TabDirtyProvider>
+    <TabDirtyProvider key={id}>
       <BlueprintDetailLayout />
     </TabDirtyProvider>
   );
@@ -1395,6 +1406,7 @@ For index-style content rendered inside a tab body of `SettingsPageTemplate` or 
 
 - The same Toolbar / DataTable / BulkActionBar contract applies inside the tab body.
 - Tab-scoped primary-add lifts to the parent template's header-actions slot via `usePageActions(<AddButton/>)`. Because only the active panel is mounted, only its registration is alive — no collisions, no stale buttons.
+- **Except when the page's header carries the Save (ADR 0004).** A template's explicit `actions` prop wins over `usePageActions` registrations, so the tab's add would silently disappear — and the header already holds the page's one primary action. On such a page the tab's add goes in the tab body's `<Toolbar>` instead. (Under a foreign host `usePageActions` reaches nothing anyway — §2.)
 - No second `<PageHeader>` inside the tab.
 - The tab does not own breadcrumbs; the parent page does.
 - **Don't** leave two panels mounted at once. Nothing in the template prevents it: the header-actions slot holds a single unkeyed registration, so a second mounted panel's `usePageActions` overwrites the active tab's. If you render panels from a `<Tabs.Root>` you own in the body rather than from the router, set `lazyMount unmountOnExit` so only the active one mounts.
@@ -2123,10 +2135,10 @@ These rules are the contract for solution authors.
    content in `<Box mt="-4" px="0">…</Box>` to undo the template's
    defaults, the template is wrong — file an issue.
 
-4. **Don't bypass the slot mechanism for cross-cutting chrome.**
-   Page-actions and rail content belong in the AppShell slot store,
-   not in a Redux store, not in a React context you set up yourself,
-   not in a portal.
+4. **Don't bypass the host contract for cross-cutting chrome.**
+   Page actions go through the template's `actions` (or `usePageActions`
+   under `<AppShell>`), and rail content through `usePageRail` — not a
+   Redux store, not a React context you set up yourself, not a portal.
 
 5. **One template per page.** Pages don't nest templates. If a tab
    pane needs its own header, render it inside the parent template's

@@ -11,7 +11,7 @@ visuals.
 | Surface | Component | Where it fires |
 |---|---|---|
 | **Field-level dirty visual** | yellow input border + dot on label | automatic on `InputField` / `SelectField` / `SwitchField` / `TextareaField` / `ArrayField` / `RadioGroupField` / `CheckboxField` via `formState.dirtyFields`. Opt out with `showDirtyState={false}`. |
-| **Header counter chip** | `<DirtyCounter />` | reads dirty count from `useFormContext`. Mount in the page header via `usePageActions`. |
+| **Header counter chip** | `<DirtyCounter />` | reads dirty count from `useFormContext`, so it must render inside the form's `FormProvider` — in the form body, not as a reported header action. On a tabbed page the header Save carries the count (`useTabDirty().dirtyTabs`). |
 | **Tab-trigger dot** | `<DirtyDot active={…} />` + `useTabDirty()` | publishes/consumes per-tab dirty state. Mount inside each `Tabs.Trigger`. |
 | **Leave-page guard (form)** | `<DirtyFormGuard />` | inside a `<FormProvider/>`. Intercepts navigation when the form is dirty. |
 | **Leave-page guard (any)** | `<UnsavedChangesGuard isDirty={…} />` | for non-form dirty sources (Monaco buffer, custom hook, etc.). |
@@ -29,10 +29,17 @@ import { InputField } from "@knkcs/anker/forms";
 
 ```tsx
 import { DirtyCounter } from "@knkcs/anker/forms";
-import { usePageActions } from "@knkcs/anker/templates";
 
-usePageActions(<DirtyCounter />);
+<FormProvider {...form}>
+  <DirtyCounter />
+  {/* fields… */}
+</FormProvider>
 ```
+
+Don't report it through `usePageActions` or the template's `actions`: a
+host draws those outside the screen's providers, where `useFormContext`
+finds no form and the chip renders nothing. For the header, build the
+count into the one header Save instead (`docs/page-patterns.md` §10).
 
 ## Tab-trigger dot
 
