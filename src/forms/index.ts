@@ -39,6 +39,11 @@ export {
 	FormMarkersProvider,
 	type FormMarkersProviderProps,
 } from "./form-markers";
+// IconPickerField
+export {
+	IconPickerField,
+	type IconPickerFieldProps,
+} from "./icon-picker-field";
 // InlineEdit
 export {
 	InlineEdit,

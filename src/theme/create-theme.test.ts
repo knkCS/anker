@@ -157,6 +157,19 @@ describe("createAnkerTheme recipe registration (#153)", () => {
 		expect(quickSet?.base?.option?.minHeight).toBe("44px");
 	});
 
+	it("resolves the iconPicker SLOT recipe with its options at the 44px target (#232)", () => {
+		// IconPicker reads this key by hand via `useSlotRecipe`; a dropped
+		// registration leaves the grid unstyled rather than erroring.
+		const iconPicker = system.getSlotRecipe("iconPicker", null);
+		expect(iconPicker?.slots).toContain("option");
+		expect(iconPicker?.base?.option?.width).toBe("44px");
+		expect(iconPicker?.base?.option?.height).toBe("44px");
+		expect(iconPicker?.base?.trigger?._focusVisible?.boxShadow).toBe(
+			"focus-ring",
+		);
+		expect(system.getRecipe("iconPicker")).toBeUndefined();
+	});
+
 	it("registers NO plain recipe under either reactions key (both are multi-part)", () => {
 		// The mirror of the unreadBadge/avatarPresence pins: a v3 slot recipe
 		// misfiled under `recipes` is just as silently dead as the reverse.

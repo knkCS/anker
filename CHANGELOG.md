@@ -6,6 +6,19 @@ All notable changes to `@knkcs/anker` are documented in this file. The format fo
 
 ### Added
 
+- **`IconPicker`, `IconPickerField` and `DynamicIcon`** (#232): choose and
+  render a lucide icon by name. `IconPicker` (`@knkcs/anker/atoms`) is a
+  popover with search over every lucide icon by name and lucide's tags,
+  lucide's category chips, a recently-used row kept in `localStorage`, a
+  virtualised keyboard-navigable grid, and a clear button.
+  `IconPickerField` (`@knkcs/anker/forms`) is its react-hook-form binding.
+  `DynamicIcon` renders a stored name, with a neutral fallback for an unknown
+  one and renamed lucide names followed to their successor. The stored value
+  is the lucide name string, so existing data needs no migration. Icons load
+  one chunk each through lucide-react's `dynamicIconImports`; tag and
+  category data is a generated module
+  (`scripts/generate-lucide-metadata.ts`) loaded on first open. New
+  `iconPicker` slot recipe.
 - **`BaseSelectField` and `LookupSelectField`** (#233, `@knkcs/anker/forms`):
   the form-bound `BaseSelect` and `LookupSelect`. Single, multi, clearable
   and grouped options; label, helper, description and error text wired as

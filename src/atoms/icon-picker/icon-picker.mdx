@@ -1,0 +1,111 @@
+import { Canvas, Meta } from "@storybook/blocks";
+import * as Stories from "./icon-picker.stories";
+
+<Meta of={Stories} />
+
+# IconPicker, IconPickerField and DynamicIcon
+
+Three pieces for a value that **is a lucide icon name** — a blueprint's icon,
+a catalog's, a nav item's:
+
+| Piece | Import | Use it to |
+|---|---|---|
+| `IconPicker` | `@knkcs/anker/atoms` | let someone choose an icon (controlled: `value` + `onChange`) |
+| `IconPickerField` | `@knkcs/anker/forms` | the same, bound to react-hook-form like every `*Field` |
+| `DynamicIcon` | `@knkcs/anker/atoms` | render a stored name in a list, a rail, a table cell |
+
+The stored value is the **lucide name string** (`"file-text"`), exactly what
+a text field asking for "a Lucide icon name" stored. Swapping the text field
+for `IconPickerField` needs no data migration and no schema change.
+
+<Canvas of={Stories.WithValue} />
+
+## Choosing
+
+The popover holds a search box, category chips and a grid of **every** icon
+lucide-react ships.
+
+- **Search** matches the icon name and lucide's own tags — "money" finds
+  `banknote`, "warning" finds `triangle-alert`. Every word must match;
+  spaces work like the name's hyphens, so "file text" finds `file-text`.
+  Name matches rank above tag matches.
+- **Category chips** are lucide's categories, with lucide's English titles.
+  Pass `formatCategory` to translate them.
+- **Recently used** is a row above the full set, kept in `localStorage`
+  under `recentStorageKey` (default `"anker:icon-picker:recent"`; share a key
+  to share a history, pass `null` to keep none). It shows only when there is
+  no search and no category.
+- **Clearable** by default: a clear button beside the trigger sets the value
+  to `null`. `isClearable={false}` removes it.
+
+### Keyboard
+
+| Where | Key | Does |
+|---|---|---|
+| Search box | typing | filters |
+| Search box | ↑ / ↓ | moves the active icon a row; Left/Right stay with the caret |
+| Search box | Enter | picks the active icon (the first result, until you move) |
+| Category strip | ← / → / Home / End | one tab stop; arrows move and select |
+| Grid | arrows / Home / End | moves the active icon; ↑ from the top row returns to search |
+| Grid | Enter / Space | picks the active icon |
+| Anywhere | Esc | closes, focus back on the trigger |
+
+The search box is a `combobox` and the grid a `listbox` of `option`s; both
+point `aria-activedescendant` at the active icon, so a screen reader follows
+the cursor wherever focus is.
+
+## Nothing heavy is bundled
+
+- The **name list** is lucide-react's own `dynamicIconImports` map.
+- Each **icon** is its own dynamic import, fetched as its row scrolls into
+  view (the grid is virtualised) and cached for every `DynamicIcon` after.
+- The **tags and categories** are a generated module, fetched the first time
+  a picker opens. Until it lands, search runs on names alone and the chips
+  are absent.
+- The panel **mounts only while open**.
+
+The tag data is generated from the lucide release that matches the
+installed lucide-react by `scripts/generate-lucide-metadata.ts`. After bumping
+lucide-react, re-run it; a test fails until you do.
+
+## In a form
+
+```tsx
+import { IconPickerField } from "@knkcs/anker/forms";
+
+const schema = z.object({ icon: z.string().nullable() });
+
+<IconPickerField<Values>
+  name="icon"
+  label="Icon"
+  helperText="Shown next to the blueprint in lists"
+/>
+```
+
+Label, helper, description and error text are wired as for `InputField`:
+the label names the trigger, helper and error text describe it, an error sets
+`aria-invalid`, and focus-on-first-error reaches the trigger. The trigger's
+description also carries the current value, so it is announced even though
+the label is the name. Strings go in `pickerProps.labels`.
+
+## Rendering a stored name
+
+```tsx
+import { DynamicIcon } from "@knkcs/anker/atoms";
+
+<DynamicIcon name={blueprint.icon} size={16} />
+```
+
+<Canvas of={Stories.DynamicIconInAList} />
+
+- An **unknown or empty** name renders a neutral dashed circle at the same
+  size, so a row with a stale value keeps its shape. Pass `fallback` to
+  render something else.
+- A name lucide has **since renamed** (`alert-triangle` → `triangle-alert`)
+  still renders, as its successor.
+- Until the icon's chunk arrives, an empty box of the icon's size holds its
+  place.
+- Decorative (`aria-hidden`) by default; pass `aria-label` and it becomes
+  `role="img"`.
+- Every other lucide prop (`size`, `strokeWidth`, `color`, `className`)
+  passes through.

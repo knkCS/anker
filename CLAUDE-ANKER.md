@@ -332,6 +332,9 @@ Full slot/prop tables: `docs/react-table-reference.md`. Mapping guide for common
 - **`LookupSelectField`** is the same over `LookupSelect`: pass `search`
   (and `resolve`, so a stored id loads with its label) instead of `options`.
   It stores ids the same way.
+- **An icon in a form is `IconPickerField`**, never a text input asking for
+  "a Lucide icon name". The form value is the lucide name string
+  (`"file-text"`), `null` when cleared — see **IconPicker**.
 - `FormField`/`ControlledFormField` render §10 label markers: `required`
   shows `*` (suppress with `showRequiredIndicator={false}`);
   `optionalText` renders a muted marker after non-required labels.
@@ -696,6 +699,33 @@ you supply and knows nothing about transports, endpoints or auth.
 - **Strings are props**: `emptyMessage`, `errorMessage`, `loadingMessage`.
 - Not named `AsyncSelect`: `chakra-react-select` exports one, and the select
   module re-exports vendor names directly.
+
+---
+
+## IconPicker
+
+For a value that **is a lucide icon name** (a blueprint's, a catalog's, a nav
+item's icon). The stored value is the lucide name string — `"file-text"` — so
+replacing a free-text icon field needs no migration.
+
+- **Choose** with `IconPicker` (`@knkcs/anker/atoms`, controlled `value` /
+  `onChange(name | null)`) or, in a react-hook-form form, `IconPickerField`
+  (`@knkcs/anker/forms`; label/helper/error wired as for `InputField`,
+  picker options in `pickerProps`). Schema: `z.string().nullable()`.
+- **Render** a stored name with `DynamicIcon name={…}` (`@knkcs/anker/atoms`)
+  in lists, rails and cells — never a hand-written `name → component` map or
+  `import * as icons from "lucide-react"` (that bundles every icon). Unknown
+  or empty names render a neutral dashed circle at the same size (`fallback`
+  overrides); renamed lucide names (`alert-triangle`) render as their
+  successor. Decorative unless given `aria-label`.
+- Search matches names and lucide's tags ("money" → `banknote`); category
+  chips are lucide's categories (`formatCategory` translates them); a
+  recently-used row lives in `localStorage` under `recentStorageKey` (`null`
+  keeps none). Clearable by default (`isClearable`).
+- Everything loads lazily — icons one chunk each, tag data on first open — so
+  using it costs consumers nothing until a picker opens.
+- **Strings are props**: `labels` (`placeholder`, `search`, `clear`, `grid`,
+  `categories`, `allCategories`, `recent`, `allIcons`, `noResults`).
 
 ---
 
