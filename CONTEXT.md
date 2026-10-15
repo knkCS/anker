@@ -24,7 +24,7 @@ Whoever draws the page frame a screen sits in and provides identity to it — an
 _Avoid_: shell (for a host that is not `AppShell`), container
 
 **Host contract**:
-The `host` layer's agreement between a host and the screens under it: screens report a Page Frame and a Side Rail, the host provides a Host Identity. Owned by anker so every host and every package speaks one vocabulary; anker's `AppShell` is a consumer of it, not its owner.
+The `host` layer's agreement between a host and the screens under it: screens report a Page Frame, a Side Rail and their Screen Actions, the host provides a Host Identity. Owned by anker so every host and every package speaks one vocabulary; anker's `AppShell` is a consumer of it, not its owner.
 _Avoid_: slot store, AppShell context
 
 **Page frame**:
@@ -35,12 +35,16 @@ _Avoid_: header node, page header (that is the component that renders one)
 The node a screen reports through `usePageRail` for the host's side column — status tiles, activity, secondary actions. Travels on its own channel of the host contract, not inside the Page Frame; the host decides where rails go (`AppShell`: its rail column). Like the frame's nodes, it is drawn outside the screen's own providers.
 _Avoid_: rail slot (for the contract channel; the slot is `AppShell`'s internal store)
 
+**Screen actions**:
+The actions that belong to the current screen, reported through `useScreenActions` — each a `ScreenAction`: an id, a label, an icon, an optional shortcut, an optional permission predicate, and either a handler or a route. Plain data, unlike the Page Frame's `actions` node, because the host draws them in controls of its own (the Host sidebar's "On this page" group, later a command palette). The host reads exactly the current screen's actions — `useReportedScreenActions()` under the capturing provider, or `onActionsChange` — and they clear when the screen unmounts. The host leaves out an action whose predicate fails rather than disabling it.
+_Avoid_: page actions (that is `AppShell`'s opaque `usePageActions` slot), toolbar actions
+
 **Host identity**:
 Who is looking: the viewer's user id, the workspace id and a synchronous members accessor, provided once by the host and read by screens through the host contract. Has an empty default outside any provider, never null.
 _Avoid_: current user props, session
 
 **Host sidebar**:
-The sidebar a Host draws beside its screens: the workspace picker in its header, the account popup in its footer, and the Host's own navigation between them. Every Host draws the same one, `HostSidebar` from `@knkcs/odon-ui` — not from anker, because those two controls belong to the identity provider and anker depends on nothing of it (odon ADR 0009). Unlike the Page Frame and the Side Rail, it is not reported by a screen: its navigation is the Host's.
+The sidebar a Host draws beside its screens: the workspace picker in its header, the account popup in its footer, and the Host's own navigation between them. Every Host draws the same one, `HostSidebar` from `@knkcs/odon-ui` — not from anker, because those two controls belong to the identity provider and anker depends on nothing of it (odon ADR 0009). Unlike the Page Frame and the Side Rail, it is not reported by a screen: its navigation is the Host's. It does show the current screen's Screen Actions, as "On this page" in its "+ New" menu.
 _Avoid_: app sidebar, nav bar, shell sidebar
 
 **Screen**:

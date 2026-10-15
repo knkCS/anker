@@ -102,7 +102,41 @@ provider's `onRailChange`, and the host renders the node wherever its layout
 puts rails (`<AppShell>`: the rail column) — and `HostIdentity` (user id,
 workspace id, members) from the host to every screen through
 `useHostIdentity()`. The rail is deliberately not a `PageFrame` field: the
-frame mirrors `<PageHeader>`'s props exactly.
+frame mirrors `<PageHeader>`'s props exactly. A third channel carries the
+screen's **actions** — `useScreenActions(actions)` — as plain data rather than
+nodes, because the host draws them in controls of its own: `HostSidebar`
+(`@knkcs/odon-ui`) shows them as "On this page" in its "+ New" menu.
+
+```tsx
+// A screen reports what can be done on it.
+import { useScreenActions } from "@knkcs/anker/host";
+
+function TaskList() {
+  const can = usePermissions();
+  useScreenActions([
+    { id: "new-task", label: "New task", icon: <Plus size={16} />, shortcut: "N",
+      onSelect: () => setCreating(true) },
+    { id: "import", label: "Import tasks", icon: <Upload size={16} />,
+      to: "/tasks/import", isAllowed: () => can("tasks:import") },
+  ]);
+  …
+}
+
+// The host's sidebar reads them, from anywhere under the same provider.
+import { useReportedScreenActions } from "@knkcs/anker/host";
+
+const onThisPage = useReportedScreenActions().filter((a) => a.isAllowed?.() ?? true);
+```
+
+A `ScreenAction` has an `id`, a `label`, an optional `icon` (a node, as
+anker's other icon props), an optional `shortcut` (a display label — the
+contract binds no key), an optional `isAllowed` predicate, and either an
+`onSelect` handler or a `to` route (the host follows it with its router).
+The host leaves out — never disables — an action whose `isAllowed()` returns
+`false`. A fresh `onSelect` each render is fine: the reported action always
+calls the screen's latest handler, and only a change in the data (id, label,
+shortcut, route, predicate, icon) re-reports. `[]` is reported when the
+screen unmounts.
 
 ```tsx
 // A host that is not AppShell: provide once, render the frame yourself.
@@ -140,22 +174,27 @@ Rules that follow:
   a host that draws it elsewhere silently renders nothing. Build the chip
   from the dirty state the screen already holds (`formState` read inside
   the screen) instead.
-- **Without a provider `usePageFrame` and `usePageRail` are no-ops** and `useHostIdentity()`
-  returns `emptyHostIdentity` — a template rendered in a story or an
-  isolated test needs no wrapper.
+- **Without a provider `usePageFrame`, `usePageRail` and `useScreenActions`
+  are no-ops**, `useHostIdentity()` returns `emptyHostIdentity` and
+  `useReportedScreenActions()` returns `[]` — a template rendered in a story
+  or an isolated test needs no wrapper.
 - **A nested provider without an identity inherits its parent's**; frames
   and rails are captured by the nearest provider. So `<HostProvider identity=…>`
   above an `<AppShell>` supplies identity to everything inside the shell,
   while the shell keeps drawing the header and rail. The reverse does not
   hold: a provider mounted *inside* the shell captures (and, without sinks,
-  drops) the frames and rails of the screens beneath it.
+  drops) the frames and rails of the screens beneath it. Screen actions are
+  captured by the nearest provider too, and `useReportedScreenActions()`
+  reads that provider's — so a `HostSidebar` passed as `<AppShell sidebar>`
+  sees the actions of the screens inside the shell.
 - **Bespoke chrome wins.** A node registered through the opaque header slot
   below is rendered instead of the reported frame.
 - **`usePageActions` is a slot, not part of the contract.** A template
   reports registered actions only under `<AppShell>`; under a foreign host
   pass `actions` to the template.
-- **`<TestHost ref>`** (same subpath) captures the last reported frame and
-  rail (`host.current.frame`, `host.current.rail`) and takes a settable
+- **`<TestHost ref>`** (same subpath) captures the last reported frame,
+  rail and actions (`host.current.frame`, `host.current.rail`,
+  `host.current.actions`) and takes a settable
   identity for a package's render-smoke tests.
 
 ### Slot mechanism

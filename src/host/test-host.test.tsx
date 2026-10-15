@@ -8,6 +8,7 @@ import {
 	useHostIdentity,
 	usePageFrame,
 	usePageRail,
+	useScreenActions,
 } from "./host-contract";
 import { TestHost, type TestHostHandle } from "./test-host";
 
@@ -132,5 +133,59 @@ describe("TestHost", () => {
 		);
 		expect(seen).toEqual(["rail text"]);
 		expect(host.current?.rail).toBe("rail text");
+	});
+
+	it("exposes the actions a screen reported, and clears them on unmount", () => {
+		const host = createRef<TestHostHandle>();
+		let archived = 0;
+		function TaskDetail() {
+			useScreenActions([
+				{ id: "archive", label: "Archive", onSelect: () => archived++ },
+				{ id: "history", label: "History", to: "/tasks/1/history" },
+			]);
+			return null;
+		}
+		const { rerender } = render(
+			<TestHost ref={host}>
+				<TaskDetail />
+			</TestHost>,
+		);
+		expect(host.current?.actions.map((a) => a.label)).toEqual([
+			"Archive",
+			"History",
+		]);
+		expect(host.current?.actions[1].to).toBe("/tasks/1/history");
+		host.current?.actions[0].onSelect?.();
+		expect(archived).toBe(1);
+		rerender(
+			<TestHost ref={host}>
+				<div>gone</div>
+			</TestHost>,
+		);
+		expect(host.current?.actions).toEqual([]);
+	});
+
+	it("starts with no actions, and hands reports to an onActionsChange spy", () => {
+		const host = createRef<TestHostHandle>();
+		const seen: string[][] = [];
+		const spy = (actions: readonly { id: string }[]) =>
+			seen.push(actions.map((a) => a.id));
+		const { rerender } = render(
+			<TestHost ref={host} onActionsChange={spy}>
+				<div>no screen</div>
+			</TestHost>,
+		);
+		expect(host.current?.actions).toEqual([]);
+		expect(seen).toEqual([]);
+		function Screen() {
+			useScreenActions([{ id: "new", label: "New", to: "/new" }]);
+			return null;
+		}
+		rerender(
+			<TestHost ref={host} onActionsChange={spy}>
+				<Screen />
+			</TestHost>,
+		);
+		expect(seen).toEqual([["new"]]);
 	});
 });

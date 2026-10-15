@@ -21,7 +21,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in eleven lay
 7. **`/dashboard`** — Domain-free dashboard framework: the widget contract (`WidgetDefinition`, `WidgetInstance`), `createWidgetRegistry`, and the `<Dashboard>` grid engine (see Dashboard & Widget Framework below).
 8. **`/templates`** — Page-level layouts: AppShell, SubNavLayout, and page templates (index, detail, settings, auth, dashboard, marketing, error/loading/maintenance).
 9. **`/navigation`** — Unsaved-changes navigation guards: `UnsavedChangesGuard`, `useUnsavedChangesBlocker`, tab dirty context.
-10. **`/host`** — The host contract (ADR 0003): `HostProvider` (mounted once by whoever draws the page frame), `usePageFrame` (a screen reports structured page-frame state mirroring `PageHeaderProps`), `usePageRail` (a screen reports its side-rail node on its own channel; re-exported by `/templates`), `useHostIdentity` (`HostIdentity`: user id, workspace id, members accessor), `TestHost` for package tests. No-op / empty default without a provider. The page templates report through it; `AppShell` is its first consumer.
+10. **`/host`** — The host contract (ADR 0003): `HostProvider` (mounted once by whoever draws the page frame), `usePageFrame` (a screen reports structured page-frame state mirroring `PageHeaderProps`), `usePageRail` (a screen reports its side-rail node on its own channel; re-exported by `/templates`), `useScreenActions` / `useReportedScreenActions` (a screen reports its actions as `ScreenAction` data on a third channel; the host reads them — odon-ui's `HostSidebar` shows them as "On this page"), `useHostIdentity` (`HostIdentity`: user id, workspace id, members accessor), `TestHost` for package tests. No-op / empty default without a provider. The page templates report through it; `AppShell` is its first consumer.
 11. **`/rules`** — `checkAnkerRules(sources)`: the mechanical half of `CLAUDE-ANKER.md` (raw Chakra import, hex colour, `SettingsPageTemplate` without `tabs`, `maxW` on a `Card`) for a consuming package's `anker-rules.test.ts`. Pure string checks — no React, no Chakra, no file system; the package reads its own sources. No components.
 
 ### Key Technology Choices
@@ -57,7 +57,7 @@ src/
 ├── dashboard/       # Widget contract, registry, <Dashboard> grid engine
 ├── templates/       # AppShell, SubNavLayout, page templates
 ├── navigation/      # Unsaved-changes guards, tab dirty context
-├── host/            # Host contract: HostProvider, usePageFrame, useHostIdentity, TestHost
+├── host/            # Host contract: HostProvider, usePageFrame, usePageRail, useScreenActions, useHostIdentity, TestHost
 ├── rules/           # checkAnkerRules — CLAUDE-ANKER.md's checkable rules for consumers' tests
 └── (no root index.ts — consumers use subpath imports)
 ```
@@ -392,7 +392,13 @@ header from the same state. `useHostIdentity()` reads `HostIdentity` the host
 provided. `usePageRail(node)` reports the side rail on its own channel
 (`HostProvider`'s `onRailChange`; `PageFrame` stays a pure header mirror);
 `AppShell`'s provider writes it into the shell's rail slot, and
-`templates` re-exports the hook. Reported nodes (frame `actions`, the rail)
+`templates` re-exports the hook. `useScreenActions(actions)` reports the
+screen's actions on a third channel, as `ScreenAction` data (id, label, icon,
+shortcut, `isAllowed`, `onSelect` or `to`) rather than nodes, because the host
+draws them in its own controls; the provider keeps them in a store read by
+`useReportedScreenActions()` (re-rendering only the reader) and calls
+`onActionsChange`, `[]` on unmount. A reported handler delegates to the
+screen's latest `onSelect`, so only a data change re-reports. Reported nodes (frame `actions`, the rail)
 are drawn outside the screen's providers and must not read screen-local
 context. Outside any provider the hooks are no-ops and identity is
 `emptyHostIdentity`. A nested provider without an identity inherits its

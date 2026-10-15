@@ -2,6 +2,22 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- **Screen actions on the host contract** (knkCS/odon#331,
+  `@knkcs/anker/host`): a third channel beside the page frame and the side
+  rail. A screen reports the actions that belong to it with
+  `useScreenActions(actions)` — `ScreenAction` data: `id`, `label`, `icon`,
+  `shortcut`, an `isAllowed` predicate, and an `onSelect` handler or a `to`
+  route. The host reads exactly the current screen's actions with
+  `useReportedScreenActions()` from anywhere under the capturing provider, or
+  receives them through `HostProvider`'s new `onActionsChange`; they clear to
+  `[]` when the screen unmounts. `TestHost` exposes them as
+  `host.current.actions` and takes an `onActionsChange` spy. odon-ui's
+  `HostSidebar` shows them as "On this page". Additive.
+
 ## 5.5.0 — 2026-10-02
 
 ### Added

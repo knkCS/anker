@@ -8,9 +8,12 @@ import {
 	type HostIdentity,
 	HostProvider,
 	type PageFrame,
+	type ScreenAction,
 	useHostIdentity,
 	usePageFrame,
 	usePageRail,
+	useReportedScreenActions,
+	useScreenActions,
 } from "./host-contract";
 
 const alice: HostIdentity = {
@@ -309,6 +312,355 @@ describe("usePageRail", () => {
 		);
 		expect(inner).toHaveBeenCalledTimes(1);
 		expect(outer).not.toHaveBeenCalled();
+	});
+});
+
+function ActionsScreen({ actions }: { actions: readonly ScreenAction[] }) {
+	useScreenActions(actions);
+	return <div data-testid="body">body</div>;
+}
+
+/** What a Host's sidebar does: read the reported actions and draw them. */
+function ActionsReadout() {
+	const actions = useReportedScreenActions();
+	return (
+		<ul data-testid="host-actions">
+			{actions.map((a) => (
+				<li key={a.id}>
+					{"to" in a && a.to ? (
+						<a href={a.to}>{a.label}</a>
+					) : (
+						<button type="button" onClick={() => a.onSelect?.()}>
+							{a.label}
+						</button>
+					)}
+				</li>
+			))}
+		</ul>
+	);
+}
+
+describe("useScreenActions", () => {
+	it("reports the screen's actions to the provider's actions sink", () => {
+		const onActionsChange = vi.fn();
+		const onSelect = vi.fn();
+		render(
+			<HostProvider onActionsChange={onActionsChange}>
+				<ActionsScreen
+					actions={[
+						{ id: "new-task", label: "New task", shortcut: "N", onSelect },
+						{ id: "import", label: "Import", to: "/tasks/import" },
+					]}
+				/>
+			</HostProvider>,
+		);
+		expect(onActionsChange).toHaveBeenCalledTimes(1);
+		const [reported] = onActionsChange.mock.lastCall as [ScreenAction[]];
+		expect(reported.map((a) => [a.id, a.label, a.shortcut, a.to])).toEqual([
+			["new-task", "New task", "N", undefined],
+			["import", "Import", undefined, "/tasks/import"],
+		]);
+		reported[0].onSelect?.();
+		expect(onSelect).toHaveBeenCalledTimes(1);
+		expect(reported[1].onSelect).toBeUndefined();
+	});
+
+	it("carries the icon and the permission predicate to the host untouched", () => {
+		const onActionsChange = vi.fn();
+		const icon = <svg data-testid="icon" />;
+		const isAllowed = () => false;
+		render(
+			<HostProvider onActionsChange={onActionsChange}>
+				<ActionsScreen
+					actions={[
+						{ id: "a", label: "Archive", icon, isAllowed, onSelect() {} },
+					]}
+				/>
+			</HostProvider>,
+		);
+		const [reported] = onActionsChange.mock.lastCall as [ScreenAction[]];
+		expect(reported[0].icon).toBe(icon);
+		expect(reported[0].isAllowed).toBe(isAllowed);
+	});
+
+	it("does not re-report when only fresh handlers and equal icons are rebuilt", () => {
+		const onActionsChange = vi.fn();
+		function Page() {
+			const [count, setCount] = useState(0);
+			// A fresh array, fresh objects, a fresh handler and a fresh icon
+			// element with the same props on every render.
+			useScreenActions([
+				{
+					id: "new",
+					label: "New task",
+					icon: <svg data-size={16} />,
+					onSelect: () => setCount(count + 1),
+				},
+			]);
+			return <output data-testid="count">{count}</output>;
+		}
+		render(
+			<HostProvider onActionsChange={onActionsChange}>
+				<Page />
+				<ActionsReadout />
+			</HostProvider>,
+		);
+		expect(onActionsChange).toHaveBeenCalledTimes(1);
+		act(() => {
+			screen.getByRole("button", { name: "New task" }).click();
+		});
+		expect(screen.getByTestId("count")).toHaveTextContent("1");
+		expect(onActionsChange).toHaveBeenCalledTimes(1);
+		// The held action still runs the screen's LATEST handler, not the
+		// closure from the first report.
+		act(() => {
+			screen.getByRole("button", { name: "New task" }).click();
+		});
+		expect(screen.getByTestId("count")).toHaveTextContent("2");
+		expect(onActionsChange).toHaveBeenCalledTimes(1);
+	});
+
+	it("reports again when an action's data changes", () => {
+		const onActionsChange = vi.fn();
+		function Page() {
+			const [archived, setArchived] = useState(false);
+			useScreenActions(
+				archived
+					? [{ id: "restore", label: "Restore", onSelect() {} }]
+					: [
+							{
+								id: "archive",
+								label: "Archive",
+								onSelect: () => setArchived(true),
+							},
+						],
+			);
+			return null;
+		}
+		render(
+			<HostProvider onActionsChange={onActionsChange}>
+				<Page />
+				<ActionsReadout />
+			</HostProvider>,
+		);
+		act(() => {
+			screen.getByRole("button", { name: "Archive" }).click();
+		});
+		expect(onActionsChange).toHaveBeenCalledTimes(2);
+		const [reported] = onActionsChange.mock.lastCall as [ScreenAction[]];
+		expect(reported.map((a) => a.label)).toEqual(["Restore"]);
+	});
+
+	it("reports again when a handler becomes a route, the route or the predicate changes", () => {
+		const onActionsChange = vi.fn();
+		const allowed = () => true;
+		const denied = () => false;
+		const { rerender } = render(
+			<HostProvider onActionsChange={onActionsChange}>
+				<ActionsScreen actions={[{ id: "x", label: "X", onSelect() {} }]} />
+			</HostProvider>,
+		);
+		rerender(
+			<HostProvider onActionsChange={onActionsChange}>
+				<ActionsScreen actions={[{ id: "x", label: "X", to: "/x" }]} />
+			</HostProvider>,
+		);
+		expect(onActionsChange).toHaveBeenCalledTimes(2);
+		rerender(
+			<HostProvider onActionsChange={onActionsChange}>
+				<ActionsScreen actions={[{ id: "x", label: "X", to: "/y" }]} />
+			</HostProvider>,
+		);
+		expect(onActionsChange).toHaveBeenCalledTimes(3);
+		expect(onActionsChange.mock.lastCall?.[0][0].to).toBe("/y");
+		rerender(
+			<HostProvider onActionsChange={onActionsChange}>
+				<ActionsScreen
+					actions={[{ id: "x", label: "X", to: "/y", isAllowed: allowed }]}
+				/>
+			</HostProvider>,
+		);
+		rerender(
+			<HostProvider onActionsChange={onActionsChange}>
+				<ActionsScreen
+					actions={[{ id: "x", label: "X", to: "/y", isAllowed: denied }]}
+				/>
+			</HostProvider>,
+		);
+		expect(onActionsChange).toHaveBeenCalledTimes(5);
+		const [reported] = onActionsChange.mock.lastCall as [ScreenAction[]];
+		expect(reported[0].isAllowed).toBe(denied);
+	});
+
+	it("clears the actions when the reporting screen unmounts", () => {
+		const onActionsChange = vi.fn();
+		function Host({ children }: { children: ReactNode }) {
+			return (
+				<HostProvider onActionsChange={onActionsChange}>
+					{children}
+					<ActionsReadout />
+				</HostProvider>
+			);
+		}
+		const { rerender } = render(
+			<Host>
+				<ActionsScreen actions={[{ id: "a", label: "Archive", to: "/a" }]} />
+			</Host>,
+		);
+		expect(screen.getByTestId("host-actions")).toHaveTextContent("Archive");
+		rerender(
+			<Host>
+				<div>nothing reports</div>
+			</Host>,
+		);
+		expect(onActionsChange).toHaveBeenLastCalledWith([]);
+		expect(screen.getByTestId("host-actions")).toBeEmptyDOMElement();
+	});
+
+	it("survives a StrictMode remount with the actions still reported", () => {
+		const onActionsChange = vi.fn();
+		render(
+			<StrictMode>
+				<HostProvider onActionsChange={onActionsChange}>
+					<ActionsScreen actions={[{ id: "a", label: "Archive", to: "/a" }]} />
+				</HostProvider>
+			</StrictMode>,
+		);
+		const [reported] = onActionsChange.mock.lastCall as [ScreenAction[]];
+		expect(reported.map((a) => a.id)).toEqual(["a"]);
+	});
+
+	it("is a no-op without a provider", () => {
+		expect(() =>
+			render(<ActionsScreen actions={[{ id: "a", label: "A", to: "/a" }]} />),
+		).not.toThrow();
+		expect(screen.getByTestId("body")).toBeInTheDocument();
+	});
+
+	it("travels on its own channel: frame and rail sinks never see the actions", () => {
+		const onFrameChange = vi.fn();
+		const onRailChange = vi.fn();
+		const onActionsChange = vi.fn();
+		function Page() {
+			usePageFrame({ title: "Task" });
+			useScreenActions([{ id: "a", label: "Archive", to: "/a" }]);
+			return null;
+		}
+		render(
+			<HostProvider
+				onFrameChange={onFrameChange}
+				onRailChange={onRailChange}
+				onActionsChange={onActionsChange}
+			>
+				<Page />
+			</HostProvider>,
+		);
+		expect(onFrameChange).toHaveBeenLastCalledWith({ title: "Task" });
+		expect(onRailChange).not.toHaveBeenCalled();
+		expect(onActionsChange).toHaveBeenCalledTimes(1);
+	});
+
+	it("a nested provider captures actions instead of the outer one", () => {
+		const outer = vi.fn();
+		const inner = vi.fn();
+		render(
+			<HostProvider onActionsChange={outer}>
+				<HostProvider onActionsChange={inner}>
+					<ActionsScreen actions={[{ id: "a", label: "A", to: "/a" }]} />
+				</HostProvider>
+			</HostProvider>,
+		);
+		expect(inner).toHaveBeenCalledTimes(1);
+		expect(outer).not.toHaveBeenCalled();
+	});
+});
+
+describe("useReportedScreenActions", () => {
+	it("returns an empty list without a provider", () => {
+		render(<ActionsReadout />);
+		expect(screen.getByTestId("host-actions")).toBeEmptyDOMElement();
+	});
+
+	it("lets the host read exactly the current screen's actions, and run them", () => {
+		const archive = vi.fn();
+		function Router({ route }: { route: "tasks" | "settings" }) {
+			return route === "tasks" ? (
+				<ActionsScreen
+					actions={[
+						{ id: "archive", label: "Archive", onSelect: archive },
+						{ id: "import", label: "Import", to: "/tasks/import" },
+					]}
+				/>
+			) : (
+				<ActionsScreen
+					actions={[{ id: "invite", label: "Invite", to: "/invite" }]}
+				/>
+			);
+		}
+		// The sidebar sits beside the screens under the same provider — as a
+		// sidebar passed to <AppShell> does.
+		const { rerender } = render(
+			<HostProvider>
+				<ActionsReadout />
+				<Router route="tasks" />
+			</HostProvider>,
+		);
+		const list = screen.getByTestId("host-actions");
+		expect(list).toHaveTextContent("ArchiveImport");
+		act(() => {
+			screen.getByRole("button", { name: "Archive" }).click();
+		});
+		expect(archive).toHaveBeenCalledTimes(1);
+		expect(screen.getByRole("link", { name: "Import" })).toHaveAttribute(
+			"href",
+			"/tasks/import",
+		);
+		rerender(
+			<HostProvider>
+				<ActionsReadout />
+				<Router route="settings" />
+			</HostProvider>,
+		);
+		expect(list).toHaveTextContent("Invite");
+		expect(list).not.toHaveTextContent("Archive");
+	});
+
+	it("does not re-render the screens when the host reads new actions", () => {
+		let screenRenders = 0;
+		function Page() {
+			screenRenders += 1;
+			const [n, setN] = useState(0);
+			useScreenActions([
+				{ id: "bump", label: `Bump ${n}`, onSelect: () => setN(n + 1) },
+			]);
+			return null;
+		}
+		render(
+			<HostProvider>
+				<ActionsReadout />
+				<Page />
+			</HostProvider>,
+		);
+		const before = screenRenders;
+		act(() => {
+			screen.getByRole("button", { name: "Bump 0" }).click();
+		});
+		expect(screen.getByRole("button", { name: "Bump 1" })).toBeInTheDocument();
+		// One render for the screen's own state change; the host reading the
+		// new report did not re-render it again.
+		expect(screenRenders - before).toBe(1);
+	});
+
+	it("reads the nearest provider's actions", () => {
+		render(
+			<HostProvider>
+				<HostProvider>
+					<ActionsReadout />
+					<ActionsScreen actions={[{ id: "a", label: "Inner", to: "/a" }]} />
+				</HostProvider>
+			</HostProvider>,
+		);
+		expect(screen.getByTestId("host-actions")).toHaveTextContent("Inner");
 	});
 });
 
