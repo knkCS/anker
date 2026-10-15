@@ -1,7 +1,7 @@
 // src/host/test-host.tsx
 //
 // TestHost — a host for package tests. Renders children under the host
-// contract, captures the last frame and side rail they reported and lets the test change
+// contract, captures the last frame, side rail and actions they reported and lets the test change
 // the identity mid-render, so a render-smoke test can assert what a screen
 // reports and how it reacts to who is looking.
 
@@ -18,6 +18,8 @@ import {
 	HostProvider,
 	type PageFrame,
 	type PageRailSink,
+	type ScreenAction,
+	type ScreenActionsSink,
 } from "./host-contract";
 
 export interface TestHostHandle {
@@ -25,6 +27,12 @@ export interface TestHostHandle {
 	readonly frame: PageFrame | null;
 	/** The last side-rail node a descendant screen reported via `usePageRail`; `null` when none has (or the last one unmounted). */
 	readonly rail: ReactNode;
+	/**
+	 * The actions a descendant screen last reported via `useScreenActions`;
+	 * `[]` when none has (or the last one unmounted). A handler action's
+	 * `onSelect` runs the screen's handler.
+	 */
+	readonly actions: readonly ScreenAction[];
 	/** The identity currently provided. */
 	readonly identity: HostIdentity;
 	/** Replace the provided identity; wrap in `act()` as with any state change. */
@@ -38,6 +46,8 @@ export interface TestHostProps {
 	onFrameChange?: (frame: PageFrame | null) => void;
 	/** Also receives every rail report. */
 	onRailChange?: PageRailSink;
+	/** Also receives every actions report. */
+	onActionsChange?: ScreenActionsSink;
 	ref?: Ref<TestHostHandle>;
 	children: ReactNode;
 }
@@ -51,9 +61,10 @@ export interface TestHostProps {
  * ```
  *
  * `host.current?.rail` is the last reported rail node — render it to assert
- * on its content.
+ * on its content. `host.current?.actions` is the last reported list of
+ * screen actions.
  *
- * The frame and rail live in refs, not state: reading them never re-renders the
+ * The frame, rail and actions live in refs, not state: reading them never re-renders the
  * screens under test, so a report is observable the moment `render`
  * returns without an `act()` wait.
  */
@@ -61,12 +72,14 @@ export function TestHost({
 	identity: initialIdentity = emptyHostIdentity,
 	onFrameChange,
 	onRailChange,
+	onActionsChange,
 	ref,
 	children,
 }: TestHostProps) {
 	const [identity, setIdentity] = useState<HostIdentity>(initialIdentity);
 	const frame = useRef<PageFrame | null>(null);
 	const rail = useRef<ReactNode>(null);
+	const actions = useRef<readonly ScreenAction[]>([]);
 	useImperativeHandle(
 		ref,
 		() => ({
@@ -75,6 +88,9 @@ export function TestHost({
 			},
 			get rail() {
 				return rail.current;
+			},
+			get actions() {
+				return actions.current;
 			},
 			identity,
 			setIdentity,
@@ -91,6 +107,10 @@ export function TestHost({
 			onRailChange={(next) => {
 				rail.current = next;
 				onRailChange?.(next);
+			}}
+			onActionsChange={(next) => {
+				actions.current = next;
+				onActionsChange?.(next);
 			}}
 		>
 			{children}

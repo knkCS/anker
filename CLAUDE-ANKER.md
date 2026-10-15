@@ -247,6 +247,15 @@ frame reports itself.
   `onRailChange` (`null` on unmount). The host renders it where its layout
   puts rails; `<AppShell>` renders it in the rail column, over its `rail`
   prop. It is not a `PageFrame` field.
+- **A screen's actions travel on the contract as data.**
+  `useScreenActions([{ id, label, icon, shortcut, isAllowed, onSelect | to }])`
+  reports the actions that belong to the screen; the host draws them in its
+  own controls (`HostSidebar`: "On this page" in "+ New") and reads them with
+  `useReportedScreenActions()` or `onActionsChange` (`[]` on unmount). Not
+  `usePageActions` — that is `AppShell`'s opaque header slot. Leave out an
+  action the user may not run with `isAllowed`, never by disabling it. Fresh
+  `onSelect` / `isAllowed` closures each render are fine; the latest ones run,
+  and only a data change or a predicate's changed answer re-reports.
 - **Reported nodes render outside your screen's providers.** A host draws
   the frame's `actions` and the rail node away from the providers your
   screen mounts, so those nodes must not read screen-local context (form
@@ -259,7 +268,7 @@ frame reports itself.
   are synchronous over what the host already fetched. Build one with
   `createHostMembers(list)`. Don't take a current-user or members prop on a
   screen any more.
-- **No provider is fine.** The reporting hooks are no-ops and identity is
+- **No provider is fine.** The reporting hooks (`useScreenActions` too) are no-ops and identity is
   `emptyHostIdentity` (`""` ids, no members) — never null, so compare against
   `userId` and get no match rather than null-checking. Stories and isolated
   tests need no wrapper.
@@ -268,7 +277,7 @@ frame reports itself.
   an `AppShell` nested under a host does not shadow the host's identity, but
   it does capture the frames and rails beneath it.
 - **Test with `<TestHost ref>`** from the same subpath: `host.current.frame` is
-  the last reported frame, `host.current.rail` the last reported rail node, `host.current.setIdentity(…)` (in `act()`) changes
+  the last reported frame, `host.current.rail` the last reported rail node, `host.current.actions` the last reported screen actions, `host.current.setIdentity(…)` (in `act()`) changes
   who is looking. Assert the title, breadcrumbs and actions your screen
   reports; never reach into the slot store.
 - **`usePageActions` from a tab body reaches `AppShell` only.** Under a foreign

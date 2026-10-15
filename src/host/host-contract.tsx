@@ -4,7 +4,7 @@
 // reports. Rationale: docs/adr/0003-host-owns-the-frame-anker-owns-the-contract.md
 // (origin: knkcms/core ADR 0003).
 //
-// Three things flow through one context:
+// Four things flow through one context:
 //
 //   - **Page frame** (screen → host). A screen built on anker's page
 //     templates calls `usePageFrame(frame)` with structured state — title,
@@ -19,21 +19,32 @@
 //     header exactly); it travels on its own channel of the same contract.
 //     The host renders it wherever its layout puts rails; `<AppShell>`
 //     renders it in its rail column.
+//   - **Screen actions** (screen → host). A screen calls
+//     `useScreenActions(actions)` with the actions that belong to it — plain
+//     data (`ScreenAction`: id, label, icon, shortcut, permission predicate,
+//     and a handler or a route), not markup, so a host draws them in its own
+//     controls. odon-ui's `HostSidebar` shows them as "On this page". The
+//     host reads them with `useReportedScreenActions()` anywhere under the
+//     same provider, or receives them through `onActionsChange`.
 //   - **Identity** (host → screen). `HostIdentity` — the user id, the
 //     workspace id, and a members accessor — provided once at the app root
 //     and read through `useHostIdentity()` instead of arriving as props on
 //     every mount.
 //
-// Outside any provider the reporting hooks are no-ops and the identity hook
-// returns `emptyHostIdentity`, so stories and isolated tests keep working.
+// Outside any provider the reporting hooks are no-ops, the identity hook
+// returns `emptyHostIdentity` and `useReportedScreenActions()` returns an
+// empty list, so stories and isolated tests keep working.
 
 import {
 	createContext,
+	isValidElement,
 	type ReactNode,
 	useContext,
 	useEffect,
 	useMemo,
 	useRef,
+	useState,
+	useSyncExternalStore,
 } from "react";
 
 // ---------------------------------------------------------------------------
@@ -91,6 +102,95 @@ export type PageFrameSink = (frame: PageFrame | null) => void;
 export type PageRailSink = (rail: ReactNode) => void;
 
 // ---------------------------------------------------------------------------
+// Screen actions
+// ---------------------------------------------------------------------------
+
+/** What every screen action carries, whichever way it runs. */
+export interface ScreenActionBase {
+	/**
+	 * Stable within the screen's report — a host keys its controls by it, and
+	 * a later command palette or shortcut binding may refer to it.
+	 */
+	id: string;
+	/** What the host shows, e.g. "New task". */
+	label: string;
+	/**
+	 * Leading icon, as anker's other icon props take one (`<Plus size={16} />`).
+	 * The host may draw it at another size or leave it out.
+	 */
+	icon?: ReactNode;
+	/**
+	 * The key combination as shown next to the label, e.g. `"N"` or
+	 * `"⇧ ⌘ N"`. A display label: the contract binds no key.
+	 */
+	shortcut?: string;
+	/**
+	 * Permission predicate. Absent means allowed; a host leaves out — does not
+	 * disable — an action whose predicate returns `false`, and evaluates it
+	 * whenever it draws. Keep it pure and cheap: `useScreenActions` also calls
+	 * it after each render of the screen, to re-report when its answer changes.
+	 */
+	isAllowed?: () => boolean;
+}
+
+/** An action that runs a handler. */
+export interface ScreenHandlerAction extends ScreenActionBase {
+	onSelect: () => void;
+	to?: never;
+}
+
+/** An action that navigates. The host follows the route with its own router. */
+export interface ScreenRouteAction extends ScreenActionBase {
+	to: string;
+	onSelect?: never;
+}
+
+/**
+ * An action that belongs to the current screen, reported through
+ * `useScreenActions`. Plain data, not markup: the host decides how it is
+ * drawn (odon-ui's `HostSidebar`: the "On this page" group of "+ New").
+ * Either a handler (`onSelect`) or a route (`to`), never both.
+ */
+export type ScreenAction = ScreenHandlerAction | ScreenRouteAction;
+
+/**
+ * The host's actions sink: the current screen's actions, `[]` once no
+ * screen reports any.
+ */
+export type ScreenActionsSink = (actions: readonly ScreenAction[]) => void;
+
+const NO_ACTIONS: readonly ScreenAction[] = Object.freeze([]);
+
+/** The provider's store of the last reported actions, read by `useReportedScreenActions`. */
+interface ScreenActionsStore {
+	get(): readonly ScreenAction[];
+	set(actions: readonly ScreenAction[]): void;
+	subscribe(listener: () => void): () => void;
+}
+
+function createScreenActionsStore(): ScreenActionsStore {
+	let current = NO_ACTIONS;
+	const listeners = new Set<() => void>();
+	return {
+		get: () => current,
+		set: (next) => {
+			current = next;
+			for (const listener of listeners) listener();
+		},
+		subscribe: (listener) => {
+			listeners.add(listener);
+			return () => listeners.delete(listener);
+		},
+	};
+}
+
+const emptyScreenActionsStore: ScreenActionsStore = {
+	get: () => NO_ACTIONS,
+	set: () => undefined,
+	subscribe: () => () => undefined,
+};
+
+// ---------------------------------------------------------------------------
 // Identity
 // ---------------------------------------------------------------------------
 
@@ -146,6 +246,8 @@ interface HostContextValue {
 	identity: HostIdentity;
 	reportFrame: PageFrameSink;
 	reportRail: PageRailSink;
+	reportActions: ScreenActionsSink;
+	actions: ScreenActionsStore;
 }
 
 const HostContext = createContext<HostContextValue | null>(null);
@@ -171,17 +273,27 @@ export interface HostProviderProps {
 	 * state-placement rule as `onFrameChange` applies.
 	 */
 	onRailChange?: PageRailSink;
+	/**
+	 * Receives the actions a descendant screen reports through
+	 * `useScreenActions`, and `[]` when the reporting screen unmounts. Optional:
+	 * a host can instead read them with `useReportedScreenActions()` anywhere
+	 * under this provider.
+	 */
+	onActionsChange?: ScreenActionsSink;
 	children: ReactNode;
 }
 
 /**
  * Mount once, at the host's root. Descendant screens report their page
- * frame into `onFrameChange`, their side rail into `onRailChange`, and read `identity` through `useHostIdentity()`.
+ * frame into `onFrameChange`, their side rail into `onRailChange`, their
+ * actions into `onActionsChange` (and to `useReportedScreenActions()` under
+ * this provider), and read `identity` through `useHostIdentity()`.
  */
 export function HostProvider({
 	identity,
 	onFrameChange,
 	onRailChange,
+	onActionsChange,
 	children,
 }: HostProviderProps) {
 	const parent = useContext(HostContext);
@@ -192,14 +304,24 @@ export function HostProvider({
 	frameSink.current = onFrameChange;
 	const railSink = useRef<PageRailSink | undefined>(onRailChange);
 	railSink.current = onRailChange;
+	const actionsSink = useRef<ScreenActionsSink | undefined>(onActionsChange);
+	actionsSink.current = onActionsChange;
+	// One store for the provider's lifetime: a report notifies only the
+	// components reading it, never the screen tree.
+	const [actions] = useState(createScreenActionsStore);
 	const resolvedIdentity = identity ?? parent?.identity ?? emptyHostIdentity;
 	const value = useMemo<HostContextValue>(
 		() => ({
 			identity: resolvedIdentity,
 			reportFrame: (frame) => frameSink.current?.(frame),
 			reportRail: (rail) => railSink.current?.(rail),
+			reportActions: (next) => {
+				actions.set(next);
+				actionsSink.current?.(next);
+			},
+			actions,
 		}),
-		[resolvedIdentity],
+		[resolvedIdentity, actions],
 	);
 	return <HostContext.Provider value={value}>{children}</HostContext.Provider>;
 }
@@ -315,4 +437,137 @@ export function usePageRail(content: ReactNode): void {
 			ctx.reportRail(null);
 		};
 	}, [ctx]);
+}
+
+/**
+ * Element equality one level deep: same type, same key, props equal by
+ * identity. `<Plus size={16} />` rebuilt on every render is the same icon;
+ * anything else is compared by identity.
+ */
+function sameNode(a: ReactNode, b: ReactNode): boolean {
+	if (Object.is(a, b)) return true;
+	if (!isValidElement(a) || !isValidElement(b)) return false;
+	if (a.type !== b.type || a.key !== b.key) return false;
+	const pa = a.props as Record<string, unknown>;
+	const pb = b.props as Record<string, unknown>;
+	const keys = Object.keys(pa);
+	return (
+		keys.length === Object.keys(pb).length &&
+		keys.every((k) => Object.hasOwn(pb, k) && Object.is(pa[k], pb[k]))
+	);
+}
+
+/**
+ * Whether two lists would draw and behave the same. Functions are not
+ * compared — the reported action calls the screen's latest handler and
+ * predicate — only whether there is one; the predicate's answer is compared
+ * separately (`sameAnswers`), so a screen whose permissions changed reaches
+ * the host.
+ */
+function sameActions(
+	a: readonly ScreenAction[],
+	b: readonly ScreenAction[],
+): boolean {
+	if (a === b) return true;
+	if (a.length !== b.length) return false;
+	return a.every((x, i) => {
+		const y = b[i];
+		return (
+			x.id === y.id &&
+			x.label === y.label &&
+			x.shortcut === y.shortcut &&
+			x.to === y.to &&
+			(typeof x.onSelect === "function") ===
+				(typeof y.onSelect === "function") &&
+			(typeof x.isAllowed === "function") ===
+				(typeof y.isAllowed === "function") &&
+			sameNode(x.icon, y.icon)
+		);
+	});
+}
+
+/** Each action's predicate answer, `undefined` where it has none. */
+function answersOf(
+	actions: readonly ScreenAction[],
+): ReadonlyArray<boolean | undefined> {
+	return actions.map((a) => a.isAllowed?.());
+}
+
+function sameAnswers(
+	a: ReadonlyArray<boolean | undefined>,
+	b: ReadonlyArray<boolean | undefined>,
+): boolean {
+	return a.length === b.length && a.every((x, i) => x === b[i]);
+}
+
+/**
+ * Report the actions that belong to the screen — what odon-ui's
+ * `HostSidebar` shows as "On this page". Plain data: the host draws them in
+ * its own controls and leaves out any whose `isAllowed()` returns `false`.
+ * Re-reports when an action's data or a predicate's answer changes — a fresh
+ * `onSelect` or `isAllowed` closure alone is not a change: the reported
+ * action always calls the screen's latest one — and reports `[]` on unmount.
+ * A no-op outside any provider.
+ *
+ * Only one screen should report at a time — the most recent report wins and
+ * any reporting screen's unmount clears the actions, as with the frame and
+ * the rail. A screen with no actions of its own does not call it.
+ */
+export function useScreenActions(actions: readonly ScreenAction[]): void {
+	const ctx = useContext(HostContext);
+	const latest = useRef(actions);
+	const reported = useRef<{
+		actions: readonly ScreenAction[];
+		answers: ReadonlyArray<boolean | undefined>;
+	} | null>(null);
+	useEffect(() => {
+		if (!ctx) return;
+		latest.current = actions;
+		const answers = answersOf(actions);
+		if (
+			reported.current &&
+			sameActions(reported.current.actions, actions) &&
+			sameAnswers(reported.current.answers, answers)
+		)
+			return;
+		reported.current = { actions, answers };
+		// Positions match until the next report (`sameActions`), so the
+		// wrappers index into the latest list to call the latest functions.
+		ctx.reportActions(
+			actions.map((action, index): ScreenAction => {
+				const isAllowed = action.isAllowed
+					? () => latest.current[index]?.isAllowed?.() ?? true
+					: undefined;
+				const base = {
+					...action,
+					...(isAllowed ? { isAllowed } : {}),
+				};
+				if (typeof action.to === "string") return base as ScreenAction;
+				return {
+					...base,
+					onSelect: () => latest.current[index]?.onSelect?.(),
+				} as ScreenAction;
+			}),
+		);
+	});
+	useEffect(() => {
+		if (!ctx) return;
+		return () => {
+			reported.current = null;
+			ctx.reportActions(NO_ACTIONS);
+		};
+	}, [ctx]);
+}
+
+/**
+ * Read the actions the current screen reports — for the host's own controls
+ * (odon-ui's `HostSidebar`), from anywhere under the provider that captures
+ * them; a sidebar passed to `<AppShell>` is. Exactly the current screen's
+ * actions, `[]` while no screen reports any or outside any provider. Not
+ * filtered: honour each action's `isAllowed` when drawing. Re-renders only
+ * the reading component when the report changes.
+ */
+export function useReportedScreenActions(): readonly ScreenAction[] {
+	const store = useContext(HostContext)?.actions ?? emptyScreenActionsStore;
+	return useSyncExternalStore(store.subscribe, store.get, store.get);
 }
