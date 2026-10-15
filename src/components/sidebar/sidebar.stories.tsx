@@ -3,7 +3,10 @@ import type { Meta, StoryObj } from "@storybook/react";
 import {
 	Building2,
 	ClipboardList,
+	Download,
+	Inbox,
 	KeyRound,
+	ListTodo,
 	Users,
 	Webhook,
 } from "lucide-react";
@@ -51,6 +54,47 @@ export const Default: Story = {
 				</Sidebar.UserMenu>
 			</Sidebar.Footer>
 		</Sidebar>
+	),
+};
+
+const badgeItems = (
+	<Sidebar.Section label="Work">
+		<Sidebar.Item
+			icon={<ListTodo size={16} />}
+			badge={{ count: 3, tone: "attention", label: "3 overdue" }}
+		>
+			Tasks
+		</Sidebar.Item>
+		<Sidebar.Item
+			icon={<Download size={16} />}
+			badge={{ tone: "info", label: "running" }}
+		>
+			Exports
+		</Sidebar.Item>
+		<Sidebar.Item
+			icon={<Inbox size={16} />}
+			badge={{ count: 128, label: "128 unread" }}
+		>
+			Inbox
+		</Sidebar.Item>
+	</Sidebar.Section>
+);
+
+/**
+ * `badge` — a count bubble or a status dot, in a tone (`neutral`,
+ * `attention`, `info`). Expanded it trails the label; on the collapsed rail
+ * it overlays the icon's top-right corner. Its `label` joins the accessible
+ * name: "Tasks, 3 overdue".
+ */
+export const WithBadges: Story = {
+	render: () => (
+		<Flex gap="4" h="400px">
+			{[false, true].map((collapsed) => (
+				<Sidebar key={String(collapsed)} defaultCollapsed={collapsed}>
+					<Sidebar.Body>{badgeItems}</Sidebar.Body>
+				</Sidebar>
+			))}
+		</Flex>
 	),
 };
 

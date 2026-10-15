@@ -504,3 +504,92 @@ describe("Sidebar — internal-scroll layout", () => {
 		});
 	});
 });
+
+describe("Sidebar.Item badge", () => {
+	function renderSidebar(collapsed: boolean, item: React.ReactElement) {
+		Object.defineProperty(window, "innerWidth", {
+			configurable: true,
+			value: 1600,
+		});
+		return renderWithChakra(
+			<Sidebar defaultCollapsed={collapsed}>
+				<Sidebar.Body>
+					<Sidebar.Section label="Work">{item}</Sidebar.Section>
+				</Sidebar.Body>
+			</Sidebar>,
+		);
+	}
+
+	const tasks = (
+		<Sidebar.Item
+			asChild
+			icon={<svg aria-hidden="true" data-testid="tasks-icon" />}
+			badge={{ count: 3, tone: "attention", label: "3 overdue" }}
+		>
+			<a href="/tasks">Tasks</a>
+		</Sidebar.Item>
+	);
+
+	const exports = (
+		<Sidebar.Item
+			asChild
+			label="Exports"
+			icon={<svg aria-hidden="true" />}
+			badge={{ tone: "info", label: "running" }}
+		>
+			<a href="/exports">Exports</a>
+		</Sidebar.Item>
+	);
+
+	it("shows a count expanded, as a pill in the row", () => {
+		renderSidebar(false, tasks);
+		const badge = screen.getByTestId("nav-list-badge");
+		expect(badge).toHaveTextContent("3");
+		expect(badge).toHaveAttribute("data-placement", "inline");
+		expect(badge).toHaveAttribute("data-tone", "attention");
+	});
+
+	it("keeps the count on the collapsed rail, overlaid on the icon", () => {
+		renderSidebar(true, tasks);
+		const badge = screen.getByTestId("nav-list-badge");
+		expect(badge).toHaveTextContent("3");
+		expect(badge).toHaveAttribute("data-placement", "rail");
+		expect(badge.parentElement).toContainElement(
+			screen.getByTestId("tasks-icon"),
+		);
+	});
+
+	it("shows a dot expanded and collapsed", () => {
+		for (const collapsed of [false, true]) {
+			const { unmount } = renderSidebar(collapsed, exports);
+			const badge = screen.getByTestId("nav-list-badge");
+			expect(badge).toHaveAttribute("data-variant", "dot");
+			expect(badge).toHaveAttribute("data-tone", "info");
+			unmount();
+		}
+	});
+
+	it("names the item with the badge meaning, expanded and collapsed", () => {
+		for (const collapsed of [false, true]) {
+			const { unmount } = renderSidebar(
+				collapsed,
+				<>
+					{tasks}
+					{exports}
+				</>,
+			);
+			expect(
+				screen.getByRole("link", { name: "Tasks, 3 overdue" }),
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole("link", { name: "Exports, running" }),
+			).toBeInTheDocument();
+			unmount();
+		}
+	});
+
+	it("passes a plain count through, shown only when expanded", () => {
+		renderSidebar(false, <Sidebar.Item count={12}>Users</Sidebar.Item>);
+		expect(screen.getByText("12")).toBeInTheDocument();
+	});
+});

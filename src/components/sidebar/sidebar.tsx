@@ -13,7 +13,7 @@ import {
 import { Text } from "../../primitives/typography";
 import { readStoredFlag, writeStoredFlag } from "../../utils/safe-storage";
 import { KnkLogo } from "../knk-logo/knk-logo";
-import { NavList } from "../nav-list/nav-list";
+import { NavList, type NavListItemBadge } from "../nav-list/nav-list";
 import { NavListModeProvider } from "../nav-list/nav-list-context";
 
 const COLLAPSED_WIDTH = "64px";
@@ -221,7 +221,16 @@ export interface SidebarItemProps {
 	children: React.ReactNode;
 	asChild?: boolean;
 	active?: boolean;
-	label?: string; // NEW — overrides children for tooltip text when collapsed
+	/** Overrides children for the tooltip text (and accessible name) when collapsed. */
+	label?: string;
+	/** A plain quantity at the end of the row, shown only when expanded. */
+	count?: number | string;
+	/**
+	 * A count bubble or status dot that stays visible on the collapsed rail,
+	 * as an overlay on the icon. Its `label` ("3 overdue") is added to the
+	 * item's accessible name: "Tasks, 3 overdue".
+	 */
+	badge?: NavListItemBadge;
 }
 
 const SidebarItem = ({
@@ -230,12 +239,16 @@ const SidebarItem = ({
 	asChild,
 	active,
 	label,
+	count,
+	badge,
 }: SidebarItemProps) => (
 	<NavList.Item
 		icon={icon}
 		active={active}
 		asChild={asChild}
 		label={label}
+		count={count}
+		badge={badge}
 		testId="sidebar-item"
 	>
 		{children}
