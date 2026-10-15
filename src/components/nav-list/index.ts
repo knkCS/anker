@@ -1,7 +1,9 @@
 // src/components/nav-list/index.ts
 
 export type {
+	NavListBadgeTone,
 	NavListGroupProps,
+	NavListItemBadge,
 	NavListItemProps,
 	NavListProps,
 } from "./nav-list";

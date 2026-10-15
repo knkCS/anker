@@ -1,6 +1,7 @@
 // src/components/nav-list/nav-list.tsx
 import type { ReactNode } from "react";
 import React from "react";
+import { formatUnreadCount } from "../../atoms/unread-badge/format-count";
 import { Box, Flex } from "../../primitives/layout";
 import { Tooltip } from "../../primitives/tooltip";
 import { Text } from "../../primitives/typography";
@@ -49,9 +50,41 @@ const NavListGroup = ({ label, children }: NavListGroupProps) => {
 };
 NavListGroup.displayName = "NavList.Group";
 
+/** Colour intent of a {@link NavListItemBadge}, mapped to anker tokens. */
+export type NavListBadgeTone = "neutral" | "attention" | "info";
+
+/**
+ * A status badge on a nav item: a count bubble, or a dot when `count` is
+ * omitted. Unlike the plain `count` it stays visible on the collapsed rail,
+ * as a small overlay at the icon's top-right corner.
+ */
+export interface NavListItemBadge {
+	/**
+	 * Number (or short string) to show. Omit for a dot. A number above 99
+	 * reads `99+`; zero or less renders no badge at all.
+	 */
+	count?: number | string;
+	/** @default "neutral" */
+	tone?: NavListBadgeTone;
+	/**
+	 * What the badge means, e.g. `"3 overdue"` or `"running"`. It is
+	 * appended to the item's accessible name ("Tasks, 3 overdue") and to its
+	 * tooltip on the rail; the visible badge itself is hidden from assistive
+	 * technology.
+	 */
+	label: string;
+}
+
 export interface NavListItemProps {
 	icon?: ReactNode;
+	/**
+	 * A plain quantity shown at the end of the row when expanded (e.g. the
+	 * number of entries in a catalog). Hidden on the collapsed rail — use
+	 * `badge` for something that needs attention.
+	 */
 	count?: number | string;
+	/** A count bubble or status dot, kept visible on the collapsed rail. */
+	badge?: NavListItemBadge;
 	active?: boolean;
 	asChild?: boolean;
 	/** Override tooltip text when the parent is collapsed. */
@@ -61,9 +94,125 @@ export interface NavListItemProps {
 	children: ReactNode;
 }
 
+const BADGE_TONES: Record<
+	NavListBadgeTone,
+	{ subtleBg: string; subtleFg: string; solidBg: string; solidFg: string }
+> = {
+	neutral: {
+		subtleBg: "bg-muted",
+		subtleFg: "emphasized",
+		solidBg: "muted",
+		solidFg: "inverted",
+	},
+	attention: {
+		subtleBg: "secondary.subtle",
+		subtleFg: "secondary.fg",
+		// secondary.solid (600) with white is ~3.7:1 — too low for the rail's
+		// 2xs digits; 700 clears AA in both modes.
+		solidBg: "secondary.700",
+		solidFg: "secondary.contrast",
+	},
+	info: {
+		subtleBg: "primary.subtle",
+		subtleFg: "primary.fg",
+		solidBg: "primary.solid",
+		solidFg: "primary.contrast",
+	},
+};
+
+/** The text a badge shows: a string for a count, "" for a dot, null for none. */
+function badgeText(badge: NavListItemBadge): string | null {
+	if (badge.count === undefined) return "";
+	if (typeof badge.count === "number")
+		return formatUnreadCount(badge.count, 99);
+	return badge.count === "" ? null : badge.count;
+}
+
+interface NavBadgeProps {
+	text: string;
+	tone: NavListBadgeTone;
+	placement: "inline" | "rail";
+	marginInlineStart?: string;
+}
+
+const NavBadge = ({
+	text,
+	tone,
+	placement,
+	marginInlineStart,
+}: NavBadgeProps) => {
+	const colors = BADGE_TONES[tone];
+	const isDot = text === "";
+	const common = {
+		"data-testid": "nav-list-badge",
+		"data-tone": tone,
+		"data-variant": isDot ? "dot" : "count",
+		"data-placement": placement,
+		"aria-hidden": true as const,
+		flexShrink: 0,
+		borderRadius: "full",
+	};
+
+	if (placement === "rail") {
+		// Overlay at the icon's top-right; the ring in the rail's background
+		// colour separates it from the icon underneath.
+		return (
+			<Box
+				{...common}
+				position="absolute"
+				top={isDot ? "-0.5" : "-1.5"}
+				insetInlineEnd={isDot ? "-0.5" : "-2"}
+				bg={colors.solidBg}
+				color={colors.solidFg}
+				boxShadow="0 0 0 2px var(--chakra-colors-bg-canvas)"
+				{...(isDot
+					? { w: "2", h: "2" }
+					: {
+							minW: "4",
+							h: "4",
+							px: "1",
+							fontSize: "2xs",
+							fontWeight: "semibold",
+							lineHeight: "4",
+							textAlign: "center" as const,
+						})}
+				style={{ fontVariantNumeric: "tabular-nums" }}
+			>
+				{text}
+			</Box>
+		);
+	}
+
+	return (
+		<Box
+			{...common}
+			as="span"
+			display="inline-block"
+			marginInlineStart={marginInlineStart}
+			{...(isDot
+				? { w: "2", h: "2", bg: colors.solidBg }
+				: {
+						minW: "5",
+						h: "5",
+						px: "1.5",
+						fontSize: "xs",
+						fontWeight: "medium",
+						lineHeight: "5",
+						textAlign: "center" as const,
+						bg: colors.subtleBg,
+						color: colors.subtleFg,
+					})}
+			style={{ fontVariantNumeric: "tabular-nums" }}
+		>
+			{text}
+		</Box>
+	);
+};
+
 const NavListItem = ({
 	icon,
 	count,
+	badge,
 	active,
 	asChild,
 	label,
@@ -96,9 +245,24 @@ const NavListItem = ({
 		cursor: "pointer",
 	};
 
+	const shownBadgeText = badge ? badgeText(badge) : null;
+	const hasBadge = badge !== undefined && shownBadgeText !== null;
+	const badgeTone = badge?.tone ?? "neutral";
+	// On the rail the badge overlays the icon; without an icon to anchor to it
+	// stays in the row.
+	const badgeOnRail = hasBadge && collapsed && Boolean(icon);
+
 	const iconEl = icon ? (
-		<Box display="inline-flex" alignItems="center" flexShrink={0}>
+		<Box
+			display="inline-flex"
+			alignItems="center"
+			flexShrink={0}
+			position={badgeOnRail ? "relative" : undefined}
+		>
 			{icon}
+			{badgeOnRail && shownBadgeText !== null ? (
+				<NavBadge text={shownBadgeText} tone={badgeTone} placement="rail" />
+			) : null}
 		</Box>
 	) : null;
 
@@ -116,9 +280,22 @@ const NavListItem = ({
 			</Text>
 		) : null;
 
-	// The active pill is a flex child. When there's no count it gets
-	// margin-inline-start: auto (push to end); when there IS a count the
-	// count owns the auto-margin and the pill sits after it with a small gap.
+	const hasCount = count !== undefined && !collapsed;
+	const inlineBadgeEl =
+		hasBadge && !badgeOnRail && shownBadgeText !== null ? (
+			<NavBadge
+				text={shownBadgeText}
+				tone={badgeTone}
+				placement="inline"
+				marginInlineStart={
+					hasCount || collapsed ? "var(--chakra-spacing-2)" : "auto"
+				}
+			/>
+		) : null;
+
+	// The active pill is a flex child. When nothing trails the label it gets
+	// margin-inline-start: auto (push to end); otherwise the count or badge
+	// owns the auto-margin and the pill sits after it with a small gap.
 	const pillEl =
 		active && !collapsed ? (
 			<span
@@ -130,16 +307,62 @@ const NavListItem = ({
 					borderRadius: 999,
 					flexShrink: 0,
 					marginInlineStart:
-						count !== undefined ? "var(--chakra-spacing-2)" : "auto",
+						count !== undefined || hasBadge
+							? "var(--chakra-spacing-2)"
+							: "auto",
 				}}
 			/>
 		) : null;
 
 	const tooltipLabel = label || (typeof children === "string" ? children : "");
 
+	// The badge's meaning, for assistive technology. An asChild link carries
+	// it as its aria-label ("Tasks, 3 overdue"), which also keeps the
+	// separate text runs of icon, label and badge from being joined with
+	// stray spaces. Otherwise — no derivable name, or a plain row — it is
+	// visually hidden text: appended to the visible label when expanded,
+	// spelled out in full on the rail, where no label text is rendered.
+	const asChildProps =
+		asChild &&
+		React.isValidElement<{ children?: ReactNode; "aria-label"?: string }>(
+			children,
+		)
+			? children.props
+			: undefined;
+	const asChildText =
+		typeof asChildProps?.children === "string" ? asChildProps.children : "";
+	// Expanded, the visible text leads the name (label-in-name); on the rail
+	// the label prop does, as it does for the tooltip.
+	const itemName = collapsed
+		? tooltipLabel || asChildText
+		: asChildText || tooltipLabel;
+	// A plain count shown beside the badge stays in the name, as it was read
+	// when it was the row's content.
+	const countPart = hasCount ? `, ${count}` : "";
+	const badgeName =
+		hasBadge && badge && itemName
+			? `${itemName}${countPart}, ${badge.label}`
+			: undefined;
+	// A child's own aria-label already replaces its content as the name, so
+	// the meaning is appended to it rather than to hidden text it would mask.
+	const childAriaLabel = asChildProps?.["aria-label"];
+	const badgeAriaLabel =
+		asChild && hasBadge && badge
+			? childAriaLabel
+				? `${childAriaLabel}, ${badge.label}`
+				: badgeName
+			: undefined;
+	const badgeA11yEl =
+		hasBadge && badge && !badgeAriaLabel ? (
+			<Box as="span" srOnly>
+				{collapsed ? (badgeName ?? badge.label) : `, ${badge.label}`}
+			</Box>
+		) : null;
+	const tooltipText = badgeName ?? tooltipLabel;
+
 	const wrapTooltip = (node: React.ReactElement) =>
-		collapsed && tooltipLabel ? (
-			<Tooltip content={tooltipLabel} positioning={{ placement: "right" }}>
+		collapsed && tooltipText ? (
+			<Tooltip content={tooltipText} positioning={{ placement: "right" }}>
 				{node}
 			</Tooltip>
 		) : (
@@ -158,6 +381,7 @@ const NavListItem = ({
 			{
 				"data-active": active ? "true" : "false",
 				"aria-current": active ? "page" : undefined,
+				...(badgeAriaLabel ? { "aria-label": badgeAriaLabel } : {}),
 				style: {
 					...itemStyle,
 					...(child.props.style as React.CSSProperties | undefined),
@@ -165,7 +389,9 @@ const NavListItem = ({
 			},
 			iconEl,
 			collapsed ? null : child.props.children,
+			badgeA11yEl,
 			countEl,
+			inlineBadgeEl,
 			pillEl,
 		);
 		return wrapTooltip(cloned);
@@ -180,7 +406,9 @@ const NavListItem = ({
 		>
 			{iconEl}
 			{!collapsed && children}
+			{badgeA11yEl}
 			{countEl}
+			{inlineBadgeEl}
 			{pillEl}
 		</Box>,
 	);

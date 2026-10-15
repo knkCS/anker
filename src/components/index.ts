@@ -113,7 +113,9 @@ export type { ModalProps } from "./modal";
 export { Modal } from "./modal";
 // NavList
 export type {
+	NavListBadgeTone,
 	NavListGroupProps,
+	NavListItemBadge,
 	NavListItemProps,
 	NavListProps,
 } from "./nav-list";

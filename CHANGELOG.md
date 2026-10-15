@@ -2,6 +2,23 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- **Badges on `Sidebar.Item` and `NavList.Item`** (knkCS/odon#374,
+  `@knkcs/anker/components`): a new `badge` prop — `{ count?, tone?, label }`
+  — shows a count pill, or a dot when `count` is omitted, in a tone
+  (`neutral` default, `attention`, `info`) mapped to anker tokens. Expanded
+  it trails the label; on the collapsed rail it stays visible as a small
+  bubble or dot over the icon's top-right corner. Its `label` ("3 overdue")
+  joins the item's accessible name ("Tasks, 3 overdue") and its rail
+  tooltip; the visible badge is hidden from assistive technology. A number
+  above 99 reads `99+`, zero renders nothing. `Sidebar.Item` now also passes
+  the plain `count` through to `NavList.Item`; that count keeps its meaning —
+  a quantity, shown only when expanded. New exported types
+  `NavListItemBadge` and `NavListBadgeTone`. Additive.
+
 ## 5.6.0 — 2026-10-15
 
 ### Added
