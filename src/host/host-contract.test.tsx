@@ -380,7 +380,7 @@ describe("useScreenActions", () => {
 		);
 		const [reported] = onActionsChange.mock.lastCall as [ScreenAction[]];
 		expect(reported[0].icon).toBe(icon);
-		expect(reported[0].isAllowed).toBe(isAllowed);
+		expect(reported[0].isAllowed?.()).toBe(false);
 	});
 
 	it("does not re-report when only fresh handlers and equal icons are rebuilt", () => {
@@ -489,7 +489,54 @@ describe("useScreenActions", () => {
 		);
 		expect(onActionsChange).toHaveBeenCalledTimes(5);
 		const [reported] = onActionsChange.mock.lastCall as [ScreenAction[]];
-		expect(reported[0].isAllowed).toBe(denied);
+		expect(reported[0].isAllowed?.()).toBe(false);
+	});
+
+	it("re-reports when a predicate's answer changes, not when only its closure is fresh", () => {
+		const onActionsChange = vi.fn();
+		function Page() {
+			const [count, setCount] = useState(0);
+			const [locked, setLocked] = useState(false);
+			// Fresh predicate closures on every render, as written inline.
+			useScreenActions([
+				{
+					id: "edit",
+					label: "Edit",
+					to: "/edit",
+					isAllowed: () => !locked,
+				},
+			]);
+			return (
+				<>
+					<button type="button" onClick={() => setCount((c) => c + 1)}>
+						bump {count}
+					</button>
+					<button type="button" onClick={() => setLocked(true)}>
+						lock
+					</button>
+				</>
+			);
+		}
+		render(
+			<HostProvider onActionsChange={onActionsChange}>
+				<Page />
+			</HostProvider>,
+		);
+		expect(onActionsChange).toHaveBeenCalledTimes(1);
+		const [held] = onActionsChange.mock.lastCall as [ScreenAction[]];
+		act(() => {
+			screen.getByRole("button", { name: /bump/ }).click();
+		});
+		expect(onActionsChange).toHaveBeenCalledTimes(1);
+		act(() => {
+			screen.getByRole("button", { name: "lock" }).click();
+		});
+		expect(onActionsChange).toHaveBeenCalledTimes(2);
+		const [reported] = onActionsChange.mock.lastCall as [ScreenAction[]];
+		expect(reported[0].isAllowed?.()).toBe(false);
+		// A predicate the host still holds from the earlier report reads the
+		// screen's latest state too.
+		expect(held[0].isAllowed?.()).toBe(false);
 	});
 
 	it("clears the actions when the reporting screen unmounts", () => {

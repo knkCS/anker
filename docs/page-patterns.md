@@ -133,10 +133,11 @@ anker's other icon props), an optional `shortcut` (a display label — the
 contract binds no key), an optional `isAllowed` predicate, and either an
 `onSelect` handler or a `to` route (the host follows it with its router).
 The host leaves out — never disables — an action whose `isAllowed()` returns
-`false`. A fresh `onSelect` each render is fine: the reported action always
-calls the screen's latest handler, and only a change in the data (id, label,
-shortcut, route, predicate, icon) re-reports. `[]` is reported when the
-screen unmounts.
+`false`. Fresh `onSelect` and `isAllowed` closures each render are fine: the
+reported action always calls the screen's latest ones, and only a change in
+the data (id, label, shortcut, route, icon) or in a predicate's answer
+re-reports — so keep `isAllowed` pure and cheap, the hook calls it after each
+render. `[]` is reported when the screen unmounts.
 
 ```tsx
 // A host that is not AppShell: provide once, render the frame yourself.

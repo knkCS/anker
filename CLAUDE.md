@@ -397,8 +397,9 @@ screen's actions on a third channel, as `ScreenAction` data (id, label, icon,
 shortcut, `isAllowed`, `onSelect` or `to`) rather than nodes, because the host
 draws them in its own controls; the provider keeps them in a store read by
 `useReportedScreenActions()` (re-rendering only the reader) and calls
-`onActionsChange`, `[]` on unmount. A reported handler delegates to the
-screen's latest `onSelect`, so only a data change re-reports. Reported nodes (frame `actions`, the rail)
+`onActionsChange`, `[]` on unmount. A reported handler and predicate delegate
+to the screen's latest `onSelect` / `isAllowed`, so only a data change or a
+predicate's changed answer re-reports. Reported nodes (frame `actions`, the rail)
 are drawn outside the screen's providers and must not read screen-local
 context. Outside any provider the hooks are no-ops and identity is
 `emptyHostIdentity`. A nested provider without an identity inherits its

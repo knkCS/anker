@@ -253,8 +253,9 @@ frame reports itself.
   own controls (`HostSidebar`: "On this page" in "+ New") and reads them with
   `useReportedScreenActions()` or `onActionsChange` (`[]` on unmount). Not
   `usePageActions` — that is `AppShell`'s opaque header slot. Leave out an
-  action the user may not run with `isAllowed`, never by disabling it. A fresh
-  `onSelect` each render is fine; the latest one runs.
+  action the user may not run with `isAllowed`, never by disabling it. Fresh
+  `onSelect` / `isAllowed` closures each render are fine; the latest ones run,
+  and only a data change or a predicate's changed answer re-reports.
 - **Reported nodes render outside your screen's providers.** A host draws
   the frame's `actions` and the rail node away from the providers your
   screen mounts, so those nodes must not read screen-local context (form

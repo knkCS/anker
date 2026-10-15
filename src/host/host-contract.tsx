@@ -127,7 +127,8 @@ export interface ScreenActionBase {
 	/**
 	 * Permission predicate. Absent means allowed; a host leaves out — does not
 	 * disable — an action whose predicate returns `false`, and evaluates it
-	 * whenever it draws.
+	 * whenever it draws. Keep it pure and cheap: `useScreenActions` also calls
+	 * it after each render of the screen, to re-report when its answer changes.
 	 */
 	isAllowed?: () => boolean;
 }
@@ -457,10 +458,11 @@ function sameNode(a: ReactNode, b: ReactNode): boolean {
 }
 
 /**
- * Whether two reports would draw and behave the same. A handler is not
- * compared — the reported action calls the screen's latest one — only
- * whether there is one; the predicate is, by identity, so a screen whose
- * permissions changed reaches the host.
+ * Whether two lists would draw and behave the same. Functions are not
+ * compared — the reported action calls the screen's latest handler and
+ * predicate — only whether there is one; the predicate's answer is compared
+ * separately (`sameAnswers`), so a screen whose permissions changed reaches
+ * the host.
  */
 function sameActions(
 	a: readonly ScreenAction[],
@@ -477,19 +479,35 @@ function sameActions(
 			x.to === y.to &&
 			(typeof x.onSelect === "function") ===
 				(typeof y.onSelect === "function") &&
-			Object.is(x.isAllowed, y.isAllowed) &&
+			(typeof x.isAllowed === "function") ===
+				(typeof y.isAllowed === "function") &&
 			sameNode(x.icon, y.icon)
 		);
 	});
+}
+
+/** Each action's predicate answer, `undefined` where it has none. */
+function answersOf(
+	actions: readonly ScreenAction[],
+): ReadonlyArray<boolean | undefined> {
+	return actions.map((a) => a.isAllowed?.());
+}
+
+function sameAnswers(
+	a: ReadonlyArray<boolean | undefined>,
+	b: ReadonlyArray<boolean | undefined>,
+): boolean {
+	return a.length === b.length && a.every((x, i) => x === b[i]);
 }
 
 /**
  * Report the actions that belong to the screen — what odon-ui's
  * `HostSidebar` shows as "On this page". Plain data: the host draws them in
  * its own controls and leaves out any whose `isAllowed()` returns `false`.
- * Re-reports when an action's data changes (a fresh `onSelect` alone is not a
- * change: the reported action always calls the screen's latest handler) and
- * reports `[]` on unmount. A no-op outside any provider.
+ * Re-reports when an action's data or a predicate's answer changes — a fresh
+ * `onSelect` or `isAllowed` closure alone is not a change: the reported
+ * action always calls the screen's latest one — and reports `[]` on unmount.
+ * A no-op outside any provider.
  *
  * Only one screen should report at a time — the most recent report wins and
  * any reporting screen's unmount clears the actions, as with the frame and
@@ -498,21 +516,37 @@ function sameActions(
 export function useScreenActions(actions: readonly ScreenAction[]): void {
 	const ctx = useContext(HostContext);
 	const latest = useRef(actions);
-	const reported = useRef<readonly ScreenAction[] | null>(null);
+	const reported = useRef<{
+		actions: readonly ScreenAction[];
+		answers: ReadonlyArray<boolean | undefined>;
+	} | null>(null);
 	useEffect(() => {
 		if (!ctx) return;
 		latest.current = actions;
-		if (reported.current && sameActions(reported.current, actions)) return;
-		reported.current = actions;
+		const answers = answersOf(actions);
+		if (
+			reported.current &&
+			sameActions(reported.current.actions, actions) &&
+			sameAnswers(reported.current.answers, answers)
+		)
+			return;
+		reported.current = { actions, answers };
+		// Positions match until the next report (`sameActions`), so the
+		// wrappers index into the latest list to call the latest functions.
 		ctx.reportActions(
 			actions.map((action, index): ScreenAction => {
-				if (typeof action.to === "string") return { ...action };
-				return {
+				const isAllowed = action.isAllowed
+					? () => latest.current[index]?.isAllowed?.() ?? true
+					: undefined;
+				const base = {
 					...action,
-					// Positions match until the next report (`sameActions`), so
-					// index into the latest list to run the latest handler.
-					onSelect: () => latest.current[index]?.onSelect?.(),
+					...(isAllowed ? { isAllowed } : {}),
 				};
+				if (typeof action.to === "string") return base as ScreenAction;
+				return {
+					...base,
+					onSelect: () => latest.current[index]?.onSelect?.(),
+				} as ScreenAction;
 			}),
 		);
 	});
