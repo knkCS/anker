@@ -39,6 +39,10 @@ _Avoid_: rail slot (for the contract channel; the slot is `AppShell`'s internal 
 Who is looking: the viewer's user id, the workspace id and a synchronous members accessor, provided once by the host and read by screens through the host contract. Has an empty default outside any provider, never null.
 _Avoid_: current user props, session
 
+**Host sidebar**:
+The sidebar a Host draws beside its screens: the workspace picker in its header, the account popup in its footer, and the Host's own navigation between them. Every Host draws the same one, `HostSidebar` from `@knkcs/odon-ui` — not from anker, because those two controls belong to the identity provider and anker depends on nothing of it (odon ADR 0009). Unlike the Page Frame and the Side Rail, it is not reported by a screen: its navigation is the Host's.
+_Avoid_: app sidebar, nav bar, shell sidebar
+
 **Screen**:
 A page-level component a package exports for a host to mount — body content plus a reported Page Frame, no routes of its own.
 _Avoid_: page (ambiguous with the host's route), view
