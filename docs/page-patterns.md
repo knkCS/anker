@@ -2,7 +2,7 @@
 
 **Version:** 1.x
 **Status:** Active — source-of-truth contract for knkCMS solutions
-**Last updated:** May 2026
+**Last updated:** October 2026
 
 ---
 
@@ -331,17 +331,29 @@ The sidebar is the global navigation surface. It is the first thing users
 see on every page and the only navigation surface that is always visible
 in the chrome.
 
+**Every Host's sidebar is `HostSidebar` from `@knkcs/odon-ui`** — the
+Workspace Picker in the header, the Account Popup in the footer, and the
+Host's navigation between them, passed as data. A Host does not assemble
+the header and footer itself. The decision, and why the component lives in
+odon-ui rather than in anker, is
+[odon ADR 0009](https://github.com/knkCS/odon/blob/main/docs/adr/0009-every-hosts-sidebar-comes-from-odon-ui-hostsidebar.md).
+`HostSidebar` is built on anker's compound `<Sidebar>`; the anatomy and
+item rules below describe that compound component and govern the
+navigation a Host passes in. core keeps its own sidebar until its
+redesign (same ADR).
+
 ### Section anatomy
 
 A sidebar is composed of:
 
 1. **`<Sidebar.Header>`** — fixed-height header band. Contains
-   `<Sidebar.Logo>` (wordmark + optional subtitle + collapse toggle).
+   `<Sidebar.Logo>` (wordmark + optional subtitle + collapse toggle) and,
+   in a Host, the Workspace Picker.
 2. **`<Sidebar.Body>`** — scrolling section list. Contains zero or more
    `<Sidebar.Section>`s, each of which contains zero or more
    `<Sidebar.Item>`s.
-3. **`<Sidebar.Footer>`** — fixed-height footer band. Typically holds
-   `<Sidebar.UserMenu>`.
+3. **`<Sidebar.Footer>`** — fixed-height footer band. In a Host it holds
+   the Account Popup (see "Footer" below).
 
 ### `<Sidebar.Section>` structure
 
@@ -387,41 +399,34 @@ Sidebar's section + item rendering is implemented via the shared `<NavList>` pri
 
 ### Footer
 
-The footer is reserved for `<Sidebar.UserMenu>` (account avatar +
-dropdown with personal-settings, theme toggle, sign-out). Solutions may
-add product-specific items above the user menu (e.g. a "Help" link) by
-nesting them inside `<Sidebar.Footer>` above `<Sidebar.UserMenu>`.
+The footer is reserved for the user's account block: the Account Popup,
+which `HostSidebar` draws there. A Host does not use `<Sidebar.UserMenu>`
+there — it lacks the organization switch and profile link every Host must
+offer. It remains an anker component for sidebars that are not a Host's.
 
 The collapse-toggle lives **inside** `<Sidebar.Logo>`, not in the footer.
 This was a deliberate move in 1.8.1 — putting the toggle in the header
 keeps the footer pure user-action territory.
 
-### Sidebar account block
+### Sidebar header and account block
 
-The `<Sidebar.Footer>` slot is reserved for the user's account block —
-avatar + display name + active organization, paired with a menu for
-profile, logout, and org switching.
+`HostSidebar` (in `@knkcs/odon-ui`) is the standard for both ends of a
+Host's sidebar ([odon ADR 0009](https://github.com/knkCS/odon/blob/main/docs/adr/0009-every-hosts-sidebar-comes-from-odon-ui-hostsidebar.md)):
 
-Use `<AccountPopup>` from `@knkcs/odon-ui` (≥ 0.6.0) as the standard
-implementation across knkCMS solutions:
+- **Header — Workspace Picker.** Shows the Workspace the user is acting in
+  and switches to another. A switch goes through odon's `/switch` and
+  returns the user to the same page, provided the Host's origin is allowed
+  by odon and its `/auth/login` honours `target` (the round-trip contract
+  in the ADR).
+- **Footer — Account Popup.** Avatar, display name and active
+  organization, opening a menu with the organization switch, the odon
+  profile link and sign-out.
 
-```tsx
-import { AccountPopup } from "@knkcs/odon-ui";
-
-<Sidebar.Footer>
-  <AccountPopup
-    client={orgClient}
-    user={{ displayName, email }}
-    activeOrgId={state.active_org.id}
-    activeOrgName={lookupActiveOrgName(state)}
-    profilePath={state.profile_url}
-  />
-</Sidebar.Footer>
-```
-
-The popup's default trigger renders the rich avatar + name + org block
-that the sidebar pattern expects. Pass a custom `trigger` only when a
-specific solution needs a different shape.
+Do not wire `WorkspacePicker` and `AccountPopup` into a Host's sidebar by
+hand, wrap them in local copies, or copy odon's organization and workspace
+clients into the Host: mount `HostSidebar`, which composes them. Both
+stay exported from odon-ui for core, which mounts them directly until its
+redesign.
 
 ### Sub-section pattern: "Personal / Organization / Identity / Admin"
 
