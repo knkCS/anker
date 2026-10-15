@@ -59,6 +59,7 @@ src/
 ├── navigation/      # Unsaved-changes guards, tab dirty context
 ├── host/            # Host contract: HostProvider, usePageFrame, usePageRail, useScreenActions, useHostIdentity, TestHost
 ├── rules/           # checkAnkerRules — CLAUDE-ANKER.md's checkable rules for consumers' tests
+├── utils/           # Internal helpers, not exported (safe-storage: localStorage that never throws)
 └── (no root index.ts — consumers use subpath imports)
 ```
 

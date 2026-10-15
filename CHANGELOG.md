@@ -18,6 +18,22 @@ All notable changes to `@knkcs/anker` are documented in this file. The format fo
   `host.current.actions` and takes an `onActionsChange` spy. odon-ui's
   `HostSidebar` shows them as "On this page". Additive.
 
+### Fixed
+
+- **`Sidebar`, `ContextRail` and `SubNavLayout` never throw on storage**
+  (knkCS/odon#350). Their remembered collapsed state (`storageKey`) is read
+  and written through a guard: when `localStorage` is missing, throws on
+  access (blocked by the browser or privacy settings), throws on write (a
+  full quota) or lacks working methods, they start from their default, still
+  toggle, and keep the state in memory for the rest of the session. Before,
+  `Sidebar` called `window.localStorage.getItem`/`setItem` unguarded and
+  could crash the page. `IconPicker`'s recently-used row uses the same guard
+  and is now remembered for the session when storage refuses it.
+- **Tests use jsdom's `localStorage` on any Node** (knkCS/odon#350): the
+  suite runs with Node's own Web Storage disabled
+  (`--no-experimental-webstorage` in `vitest.config.ts`), and the in-memory
+  `localStorage` replacement in `src/test/setup.ts` is gone.
+
 ## 5.5.0 — 2026-10-02
 
 ### Added

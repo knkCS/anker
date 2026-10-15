@@ -1,11 +1,15 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import { BROKEN_STORAGE_SHAPES, breakLocalStorage } from "../../test/storage";
 import { pushRecent, readRecent, writeRecent } from "./recent-icons";
 
 const KEY = "test:recent-icons";
 
+let restore: (() => void) | undefined;
+
 afterEach(() => {
+	restore?.();
+	restore = undefined;
 	localStorage.clear();
-	vi.restoreAllMocks();
 });
 
 describe("pushRecent", () => {
@@ -38,14 +42,14 @@ describe("readRecent / writeRecent", () => {
 		expect(readRecent(KEY)).toEqual(["a", "b"]);
 	});
 
-	it("survives storage that throws (private mode, blocked site data)", () => {
-		vi.spyOn(localStorage, "getItem").mockImplementation(() => {
-			throw new Error("SecurityError");
-		});
-		vi.spyOn(localStorage, "setItem").mockImplementation(() => {
-			throw new Error("QuotaExceededError");
-		});
-		expect(readRecent(KEY)).toEqual([]);
-		expect(() => writeRecent(KEY, ["a"])).not.toThrow();
+	it.each(
+		BROKEN_STORAGE_SHAPES,
+	)("survives storage that is %s and remembers the list for the session", (shape) => {
+		restore = breakLocalStorage(shape);
+		// Its own key: the list stays in memory for the session.
+		const key = `${KEY}:${shape}`;
+		expect(readRecent(key)).toEqual([]);
+		expect(() => writeRecent(key, ["a"])).not.toThrow();
+		expect(readRecent(key)).toEqual(["a"]);
 	});
 });

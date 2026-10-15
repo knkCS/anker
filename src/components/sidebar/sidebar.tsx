@@ -11,6 +11,7 @@ import {
 	MenuTrigger,
 } from "../../primitives/menu";
 import { Text } from "../../primitives/typography";
+import { readStoredFlag, writeStoredFlag } from "../../utils/safe-storage";
 import { KnkLogo } from "../knk-logo/knk-logo";
 import { NavList } from "../nav-list/nav-list";
 import { NavListModeProvider } from "../nav-list/nav-list-context";
@@ -40,9 +41,8 @@ function getInitialCollapsed(
 ): boolean {
 	if (typeof window === "undefined") return defaultCollapsed ?? false;
 	if (storageKey) {
-		const stored = window.localStorage.getItem(storageKey);
-		if (stored === "true") return true;
-		if (stored === "false") return false;
+		const stored = readStoredFlag(storageKey);
+		if (stored !== undefined) return stored;
 	}
 	if (defaultCollapsed !== undefined) return defaultCollapsed;
 	return window.innerWidth < COLLAPSE_BREAKPOINT;
@@ -66,7 +66,7 @@ const SidebarRoot = ({
 
 	useEffect(() => {
 		if (storageKey) {
-			window.localStorage.setItem(storageKey, String(collapsed));
+			writeStoredFlag(storageKey, collapsed);
 		}
 	}, [collapsed, storageKey]);
 
