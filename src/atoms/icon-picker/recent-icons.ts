@@ -1,3 +1,5 @@
+import { readStoredValue, writeStoredValue } from "../../utils/safe-storage";
+
 /** The recently-used row's storage key when the consumer names none. */
 export const DEFAULT_RECENT_STORAGE_KEY = "anker:icon-picker:recent";
 
@@ -13,11 +15,12 @@ export function pushRecent(
 /**
  * The stored list, or `[]`. Storage is a convenience here: a private window,
  * blocked site data or someone else's value under the key all read as empty
- * rather than throwing into render.
+ * rather than throwing into render, and a list storage would not take is
+ * remembered for the session.
  */
 export function readRecent(key: string): string[] {
 	try {
-		const raw = globalThis.localStorage?.getItem(key);
+		const raw = readStoredValue(key);
 		if (!raw) return [];
 		const parsed: unknown = JSON.parse(raw);
 		if (!Array.isArray(parsed)) return [];
@@ -27,11 +30,7 @@ export function readRecent(key: string): string[] {
 	}
 }
 
-/** Stores the list; a storage failure only costs the row its memory. */
+/** Stores the list — in memory for the session when storage will not take it. */
 export function writeRecent(key: string, list: readonly string[]): void {
-	try {
-		globalThis.localStorage?.setItem(key, JSON.stringify(list));
-	} catch {
-		// Nothing to do — the picker works without the recent row.
-	}
+	writeStoredValue(key, JSON.stringify(list));
 }

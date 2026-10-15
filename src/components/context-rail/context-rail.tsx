@@ -10,6 +10,7 @@ import React, {
 import { IconButton } from "../../atoms/button";
 import { Box, Flex, Stack } from "../../primitives/layout";
 import { Heading, Text } from "../../primitives/typography";
+import { readStoredFlag, writeStoredFlag } from "../../utils/safe-storage";
 import {
 	ContextRailAvatar,
 	ContextRailDivider,
@@ -69,9 +70,8 @@ function useWarnIfOutsideRailRoot(componentName: string) {
 function getInitialCollapsed(storageKey?: string): boolean {
 	if (typeof window === "undefined") return false;
 	if (storageKey) {
-		const stored = window.localStorage.getItem(storageKey);
-		if (stored === "true") return true;
-		if (stored === "false") return false;
+		const stored = readStoredFlag(storageKey);
+		if (stored !== undefined) return stored;
 	}
 	return window.innerWidth < COLLAPSE_BREAKPOINT;
 }
@@ -88,7 +88,7 @@ const ContextRailRoot = ({ storageKey, children }: ContextRailProps) => {
 
 	useEffect(() => {
 		if (storageKey) {
-			window.localStorage.setItem(storageKey, String(collapsed));
+			writeStoredFlag(storageKey, collapsed);
 		}
 	}, [collapsed, storageKey]);
 

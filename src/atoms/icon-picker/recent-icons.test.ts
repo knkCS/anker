@@ -45,7 +45,10 @@ describe("readRecent / writeRecent", () => {
 		vi.spyOn(localStorage, "setItem").mockImplementation(() => {
 			throw new Error("QuotaExceededError");
 		});
-		expect(readRecent(KEY)).toEqual([]);
-		expect(() => writeRecent(KEY, ["a"])).not.toThrow();
+		// Its own key: the list stays in memory for the session.
+		const key = `${KEY}:refused`;
+		expect(readRecent(key)).toEqual([]);
+		expect(() => writeRecent(key, ["a"])).not.toThrow();
+		expect(readRecent(key)).toEqual(["a"]);
 	});
 });

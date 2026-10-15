@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { IconButton } from "../atoms/button";
 import { NavListModeProvider } from "../components/nav-list/nav-list-context";
 import { Box, Grid } from "../primitives/layout";
+import { readStoredFlag, writeStoredFlag } from "../utils/safe-storage";
 
 const EXPANDED_NAV = "220px";
 const COLLAPSED_NAV = "56px";
@@ -15,9 +16,8 @@ function getInitialCollapsed(
 ): boolean {
 	if (typeof window === "undefined") return defaultCollapsed ?? false;
 	if (storageKey) {
-		const stored = window.localStorage.getItem(storageKey);
-		if (stored === "true") return true;
-		if (stored === "false") return false;
+		const stored = readStoredFlag(storageKey);
+		if (stored !== undefined) return stored;
 	}
 	return defaultCollapsed ?? false;
 }
@@ -42,7 +42,7 @@ const SubNavLayoutRoot = ({
 
 	useEffect(() => {
 		if (storageKey) {
-			window.localStorage.setItem(storageKey, String(collapsed));
+			writeStoredFlag(storageKey, collapsed);
 		}
 	}, [collapsed, storageKey]);
 
