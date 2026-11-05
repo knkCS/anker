@@ -42,7 +42,6 @@ import {
 	buildReorderAnnouncements,
 	createRowReorderColumn,
 	REORDER_COLUMN_ID,
-	REORDER_COLUMN_WIDTH,
 	type ReorderableRow,
 	reorderScreenReaderInstructions,
 	resolveRowReorder,
@@ -52,8 +51,11 @@ import {
 /** Column id of the checkbox column injected when `selectable` is set. */
 const SELECT_COLUMN_ID = "_select";
 
-/** The checkbox column's whole width in px, padding included. */
-const SELECT_COLUMN_WIDTH = 40;
+/**
+ * The checkbox column's `size`: its content width in px, the small checkbox's
+ * control. DataTable adds the cell's padding, as to every column.
+ */
+const SELECT_COLUMN_SIZE = 16;
 
 export interface DataTableProps<T extends Record<string, unknown>> {
 	/**
@@ -113,10 +115,10 @@ export interface DataTableProps<T extends Record<string, unknown>> {
 	onRowReorder?: (fromIndex: number, toIndex: number) => void;
 }
 
-/** DataTable's own columns, by id, at their whole width in px. */
-const BUILT_IN_COLUMN_WIDTHS: ReadonlyMap<string, number> = new Map([
-	[SELECT_COLUMN_ID, SELECT_COLUMN_WIDTH],
-	[REORDER_COLUMN_ID, REORDER_COLUMN_WIDTH],
+/** DataTable's own columns, by id: their sizes alone ask for no minimum width. */
+const BUILT_IN_COLUMNS: ReadonlySet<string> = new Set([
+	SELECT_COLUMN_ID,
+	REORDER_COLUMN_ID,
 ]);
 
 /**
@@ -143,7 +145,7 @@ function widthSource<T>(column: Column<T, unknown>): ColumnWidthSource {
 
 /** The CSS width of a column's header and cells, or `undefined` to flex. */
 function widthOfColumn<T>(column: Column<T, unknown>): string | undefined {
-	return columnWidth(widthSource(column), BUILT_IN_COLUMN_WIDTHS);
+	return columnWidth(widthSource(column));
 }
 
 const LOADING_ROW_COUNT = 5;
@@ -176,9 +178,9 @@ function DataTableInner<T extends Record<string, unknown>>(
 	const selectionColumn = useMemo<ColumnDef<T, unknown>>(
 		() => ({
 			id: SELECT_COLUMN_ID,
-			size: SELECT_COLUMN_WIDTH,
-			minSize: SELECT_COLUMN_WIDTH,
-			maxSize: SELECT_COLUMN_WIDTH,
+			size: SELECT_COLUMN_SIZE,
+			minSize: SELECT_COLUMN_SIZE,
+			maxSize: SELECT_COLUMN_SIZE,
 			header: ({ table }) => (
 				<Checkbox.Root
 					checked={
@@ -257,7 +259,7 @@ function DataTableInner<T extends Record<string, unknown>>(
 
 	const minWidth = tableMinWidth(
 		table.getVisibleLeafColumns().map(widthSource),
-		BUILT_IN_COLUMN_WIDTHS,
+		BUILT_IN_COLUMNS,
 	);
 
 	const sensors = useSensors(

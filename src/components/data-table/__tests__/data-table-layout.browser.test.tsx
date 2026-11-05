@@ -108,24 +108,22 @@ function paddingX(cell: HTMLElement): number {
 	);
 }
 
-/**
- * anker's drag-handle cell: its 44px handle in a 52px column with 24px of
- * padding reaches past the column whatever a consumer does — #273's to fix,
- * left out of the measure here.
- */
-function isDragHandleCell(cell: HTMLElement): boolean {
-	return cell.querySelector("button[aria-label^='Reorder row']") != null;
-}
+/** The drag handle DataTable injects with `onRowReorder`. */
+const DRAG_HANDLE = "button[aria-label^='Reorder row']";
 
-/** Each fixed-width content box drawn outside the cell it is in. */
+/**
+ * What a cell draws at a fixed width: a test's content, DataTable's selection
+ * checkbox, and the drag handle, whose 44px touch target once reached past its
+ * column (#273).
+ */
+const MEASURED = `[data-testid='fixed'], [data-scope='checkbox'][data-part='control'], ${DRAG_HANDLE}`;
+
+/** Each fixed-width box drawn outside the cell it is in. */
 function overflows(container: HTMLElement): string[] {
 	const out: string[] = [];
 	for (const cell of container.querySelectorAll<HTMLElement>("th, td")) {
-		if (isDragHandleCell(cell)) continue;
 		const box = cell.getBoundingClientRect();
-		for (const el of cell.querySelectorAll<HTMLElement>(
-			"[data-testid='fixed']",
-		)) {
+		for (const el of cell.querySelectorAll<HTMLElement>(MEASURED)) {
 			const r = el.getBoundingClientRect();
 			if (r.left < box.left - SLACK || r.right > box.right + SLACK) {
 				out.push(
@@ -202,6 +200,14 @@ describe("DataTable column widths, in a real browser", () => {
 		});
 
 		expect(overflows(container)).toEqual([]);
+		// The drag-handle column is its handle plus the cell's padding.
+		const handleCell = firstRow(container)[0];
+		const handle = handleCell.querySelector<HTMLElement>(DRAG_HANDLE);
+		if (!handle) throw new Error("no drag handle");
+		expect(handleCell.getBoundingClientRect().width).toBeCloseTo(
+			handle.getBoundingClientRect().width + paddingX(handleCell),
+			0,
+		);
 		const ths = headers(container);
 		// Drag handle, checkbox, then the data columns at their sizes.
 		[WIDTHS.a, WIDTHS.b, WIDTHS.c].forEach((width, i) => {
