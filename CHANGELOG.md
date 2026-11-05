@@ -2,6 +2,33 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.8.0 — 2026-11-05
+
+### Added
+
+- **`DataTable` column widths** (#271, `@knkcs/anker/components`): a
+  column's TanStack `size` is now its content width; header and cells get
+  `size` plus the cell padding, which anker adds itself. A column with only
+  `minSize` takes the table's remainder. When any column carries a width, the
+  table gets a `min-width` (built-in columns + every size/minSize + padding)
+  and scrolls horizontally in its own box instead of compressing. Tables
+  without widths lay out as before. **Behaviour change:** a column that
+  already set `size` (previously ignored) now gets that width.
+- **Dates in the UI language** (#272): `DateCell` and `formatDateAndTime`
+  (with `formatDate`, `formatTime`, `formatWeekdayDate`) follow the UI
+  language — an explicit `locale`, else react-i18next's language, else
+  English: "28.02.2026" in German. A date-only value never shifts with the
+  viewer's time zone. `DateCell` gains a `locale` prop and re-renders on a
+  language switch. **Behaviour change:** in English, the `day` format (and
+  `formatDate`) now reads "Aug 17, 2021" instead of "17 Aug 2021"; `full`,
+  `fullWithSeconds`, `weekday` and `time` are unchanged in English.
+
+### Fixed
+
+- **The drag-handle column fits its button** (#273): the column is the
+  handle's size plus cell padding (68px, was 52px), so a reorderable table's
+  minimum width grows by 16px.
+
 ## 5.7.0 — 2026-10-15
 
 ### Added
