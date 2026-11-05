@@ -38,9 +38,8 @@ function widthOf(px: number, paddedColumns: number): string {
  *
  * Every column's `size` is its content's width — DataTable's own columns'
  * (drag handle, selection checkbox) as much as a consumer's — and the cell's
- * padding is added here, so no column restates it. (#273: the drag-handle
- * column once carried a whole width, padding included, that fell short of its
- * button plus the padding.) A column with only `minSize` gets no width: it
+ * padding is added here, so no column restates it and a built-in column fits
+ * what it draws by construction (#273). A column with only `minSize` gets no width: it
  * takes what the table has over, all of it, so a table wider than its columns
  * gives the room to that column rather than spreading it across the sized ones.
  */
@@ -58,8 +57,8 @@ export function tableMinWidth(
 	columns: readonly ColumnWidthSource[],
 	builtIn: ReadonlySet<string>,
 ): string | undefined {
-	const own = columns.filter((c) => !builtIn.has(c.id));
-	if (!own.some((c) => c.size !== undefined || c.minSize !== undefined)) {
+	const consumer = columns.filter((c) => !builtIn.has(c.id));
+	if (!consumer.some((c) => c.size !== undefined || c.minSize !== undefined)) {
 		return undefined;
 	}
 	const contentPx = columns.reduce(
