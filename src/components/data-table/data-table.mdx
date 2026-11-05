@@ -63,6 +63,20 @@ styling the row in flight.
 onto another page is out of scope — page the data yourself and, if you need
 cross-page moves, offer a "move to position" action instead.
 
+## Column widths
+
+<Canvas of={Stories.ColumnWidths} />
+
+Give a column a `size` — the width of its **content** in px — and its header
+and every cell get that width plus the cell's padding, which DataTable adds
+itself. A column with only `minSize` (a trailing actions column, say) gets at
+least that much and whatever room the table has over.
+
+Once any column carries either, the table is never narrower than the sum of
+its columns, the drag-handle and selection columns included, and in a narrower
+container it scrolls sideways instead of squeezing its columns. With neither
+on any column, the columns share the table's width as before.
+
 ## Accessibility
 
 - Sortable column headers have `aria-sort` (`ascending`, `descending`, or `none`).

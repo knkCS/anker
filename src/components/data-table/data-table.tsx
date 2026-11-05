@@ -14,6 +14,7 @@ import {
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import {
+	type Column,
 	type ColumnDef,
 	flexRender,
 	getCoreRowModel,
@@ -33,9 +34,15 @@ import { Table } from "../../primitives/table";
 import { Text } from "../../primitives/typography";
 import { Pagination } from "../pagination";
 import {
+	type ColumnWidthSource,
+	columnWidth,
+	tableMinWidth,
+} from "./column-width";
+import {
 	buildReorderAnnouncements,
 	createRowReorderColumn,
 	REORDER_COLUMN_ID,
+	REORDER_COLUMN_WIDTH,
 	type ReorderableRow,
 	reorderScreenReaderInstructions,
 	resolveRowReorder,
@@ -45,8 +52,21 @@ import {
 /** Column id of the checkbox column injected when `selectable` is set. */
 const SELECT_COLUMN_ID = "_select";
 
+/** The checkbox column's whole width in px, padding included. */
+const SELECT_COLUMN_WIDTH = 40;
+
 export interface DataTableProps<T extends Record<string, unknown>> {
-	/** Column definitions for TanStack Table */
+	/**
+	 * Column definitions for TanStack Table.
+	 *
+	 * A column's `size` is the width of its CONTENT in px: its header and every
+	 * cell get that plus the cell's padding, which DataTable adds itself. A
+	 * column with `minSize` and no `size` gets at least that much content width
+	 * and whatever the table has over. Once any column carries either, the
+	 * table is never narrower than the sum of its columns (the drag-handle and
+	 * selection columns included) and scrolls sideways in a narrower container.
+	 * With neither on any column, the columns share the table's width.
+	 */
 	columns: ColumnDef<T, unknown>[];
 	/** Data array */
 	data: T[];
@@ -93,11 +113,38 @@ export interface DataTableProps<T extends Record<string, unknown>> {
 	onRowReorder?: (fromIndex: number, toIndex: number) => void;
 }
 
-/** Internal columns rendered at a fixed width rather than flexing. */
-const FIXED_WIDTH_COLUMN_IDS = new Set<string>([
-	SELECT_COLUMN_ID,
-	REORDER_COLUMN_ID,
+/** DataTable's own columns, by id, at their whole width in px. */
+const BUILT_IN_COLUMN_WIDTHS: ReadonlyMap<string, number> = new Map([
+	[SELECT_COLUMN_ID, SELECT_COLUMN_WIDTH],
+	[REORDER_COLUMN_ID, REORDER_COLUMN_WIDTH],
 ]);
+
+/**
+ * TanStack fills every column definition with default sizes (150, min 20),
+ * which would read as a width on every column. Cleared, a resolved column's
+ * `size` / `minSize` is what its definition says and nothing else, so a table
+ * whose columns set none lays out as it always has. (`getSize()` still falls
+ * back to TanStack's defaults.)
+ */
+const NO_DEFAULT_SIZES = {
+	size: undefined,
+	minSize: undefined,
+	maxSize: undefined,
+};
+
+/** What a column's width is read from: its id and its definition's sizes. */
+function widthSource<T>(column: Column<T, unknown>): ColumnWidthSource {
+	return {
+		id: column.id,
+		size: column.columnDef.size,
+		minSize: column.columnDef.minSize,
+	};
+}
+
+/** The CSS width of a column's header and cells, or `undefined` to flex. */
+function widthOfColumn<T>(column: Column<T, unknown>): string | undefined {
+	return columnWidth(widthSource(column), BUILT_IN_COLUMN_WIDTHS);
+}
 
 const LOADING_ROW_COUNT = 5;
 
@@ -129,9 +176,9 @@ function DataTableInner<T extends Record<string, unknown>>(
 	const selectionColumn = useMemo<ColumnDef<T, unknown>>(
 		() => ({
 			id: SELECT_COLUMN_ID,
-			size: 40,
-			minSize: 40,
-			maxSize: 40,
+			size: SELECT_COLUMN_WIDTH,
+			minSize: SELECT_COLUMN_WIDTH,
+			maxSize: SELECT_COLUMN_WIDTH,
 			header: ({ table }) => (
 				<Checkbox.Root
 					checked={
@@ -192,6 +239,7 @@ function DataTableInner<T extends Record<string, unknown>>(
 		...(onSortingChange === undefined
 			? { getSortedRowModel: getSortedRowModel() }
 			: {}),
+		defaultColumn: NO_DEFAULT_SIZES,
 		enableRowSelection: selectable,
 		manualSorting: onSortingChange !== undefined,
 		...(getRowId !== undefined ? { getRowId } : {}),
@@ -206,6 +254,12 @@ function DataTableInner<T extends Record<string, unknown>>(
 	const isEmpty = !loading && data.length === 0;
 
 	const rows = table.getRowModel().rows;
+
+	const leafColumns = table.getVisibleLeafColumns();
+	const minWidth = useMemo(
+		() => tableMinWidth(leafColumns.map(widthSource), BUILT_IN_COLUMN_WIDTHS),
+		[leafColumns],
+	);
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
@@ -262,14 +316,7 @@ function DataTableInner<T extends Record<string, unknown>>(
 		};
 
 		const cells = row.getVisibleCells().map((cell) => (
-			<Table.Cell
-				key={cell.id}
-				style={
-					FIXED_WIDTH_COLUMN_IDS.has(cell.column.id)
-						? { width: cell.column.getSize() }
-						: undefined
-				}
-			>
+			<Table.Cell key={cell.id} width={widthOfColumn(cell.column)}>
 				{flexRender(cell.column.columnDef.cell, cell.getContext())}
 			</Table.Cell>
 		));
@@ -291,16 +338,13 @@ function DataTableInner<T extends Record<string, unknown>>(
 				    Our custom table recipe adds "striped" and "hoverable" variants
 				    that work at runtime but require a type cast. Module augmentation
 				    for slot recipe variants is not supported in Chakra v3. */}
-			<Table.Root variant={variant as "line"}>
+			<Table.Root variant={variant as "line"} minWidth={minWidth}>
 				<Table.Header>
 					{table.getHeaderGroups().map((headerGroup) => (
 						<Table.Row key={headerGroup.id}>
 							{headerGroup.headers.map((header) => {
 								const canSort = header.column.getCanSort();
 								const sorted = header.column.getIsSorted();
-								const isFixedWidthCol = FIXED_WIDTH_COLUMN_IDS.has(
-									header.column.id,
-								);
 
 								return (
 									<Table.ColumnHeader
@@ -333,11 +377,7 @@ function DataTableInner<T extends Record<string, unknown>>(
 													}
 												: undefined
 										}
-										style={
-											isFixedWidthCol
-												? { width: header.column.getSize() }
-												: undefined
-										}
+										width={widthOfColumn(header.column)}
 									>
 										<Flex alignItems="center" gap={1}>
 											{header.isPlaceholder

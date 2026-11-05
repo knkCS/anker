@@ -210,15 +210,21 @@ export const SortableTableRow: React.FC<SortableTableRowProps> = ({
 };
 SortableTableRow.displayName = "SortableTableRow";
 
+/**
+ * The drag-handle column's whole width in px, padding included — the one
+ * place it is set; DataTable counts it into the table's minimum width.
+ */
+export const REORDER_COLUMN_WIDTH = 52;
+
 /** The drag-handle column injected at the start of the table. */
 export function createRowReorderColumn<
 	T extends Record<string, unknown>,
 >(): ColumnDef<T, unknown> {
 	return {
 		id: REORDER_COLUMN_ID,
-		size: 52,
-		minSize: 52,
-		maxSize: 52,
+		size: REORDER_COLUMN_WIDTH,
+		minSize: REORDER_COLUMN_WIDTH,
+		maxSize: REORDER_COLUMN_WIDTH,
 		enableSorting: false,
 		header: () => <Box srOnly>Reorder</Box>,
 		cell: ({ row, table }) => (
