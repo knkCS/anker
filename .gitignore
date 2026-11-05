@@ -6,3 +6,4 @@ storybook-static/
 .worktrees
 .claude/worktrees/
 .superpowers/
+__screenshots__/

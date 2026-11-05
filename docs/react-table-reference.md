@@ -262,6 +262,25 @@ When `onRowReorder` is provided, DataTable injects a `_reorder` drag-handle colu
 
 The pure part of the feature — mapping a dnd-kit drag result onto `(fromIndex, toIndex)` and phrasing the announcements — lives in `row-reorder.tsx` as `resolveRowReorder` and `buildReorderAnnouncements`, and is unit-tested without a DOM.
 
+## Column Widths
+
+The table is `table-layout: fixed` at `width: 100%`. Without widths the columns share the container's width equally, so a wide table is squeezed into its card and fixed-width content spills into the next column. A column definition can say how wide it is (#271):
+
+```tsx
+const columns = [
+  columnHelper.accessor("name", { header: "Name", size: 180 }),
+  columnHelper.accessor("due", { header: "Due", size: 110 }),
+  // No `size`: at least 140px of content, plus whatever the table has over.
+  columnHelper.display({ id: "actions", header: "", minSize: 140, cell: … }),
+];
+```
+
+- **`size` is the width of the column's CONTENT in px.** Its header and every cell get that plus the cell's padding, which DataTable adds itself — a consumer never adds anker's padding or the built-in columns' widths.
+- **`minSize` without `size`** gives the column no width of its own: it takes the table's remainder, all of it, and counts `minSize` (plus padding) into the minimum width. Use it for a trailing actions column, so a wide container gives its room to the row's end rather than spreading it over the data.
+- **The table's minimum width is the sum of its columns** — every `size` / `minSize`, every consumer column's padding, and the built-in drag-handle (`REORDER_COLUMN_WIDTH`, 52px) and selection (40px) columns' whole widths. In a container narrower than that it scrolls sideways inside DataTable's own `overflowX` box instead of compressing.
+- **With no `size` or `minSize` on any column, nothing changes**: no widths, no minimum, the columns share the table's width. DataTable clears TanStack's default sizes (150 / 20) through `defaultColumn`, so only what a definition says counts; `column.getSize()` still answers with TanStack's defaults.
+- The arithmetic is `column-width.ts` (unit-tested); that the browser honours it is `__tests__/data-table-layout.browser.test.tsx`, run in Chromium by the `layout` vitest project — jsdom lays nothing out.
+
 ## Performance
 
 ### The #1 pitfall: unstable references
@@ -330,11 +349,14 @@ When passing columns as a prop, type them as `ColumnDef<T, unknown>[]`. The seco
 src/components/data-table/
 ├── data-table.tsx          # useReactTable wrapper, renders Chakra Table.*
 ├── row-reorder.tsx         # Drag-handle column, sortable row, reorder/announcement logic
+├── column-width.ts         # Column widths and the table's minimum width (pure)
 ├── data-table.stories.tsx  # Usage examples with sorting, selection, pagination, reorder
 ├── data-table.mdx          # Component documentation
 ├── index.ts                # Barrel: DataTable + all cells + utilities
 ├── __tests__/
 │   ├── data-table.test.tsx # Rendering, empty state, loading, pagination, reorder
+│   ├── column-width.test.ts # Pure column-width / minimum-width arithmetic
+│   ├── data-table-layout.browser.test.tsx # Real-browser layout: widths, no overflow, scrolling
 │   └── row-reorder.test.ts # Pure reorder resolution + announcement wording
 └── cells/
     ├── cell-utils.ts       # emptyCellValue, truncateText, pluralize

@@ -452,6 +452,7 @@ Additional rules:
 - Prefer `createColumnHelper<T>()` over inline `ColumnDef` objects for full TypeScript inference
 - Cell components are plain React — they receive extracted values and return JSX, with no TanStack imports
 - Every cell must handle `null`/`undefined` → `emptyCellValue` (em-dash `—`)
+- Column widths are opt-in: a column's `size` is its CONTENT width (DataTable adds the cell padding, `TABLE_CELL_PADDING_X` in the table recipe), `minSize` alone makes a column that takes the remainder, and once any column sets either the table gets a `min-width` summing every column (built-ins at their whole width — `REORDER_COLUMN_WIDTH` is the one drag-handle constant) and scrolls in its `overflowX` box. TanStack's default sizes are cleared via `defaultColumn`, so a table with no sizes is unchanged. Layout is proven in Chromium by `*.browser.test.tsx` files — the `layout` project of `vitest.config.ts` (vitest browser mode + Playwright; `pretest` installs the browser). See `docs/react-table-reference.md` § Column Widths
 - Row reorder is opt-in: pass `onRowReorder(fromIndex, toIndex)` and DataTable injects a `_reorder` drag-handle column and a dnd-kit `DndContext`. Without the prop nothing is injected. The table stays controlled — the consumer applies the move to its own `data`. See `docs/react-table-reference.md` § Row Reorder
 
 ## Component Scaffolding Checklist

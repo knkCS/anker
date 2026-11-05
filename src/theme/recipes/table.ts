@@ -1,6 +1,13 @@
 import { defineSlotRecipe } from "@chakra-ui/react";
 
 /**
+ * A header's and a cell's padding on each side, a spacing token. One value,
+ * because `DataTable` adds it to a column's `size` — the column is its
+ * content's width plus this twice — and so must read the same one (#271).
+ */
+export const TABLE_CELL_PADDING_X = "3";
+
+/**
  * FIX: Replaced `blue.50` in the hoverable variant body with `primary.50`
  * to use the primary palette consistently.
  */
@@ -23,7 +30,7 @@ export const tableTheme = defineSlotRecipe({
 		},
 		columnHeader: {
 			py: 3,
-			px: 3,
+			px: TABLE_CELL_PADDING_X,
 			textAlign: "start",
 			fontSize: "xs",
 			fontWeight: "600",
@@ -37,7 +44,7 @@ export const tableTheme = defineSlotRecipe({
 		cell: {
 			fontSize: "sm",
 			py: 3,
-			px: 3,
+			px: TABLE_CELL_PADDING_X,
 			whiteSpace: "nowrap",
 			borderColor: "border",
 		},

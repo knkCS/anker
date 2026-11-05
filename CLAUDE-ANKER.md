@@ -319,6 +319,22 @@ import { IdentityCell, StatusBadgeCell, DateCell } from "@knkcs/anker/components
 
 Full slot/prop tables: `docs/react-table-reference.md`. Mapping guide for common column intents: `docs/page-patterns.md` §11.13.
 
+### DataTable column widths
+
+- **Give a wide table's columns a `size`**, the width of the column's content
+  in px: `columnHelper.accessor("due", { header: "Due", size: 110 })`. The
+  header and every cell get that plus the cell's padding — anker adds the
+  padding, so never add it yourself.
+- **A trailing actions column takes `minSize`, not `size`**: at least that
+  much, and whatever room the table has over.
+- **The table is then never narrower than its columns** (the drag-handle and
+  selection columns counted by anker) and scrolls sideways inside its
+  container instead of squeezing them. Don't set a `min-width` on the table or
+  widths on `th:nth-child` yourself — that copies anker's padding and built-in
+  column widths into your code, and it breaks when they change.
+- With no `size` / `minSize` on any column, the columns share the width as
+  before.
+
 ---
 
 ## Form fields

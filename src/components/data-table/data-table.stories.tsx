@@ -4,6 +4,7 @@ import type { RowSelectionState, SortingState } from "@tanstack/react-table";
 import { createColumnHelper } from "@tanstack/react-table";
 import { useState } from "react";
 import { StatusBadge } from "../../atoms/status-badge";
+import { Box } from "../../primitives/layout";
 import { Text } from "../../primitives/typography";
 import { DataTable } from "./data-table";
 
@@ -232,4 +233,40 @@ const RowReorderDemo = () => {
 
 export const RowReorder: Story = {
 	render: () => <RowReorderDemo />,
+};
+
+// A column's `size` is the width of its CONTENT in px; DataTable adds the
+// cell's padding. The trailing actions column sets only `minSize`, so it gets
+// at least that and whatever the table has over. The table is never narrower
+// than its columns and scrolls sideways inside its container instead.
+const widthColumns = [
+	columnHelper.accessor("name", { header: "Name", size: 160 }),
+	columnHelper.accessor("email", { header: "Email", size: 220 }),
+	columnHelper.accessor("role", { header: "Role", size: 90 }),
+	columnHelper.accessor("status", { header: "Status", size: 90 }),
+	columnHelper.display({
+		id: "actions",
+		header: "",
+		minSize: 120,
+		cell: () => <Text fontSize="sm">Edit · Delete</Text>,
+	}),
+];
+
+const ColumnWidthsDemo = () => {
+	const [users, setUsers] = useState(sampleUsers);
+	return (
+		// A narrow container: the table scrolls rather than squeezing its columns.
+		<Box maxW="480px" borderWidth="1px" borderColor="border">
+			<DataTable
+				columns={widthColumns}
+				data={users}
+				getRowId={(row) => row.id}
+				onRowReorder={(from, to) => setUsers((u) => arrayMove(u, from, to))}
+			/>
+		</Box>
+	);
+};
+
+export const ColumnWidths: Story = {
+	render: () => <ColumnWidthsDemo />,
 };
