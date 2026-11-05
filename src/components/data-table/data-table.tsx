@@ -255,10 +255,9 @@ function DataTableInner<T extends Record<string, unknown>>(
 
 	const rows = table.getRowModel().rows;
 
-	const leafColumns = table.getVisibleLeafColumns();
-	const minWidth = useMemo(
-		() => tableMinWidth(leafColumns.map(widthSource), BUILT_IN_COLUMN_WIDTHS),
-		[leafColumns],
+	const minWidth = tableMinWidth(
+		table.getVisibleLeafColumns().map(widthSource),
+		BUILT_IN_COLUMN_WIDTHS,
 	);
 
 	const sensors = useSensors(

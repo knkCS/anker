@@ -1,14 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { columnWidth, tableMinWidth } from "../column-width";
+import { REORDER_COLUMN_WIDTH } from "../row-reorder";
 
 const BUILT_IN = new Map([
-	["_reorder", 52],
+	["_reorder", REORDER_COLUMN_WIDTH],
 	["_select", 40],
 ]);
 
 describe("columnWidth", () => {
 	it("gives a built-in column its whole width, padding included", () => {
-		expect(columnWidth({ id: "_reorder", size: 52 }, BUILT_IN)).toBe("52px");
+		expect(
+			columnWidth({ id: "_reorder", size: REORDER_COLUMN_WIDTH }, BUILT_IN),
+		).toBe("52px");
 	});
 
 	it("adds the cell's padding to a column's size", () => {
@@ -29,7 +32,11 @@ describe("tableMinWidth", () => {
 	it("is undefined when no column of the consumer's carries a width", () => {
 		expect(
 			tableMinWidth(
-				[{ id: "_reorder", size: 52 }, { id: "a" }, { id: "b" }],
+				[
+					{ id: "_reorder", size: REORDER_COLUMN_WIDTH },
+					{ id: "a" },
+					{ id: "b" },
+				],
 				BUILT_IN,
 			),
 		).toBeUndefined();
@@ -39,7 +46,7 @@ describe("tableMinWidth", () => {
 		expect(
 			tableMinWidth(
 				[
-					{ id: "_reorder", size: 52 },
+					{ id: "_reorder", size: REORDER_COLUMN_WIDTH },
 					{ id: "_select", size: 40 },
 					{ id: "a", size: 200 },
 					{ id: "b" },
