@@ -5,15 +5,35 @@ import * as Stories from "./date-cell.stories";
 
 # DateCell
 
-Formats a date value using Day.js. The default format is `MMM D, YYYY`. When `showRelative` is `true`, the cell displays a relative time string (e.g. "3 days ago") with the absolute date available as a tooltip.
+Shows a date the way the UI language writes one: "Feb 28, 2026" in English, "28.02.2026" in German. When `showRelative` is `true`, the cell displays a relative time string (e.g. "3 days ago") with the date, in the same language, as a tooltip. A `null` or unparseable value renders the empty value (—), never "Invalid Date".
 
 ## Usage
 
 <Canvas of={Stories.Default} />
 
+## The UI language
+
+The cell follows the language a hub already sets through react-i18next (`initReactI18next` and `i18n.changeLanguage`, or an `I18nextProvider`), and re-renders when it changes. Nothing is passed to the cell, so a table drawn by another package (fieldkit's date column) speaks the hub's language too. With no i18next instance the cell is English. Only the language is read: the cell has no translation keys.
+
+<Canvas of={Stories.InTheUiLanguage} />
+
+Pass `locale` to format in a given language instead, as `NumberCell` does:
+
+<Canvas of={Stories.WithLocale} />
+
+## Date-only values
+
+A date-only value (`YYYY-MM-DD`, a calendar day with no time) always shows that day, whatever the viewer's time zone. Any other value is a moment in time and shows the day it falls on in the viewer's time zone.
+
 ## Relative Date
 
 <Canvas of={Stories.Relative} />
+
+## Custom format
+
+`format` takes a Day.js template and applies it as given (month and weekday names stay English). Omit it to get the UI language's own date.
+
+<Canvas of={Stories.CustomFormat} />
 
 ## Props
 
