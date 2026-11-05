@@ -121,7 +121,7 @@ Cells never import from `@tanstack/react-table`. The `info.getValue()` call happ
 | `CodeCell` | `string` | Monospace with background |
 | `ColorSwatchCell` | `string` | Color circle + hex value |
 | `CountCell` | `array \| object \| number` | "N items" with pluralization |
-| `DateCell` | `string \| Date \| number` | Formatted date, optional relative tooltip |
+| `DateCell` | `string \| Date \| number` | Date in the UI language (react-i18next's, or `locale`), optional relative tooltip; a `YYYY-MM-DD` day never shifts with the time zone |
 | `DeviceCell` | `string` (User-Agent) | "Chrome on macOS" + UA tooltip + optional badge |
 | `IdentityCell` | `string` (name) | Avatar + name + optional sub-text (person reference); supports `colorPalette` to tint the avatar |
 | `LinkCell` | `string` | Clickable internal link (anker `Link` primitive) |

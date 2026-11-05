@@ -59,7 +59,7 @@ src/
 ├── navigation/      # Unsaved-changes guards, tab dirty context
 ├── host/            # Host contract: HostProvider, usePageFrame, usePageRail, useScreenActions, useHostIdentity, TestHost
 ├── rules/           # checkAnkerRules — CLAUDE-ANKER.md's checkable rules for consumers' tests
-├── utils/           # Internal helpers, not exported (safe-storage: localStorage that never throws)
+├── utils/           # Internal helpers, not exported (safe-storage: localStorage that never throws; ui-locale: the UI language to format in)
 └── (no root index.ts — consumers use subpath imports)
 ```
 
@@ -90,6 +90,7 @@ The knk Brand Guidelines (October 2021) define six brand colors. The theme inclu
 - **No domain coupling**: Components must not import from any service codebase (no @root/, no API calls, no service-specific types). The line is the *connection*, not the `Promise` — a component may own async orchestration (debounce, cancellation, paging) as long as every request leaving it is a call to a consumer-supplied function. See `docs/adr/0002-atoms-may-orchestrate-async.md`.
 - **Token-first styling**: Use semantic tokens (bg-canvas, accent, border, etc.) instead of hardcoded colors
 - **Props over i18n**: User-facing strings are props with English defaults, not i18n keys
+- **Formats follow the UI language**: A value anker formats itself (a date) is written in the UI language — a `locale` prop/argument when given, else the language a hub sets through react-i18next (`src/utils/ui-locale.ts`), else English. Only the language is read, never a catalogue. `DateCell` and `formatDateAndTime` follow it
 - **Lucide icons only**: All icons use lucide-react. No FontAwesome.
 - **React Hook Form**: Form controls use RHF Controller pattern. Provide ControlledFormField for non-RHF usage.
 - **Accessibility**: All interactive components must have proper ARIA attributes (see Accessibility Conventions below)

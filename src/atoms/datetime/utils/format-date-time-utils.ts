@@ -3,47 +3,87 @@ import utcPlugin from "dayjs/plugin/utc.js";
 
 dayjs.extend(utcPlugin);
 
+import { resolveUiLocale } from "../../../utils/ui-locale";
 import type { DateFormat, DateType } from "../types";
 
 /**
- * A function that will return a formatted date string. The format will depend on the option
- * passed in the second argument.
- * By default, it will return a string with "full" format (e.g. Tue, 17 Aug 2021 at 3:45 PM)
+ * How each format reads in a language other than English: the language's own
+ * order and separators, from Intl.
+ */
+const fullOptions: Intl.DateTimeFormatOptions = {
+	weekday: "short",
+	day: "2-digit",
+	month: "2-digit",
+	year: "numeric",
+	hour: "2-digit",
+	minute: "2-digit",
+};
+
+const intlOptions: Record<DateFormat, Intl.DateTimeFormatOptions> = {
+	day: { dateStyle: "medium" }, // 17.08.2021
+	weekday: { weekday: "short", day: "2-digit", month: "2-digit" }, // Di., 17.08.
+	time: { timeStyle: "short" }, // 15:45
+	full: fullOptions, // Di., 17.08.2021, 15:45
+	fullWithSeconds: { ...fullOptions, second: "2-digit" }, // Di., 17.08.2021, 15:45:07
+};
+
+/**
+ * How each format reads in English. Kept as the templates it always had, so an
+ * English caller sees no change — except `day`, which is the language's medium
+ * date in every language (`Aug 17, 2021`), the way `DateCell` shows a date.
+ */
+const englishTemplates: Record<Exclude<DateFormat, "day">, string> = {
+	weekday: "ddd, DD MMM", // Tue, 17 Aug
+	time: "h:mm A", // 3:45 PM
+	full: "ddd, DD MMM YYYY [at] h:mm A", // Tue, 17 Aug 2021 at 3:45 PM
+	fullWithSeconds: "ddd, DD MMM YYYY [at] h:mm:ss A", // Tue, 17 Aug 2021 at 3:45:07 PM
+};
+
+const isEnglish = (locale: string) => /^en(-|$)/i.test(locale);
+
+/**
+ * A function that will return a formatted date string in the UI language. The
+ * format will depend on the option passed in the second argument.
+ * By default, it will return a string with "full" format.
+ *
+ * The language is `locale` when given, else the UI language a hub sets through
+ * react-i18next, else English. A date-only value (`YYYY-MM-DD`) is read as that
+ * calendar day wherever the viewer is, never shifted by the time zone; any
+ * other value is shown in the viewer's time zone.
  *
  * @param date - the date to be formatted
- * @param format - the desired format ("full", "day", "weekday", or "time")
- * @returns a formatted date
+ * @param format - the desired format ("full", "fullWithSeconds", "day", "weekday", or "time")
+ * @param locale - a BCP 47 locale overriding the UI language
+ * @returns a formatted date, or "Invalid Date"
  *
  * @example
- * formatDateAndTime('2021-08-17T15:45:00') // returns "Tue, 17 Aug 2021 at 3:45 PM"
+ * formatDateAndTime('2021-08-17T15:45:00', 'full', 'en') // "Tue, 17 Aug 2021 at 3:45 PM"
+ * formatDateAndTime('2021-08-17T15:45:00', 'full', 'de') // "Di., 17.08.2021, 15:45"
  *
  * @example
- * formatDateAndTime('2021-08-17T15:45:00', 'day') // returns "17 Aug 2021"
+ * formatDateAndTime('2021-08-17', 'day', 'en') // "Aug 17, 2021"
+ * formatDateAndTime('2021-08-17', 'day', 'de') // "17.08.2021"
  */
 export function formatDateAndTime(
 	date: DateType,
 	format: DateFormat = "full",
+	locale?: string,
 ): string {
-	let template: string;
+	// dayjs reads a date-only string as local midnight of that day, so the day
+	// formatted in the local time zone is always the day the value names.
+	const parsed = dayjs(date);
+	if (!parsed.isValid()) return "Invalid Date";
 
-	switch (format) {
-		case "day":
-			template = "DD MMM YYYY"; // 17 Aug 2021
-			break;
-		case "weekday":
-			template = "ddd, DD MMM"; // Tue, 17 Aug
-			break;
-		case "time":
-			template = "h:mm A"; // 3:45 PM
-			break;
-		case "fullWithSeconds":
-			template = "ddd, DD MMM YYYY [at] h:mm:ss A"; // Tue, 17 Aug 2021 at 3:45:67 PM
-			break;
-		default:
-			template = "ddd, DD MMM YYYY [at] h:mm A"; // Tue, 17 Aug 2021 at 3:45 PM
+	// The `?? …full` fallbacks keep the old `default:` branch for an untyped
+	// caller passing an unknown format.
+	const language = resolveUiLocale(locale);
+	if (format !== "day" && isEnglish(language)) {
+		return parsed.format(englishTemplates[format] ?? englishTemplates.full);
 	}
-
-	return dayjs(date).format(template);
+	return new Intl.DateTimeFormat(
+		language,
+		intlOptions[format] ?? intlOptions.full,
+	).format(parsed.toDate());
 }
 
 /**
@@ -86,26 +126,26 @@ export function formatMachineReadableDateTime(
 /**
  * @example
  * > formatDate(date)
- * 13 Aug 2019
+ * Aug 13, 2019 (English) · 13.08.2019 (German)
  */
-export const formatDate = (date: DateType): string => {
-	return formatDateAndTime(date, "day");
+export const formatDate = (date: DateType, locale?: string): string => {
+	return formatDateAndTime(date, "day", locale);
 };
 
 /**
  * @example
  * > formatTime(date)
- * 8:00 AM
+ * 8:00 AM (English) · 08:00 (German)
  */
-export const formatTime = (date: DateType): string => {
-	return formatDateAndTime(date, "time");
+export const formatTime = (date: DateType, locale?: string): string => {
+	return formatDateAndTime(date, "time", locale);
 };
 
 /**
  * @example
  * > formatWeekdayDate(date)
- * Mon, 12 Aug
+ * Mon, 12 Aug (English) · Mo., 12.08. (German)
  */
-export const formatWeekdayDate = (date: DateType): string => {
-	return formatDateAndTime(date, "weekday");
+export const formatWeekdayDate = (date: DateType, locale?: string): string => {
+	return formatDateAndTime(date, "weekday", locale);
 };

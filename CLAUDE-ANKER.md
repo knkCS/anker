@@ -299,7 +299,7 @@ anker ships 16 reusable cell components for `<DataTable>` columns. They are expo
 | `CodeCell` | monospace code |
 | `ColorSwatchCell` | color swatch |
 | `CountCell` | "N items" |
-| `DateCell` | timestamps |
+| `DateCell` | timestamps and days, in the UI language |
 | `DeviceCell` | User-Agent → browser/OS + tooltip |
 | `IdentityCell` | avatar + name (+ subText) |
 | `LinkCell` | internal link |
