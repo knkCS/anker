@@ -144,8 +144,8 @@ export const RowDragHandle: React.FC<RowDragHandleProps> = ({ label }) => {
 			colorPalette="gray"
 			cursor="grab"
 			// Touch-target minimum (CLAUDE.md accessibility conventions).
-			minWidth="44px"
-			minHeight="44px"
+			minWidth={`${REORDER_HANDLE_SIZE}px`}
+			minHeight={`${REORDER_HANDLE_SIZE}px`}
 			ref={sortable?.setActivatorNodeRef}
 			// A handle inside a clickable row must not also trigger onRowClick.
 			onClick={(event) => {
@@ -211,10 +211,12 @@ export const SortableTableRow: React.FC<SortableTableRowProps> = ({
 SortableTableRow.displayName = "SortableTableRow";
 
 /**
- * The drag-handle column's whole width in px, padding included — the one
- * place it is set; DataTable counts it into the table's minimum width.
+ * The drag handle's width and height in px: the 44px touch-target minimum
+ * (CLAUDE.md accessibility conventions). It is also the drag-handle column's
+ * `size` — the column's content width, to which DataTable adds the cell's
+ * padding — so the column fits its button by construction (#273).
  */
-export const REORDER_COLUMN_WIDTH = 52;
+export const REORDER_HANDLE_SIZE = 44;
 
 /** The drag-handle column injected at the start of the table. */
 export function createRowReorderColumn<
@@ -222,9 +224,9 @@ export function createRowReorderColumn<
 >(): ColumnDef<T, unknown> {
 	return {
 		id: REORDER_COLUMN_ID,
-		size: REORDER_COLUMN_WIDTH,
-		minSize: REORDER_COLUMN_WIDTH,
-		maxSize: REORDER_COLUMN_WIDTH,
+		size: REORDER_HANDLE_SIZE,
+		minSize: REORDER_HANDLE_SIZE,
+		maxSize: REORDER_HANDLE_SIZE,
 		enableSorting: false,
 		header: () => <Box srOnly>Reorder</Box>,
 		cell: ({ row, table }) => (

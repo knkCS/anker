@@ -36,42 +36,34 @@ function widthOf(px: number, paddedColumns: number): string {
  * The CSS width a column's header and cells get, or `undefined` for one that
  * flexes.
  *
- * `builtIn` maps DataTable's own columns (drag handle, selection checkbox) to
- * their WHOLE width, padding included — one constant each, so the drag-handle
- * column's width is corrected in one place. A consumer column's `size` is its
- * content's width, and the cell's padding is added here, so a consumer never
- * needs to know it. A column with only `minSize` gets no width: it takes what
- * the table has over, all of it, so a table wider than its columns gives the
- * room to that column rather than spreading it across the sized ones.
+ * Every column's `size` is its content's width — DataTable's own columns'
+ * (drag handle, selection checkbox) as much as a consumer's — and the cell's
+ * padding is added here, so no column restates it and a built-in column fits
+ * what it draws by construction (#273). A column with only `minSize` gets no width: it
+ * takes what the table has over, all of it, so a table wider than its columns
+ * gives the room to that column rather than spreading it across the sized ones.
  */
-export function columnWidth(
-	column: ColumnWidthSource,
-	builtIn: ReadonlyMap<string, number>,
-): string | undefined {
-	const fixed = builtIn.get(column.id);
-	if (fixed !== undefined) return `${fixed}px`;
-	if (column.size !== undefined) return widthOf(column.size, 1);
-	return undefined;
+export function columnWidth(column: ColumnWidthSource): string | undefined {
+	return column.size === undefined ? undefined : widthOf(column.size, 1);
 }
 
 /**
- * The table's minimum width: every column's width summed — the built-in
- * columns', each consumer column's `size` (or `minSize`) and every consumer
- * column's padding — or `undefined` when no consumer column carries a width,
- * which leaves the table exactly as it lays out without one.
+ * The table's minimum width: every column's `size` (or `minSize`) and every
+ * column's padding, summed — or `undefined` when no consumer column carries a
+ * width, which leaves the table exactly as it lays out without one. `builtIn`
+ * names DataTable's own columns, whose widths alone ask for no minimum.
  */
 export function tableMinWidth(
 	columns: readonly ColumnWidthSource[],
-	builtIn: ReadonlyMap<string, number>,
+	builtIn: ReadonlySet<string>,
 ): string | undefined {
-	const own = columns.filter((c) => !builtIn.has(c.id));
-	if (!own.some((c) => c.size !== undefined || c.minSize !== undefined)) {
+	const consumer = columns.filter((c) => !builtIn.has(c.id));
+	if (!consumer.some((c) => c.size !== undefined || c.minSize !== undefined)) {
 		return undefined;
 	}
-	const builtInPx = columns.reduce(
-		(sum, c) => sum + (builtIn.get(c.id) ?? 0),
+	const contentPx = columns.reduce(
+		(sum, c) => sum + (c.size ?? c.minSize ?? 0),
 		0,
 	);
-	const contentPx = own.reduce((sum, c) => sum + (c.size ?? c.minSize ?? 0), 0);
-	return widthOf(builtInPx + contentPx, own.length);
+	return widthOf(contentPx, columns.length);
 }
