@@ -336,3 +336,57 @@ export const PatternDetailContext: Story = {
 		</RailColumn>
 	),
 };
+
+/**
+ * Opt-in resizable width — the workflow editor's settings: 360px default,
+ * 320px minimum, at most half the space the rail shares with the main
+ * column. Drag the leading edge, double-click it to reset, or focus it and
+ * use ←/→. The width is remembered under `${storageKey}:width`.
+ */
+export const Resizable: Story = {
+	render: () => {
+		if (typeof window !== "undefined") {
+			localStorage.setItem("storybook.rail.resizable", "false");
+		}
+		return (
+			<RailColumn>
+				<ContextRail
+					storageKey="storybook.rail.resizable"
+					resizable={{
+						defaultWidth: 360,
+						minWidth: 320,
+						maxWidth: (space) => space / 2,
+					}}
+				>
+					<ContextRail.Header eyebrow="Workflow" title="Redaktionsablauf" />
+					<ContextRail.Section
+						id="actions"
+						icon={<Zap size={14} />}
+						label="Aktionen"
+					>
+						<ContextRail.IconButton
+							label="Prüfen"
+							icon={<ShieldCheck size={14} />}
+							onClick={() => {}}
+						/>
+						<ContextRail.IconButton
+							label="Löschen"
+							icon={<X size={14} />}
+							onClick={() => {}}
+							tone="outline-red"
+						/>
+					</ContextRail.Section>
+					<ContextRail.Section
+						id="about"
+						icon={<Info size={14} />}
+						label="Über"
+					>
+						<p style={{ fontSize: 13, color: "var(--chakra-colors-muted)" }}>
+							Drag the rail's leading edge to give this column more room.
+						</p>
+					</ContextRail.Section>
+				</ContextRail>
+			</RailColumn>
+		);
+	},
+};

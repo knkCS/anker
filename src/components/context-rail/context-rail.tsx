@@ -2,15 +2,22 @@
 import { ChevronRight, PanelRightClose, PanelRightOpen } from "lucide-react";
 import React, {
 	createContext,
+	useCallback,
 	useContext,
 	useEffect,
+	useLayoutEffect,
 	useRef,
 	useState,
 } from "react";
 import { IconButton } from "../../atoms/button";
 import { Box, Flex, Stack } from "../../primitives/layout";
 import { Heading, Text } from "../../primitives/typography";
-import { readStoredFlag, writeStoredFlag } from "../../utils/safe-storage";
+import {
+	readStoredFlag,
+	readStoredValue,
+	writeStoredFlag,
+	writeStoredValue,
+} from "../../utils/safe-storage";
 import {
 	ContextRailAvatar,
 	ContextRailDivider,
@@ -30,6 +37,8 @@ export { RAIL_ATOM, useContextRailMode };
 const COLLAPSED_WIDTH = "44px";
 const EXPANDED_WIDTH = "360px";
 const COLLAPSE_BREAKPOINT = 1440;
+/** Pixels one arrow-key press moves the resize handle. */
+const RESIZE_KEY_STEP = 16;
 
 /**
  * Internal context that signals "I am a `<ContextRail>` Root". Used by
@@ -76,15 +85,174 @@ function getInitialCollapsed(storageKey?: string): boolean {
 	return window.innerWidth < COLLAPSE_BREAKPOINT;
 }
 
+/**
+ * The opt-in resizable width of a `<ContextRail>`. All widths are pixels.
+ *
+ * `maxWidth` is either a fixed number or a function of the **space** the
+ * rail shares with the main column (the rail's right edge minus the left
+ * edge of the element before the rail's column — AppShell's main column),
+ * e.g. `(space) => space / 2` for "half of the main area". While that space
+ * cannot be measured the function form imposes no maximum. When the maximum
+ * falls below the minimum, the maximum wins: the main column keeps its room.
+ */
+export interface ContextRailResizable {
+	defaultWidth: number;
+	minWidth: number;
+	maxWidth: number | ((space: number) => number);
+}
+
 export interface ContextRailProps {
 	storageKey?: string;
+	/**
+	 * Opt in to a user-resizable width. Without it the rail keeps its fixed
+	 * 360px. The width is remembered under `${storageKey}:width`.
+	 */
+	resizable?: ContextRailResizable;
 	children: React.ReactNode;
 }
 
-const ContextRailRoot = ({ storageKey, children }: ContextRailProps) => {
+function widthStorageKey(storageKey: string): string {
+	return `${storageKey}:width`;
+}
+
+function readStoredWidth(storageKey?: string): number | undefined {
+	if (!storageKey) return undefined;
+	const stored = Number.parseFloat(
+		readStoredValue(widthStorageKey(storageKey)) ?? "",
+	);
+	return Number.isFinite(stored) ? stored : undefined;
+}
+
+/**
+ * The space the rail shares with the main column, or `undefined` when it
+ * cannot be measured (no main column, or nothing laid out yet).
+ */
+function measureSharedSpace(rail: HTMLElement | null): number | undefined {
+	const main = rail?.parentElement?.previousElementSibling;
+	if (!rail || !main) return undefined;
+	const space =
+		rail.getBoundingClientRect().right - main.getBoundingClientRect().left;
+	return space > 0 ? space : undefined;
+}
+
+/** The maximum width, or `undefined` while the function form cannot measure. */
+function resolveMaxWidth(
+	resizable: ContextRailResizable,
+	space: number | undefined,
+): number | undefined {
+	if (typeof resizable.maxWidth === "number") return resizable.maxWidth;
+	return space === undefined ? undefined : resizable.maxWidth(space);
+}
+
+/** Clamp into [min, max]; the maximum wins when the two cross. */
+function clampWidth(
+	width: number,
+	min: number,
+	max: number | undefined,
+): number {
+	const atLeastMin = Math.max(min, width);
+	return max === undefined ? atLeastMin : Math.min(max, atLeastMin);
+}
+
+const KEY_DELTAS: Record<string, number> = {
+	ArrowLeft: RESIZE_KEY_STEP,
+	ArrowRight: -RESIZE_KEY_STEP,
+};
+
+/**
+ * Width state for a resizable rail: the remembered width, clamped to the
+ * current bounds, plus the handlers for the resize handle. Only a user's
+ * action stores a width, so a narrow window never overwrites the stored one.
+ */
+function useResizableWidth(
+	resizable: ContextRailResizable | undefined,
+	storageKey: string | undefined,
+	railRef: React.RefObject<HTMLDivElement | null>,
+) {
+	const [width, setWidth] = useState<number | undefined>(() =>
+		resizable
+			? (readStoredWidth(storageKey) ?? resizable.defaultWidth)
+			: undefined,
+	);
+	const [space, setSpace] = useState<number | undefined>(undefined);
+	const [resizing, setResizing] = useState(false);
+	const isResizable = resizable !== undefined;
+
+	const measure = useCallback(() => {
+		const measured = measureSharedSpace(railRef.current);
+		setSpace(measured);
+		return measured;
+	}, [railRef]);
+
+	useLayoutEffect(() => {
+		if (!isResizable) return;
+		measure();
+		window.addEventListener("resize", measure);
+		return () => window.removeEventListener("resize", measure);
+	}, [isResizable, measure]);
+
+	const max = resizable ? resolveMaxWidth(resizable, space) : undefined;
+	// When the maximum falls below the minimum the maximum wins; the
+	// announced minimum follows so the separator's value stays in range.
+	const min = Math.min(resizable?.minWidth ?? 0, max ?? Number.MAX_VALUE);
+	const shown = width === undefined ? 0 : clampWidth(width, min, max);
+
+	const commit = (next: number) => {
+		setWidth(next);
+		if (storageKey) {
+			writeStoredValue(widthStorageKey(storageKey), String(next));
+		}
+	};
+
+	const onKeyDown = (event: React.KeyboardEvent) => {
+		const delta = KEY_DELTAS[event.key];
+		if (!resizable || delta === undefined) return;
+		event.preventDefault();
+		const currentMax = resolveMaxWidth(resizable, measure());
+		commit(clampWidth(shown + delta, min, currentMax));
+	};
+
+	const onPointerDown = (event: React.PointerEvent) => {
+		if (!resizable || event.button !== 0) return;
+		event.preventDefault();
+		const startX = event.clientX;
+		const startWidth = shown;
+		const dragMax = resolveMaxWidth(resizable, measure());
+		let last = startWidth;
+		setResizing(true);
+		const onMove = (move: PointerEvent) => {
+			// The handle sits on the leading (left) edge: moving left widens.
+			last = clampWidth(startWidth + startX - move.clientX, min, dragMax);
+			setWidth(last);
+		};
+		const onUp = () => {
+			window.removeEventListener("pointermove", onMove);
+			window.removeEventListener("pointerup", onUp);
+			setResizing(false);
+			commit(last);
+		};
+		window.addEventListener("pointermove", onMove);
+		window.addEventListener("pointerup", onUp);
+	};
+
+	const onDoubleClick = () => {
+		if (resizable) commit(resizable.defaultWidth);
+	};
+
+	return { shown, min, max, resizing, onKeyDown, onPointerDown, onDoubleClick };
+}
+
+const ContextRailRoot = ({
+	storageKey,
+	resizable,
+	children,
+}: ContextRailProps) => {
 	const [collapsed, setCollapsed] = useState(() =>
 		getInitialCollapsed(storageKey),
 	);
+	const railRef = useRef<HTMLDivElement>(null);
+	const resize = useResizableWidth(resizable, storageKey, railRef);
+	const showHandle = resizable !== undefined && !collapsed;
 
 	useEffect(() => {
 		if (storageKey) {
@@ -96,13 +264,42 @@ const ContextRailRoot = ({ storageKey, children }: ContextRailProps) => {
 		<RailRootContext.Provider value={true}>
 			<RailModeContext.Provider value={{ collapsed }}>
 				<Box
+					ref={railRef}
 					data-testid="context-rail"
 					data-collapsed={collapsed ? "true" : "false"}
 					w={collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
+					// A resizable rail's width changes on every pointer move; an
+					// inline style avoids minting a CSS class per pixel.
+					style={showHandle ? { width: `${resize.shown}px` } : undefined}
 					h="full"
-					transition="width 250ms ease-out"
+					transition={resize.resizing ? "none" : "width 250ms ease-out"}
 					position="relative"
 				>
+					{showHandle ? (
+						<Box
+							role="separator"
+							aria-label="Resize context rail"
+							aria-orientation="vertical"
+							aria-valuenow={resize.shown}
+							aria-valuemin={resize.min}
+							aria-valuemax={resize.max}
+							tabIndex={0}
+							data-testid="context-rail-resize-handle"
+							onKeyDown={resize.onKeyDown}
+							onPointerDown={resize.onPointerDown}
+							onDoubleClick={resize.onDoubleClick}
+							position="absolute"
+							top="0"
+							bottom="0"
+							left="-1"
+							width="2"
+							cursor="col-resize"
+							touchAction="none"
+							_hover={{ bg: "border" }}
+							_focusVisible={{ boxShadow: "focus-ring", outline: "none" }}
+							bg={resize.resizing ? "border-emphasized" : "transparent"}
+						/>
+					) : null}
 					<IconButton
 						data-testid="context-rail-toggle"
 						aria-label={
