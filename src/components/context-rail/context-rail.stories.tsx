@@ -17,6 +17,8 @@ import {
 	X,
 	Zap,
 } from "lucide-react";
+import { useState } from "react";
+import { Button } from "../../atoms/button";
 import { Box, Flex } from "../../primitives/layout";
 import { ContextRail } from "./context-rail";
 
@@ -388,5 +390,63 @@ export const Resizable: Story = {
 				</ContextRail>
 			</RailColumn>
 		);
+	},
+};
+
+const STEPS = ["Entwurf", "Prüfung", "Freigabe"];
+
+const SelectionOpensRail = () => {
+	const [selected, setSelected] = useState<string | null>(null);
+	return (
+		<Flex bg="bg-canvas" minH="100vh">
+			<Flex flex="1" direction="column" align="flex-start" gap="2" p="6">
+				{STEPS.map((step) => (
+					<Button
+						key={step}
+						size="sm"
+						variant={selected === step ? "solid" : "outline"}
+						aria-pressed={selected === step}
+						onClick={() => setSelected(step)}
+					>
+						{step}
+					</Button>
+				))}
+				<Button size="sm" variant="ghost" onClick={() => setSelected(null)}>
+					Deselect
+				</Button>
+			</Flex>
+			<Box bg="bg-surface" borderLeftWidth="1px" borderColor="border">
+				<ContextRail storageKey="storybook.rail.expand-on" expandOn={selected}>
+					<ContextRail.Header
+						eyebrow="Step"
+						title={selected ?? "Nothing selected"}
+					/>
+					<ContextRail.Section
+						id="step-form"
+						icon={<Info size={14} />}
+						label="Settings"
+					>
+						<p style={{ fontSize: 13, color: "var(--chakra-colors-muted)" }}>
+							Selecting a step opens the rail; collapse it and it stays
+							collapsed until you select another step.
+						</p>
+					</ContextRail.Section>
+				</ContextRail>
+			</Box>
+		</Flex>
+	);
+};
+
+/**
+ * `expandOn` — the selected item opens the rail. The rail starts collapsed;
+ * selecting a step expands it (stored under `storageKey`) without moving
+ * focus. Deselecting does nothing; a collapse holds until the next change.
+ */
+export const ExpandOnSelection: Story = {
+	render: () => {
+		if (typeof window !== "undefined") {
+			localStorage.setItem("storybook.rail.expand-on", "true");
+		}
+		return <SelectionOpensRail />;
 	},
 };

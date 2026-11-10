@@ -656,6 +656,39 @@ the rail's leading edge, mirroring the sidebar's trailing-edge toggle. It
 is visually identical in expanded and collapsed states; only the icon
 swaps (`PanelRightClose` ↔ `PanelRightOpen`).
 
+### Opening the rail from the screen (`expandOn`)
+
+When the rail holds what the user just acted on — selecting a step in
+the workflow editor puts that step's form in the rail — a collapsed rail
+would show nothing. Pass the selection as `expandOn` and **the rail opens
+itself**:
+
+```tsx
+<ContextRail storageKey="workflow-editor-rail" expandOn={selectedStepId}>
+  …
+</ContextRail>
+```
+
+- **A change opens.** Whenever `expandOn` changes to anything but
+  `null`, `undefined` or `false`, a collapsed rail expands. An already
+  expanded rail stays as it is.
+  Values compare by identity (`Object.is`), so pass a stable value — the
+  item's id — not an object built on every render, which would re-open the
+  rail on each render and override the user's collapse.
+- **Like the user's own expand.** The expanded state is stored under
+  `storageKey`, exactly as pressing the toggle would; with storage blocked
+  or throwing it still expands. A resizable rail expands to its remembered
+  width.
+- **Not on mount.** The value the rail mounts with does not expand it, so a
+  collapse remembered under `storageKey` survives a reload.
+- **Deselecting does nothing.** A change to `null`/`undefined`/`false`
+  leaves the rail alone. The user's collapse is respected until the value
+  changes again — selecting another item (or the same one after a
+  deselect) re-opens the rail.
+- **Focus stays put.** Expanding does not move focus; it stays where the
+  user acted (on the canvas, in the list).
+- **Without `expandOn`** no rail changes.
+
 ### Resizable width (opt-in)
 
 A rail whose content needs room the user decides on — the workflow

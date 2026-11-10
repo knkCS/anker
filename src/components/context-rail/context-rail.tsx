@@ -108,7 +108,23 @@ export interface ContextRailProps {
 	 * 360px. The width is remembered under `${storageKey}:width`.
 	 */
 	resizable?: ContextRailResizable;
+	/**
+	 * Opens the rail from the screen: whenever this value **changes** to
+	 * anything but `null`, `undefined` or `false`, a collapsed rail expands —
+	 * as if the user pressed expand, so it is stored under `storageKey`. The
+	 * value on mount does not expand (a remembered collapse survives a
+	 * reload), a change to `null`/`undefined`/`false` does nothing, and focus
+	 * is not moved. Pass e.g. the selected item's id so selecting an item
+	 * opens the rail; the user's own collapse holds until the value changes.
+	 * Values compare by identity: pass a stable value (an id), not an object
+	 * created on every render, which would re-open the rail on each render.
+	 */
+	expandOn?: unknown;
 	children: React.ReactNode;
+}
+
+function isOpenSignal(value: unknown): boolean {
+	return value !== null && value !== undefined && value !== false;
 }
 
 function widthStorageKey(storageKey: string): string {
@@ -245,11 +261,20 @@ function useResizableWidth(
 const ContextRailRoot = ({
 	storageKey,
 	resizable,
+	expandOn,
 	children,
 }: ContextRailProps) => {
 	const [collapsed, setCollapsed] = useState(() =>
 		getInitialCollapsed(storageKey),
 	);
+	// Adjust state while rendering when `expandOn` changes, so the expanded
+	// rail paints in the same frame as the change (no collapsed flash). The
+	// initial value is the baseline: mounting never expands.
+	const [seenExpandOn, setSeenExpandOn] = useState(expandOn);
+	if (!Object.is(seenExpandOn, expandOn)) {
+		setSeenExpandOn(expandOn);
+		if (isOpenSignal(expandOn)) setCollapsed(false);
+	}
 	const railRef = useRef<HTMLDivElement>(null);
 	const resize = useResizableWidth(resizable, storageKey, railRef);
 	const showHandle = resizable !== undefined && !collapsed;
