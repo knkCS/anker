@@ -2,6 +2,20 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.9.0 — 2026-11-10
+
+### Added
+
+- **Resizable `ContextRail`** (#284, `@knkcs/anker/components`): a rail opts in
+  with `resizable={{ defaultWidth, minWidth, maxWidth }}`; `maxWidth` is a
+  number or a function of the space the rail shares with the main column.
+  Its leading edge carries a keyboard-operable separator (←/→ in 16px steps
+  within the bounds, double-click resets to the default) that announces its
+  value. The width is remembered under `${storageKey}:width` beside the
+  collapsed flag and falls back to the default when storage is blocked.
+  Collapsing to the 44px rail is unchanged. Rails without the option stay at
+  their fixed 360px.
+
 ## 5.8.0 — 2026-11-05
 
 ### Added
