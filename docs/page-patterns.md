@@ -672,6 +672,9 @@ itself**:
 - **A change opens.** Whenever `expandOn` changes to anything but
   `null`, `undefined` or `false`, a collapsed rail expands. An already
   expanded rail stays as it is.
+  Values compare by identity (`Object.is`), so pass a stable value — the
+  item's id — not an object built on every render, which would re-open the
+  rail on each render and override the user's collapse.
 - **Like the user's own expand.** The expanded state is stored under
   `storageKey`, exactly as pressing the toggle would; with storage blocked
   or throwing it still expands. A resizable rail expands to its remembered

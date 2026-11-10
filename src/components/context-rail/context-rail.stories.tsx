@@ -18,6 +18,7 @@ import {
 	Zap,
 } from "lucide-react";
 import { useState } from "react";
+import { Button } from "../../atoms/button";
 import { Box, Flex } from "../../primitives/layout";
 import { ContextRail } from "./context-rail";
 
@@ -400,18 +401,19 @@ const SelectionOpensRail = () => {
 		<Flex bg="bg-canvas" minH="100vh">
 			<Flex flex="1" direction="column" align="flex-start" gap="2" p="6">
 				{STEPS.map((step) => (
-					<button
+					<Button
 						key={step}
-						type="button"
+						size="sm"
+						variant={selected === step ? "solid" : "outline"}
 						aria-pressed={selected === step}
 						onClick={() => setSelected(step)}
 					>
 						{step}
-					</button>
+					</Button>
 				))}
-				<button type="button" onClick={() => setSelected(null)}>
+				<Button size="sm" variant="ghost" onClick={() => setSelected(null)}>
 					Deselect
-				</button>
+				</Button>
 			</Flex>
 			<Box bg="bg-surface" borderLeftWidth="1px" borderColor="border">
 				<ContextRail storageKey="storybook.rail.expand-on" expandOn={selected}>

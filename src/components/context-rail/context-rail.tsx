@@ -116,6 +116,8 @@ export interface ContextRailProps {
 	 * reload), a change to `null`/`undefined`/`false` does nothing, and focus
 	 * is not moved. Pass e.g. the selected item's id so selecting an item
 	 * opens the rail; the user's own collapse holds until the value changes.
+	 * Values compare by identity: pass a stable value (an id), not an object
+	 * created on every render, which would re-open the rail on each render.
 	 */
 	expandOn?: unknown;
 	children: React.ReactNode;
