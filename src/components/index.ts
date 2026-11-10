@@ -32,6 +32,7 @@ export { Composer } from "./composer";
 export type {
 	ContextRailHeaderProps,
 	ContextRailProps,
+	ContextRailResizable,
 	ContextRailSectionProps,
 } from "./context-rail/context-rail";
 export { ContextRail } from "./context-rail/context-rail";

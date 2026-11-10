@@ -60,7 +60,7 @@ by the `<AppShell>` template:
 │            │     [ tabs (optional)                            ] │
 │  Sidebar   ├────────────────────────────────────┬───────────────┤
 │   240px    │         Main content               │ ContextRail   │
-│ ↔ 60px     │            (fluid)                 │    320px      │
+│ ↔ 60px     │            (fluid)                 │    360px      │
 │ collapsed  │                                    │  ↔ 44px       │
 │            │                                    │  collapsed    │
 └────────────┴────────────────────────────────────┴───────────────┘
@@ -71,7 +71,7 @@ by the `<AppShell>` template:
 | Element       | Expanded width | Collapsed width | Collapse breakpoint |
 |---------------|----------------|-----------------|---------------------|
 | `<Sidebar>`   | 240px          | 60px (icon rail) | < 1440px viewport  |
-| `<ContextRail>` | 320px        | 44px (icon-only) | < 1440px viewport  |
+| `<ContextRail>` | 360px (opt-in resizable, §4) | 44px (icon-only) | < 1440px viewport  |
 | Main column   | fluid (`1fr`) | —                | —                   |
 
 Both side columns persist their collapsed state to `localStorage` via the
@@ -527,7 +527,7 @@ setting.
 ## 4. ContextRail patterns
 
 The context rail is the **right column** of the app shell — a fixed-width
-secondary surface for at-a-glance information that supports the main
+(unless opted in to a resizable width, below) secondary surface for at-a-glance information that supports the main
 content without being part of it, and on a detail page for the things you
 do *to* the entity.
 
@@ -656,6 +656,51 @@ the rail's leading edge, mirroring the sidebar's trailing-edge toggle. It
 is visually identical in expanded and collapsed states; only the icon
 swaps (`PanelRightClose` ↔ `PanelRightOpen`).
 
+### Resizable width (opt-in)
+
+A rail whose content needs room the user decides on — the workflow
+editor's step form — passes `resizable` with a default, a minimum and a
+maximum width in pixels. **Without `resizable` a rail keeps its fixed
+360px**; no other rail changes.
+
+```tsx
+<ContextRail
+  storageKey="workflow-editor-rail"
+  resizable={{
+    defaultWidth: 360,
+    minWidth: 320,
+    maxWidth: (space) => space / 2, // half of the main area
+  }}
+>
+  …
+</ContextRail>
+```
+
+- **Handle.** The rail's leading edge carries a drag handle (a thin strip,
+  `col-resize` cursor, below the collapse toggle). Dragging left widens,
+  dragging right narrows; a **double-click resets** to `defaultWidth`.
+- **Keyboard and screen readers.** The handle is a focusable
+  `role="separator"` (`aria-orientation="vertical"`, label "Resize context
+  rail") announcing `aria-valuenow` with `aria-valuemin`/`aria-valuemax`.
+  ← widens and → narrows by 16px, always within the bounds.
+- **Bounds.** `maxWidth` is a number or a function of the **space** the
+  rail shares with the main column — the rail's right edge minus the left
+  edge of the element before the rail's column (AppShell's main column) —
+  re-measured on window resize and when a resize starts. While it cannot be
+  measured, the function form imposes no maximum. Choose `minWidth` so the
+  main column keeps its own minimum beside it; when the maximum falls below
+  the minimum the **maximum wins**, so the main column keeps its room, and
+  the separator announces that maximum as its minimum too (a screen that
+  needs the rail's minimum regardless opens it as an overlay).
+- **Persistence.** The width is remembered under `${storageKey}:width`,
+  beside the collapsed flag at `storageKey`. A stored width is clamped into
+  the bounds; garbage, or storage that is blocked or throws, falls back to
+  `defaultWidth`. Only the user's resizing stores a width: a window too
+  narrow for the stored width shows it clamped without overwriting it.
+- **Collapse is unchanged.** The toggle still collapses to the 44px column
+  with its compact atoms (the handle is hidden there); expanding returns to
+  the remembered width.
+
 ### Compact atoms
 
 The rail's 44px collapsed column surfaces useful content via five
@@ -702,7 +747,8 @@ non-atom JSX inside sections are hidden — only atom-tagged children render.
 
 > **Rail Root contract (required):** rail content MUST be wrapped in
 > `<ContextRail>` (the Root). The Root provides the column width
-> (360px expanded / 44px collapsed), the floating collapse toggle
+> (360px expanded — or resizable, see "Resizable width" — / 44px
+> collapsed), the floating collapse toggle
 > (mirrors `<Sidebar>` on the leading edge), inner padding, and
 > persistence (`storageKey` prop). Using
 > `<ContextRail.Header>` or `<ContextRail.Section>` inside a fragment
