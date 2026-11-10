@@ -2,6 +2,19 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.10.0 — 2026-11-10
+
+### Added
+
+- **`ContextRail` opens itself with `expandOn`** (#289): when the value of
+  `expandOn` changes (compared with `Object.is`) to anything but
+  `null`/`undefined`/`false`, a collapsed rail expands, stored under
+  `storageKey` like a manual expand. The value at mount never expands, so a
+  remembered collapse survives a reload; a manual collapse holds until the
+  value changes again. Focus does not move. Pass a stable id, such as the
+  selected item's, so a screen's rail opens when the user selects something
+  whose details live in it. Rails without the prop are unchanged.
+
 ## 5.9.0 — 2026-11-10
 
 ### Added
