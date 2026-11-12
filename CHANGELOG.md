@@ -2,6 +2,15 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.11.1 — 2026-11-12
+
+### Fixed
+
+- The message list tests let react-virtual's scroll-end timer fire before the
+  test environment is torn down (#300). It fired after teardown and failed the
+  v5.11.0 publish, so **5.11.0 was never published**: 5.11.1 is the first
+  release with `IconSearch`.
+
 ## 5.11.0 — 2026-11-12
 
 ### Added
