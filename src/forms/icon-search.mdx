@@ -1,0 +1,55 @@
+import { ArgTypes, Canvas, Meta } from "@storybook/blocks";
+import * as Stories from "./icon-search.stories";
+
+<Meta of={Stories} />
+
+# IconSearch
+
+A search that rests as an icon button and opens in place into an input. Use it
+where a standing `SearchInput` does not fit — a field's label row, the end of a
+dense toolbar. Everywhere else, a `SearchInput` is the better control: a search
+that is always visible is found without hunting for it.
+
+<Canvas of={Stories.InALabelRow} />
+
+## Opening and closing
+
+- **At rest** it is an icon button. `label` is its accessible name (and the
+  input's) and is required with no default: only the call site knows what is
+  searched. `tooltip` defaults to `label`.
+- **A click, or the `shortcut` key**, opens it with focus in the input. The
+  shortcut is one key matched against `KeyboardEvent.key` (e.g. `"/"`), ignored
+  while focus is in another field or a modifier is held, and shown in the
+  tooltip and as `aria-keyshortcuts`.
+- **It grows towards the inline start.** It puts itself at the inline end of a
+  flex row (`margin-inline-start: auto`), so it opens leftwards from a row's
+  right end — rightwards in a right-to-left row.
+- **Escape or the clear button** empties it, closes it, emits `onSearch("")` at
+  once (cancelling a pending debounce) and returns focus to the icon. Escape
+  goes no further, so a dialog around the search stays open.
+- **Blur closes it only while it is empty.** A query keeps it open, so a query
+  is never lost by accident — nor hidden behind the icon.
+
+## The counter slot
+
+`counter` renders next to the open input, for a match count and previous/next
+buttons. It takes whatever you give it; focus moving into it does not close the
+search.
+
+<Canvas of={Stories.WithCounter} />
+
+## The SearchInput contract
+
+- `onSearch` is debounced by `debounceMs` (default 300).
+- Uncontrolled with `defaultValue`, or controlled with `value` and
+  `onValueChange` (called on every keystroke, not debounced). A non-empty
+  value opens the search.
+- A ref (`IconSearchHandle`) exposes `clear()` — empty, close, cancel the
+  debounce, emit `onSearch("")` — and `focus()`, which opens it first.
+- Every string is a prop: `label`, `tooltip`, `placeholder`, `clearLabel`.
+
+<Canvas of={Stories.Controlled} />
+
+## Props
+
+<ArgTypes of={Stories} />

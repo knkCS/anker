@@ -44,6 +44,12 @@ export {
 	IconPickerField,
 	type IconPickerFieldProps,
 } from "./icon-picker-field";
+// IconSearch — a SearchInput that rests as an icon button
+export {
+	IconSearch,
+	type IconSearchHandle,
+	type IconSearchProps,
+} from "./icon-search";
 // InlineEdit
 export {
 	InlineEdit,
