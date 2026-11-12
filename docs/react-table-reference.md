@@ -128,7 +128,7 @@ Cells never import from `@tanstack/react-table`. The `info.getValue()` call happ
 | `MenuCell` | N/A (uses `actions` prop) | Row overflow menu |
 | `NumberCell` | `number \| string` | Locale-aware number formatting |
 | `SlugCell` | `string` | Monospace identifiers |
-| `StatusBadgeCell` | `string` | Colored status badge; supports `detail` line, `tooltip`, and `icon` (rendered before the label) |
+| `StatusBadgeCell` | `string` | Status badge; `toneMap` / `fallbackTone` map the value to a tone (preferred), `colorMap` / `fallbackColor` to a data-driven colour — a tone wins; supports `detail` line, `tooltip`, and `icon` (rendered before the label) |
 | `SwitchCell` | `boolean` | Inline toggle bound to a row value |
 | `TruncatedTextCell` | `string` | General text with optional truncation; supports `subText` |
 | `UrlCell` | `string` | Clickable external link |
