@@ -10,8 +10,18 @@ import React, { createContext, useContext } from "react";
  * to decide between their expanded and compact renderings. Provided by
  * `<ContextRail>`; defaults to `{ collapsed: false }` when used outside.
  */
-export const RailModeContext = createContext<{ collapsed: boolean }>({
+export interface RailMode {
+	collapsed: boolean;
+	/**
+	 * Expands the rail, exactly as the collapse toggle would (stored under
+	 * the rail's `storageKey`). A no-op outside a `<ContextRail>` Root.
+	 */
+	expand: () => void;
+}
+
+export const RailModeContext = createContext<RailMode>({
 	collapsed: false,
+	expand: () => {},
 });
 
 /**
@@ -19,7 +29,7 @@ export const RailModeContext = createContext<{ collapsed: boolean }>({
  * `{ collapsed: false }` when called outside a `<ContextRail>` Root —
  * atoms then render their expanded form.
  */
-export function useContextRailMode(): { collapsed: boolean } {
+export function useContextRailMode(): RailMode {
 	return useContext(RailModeContext);
 }
 
@@ -29,6 +39,12 @@ export function useContextRailMode(): { collapsed: boolean } {
  * keep only the atom-tagged ones.
  */
 export const RAIL_ATOM = Symbol.for("anker.contextRail.atom");
+
+/**
+ * Sentinel placed on `ContextRail.Section` so code that cannot import it
+ * without a cycle (the tabs) can recognise a section among children.
+ */
+export const RAIL_SECTION = Symbol.for("anker.contextRail.section");
 
 export function isRailAtom(child: React.ReactNode): boolean {
 	if (!React.isValidElement(child)) return false;

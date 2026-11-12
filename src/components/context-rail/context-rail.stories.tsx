@@ -4,9 +4,11 @@ import {
 	ArrowRight,
 	Copy,
 	Download,
+	GitBranch,
 	History,
 	Info,
 	Monitor,
+	ScanSearch,
 	Shield,
 	ShieldCheck,
 	ShieldOff,
@@ -449,4 +451,106 @@ export const ExpandOnSelection: Story = {
 		}
 		return <SelectionOpensRail />;
 	},
+};
+
+const TabbedRail = () => {
+	const [tab, setTab] = useState("branch");
+	const [inspectRequest, setInspectRequest] = useState(0);
+	const [fieldFocused, setFieldFocused] = useState(false);
+	const inspect = () => {
+		setTab("field");
+		setInspectRequest((n) => n + 1);
+	};
+	return (
+		<Flex bg="bg-canvas" minH="100vh">
+			<Flex flex="1" direction="column" align="flex-start" gap="2" p="6">
+				<Button
+					size="sm"
+					variant="outline"
+					aria-pressed={fieldFocused}
+					onClick={() => setFieldFocused((f) => !f)}
+				>
+					{fieldFocused ? "Blur the field" : "Focus a field"}
+				</Button>
+				<Button size="sm" variant="outline" onClick={inspect}>
+					Inspect (selects “Field” and expands)
+				</Button>
+			</Flex>
+			<Box bg="bg-surface" borderLeftWidth="1px" borderColor="border">
+				<ContextRail
+					storageKey="storybook.rail.tabs"
+					expandOn={inspectRequest || undefined}
+				>
+					<ContextRail.Header eyebrow="Branch" title="Spring release" />
+					<ContextRail.Tabs label="Rail" value={tab} onValueChange={setTab}>
+						<ContextRail.Tab
+							value="branch"
+							label="Branch"
+							icon={<GitBranch size={14} />}
+							indicator={{ kind: "badge", count: 2, label: "2 blockers" }}
+						>
+							<ContextRail.Section
+								id="actions"
+								icon={<Zap size={14} />}
+								label="Actions"
+							>
+								<ContextRail.IconButton
+									label="Publish"
+									icon={<Upload size={14} />}
+									tone="primary"
+								/>
+								<ContextRail.IconButton
+									label="Duplicate"
+									icon={<Copy size={14} />}
+								/>
+							</ContextRail.Section>
+							<ContextRail.Section
+								id="about"
+								icon={<Info size={14} />}
+								label="About"
+							>
+								<p
+									style={{ fontSize: 13, color: "var(--chakra-colors-muted)" }}
+								>
+									Two blockers keep this branch from publishing.
+								</p>
+							</ContextRail.Section>
+						</ContextRail.Tab>
+						<ContextRail.Tab
+							value="field"
+							label="Field"
+							icon={<ScanSearch size={14} />}
+							indicator={
+								fieldFocused
+									? { kind: "dot", label: "A field has focus" }
+									: undefined
+							}
+						>
+							<ContextRail.Section
+								id="inspector"
+								icon={<ScanSearch size={14} />}
+								label="Content · Rich Text"
+							>
+								<p
+									style={{ fontSize: 13, color: "var(--chakra-colors-muted)" }}
+								>
+									The focused field's inspector.
+								</p>
+							</ContextRail.Section>
+						</ContextRail.Tab>
+					</ContextRail.Tabs>
+				</ContextRail>
+			</Box>
+		</Flex>
+	);
+};
+
+/**
+ * `ContextRail.Tabs` — the rail split into tabs under the header. The tab is
+ * the caller's state (`value`, `onValueChange`). A badge counts, a dot flags.
+ * Collapse the rail: each tab becomes an icon button that expands the rail on
+ * that tab. "Inspect" sets the tab and bumps `expandOn` together.
+ */
+export const Tabs: Story = {
+	render: () => <TabbedRail />,
 };
