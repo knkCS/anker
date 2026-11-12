@@ -111,7 +111,12 @@ beforeAll(() => {
 			}) as DOMRect,
 	);
 });
-afterAll(() => {
+afterAll(async () => {
+	// react-virtual debounces its scroll-end reset (isScrollingResetDelay,
+	// 150ms) on the window and doesn't clear that timer on unmount. Let it fire
+	// while jsdom is still here; otherwise it can run after the environment is
+	// torn down ("window is not defined"), which fails the whole run.
+	await new Promise((resolve) => setTimeout(resolve, 200));
 	vi.restoreAllMocks();
 	for (const [name, descriptor] of Object.entries(offsetDescriptors)) {
 		if (descriptor) {
