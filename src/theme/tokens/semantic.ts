@@ -43,6 +43,12 @@ const semanticTokens = {
 		border: {
 			value: { base: "{colors.gray.200}", _dark: "{colors.gray.700}" },
 		},
+		// A border that must stay visible on a sunken surface (`bg-canvas`)
+		// in both modes — e.g. a quiet Kanban card's dashes — where `border`
+		// (gray.700 on gray.900 in dark mode) all but vanishes.
+		"border-emphasized": {
+			value: { base: "{colors.gray.300}", _dark: "{colors.gray.600}" },
+		},
 		"border-muted": {
 			value: { base: "{colors.gray.100}", _dark: "{colors.gray.800}" },
 		},

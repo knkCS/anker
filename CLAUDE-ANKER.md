@@ -42,7 +42,7 @@ consumers run React 19. See `CHANGELOG.md` for migration notes if you're on 18.
 **Semantic tokens** (prefer these over raw):
 - `bg-canvas` (page frame), `bg-surface` (cards/modals), `bg-subtle` (toolbars), `bg-muted` (hover)
 - `default` / `emphasized` / `muted` / `subtle` (text)
-- `border` (standard 1px), `accent` (action), `success`, `error`
+- `border` (standard 1px), `border-emphasized` (a border that must show on a sunken `bg-canvas` surface), `accent` (action), `success`, `error`
 
 **Status palettes** — pass as `colorPalette` on `Badge`, `Button`, `Alert`, `Progress`, `Tag` and every other palette-aware component; light + dark mode, `solid` / `subtle` / `outline`:
 - `success` — done, healthy, passed ("Active", "Merged", "Passed")

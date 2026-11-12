@@ -514,7 +514,7 @@ the provider, 2 with `StrictMode` outside it (or with RTL's
 
 **Text:** `default`, `inverted`, `emphasized`, `muted`, `subtle`, `on-accent`, `on-accent-muted`, `on-accent-subtle`
 
-**Interactive:** `accent`, `border`, `success`, `error`
+**Interactive:** `accent`, `border`, `border-emphasized`, `success`, `error`
 
 **Shadows:** `xs`, `sm`, `md`, `lg`, `xl`, `2xl` (diffused hero-level), `focus-ring` (primary-tinted glow for focus states)
 

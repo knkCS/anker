@@ -33,10 +33,8 @@ const TONE_STYLES: Record<KanbanCardTone, BoxProps> = {
 	quiet: {
 		bg: "bg-canvas",
 		borderStyle: "dashed",
-		// `border` is the quiet surface's own colour in dark mode (gray.700 on
-		// gray.900 would vanish behind dashes), so the dashes take a step that
-		// shows in both themes.
-		borderColor: { base: "gray.300", _dark: "gray.600" },
+		// `border` all but vanishes on the sunken surface in dark mode.
+		borderColor: "border-emphasized",
 	},
 	attention: {
 		bg: "bg-surface",

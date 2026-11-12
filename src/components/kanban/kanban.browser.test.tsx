@@ -362,9 +362,7 @@ describe.each<ColorMode>([
 		const s = (await tones())("quiet");
 		expect(s.backgroundColor).toBe(rgb("bg-canvas"));
 		expect(s.borderTopStyle).toBe("dashed");
-		expect(s.borderTopColor).toBe(
-			rgb(mode === "dark" ? "gray.600" : "gray.300"),
-		);
+		expect(s.borderTopColor).toBe(rgb("border-emphasized"));
 	});
 
 	it("quiet stays legible: full-strength text at AA, a border that shows", async () => {
@@ -374,10 +372,9 @@ describe.each<ColorMode>([
 		expect(
 			contrastRatio(token("default"), token("bg-canvas")),
 		).toBeGreaterThanOrEqual(AA_TEXT);
-		const border = mode === "dark" ? "gray.600" : "gray.300";
-		expect(contrastRatio(token(border), token("bg-canvas"))).toBeGreaterThan(
-			1.4,
-		);
+		expect(
+			contrastRatio(token("border-emphasized"), token("bg-canvas")),
+		).toBeGreaterThan(1.4);
 		// And it reads as a different surface from a default card.
 		expect(token("bg-canvas")).not.toBe(token("bg-surface"));
 	});

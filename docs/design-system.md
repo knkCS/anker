@@ -185,6 +185,7 @@ These are the **preferred API** in application code — they describe meaning, n
 | `muted` | `gray.600` | `gray.300` | Secondary text |
 | `subtle` | `gray.500` | `gray.400` | Tertiary text, placeholders |
 | `border` | `gray.200` | `gray.700` | Standard borders |
+| `border-emphasized` | `gray.300` | `gray.600` | A border that must show on a sunken `bg-canvas` surface (quiet Kanban card) |
 | `accent` | `primary.700` | `primary.300` | Action color |
 | `bg-accent` | `primary.700` | `primary.400` | Action surface bg |
 | `success` | `green.600` | `green.200` | Status success (flat token; `success.*` is also the status palette above) |
