@@ -132,7 +132,7 @@ export const AtomsExpanded: Story = {
 					<ContextRail.ValueTile value={100} label="Active users" muted />
 				</ContextRail.Section>
 				<ContextRail.StatusIcon
-					tone="amber"
+					tone="warning"
 					icon={<Shield size={14} />}
 					label="2FA: 0 of 100 enabled"
 				/>
@@ -170,7 +170,7 @@ export const AtomsCollapsed: Story = {
 						<ContextRail.ValueTile value={100} label="Active users" muted />
 					</ContextRail.Section>
 					<ContextRail.StatusIcon
-						tone="amber"
+						tone="warning"
 						icon={<Shield size={14} />}
 						label="2FA: 0 of 100 enabled"
 					/>
@@ -198,6 +198,82 @@ export const AtomsCollapsed: Story = {
 	),
 };
 
+/**
+ * Every StatusIcon tone, expanded and collapsed. The five palette tones draw
+ * from anker's status palettes and follow light / dark mode; the legacy
+ * names (`green`, `amber`, `red`, `gray`) are aliases that render
+ * identically to `success`, `warning`, `danger`, `neutral`.
+ */
+const STATUS_ICON_TONES = [
+	{
+		tone: "success",
+		icon: <ShieldCheck size={14} />,
+		label: "success · 2FA: Active",
+	},
+	{
+		tone: "warning",
+		icon: <Shield size={14} />,
+		label: "warning · 2FA: 3 of 10",
+	},
+	{ tone: "danger", icon: <ShieldOff size={14} />, label: "danger · 2FA: Off" },
+	{ tone: "info", icon: <Info size={14} />, label: "info · Sync running" },
+	{
+		tone: "neutral",
+		icon: <Monitor size={14} />,
+		label: "neutral · 2 devices",
+	},
+	{
+		tone: "green",
+		icon: <ShieldCheck size={14} />,
+		label: "green (alias of success)",
+	},
+	{
+		tone: "amber",
+		icon: <Shield size={14} />,
+		label: "amber (alias of warning)",
+	},
+	{
+		tone: "red",
+		icon: <ShieldOff size={14} />,
+		label: "red (alias of danger)",
+	},
+	{
+		tone: "gray",
+		icon: <Monitor size={14} />,
+		label: "gray (alias of neutral)",
+	},
+] as const;
+
+const statusIconTones = () =>
+	STATUS_ICON_TONES.map(({ tone, icon, label }) => (
+		<ContextRail.StatusIcon key={tone} tone={tone} icon={icon} label={label} />
+	));
+
+export const StatusIconTones: Story = {
+	render: () => {
+		if (typeof window !== "undefined") {
+			localStorage.setItem("story-status-icon-tones-expanded", "false");
+			localStorage.setItem("story-status-icon-tones-collapsed", "true");
+		}
+		return (
+			<Flex bg="bg-canvas" minH="100vh" justify="flex-end">
+				<Box bg="bg-surface" borderLeftWidth="1px" borderColor="border">
+					<ContextRail storageKey="story-status-icon-tones-expanded">
+						<ContextRail.Header eyebrow="StatusIcon" title="Expanded" />
+						{statusIconTones()}
+					</ContextRail>
+				</Box>
+				<Box bg="bg-surface" borderLeftWidth="1px" borderColor="border">
+					<ContextRail storageKey="story-status-icon-tones-collapsed">
+						<ContextRail.Header eyebrow="StatusIcon" title="Collapsed" />
+						{statusIconTones()}
+					</ContextRail>
+				</Box>
+			</Flex>
+		);
+	},
+};
+
 export const AvatarAndFooter: Story = {
 	render: () => (
 		<RailColumn>
@@ -205,7 +281,7 @@ export const AvatarAndFooter: Story = {
 				<ContextRail.Header eyebrow="USER" title="Jana Schmid" />
 				<ContextRail.Avatar initials="JS" label="Jana Schmid · jana@knk.de" />
 				<ContextRail.StatusIcon
-					tone="green"
+					tone="success"
 					icon={<Shield size={14} />}
 					label="2FA: Active"
 				/>
@@ -246,7 +322,7 @@ export const PatternOverviewStats: Story = {
 					</Flex>
 				</ContextRail.Section>
 				<ContextRail.StatusIcon
-					tone="amber"
+					tone="warning"
 					icon={<Shield size={14} />}
 					label="2FA: 856 of 1284 enabled"
 				/>
@@ -311,7 +387,7 @@ export const PatternDetailContext: Story = {
 				<ContextRail.Header eyebrow="User" title="Jana Schmid" />
 				<ContextRail.Avatar initials="JS" label="Jana Schmid · jana@knk.de" />
 				<ContextRail.StatusIcon
-					tone="green"
+					tone="success"
 					icon={<Shield size={14} />}
 					label="2FA: Active"
 				/>
