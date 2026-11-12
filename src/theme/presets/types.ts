@@ -16,7 +16,16 @@ export interface ThemePreset {
 			: never
 		: never;
 
-	/** Override semantic tokens (shadows, colors, opacity) */
+	/**
+	 * Override semantic tokens (shadows, colors, opacity).
+	 *
+	 * Each top-level colour key replaces anker's whole entry. The status
+	 * palettes (`success`, `warning`, `danger`, `info`) are nested tokens, so
+	 * overriding one means supplying every palette key (`solid`, `contrast`,
+	 * `fg`, `muted`, `subtle`, `emphasized`, `focusRing`, `border`) — and for
+	 * `success` its flat value as `DEFAULT` — or `colorPalette` on that
+	 * palette falls back to gray.
+	 */
 	semanticTokens?: SystemConfig["theme"] extends infer T
 		? T extends { semanticTokens?: infer S }
 			? S

@@ -9,6 +9,8 @@
  * `"gray.50"` are stored verbatim into the CSS custom property and yield
  * invalid CSS at runtime.
  */
+import { statusPaletteTokens } from "./status-palettes";
+
 const semanticTokens = {
 	colors: {
 		"bg-canvas": {
@@ -47,12 +49,25 @@ const semanticTokens = {
 		accent: {
 			value: { base: "{colors.primary.700}", _dark: "{colors.primary.300}" },
 		},
+		// `success` is both a flat token (`color="success"`, unchanged since
+		// before the status palettes: Chakra's green 600 / 200) and the
+		// `success` status palette. `DEFAULT` keeps the flat value — Chakra
+		// registers it as `colors.success` itself — while the palette keys
+		// sit beside it as `colors.success.solid` etc.
 		success: {
-			value: { base: "{colors.green.600}", _dark: "{colors.green.200}" },
+			DEFAULT: {
+				value: { base: "{colors.green.600}", _dark: "{colors.green.200}" },
+			},
+			...statusPaletteTokens.success,
 		},
 		error: {
 			value: { base: "{colors.red.600}", _dark: "{colors.red.200}" },
 		},
+		// Status palettes for colorPalette="warning" / "danger" / "info" (and
+		// "success" above) — see status-palettes.ts.
+		warning: statusPaletteTokens.warning,
+		danger: statusPaletteTokens.danger,
+		info: statusPaletteTokens.info,
 		// Color palette tokens for colorPalette="primary" (required by Chakra v3
 		// for solid/subtle/outline/ghost button variants and other components)
 		primary: {

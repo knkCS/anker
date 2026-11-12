@@ -44,6 +44,15 @@ consumers run React 19. See `CHANGELOG.md` for migration notes if you're on 18.
 - `default` / `emphasized` / `muted` / `subtle` (text)
 - `border` (standard 1px), `accent` (action), `success`, `error`
 
+**Status palettes** — pass as `colorPalette` on `Badge`, `Button`, `Alert`, `Progress`, `Tag` and every other palette-aware component; light + dark mode, `solid` / `subtle` / `outline`:
+- `success` — done, healthy, passed ("Active", "Merged", "Passed")
+- `warning` — needs attention soon, degraded, at risk ("Expiring", "Waiting for input")
+- `danger` — failed, error, broken ("Failed", "Error", "Offline")
+- `info` — neutral notice, in progress ("Running", "Queued", "New")
+- `subtle` is the default status pill; `solid` for the one status that must stand out; `outline` for dense rows. No status meaning → `gray`.
+- **`danger` is a status, `red` is an action.** A destructive action (delete, revoke, suspend) keeps `colorPalette="red"`; a failed/broken *state* uses `colorPalette="danger"`. Never swap them.
+- `Alert`'s `status` prop picks Chakra's palettes, not anker's — write `<Alert status="error" colorPalette="danger">`.
+
 **Defaults:**
 - Border radius: `md` = 6px (use this for buttons, inputs, small cards)
 - Body font size: `md` = 14px
@@ -55,6 +64,7 @@ consumers run React 19. See `CHANGELOG.md` for migration notes if you're on 18.
 ## Do
 
 - **Use semantic tokens before raw tokens.** Reach for `accent` before `primary.700`. Why: semantic tokens are the contract, raw tokens are the implementation; raw use becomes a search-and-replace cost on the next visual update.
+- **Show status with a status palette.** `colorPalette="success" | "warning" | "danger" | "info"`, never `green` / `orange` / `yellow` / `blue` from Chakra's defaults. Why: the status palettes are anker's own, tuned for WCAG AA in light and dark mode; Chakra's defaults step outside the closed palette. Destructive actions are the exception — they use `colorPalette="red"` (see Status palettes above).
 - **Use `<Button variant="solid">` (not `variant="primary"`).** The `primary` variant is deprecated in anker. Why: `solid` reads from `colorPalette` automatically, so the same component works for `colorPalette="primary"`, `colorPalette="secondary"`, `colorPalette="gray"`.
 - **Use `brand.*` only for branding surfaces.** Logos, headers, about pages. Why: brand colors are print-aligned and not WCAG-tuned for interactive UI.
 - **Use anker components instead of raw Chakra.** Import from `@knkcs/anker/{primitives,components,atoms,forms,feedback}`. Why: anker wraps Chakra with consistent defaults; consuming raw Chakra bypasses those defaults and creates visual drift.

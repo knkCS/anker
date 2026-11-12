@@ -10,7 +10,11 @@
  *
  * `success`, `warning`, `danger`, `info` are explicit status palettes
  * owned by anker (rather than inheriting Chakra's defaults), so consumers
- * get stable status colors regardless of Chakra version.
+ * get stable status colors regardless of Chakra version. They are full
+ * 50–950 scales so `colorPalette="success"` (etc.) works in light and dark
+ * mode — the palette semantic tokens live in `status-palettes.ts`. The
+ * steps extend each scale's own hue (emerald, amber, red; `info` is the
+ * `primary` hue step for step); no hue is added.
  *
  * NOTE: `primary.800` (#0f395d) matches `brand.navy` exactly. The
  * brand-guideline blue (`brand.blue` = #004576) is intentionally NOT in
@@ -72,30 +76,54 @@ const colors = {
 	success: {
 		"50": { value: "#ecfdf5" },
 		"100": { value: "#d1fae5" },
+		"200": { value: "#a7f3d0" },
+		"300": { value: "#6ee7b7" },
+		"400": { value: "#34d399" },
 		"500": { value: "#10b981" },
 		"600": { value: "#059669" },
 		"700": { value: "#047857" },
+		"800": { value: "#065f46" },
+		"900": { value: "#064e3b" },
+		"950": { value: "#022c22" },
 	},
 	warning: {
 		"50": { value: "#fffbeb" },
 		"100": { value: "#fef3c7" },
+		"200": { value: "#fde68a" },
+		"300": { value: "#fcd34d" },
+		"400": { value: "#fbbf24" },
 		"500": { value: "#f59e0b" },
 		"600": { value: "#d97706" },
 		"700": { value: "#b45309" },
+		"800": { value: "#92400e" },
+		"900": { value: "#78350f" },
+		"950": { value: "#451a03" },
 	},
 	danger: {
 		"50": { value: "#fef2f2" },
 		"100": { value: "#fee2e2" },
+		"200": { value: "#fecaca" },
+		"300": { value: "#fca5a5" },
+		"400": { value: "#f87171" },
 		"500": { value: "#ef4444" },
 		"600": { value: "#dc2626" },
 		"700": { value: "#b91c1c" },
+		"800": { value: "#991b1b" },
+		"900": { value: "#7f1d1d" },
+		"950": { value: "#450a0a" },
 	},
 	info: {
 		"50": { value: "#eff6fc" },
 		"100": { value: "#d9eafa" },
+		"200": { value: "#b8d6f5" },
+		"300": { value: "#88baeb" },
+		"400": { value: "#5995dc" },
 		"500": { value: "#2f6fbf" },
 		"600": { value: "#1c5aa8" },
 		"700": { value: "#134788" },
+		"800": { value: "#0f395d" },
+		"900": { value: "#0a2740" },
+		"950": { value: "#061a2c" },
 	},
 };
 
