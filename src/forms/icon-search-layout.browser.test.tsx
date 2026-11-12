@@ -96,6 +96,22 @@ describe("IconSearch — layout", () => {
 		expect(opened.right).toBeGreaterThan(closed.right);
 	});
 
+	it("Escape returns focus to the icon button", async () => {
+		const container = await mount("ltr");
+		await open(container);
+		const input = container.querySelector<HTMLInputElement>("input");
+		if (!input) throw new Error("no input");
+		expect(document.activeElement).toBe(input);
+		await act(async () => {
+			input.dispatchEvent(
+				new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+			);
+		});
+		expect(document.activeElement?.getAttribute("aria-label")).toBe(
+			"Search the tree",
+		);
+	});
+
 	it("shows the tooltip passed in on hover", async () => {
 		const container = await mount("ltr");
 		const button = container.querySelector<HTMLButtonElement>(

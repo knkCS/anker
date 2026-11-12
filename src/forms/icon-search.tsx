@@ -118,9 +118,15 @@ export const IconSearch = forwardRef<IconSearchHandle, IconSearchProps>(
 		// goes back to the icon button rather than to the document body.
 		const focusButtonOnClose = useRef(false);
 
+		// The latest onSearch, read when the debounce fires. Rebuilding the
+		// debounce on a new onSearch would cancel the pending call, and an inline
+		// onSearch is new on every render — in controlled mode, every keystroke.
+		const onSearchRef = useRef(onSearch);
+		onSearchRef.current = onSearch;
+
 		const debouncedSearch = useMemo(
-			() => debounce((term: string) => onSearch(term), debounceMs),
-			[onSearch, debounceMs],
+			() => debounce((term: string) => onSearchRef.current(term), debounceMs),
+			[debounceMs],
 		);
 
 		useEffect(() => {
@@ -136,7 +142,11 @@ export const IconSearch = forwardRef<IconSearchHandle, IconSearchProps>(
 			}
 			if (!isOpen && focusButtonOnClose.current) {
 				focusButtonOnClose.current = false;
-				buttonRef.current?.focus();
+				// Only focus the input took with it when it unmounted. The flag can
+				// be stale — a controlled parent that kept its query on Escape, and
+				// emptied it later from its own control, keeps that control's focus.
+				const active = document.activeElement;
+				if (!active || active === document.body) buttonRef.current?.focus();
 			}
 		}, [isOpen]);
 
@@ -163,9 +173,9 @@ export const IconSearch = forwardRef<IconSearchHandle, IconSearchProps>(
 				focusButtonOnClose.current = returnFocus;
 				setValue("");
 				setOpened(false);
-				onSearch("");
+				onSearchRef.current("");
 			},
-			[debouncedSearch, onSearch, setValue],
+			[debouncedSearch, setValue],
 		);
 
 		useImperativeHandle(

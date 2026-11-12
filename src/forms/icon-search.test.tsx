@@ -250,6 +250,60 @@ describe("IconSearch — the SearchInput contract", () => {
 		expect(onSearch).toHaveBeenCalledWith("");
 	});
 
+	it("debounces onSearch controlled with an inline onSearch", () => {
+		const calls: string[] = [];
+		function Controlled() {
+			const [value, setValue] = useState("");
+			return (
+				<ChakraProvider value={defaultSystem}>
+					<IconSearch
+						label="Search the tree"
+						value={value}
+						onValueChange={setValue}
+						onSearch={(q) => calls.push(q)}
+					/>
+				</ChakraProvider>
+			);
+		}
+		render(<Controlled />);
+		fireEvent.click(button());
+		fireEvent.change(input(), { target: { value: "a" } });
+		fireEvent.change(input(), { target: { value: "ab" } });
+		act(() => {
+			vi.advanceTimersByTime(300);
+		});
+		expect(calls).toEqual(["ab"]);
+	});
+
+	it("does not steal focus later when a controlled parent keeps its query on Escape", () => {
+		function Stubborn() {
+			const [value, setValue] = useState("kept");
+			return (
+				<ChakraProvider value={defaultSystem}>
+					<IconSearch
+						label="Search the tree"
+						value={value}
+						onValueChange={() => {}}
+						onSearch={() => {}}
+					/>
+					<button type="button" onClick={() => setValue("")}>
+						reset
+					</button>
+				</ChakraProvider>
+			);
+		}
+		render(<Stubborn />);
+		fireEvent.keyDown(input(), { key: "Escape" });
+		// Still open: the parent ignored "".
+		expect(input()).toBeInTheDocument();
+		// Later the parent empties it from its own control, which keeps focus.
+		const reset = screen.getByRole("button", { name: "reset" });
+		act(() => reset.focus());
+		fireEvent.click(reset);
+		expect(queryInput()).toBeNull();
+		expect(reset).toHaveFocus();
+	});
+
 	it("works uncontrolled, reporting each keystroke to onValueChange", () => {
 		const onValueChange = vi.fn();
 		renderSearch({ onValueChange });
