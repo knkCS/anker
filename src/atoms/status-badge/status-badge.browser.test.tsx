@@ -45,7 +45,7 @@ const frame = () =>
 
 const id = (...parts: string[]) => parts.join("-");
 
-/** The badge element — the one holding the label text. */
+/** A wrapper whose first child is the badge under test. */
 function Labelled({
 	testId,
 	children,
