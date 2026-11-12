@@ -72,4 +72,37 @@ describe("StatusBadgeCell", () => {
 		expect(screen.queryByTestId("badge-icon")).not.toBeInTheDocument();
 		expect(screen.getByText("published")).toBeInTheDocument();
 	});
+
+	// The colour each combination paints is pinned in a real browser:
+	// src/atoms/status-badge/status-badge.browser.test.tsx.
+	it("renders the label with a toneMap, a colorMap, or both", () => {
+		renderWithChakra(
+			<>
+				<StatusBadgeCell value="failed" toneMap={{ failed: "danger" }} />
+				<StatusBadgeCell value="custom" colorMap={{ custom: "purple" }} />
+				<StatusBadgeCell
+					value="both"
+					toneMap={{ both: "success" }}
+					colorMap={{ both: "purple" }}
+					fallbackTone="warning"
+				/>
+			</>,
+		);
+		expect(screen.getByText("failed")).toBeInTheDocument();
+		expect(screen.getByText("custom")).toBeInTheDocument();
+		expect(screen.getByText("both")).toBeInTheDocument();
+	});
+
+	it("keeps the icon inside a tone badge", () => {
+		renderWithChakra(
+			<StatusBadgeCell
+				value="On"
+				toneMap={{ On: "success" }}
+				icon={<svg data-testid="badge-icon" aria-hidden="true" />}
+			/>,
+		);
+		expect(screen.getByText("On").firstChild).toBe(
+			screen.getByTestId("badge-icon"),
+		);
+	});
 });

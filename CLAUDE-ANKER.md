@@ -52,6 +52,7 @@ consumers run React 19. See `CHANGELOG.md` for migration notes if you're on 18.
 - `subtle` is the default status pill; `solid` for the one status that must stand out; `outline` for dense rows. No status meaning → `gray`.
 - **`danger` is a status, `red` is an action.** A destructive action (delete, revoke, suspend) keeps `colorPalette="red"`; a failed/broken *state* uses `colorPalette="danger"`. Never swap them.
 - `Alert`'s `status` prop picks Chakra's palettes, not anker's — write `<Alert status="error" colorPalette="danger">`.
+- A status badge in code is `<StatusBadge tone="success" label="Passed" />` (`success` / `warning` / `danger` / `info` / `neutral` / `accent`); in a table, `<StatusBadgeCell toneMap={…} />`. `color` / `colorMap` are only for a colour that arrives as data (a user-picked status colour from the backend) — never a literal.
 
 **Defaults:**
 - Border radius: `md` = 6px (use this for buttons, inputs, small cards)
@@ -316,7 +317,7 @@ anker ships 16 reusable cell components for `<DataTable>` columns. They are expo
 | `MenuCell` | row overflow menu |
 | `NumberCell` | numbers |
 | `SlugCell` | mono IDs |
-| `StatusBadgeCell` | status pill (+ optional `tooltip`) |
+| `StatusBadgeCell` | status pill: `toneMap={{ failed: "danger" }}` + `fallbackTone` (`colorMap` only for data-driven colours) (+ optional `tooltip`) |
 | `SwitchCell` | inline toggle |
 | `TruncatedTextCell` | text (+ optional `subText`, `maxLength`) |
 | `UrlCell` | external URL |

@@ -5,13 +5,44 @@ import * as Stories from "./status-badge-cell.stories";
 
 # StatusBadgeCell
 
-Renders a `StatusBadge` for a string status value. Pass a `colorMap` to associate each status string with a named color palette. Unknown statuses fall back to `fallbackColor` (default `"gray"`).
+Renders a `StatusBadge` for a string status value. Map each status string to a **tone** with `toneMap` — the preferred mapping, which follows the theme in light and dark mode (tones: `success`, `warning`, `danger`, `info`, `neutral`, `accent`; see the `StatusBadge` docs). Statuses not in the map fall back to `fallbackTone`.
+
+```tsx
+<StatusBadgeCell
+  value={row.status}
+  toneMap={{ done: "success", failed: "danger", running: "info" }}
+  fallbackTone="neutral"
+/>
+```
 
 ## Usage
 
 <Canvas of={Stories.Default} />
 
-## Without Color Map
+## Fallback tone
+
+<Canvas of={Stories.FallbackTone} />
+
+## Data-driven colours
+
+`colorMap` maps a status to a colour that arrives as **data** — user-picked status colours stored in the backend — and `fallbackColor` (default `"gray"`) covers the rest. Never write colour literals into it: a status known in code takes a tone.
+
+<Canvas of={Stories.DataDrivenColorMap} />
+
+## Tone and colour together
+
+When both are given, a mapping beats a fallback, and at each level a tone beats a colour:
+
+1. `toneMap[value]`
+2. `colorMap[value]`
+3. `fallbackTone`
+4. `fallbackColor`
+
+So a value in both maps takes its tone:
+
+<Canvas of={Stories.ToneBeatsColor} />
+
+## Without a map
 
 <Canvas of={Stories.NoColorMap} />
 
