@@ -191,6 +191,49 @@ describe("ContextRail.Tabs, expanded", () => {
 		expect(field).toHaveFocus();
 	});
 
+	it("counts arrow keys from the focused tab when the caller declines a change", async () => {
+		const onValueChange = vi.fn();
+		const user = userEvent.setup();
+		renderRail({ value: "branch", onValueChange });
+		const branch = screen.getByRole("tab", { name: "Branch" });
+		const field = screen.getByRole("tab", { name: "Field" });
+		branch.focus();
+		await user.keyboard("{ArrowRight}");
+		expect(field).toHaveFocus();
+		await user.keyboard("{ArrowRight}");
+		expect(branch).toHaveFocus();
+		// Branch is still selected, so moving back to it reports nothing new.
+		expect(onValueChange).toHaveBeenCalledTimes(1);
+	});
+
+	it("flips the arrow keys in a right-to-left layout", async () => {
+		const onValueChange = vi.fn();
+		const user = userEvent.setup();
+		render(
+			<ChakraProvider value={defaultSystem}>
+				<div dir="rtl">
+					<ContextRail>
+						<ContextRail.Tabs value="one" onValueChange={onValueChange}>
+							{["one", "two", "three"].map((value) => (
+								<ContextRail.Tab
+									key={value}
+									value={value}
+									label={value}
+									icon={null}
+								/>
+							))}
+						</ContextRail.Tabs>
+					</ContextRail>
+				</div>
+			</ChakraProvider>,
+		);
+		screen.getByRole("tab", { name: "one" }).focus();
+		// In RTL the next tab sits to the left.
+		await user.keyboard("{ArrowLeft}");
+		expect(onValueChange).toHaveBeenLastCalledWith("two");
+		expect(screen.getByRole("tab", { name: "two" })).toHaveFocus();
+	});
+
 	it("falls back to the first tab when value names no tab", () => {
 		renderRail({ value: "gone" });
 		expect(screen.getByRole("tab", { name: "Branch" })).toHaveAttribute(

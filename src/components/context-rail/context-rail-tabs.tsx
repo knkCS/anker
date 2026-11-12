@@ -7,6 +7,7 @@
 // selected tab's content; collapsed (44px), each tab is a
 // `ContextRail.IconButton` that expands the rail on that tab.
 import React, { useId, useRef } from "react";
+import { Badge } from "../../primitives/badge";
 import { Box, Flex, Stack } from "../../primitives/layout";
 import { Text } from "../../primitives/typography";
 import { ContextRailDivider, ContextRailIconButton } from "./atoms";
@@ -57,7 +58,7 @@ export interface ContextRailTabsProps {
 
 function readTabs(children: React.ReactNode) {
 	return React.Children.toArray(children).filter(
-		(child): child is React.ReactElement<ContextRailTabProps> =>
+		(child): child is TabElement =>
 			React.isValidElement(child) && child.type === ContextRailTab,
 	);
 }
@@ -69,11 +70,15 @@ function visibleIndicator(
 	return indicator;
 }
 
-function accessibleName(
-	label: string,
-	indicator: ContextRailTabIndicator | undefined,
-): string {
-	return indicator ? `${label}, ${indicator.label}` : label;
+type TabElement = React.ReactElement<ContextRailTabProps>;
+
+/** What both renderings need of a tab: its indicator, if shown, and its name. */
+function describeTab(tab: TabElement) {
+	const indicator = visibleIndicator(tab.props.indicator);
+	const name = indicator
+		? `${tab.props.label}, ${indicator.label}`
+		: tab.props.label;
+	return { indicator, name };
 }
 
 /** Whether a collapsed panel would show anything: an atom, or a section with one. */
@@ -91,13 +96,20 @@ function hasCompactContent(children: React.ReactNode): boolean {
 	});
 }
 
+/** Where an indicator sits on a collapsed tab's icon. */
+const ON_ICON = {
+	dot: { position: "absolute", top: "-0.5", insetInlineEnd: "-0.5" },
+	badge: { position: "absolute", top: "-1.5", insetInlineEnd: "-2" },
+} as const;
+
 function IndicatorMark({
 	indicator,
-	compact,
+	onIcon,
 }: {
 	indicator: ContextRailTabIndicator;
-	compact: boolean;
+	onIcon: boolean;
 }) {
+	const placement = onIcon ? ON_ICON[indicator.kind] : {};
 	if (indicator.kind === "dot") {
 		return (
 			<Box
@@ -108,111 +120,114 @@ function IndicatorMark({
 				borderRadius="full"
 				bg="accent"
 				flexShrink={0}
-				{...(compact
-					? { position: "absolute", top: "-0.5", insetInlineEnd: "-0.5" }
-					: {})}
+				{...placement}
 			/>
 		);
 	}
 	return (
-		<Box
+		<Badge
 			data-testid="context-rail-tab-badge"
 			aria-hidden
-			minW="4"
-			h="4"
-			px="1"
+			size="xs"
+			variant="solid"
+			colorPalette="gray"
 			borderRadius="full"
-			bg="gray.solid"
-			color="gray.contrast"
-			fontSize="2xs"
-			fontWeight="bold"
-			lineHeight="4"
-			textAlign="center"
+			justifyContent="center"
+			minW="4"
 			flexShrink={0}
-			{...(compact
-				? { position: "absolute", top: "-1.5", insetInlineEnd: "-2" }
-				: {})}
+			{...placement}
 		>
 			{indicator.count}
-		</Box>
+		</Badge>
 	);
 }
 
-const ContextRailTabs = ({
-	value,
-	onValueChange,
+interface TabsViewProps {
+	tabs: TabElement[];
+	selectedIndex: number;
+	select: (value: string) => void;
+}
+
+/** Collapsed: a stack of icon buttons, each expanding the rail on its tab. */
+function CollapsedTabs({ tabs, selectedIndex, select }: TabsViewProps) {
+	const { expand } = useContextRailMode();
+	const panel = tabs[selectedIndex].props.children;
+	return (
+		<>
+			<Flex
+				data-testid="context-rail-tabs-collapsed"
+				direction="column"
+				align="center"
+				gap="2"
+			>
+				{tabs.map((tab, index) => {
+					const { indicator, name } = describeTab(tab);
+					return (
+						<ContextRailIconButton
+							key={tab.props.value}
+							label={name}
+							tone={index === selectedIndex ? "outline-primary" : "ghost"}
+							icon={
+								<Box
+									as="span"
+									position="relative"
+									display="inline-flex"
+									alignItems="center"
+								>
+									{tab.props.icon}
+									{indicator ? (
+										<IndicatorMark indicator={indicator} onIcon />
+									) : null}
+								</Box>
+							}
+							onClick={() => {
+								select(tab.props.value);
+								expand();
+							}}
+						/>
+					);
+				})}
+			</Flex>
+			{hasCompactContent(panel) ? (
+				<>
+					<ContextRailDivider />
+					{panel}
+				</>
+			) : null}
+		</>
+	);
+}
+
+function isRtl(element: Element): boolean {
+	return element.closest("[dir]")?.getAttribute("dir") === "rtl";
+}
+
+/** Expanded: a tablist and the selected tab's panel. */
+function ExpandedTabs({
+	tabs,
+	selectedIndex,
+	select,
 	label,
-	children,
-}: ContextRailTabsProps) => {
-	const { collapsed, expand } = useContextRailMode();
+}: TabsViewProps & { label?: string }) {
 	const baseId = useId();
 	const tabRefs = useRef<(HTMLElement | null)[]>([]);
-	const tabs = readTabs(children);
-	if (tabs.length === 0) return null;
-
-	const found = tabs.findIndex((tab) => tab.props.value === value);
-	const selectedIndex = found === -1 ? 0 : found;
-	const selected = tabs[selectedIndex];
-	const select = (next: string) => {
-		if (next !== selected.props.value) onValueChange(next);
-	};
-
-	if (collapsed) {
-		const panel = selected.props.children;
-		return (
-			<>
-				<Flex
-					data-testid="context-rail-tabs-collapsed"
-					direction="column"
-					align="center"
-					gap="2"
-				>
-					{tabs.map((tab) => {
-						const indicator = visibleIndicator(tab.props.indicator);
-						return (
-							<ContextRailIconButton
-								key={tab.props.value}
-								label={accessibleName(tab.props.label, indicator)}
-								tone={tab === selected ? "outline-primary" : "ghost"}
-								icon={
-									<Box
-										as="span"
-										position="relative"
-										display="inline-flex"
-										alignItems="center"
-									>
-										{tab.props.icon}
-										{indicator ? (
-											<IndicatorMark indicator={indicator} compact />
-										) : null}
-									</Box>
-								}
-								onClick={() => {
-									select(tab.props.value);
-									expand();
-								}}
-							/>
-						);
-					})}
-				</Flex>
-				{hasCompactContent(panel) ? (
-					<>
-						<ContextRailDivider />
-						{panel}
-					</>
-				) : null}
-			</>
-		);
-	}
-
 	const tabId = (index: number) => `${baseId}-tab-${index}`;
 	const panelId = `${baseId}-panel`;
 
-	const onKeyDown = (event: React.KeyboardEvent) => {
+	const onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+		// Count from the focused tab: a caller may decline a change, leaving
+		// focus one step ahead of the selection.
+		const focused = tabRefs.current.indexOf(
+			document.activeElement as HTMLElement,
+		);
+		const from = focused === -1 ? selectedIndex : focused;
 		const last = tabs.length - 1;
+		const next = from === last ? 0 : from + 1;
+		const previous = from === 0 ? last : from - 1;
+		const rtl = isRtl(event.currentTarget);
 		const target = {
-			ArrowRight: selectedIndex === last ? 0 : selectedIndex + 1,
-			ArrowLeft: selectedIndex === 0 ? last : selectedIndex - 1,
+			ArrowRight: rtl ? previous : next,
+			ArrowLeft: rtl ? next : previous,
 			Home: 0,
 			End: last,
 		}[event.key];
@@ -235,7 +250,7 @@ const ContextRailTabs = ({
 			>
 				{tabs.map((tab, index) => {
 					const isSelected = index === selectedIndex;
-					const indicator = visibleIndicator(tab.props.indicator);
+					const { indicator, name } = describeTab(tab);
 					return (
 						<Flex
 							key={tab.props.value}
@@ -248,17 +263,16 @@ const ContextRailTabs = ({
 							id={tabId(index)}
 							aria-selected={isSelected}
 							aria-controls={panelId}
-							aria-label={
-								indicator
-									? accessibleName(tab.props.label, indicator)
-									: undefined
-							}
+							aria-label={indicator ? name : undefined}
 							tabIndex={isSelected ? 0 : -1}
 							onClick={() => select(tab.props.value)}
 							align="center"
 							gap="1.5"
 							minH="11"
+							minW="11"
 							px="2"
+							// Overlap the tablist's border so the selected tab's
+							// underline replaces it.
 							mb="-1px"
 							bg="transparent"
 							border="none"
@@ -281,7 +295,7 @@ const ContextRailTabs = ({
 								{tab.props.label}
 							</Text>
 							{indicator ? (
-								<IndicatorMark indicator={indicator} compact={false} />
+								<IndicatorMark indicator={indicator} onIcon={false} />
 							) : null}
 						</Flex>
 					);
@@ -293,9 +307,39 @@ const ContextRailTabs = ({
 				aria-labelledby={tabId(selectedIndex)}
 				gap="3"
 			>
-				{selected.props.children}
+				{tabs[selectedIndex].props.children}
 			</Stack>
 		</Stack>
+	);
+}
+
+/*
+ * Hand-built rather than on the Tabs primitive: the collapsed rendering is
+ * not a tablist at all (rail icon buttons that expand the rail), and the
+ * expanded one must render only the selected panel inside the rail's own
+ * layout. Chakra's Tabs would cover half of that and constrain the rest.
+ */
+const ContextRailTabs = ({
+	value,
+	onValueChange,
+	label,
+	children,
+}: ContextRailTabsProps) => {
+	const { collapsed } = useContextRailMode();
+	const tabs = readTabs(children);
+	if (tabs.length === 0) return null;
+
+	const found = tabs.findIndex((tab) => tab.props.value === value);
+	const selectedIndex = found === -1 ? 0 : found;
+	const select = (next: string) => {
+		if (next !== tabs[selectedIndex].props.value) onValueChange(next);
+	};
+	const view = { tabs, selectedIndex, select };
+
+	return collapsed ? (
+		<CollapsedTabs {...view} />
+	) : (
+		<ExpandedTabs {...view} label={label} />
 	);
 };
 ContextRailTabs.displayName = "ContextRail.Tabs";

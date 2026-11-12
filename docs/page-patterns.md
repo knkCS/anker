@@ -747,8 +747,9 @@ const inspect = () => {
   nothing.
 - **Keyboard and screen readers.** A `role="tablist"` (named by `label`)
   of `role="tab"` buttons and one `role="tabpanel"`. ←/→ move between tabs
-  and wrap, Home/End jump to the first/last; selection follows focus. Only
-  the selected tab is in the tab order.
+  (flipped under `dir="rtl"`) and wrap, Home/End jump to the first/last;
+  selection follows focus, counted from the focused tab. Only the selected
+  tab is in the tab order.
 - **Collapsed (44px).** Each tab is a `ContextRail.IconButton` — its icon
   with the indicator on it, the label (and indicator label) as tooltip and
   accessible name; the selected tab is outlined. Activating one **expands
