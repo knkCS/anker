@@ -2,6 +2,20 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.11.0 — 2026-11-12
+
+### Added
+
+- **`IconSearch`** (`@knkcs/anker/forms`, #298, knkCS/contenthub#638): a
+  search that rests as an icon button and opens in place into an input. A
+  click, an optional `shortcut` key or `ref.focus()` opens it with focus in
+  the input; it grows towards the inline start of its row. Escape or the clear
+  button empty and close it and fire `onSearch("")`; blur closes it only while
+  it is empty, so a query is never lost. It keeps `SearchInput`'s contract
+  (debounced `onSearch`, controlled or uncontrolled, `clear()`/`focus()` on the
+  ref), adds a `counter` slot for a match count and previous/next, and takes
+  every string as a prop. For compact toolbars such as a field's label row.
+
 ## 5.10.0 — 2026-11-10
 
 ### Added
