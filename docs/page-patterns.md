@@ -323,7 +323,7 @@ is required.
   breadcrumbs={[{ label: "Identity", to: "/identity" }, { label: "Users", to: "/identity/users" }, { label: "Jana Schmid" }]}
   title="Jana Schmid"
   avatar={<Avatar name="Jana Schmid" size="lg" />}
-  badges={<><Badge colorPalette="green">Aktiv</Badge><Badge colorPalette="blue">Admin</Badge></>}
+  badges={<><Badge colorPalette="success">Aktiv</Badge><Badge colorPalette="blue">Admin</Badge></>}
   meta={<Flex gap="4" fontSize="sm"><span>jana.schmid@knk.de</span><span>Produkt</span></Flex>}
   actions={<Button>Bearbeiten</Button>}
   tabs={
@@ -1299,7 +1299,9 @@ confirmations should usually be skipped).
 
 Destructive actions (delete, revoke, suspend) **must** use
 `colorPalette="red"` on the confirm/save button. This is the only
-place red is allowed in the UI.
+place `colorPalette="red"` is allowed in the UI. A *status* that is
+failed or broken uses `colorPalette="danger"` instead (§11 Status
+palettes).
 
 ---
 
@@ -1479,6 +1481,44 @@ The `<DataTable emptyState={…}>` prop accepts a ReactNode rendered when
 />
 ```
 
+### Status palettes
+
+Status is shown with anker's four status palettes, passed as
+`colorPalette` to any palette-aware component (`Badge`, `Button`,
+`Alert`, `Progress`, `Tag`, …). Each works in light and dark mode and in
+the `solid`, `subtle` and `outline` variants (`Progress`: `subtle`,
+`outline`):
+
+| Palette | Means | Typical use |
+|---|---|---|
+| `success` | Done, healthy, passed | "Active", "Merged", "Passed", a completed run |
+| `warning` | Needs attention soon, degraded, at risk | "Expiring", "Waiting for input", "Stale", a slow run |
+| `danger` | Failed, error, broken | "Failed", "Error", "Offline", a crashed run |
+| `info` | Neutral notice, in progress | "Running", "Queued", "New", an informational banner |
+
+Pick the variant by how loud the status should be: `subtle` is the
+default for a status pill in a list or a card; `solid` is for the one
+status that must win the user's eye (a failed run at the top of a board);
+`outline` is the quiet form for dense rows where many statuses sit side by
+side. A status with no meaning beyond "it exists" stays neutral
+(`colorPalette="gray"`).
+
+```tsx
+<Badge colorPalette="success" variant="subtle">Passed</Badge>
+<Badge colorPalette="danger" variant="solid">Failed</Badge>
+<Progress colorPalette="warning" value={80} />
+```
+
+> **`danger` is a status, `red` is an action (required).** `danger` says
+> something *is* failed or broken. A destructive *action* — delete,
+> revoke, suspend — keeps `colorPalette="red"` (§9 Destructive
+> treatment), even though both are red-hued. Never put `danger` on a
+> delete button, and never put `red` on a "Failed" badge.
+
+Chakra's `Alert` `status` prop picks Chakra's own palettes (`warning` →
+orange, `error` → red), not anker's. Keep `status` for the icon and pass
+the anker palette explicitly — the explicit `colorPalette` wins.
+
 ### Error Alert placement
 
 Inline errors on flush `bg-canvas` pages use `<Alert>` with explicit
@@ -1487,6 +1527,7 @@ horizontal margin so they don't sit flush against the page edge:
 ```tsx
 <Alert
   status="error"
+  colorPalette="danger"
   title="Failed to load users"
   mx="8"
   mt="4"

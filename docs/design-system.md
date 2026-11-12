@@ -133,14 +133,42 @@ Reserved for branding contexts (logos, headers, about pages). Print-aligned.
 
 #### Status palettes
 
-Explicit, anker-owned (rather than inheriting Chakra defaults).
+Explicit, anker-owned (rather than inheriting Chakra defaults). Full
+50–950 scales, each on its own hue only — emerald, amber, red; `info` is
+the `primary` scale step for step. The steps beyond 50/100/500/600/700
+exist so the palettes work in dark mode and with the recipes that read a
+raw step through `colorPalette` (e.g. the outline button's hover tint).
 
-| Role | 50 | 100 | 500 | 600 | 700 |
+| Role | 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **success** | `#ecfdf5` | `#d1fae5` | `#a7f3d0` | `#6ee7b7` | `#34d399` | `#10b981` | `#059669` | `#047857` | `#065f46` | `#064e3b` | `#022c22` |
+| **warning** | `#fffbeb` | `#fef3c7` | `#fde68a` | `#fcd34d` | `#fbbf24` | `#f59e0b` | `#d97706` | `#b45309` | `#92400e` | `#78350f` | `#451a03` |
+| **danger** | `#fef2f2` | `#fee2e2` | `#fecaca` | `#fca5a5` | `#f87171` | `#ef4444` | `#dc2626` | `#b91c1c` | `#991b1b` | `#7f1d1d` | `#450a0a` |
+| **info** | `#eff6fc` | `#d9eafa` | `#b8d6f5` | `#88baeb` | `#5995dc` | `#2f6fbf` | `#1c5aa8` | `#134788` | `#0f395d` | `#0a2740` | `#061a2c` |
+
+Each status palette is usable through `colorPalette` (`colorPalette="warning"`
+on `Badge`, `Button`, `Alert`, `Progress`, …). Chakra v3 reads these
+per-palette semantic tokens (`src/theme/tokens/status-palettes.ts`), the
+same shape for all four — steps given as light → dark:
+
+| Palette token | success | warning | danger | info | Used for |
 |---|---|---|---|---|---|
-| **success** | `#ecfdf5` | `#d1fae5` | `#10b981` | `#059669` | `#047857` |
-| **warning** | `#fffbeb` | `#fef3c7` | `#f59e0b` | `#d97706` | `#b45309` |
-| **danger** | `#fef2f2` | `#fee2e2` | `#ef4444` | `#dc2626` | `#b91c1c` |
-| **info** | `#eff6fc` | `#d9eafa` | `#2f6fbf` | `#1c5aa8` | `#134788` |
+| `solid` | 700 → 700 | 700 → 700 | 700 → 700 | 700 → 500 | `solid` variant background |
+| `contrast` | 50 → 50 | 50 → 50 | 50 → 50 | 50 → 50 | Text on `solid` |
+| `fg` | 700 → 300 | 700 → 300 | 700 → 300 | 700 → 300 | Text of `subtle` / `outline` |
+| `subtle` | 100 → 900 | 100 → 900 | 100 → 900 | 100 → 900 | `subtle` variant background |
+| `muted` | 200 → 800 | 200 → 800 | 200 → 800 | 200 → 800 | Hover, progress track |
+| `emphasized` | 300 → 700 | 300 → 700 | 300 → 700 | 300 → 700 | Stronger tint |
+| `focusRing` | 700 → 700 | 700 → 700 | 700 → 700 | 700 → 500 | Focus ring |
+| `border` | 600 → 400 | 600 → 400 | 600 → 400 | 600 → 400 | `outline` variant border |
+
+Contrast is pinned by `status-palettes.test.ts` in both modes: `fg` on
+`subtle` and `contrast` on `solid` meet WCAG AA for text (4.5:1), as does
+`fg` on `bg-surface`; `border` on `bg-surface` meets 3:1.
+
+Meaning: `success` = done/healthy, `warning` = needs attention, `danger` =
+failed/error, `info` = notice/in progress. `danger` is a **status**; a
+destructive **action** keeps `colorPalette="red"` (page-patterns §9, §11).
 
 #### Semantic tokens
 
@@ -159,7 +187,7 @@ These are the **preferred API** in application code — they describe meaning, n
 | `border` | `gray.200` | `gray.700` | Standard borders |
 | `accent` | `primary.700` | `primary.300` | Action color |
 | `bg-accent` | `primary.700` | `primary.400` | Action surface bg |
-| `success` | `green.600` | `green.200` | Status success |
+| `success` | `green.600` | `green.200` | Status success (flat token; `success.*` is also the status palette above) |
 | `error` | `red.600` | `red.200` | Status error |
 
 **Rule of thumb:** wherever a semantic token fits, use it. Raw tokens (`primary.700`, `gray.500`) are the implementation; semantic tokens are the contract.
