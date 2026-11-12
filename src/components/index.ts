@@ -34,6 +34,9 @@ export type {
 	ContextRailProps,
 	ContextRailResizable,
 	ContextRailSectionProps,
+	ContextRailTabIndicator,
+	ContextRailTabProps,
+	ContextRailTabsProps,
 } from "./context-rail/context-rail";
 export { ContextRail } from "./context-rail/context-rail";
 // ConversationListItem

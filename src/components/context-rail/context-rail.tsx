@@ -28,11 +28,18 @@ import {
 import {
 	isRailAtom,
 	RAIL_ATOM,
+	RAIL_SECTION,
 	RailModeContext,
 	useContextRailMode,
 } from "./context-rail-context";
+import { ContextRailTab, ContextRailTabs } from "./context-rail-tabs";
 
 export { RAIL_ATOM, useContextRailMode };
+export type {
+	ContextRailTabIndicator,
+	ContextRailTabProps,
+	ContextRailTabsProps,
+} from "./context-rail-tabs";
 
 const COLLAPSED_WIDTH = "44px";
 const EXPANDED_WIDTH = "360px";
@@ -284,10 +291,11 @@ const ContextRailRoot = ({
 			writeStoredFlag(storageKey, collapsed);
 		}
 	}, [collapsed, storageKey]);
+	const expand = useCallback(() => setCollapsed(false), []);
 
 	return (
 		<RailRootContext.Provider value={true}>
-			<RailModeContext.Provider value={{ collapsed }}>
+			<RailModeContext.Provider value={{ collapsed, expand }}>
 				<Box
 					ref={railRef}
 					data-testid="context-rail"
@@ -503,6 +511,8 @@ const ContextRailSection = ({
 	);
 };
 ContextRailSection.displayName = "ContextRail.Section";
+(ContextRailSection as unknown as { railSection: symbol }).railSection =
+	RAIL_SECTION;
 
 // Footer
 const ContextRailFooter = ({ children }: { children: React.ReactNode }) => {
@@ -526,6 +536,8 @@ export const ContextRail = Object.assign(ContextRailRoot, {
 	Header: ContextRailHeader,
 	Section: ContextRailSection,
 	Footer: ContextRailFooter,
+	Tabs: ContextRailTabs,
+	Tab: ContextRailTab,
 	Avatar: ContextRailAvatar,
 	Divider: ContextRailDivider,
 	IconButton: ContextRailIconButton,

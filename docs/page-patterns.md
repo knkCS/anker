@@ -689,6 +689,77 @@ itself**:
   user acted (on the canvas, in the list).
 - **Without `expandOn`** no rail changes.
 
+### Tabs (`ContextRail.Tabs`)
+
+A rail that holds two kinds of information at different rhythms — what
+concerns the entity, and what concerns the cursor — splits its sections
+into **tabs under the header** instead of one long list:
+
+```tsx
+const [tab, setTab] = useState("branch"); // the screen's state
+const [inspectRequest, setInspectRequest] = useState(0);
+
+usePageRail(
+  <ContextRail storageKey="branch-rail" expandOn={inspectRequest || undefined}>
+    <ContextRail.Header eyebrow="BRANCH" title={branch.name} />
+    <ContextRail.Tabs label="Rail" value={tab} onValueChange={setTab}>
+      <ContextRail.Tab
+        value="branch"
+        label="Branch"
+        icon={<GitBranch size={14} />}
+        indicator={{ kind: "badge", count: blockers, label: `${blockers} blockers` }}
+      >
+        <ContextRail.Section id="actions" label="Actions">…</ContextRail.Section>
+        <ContextRail.Section id="about" label="About">…</ContextRail.Section>
+      </ContextRail.Tab>
+      <ContextRail.Tab
+        value="field"
+        label="Field"
+        icon={<ScanSearch size={14} />}
+        indicator={fieldFocused ? { kind: "dot", label: "A field has focus" } : undefined}
+      >
+        <ContextRail.Section id="inspector" label="Content · Rich Text">…</ContextRail.Section>
+      </ContextRail.Tab>
+    </ContextRail.Tabs>
+  </ContextRail>,
+);
+
+// Asking to inspect selects the tab and opens the rail in one render.
+const inspect = () => {
+  setTab("field");
+  setInspectRequest((n) => n + 1);
+};
+```
+
+- **Controlled.** `value` is the selected tab, `onValueChange` reports the
+  user's choice; nothing changes until the caller applies it. The tab is
+  the screen's state, held **above** the rail: a reported rail is drawn
+  outside the screen's providers, and the rail swaps its body when it
+  collapses or expands, so state kept inside rail content does not survive.
+  A `value` that names no tab selects the first.
+- **One panel.** Each `<ContextRail.Tab>`'s children are its panel — its
+  `ContextRail.Section`s. Only the selected tab's panel renders; switching
+  tabs unmounts the other (a section's open/closed state starts afresh).
+- **Indicator.** Optional, per tab: `{ kind: "badge", count, label }` shows
+  the count, `{ kind: "dot", label }` a dot. `label` is added to the tab's
+  accessible name ("Branch, 3 blockers"). A badge with a count of 0 or less
+  shows nothing, so pass the count unconditionally; no indicator shows
+  nothing.
+- **Keyboard and screen readers.** A `role="tablist"` (named by `label`)
+  of `role="tab"` buttons and one `role="tabpanel"`. ←/→ move between tabs
+  (flipped under `dir="rtl"`) and wrap, Home/End jump to the first/last;
+  selection follows focus, counted from the focused tab. Only the selected
+  tab is in the tab order.
+- **Collapsed (44px).** Each tab is a `ContextRail.IconButton` — its icon
+  with the indicator on it, the label (and indicator label) as tooltip and
+  accessible name; the selected tab is outlined. Activating one **expands
+  the rail on that tab**, stored under `storageKey` like the toggle. Below
+  the tab buttons the selected tab's compact atoms render as in any
+  collapsed rail.
+- **With `expandOn`.** Unchanged: a change expands a collapsed rail with
+  tabs as it does without. To select a tab *and* open the rail — asking to
+  inspect something — set `value` and change `expandOn` in the same update.
+
 ### Resizable width (opt-in)
 
 A rail whose content needs room the user decides on — the workflow
