@@ -970,7 +970,7 @@ the `actions` slot or wrap the title:
   title={
     <Flex align="center" gap="2">
       <span>Jana Schmid</span>
-      <StatusBadge status="success">Active</StatusBadge>
+      <StatusBadge label="Active" tone="success" />
     </Flex>
   }
 />
@@ -1508,6 +1508,12 @@ side. A status with no meaning beyond "it exists" stays neutral
 <Badge colorPalette="danger" variant="solid">Failed</Badge>
 <Progress colorPalette="warning" value={80} />
 ```
+
+A status badge written in code is `<StatusBadge tone="success" label="Passed" />`
+— the four palettes plus `neutral` and `accent` — and a status column is
+`<StatusBadgeCell toneMap={{ failed: "danger" }} />`. `StatusBadge`'s `color`
+(and the cell's `colorMap`) is only for a colour that arrives as data, such
+as a user-picked status colour from the backend.
 
 > **`danger` is a status, `red` is an action (required).** `danger` says
 > something *is* failed or broken. A destructive *action* — delete,
@@ -2119,7 +2125,7 @@ import {
 | `MenuCell` | Row overflow menu (`⋯`) |
 | `NumberCell` | Locale-aware number formatting |
 | `SlugCell` | Monospace identifiers (KSUID, slug, handle) |
-| `StatusBadgeCell` | Colored status badge; supports `detail` and `tooltip` |
+| `StatusBadgeCell` | Status badge; `toneMap` / `fallbackTone` map a value to a tone (`colorMap` only for data-driven colours); supports `detail` and `tooltip` |
 | `SwitchCell` | Inline toggle bound to a row value |
 | `TruncatedTextCell` | General text with optional truncation; supports `subText` |
 | `UrlCell` | External clickable link |
@@ -2129,7 +2135,7 @@ for:
 
 | Column intent | Reach for |
 |---|---|
-| Status / state pill | `StatusBadgeCell` (use `tooltip` for descriptions; `detail` for error-line under the badge) |
+| Status / state pill | `StatusBadgeCell` with `toneMap` (use `tooltip` for descriptions; `detail` for error-line under the badge) |
 | Timestamp | `DateCell` |
 | Mono ID / KSUID | `SlugCell` (small / inline) or `CodeCell` (block-y) |
 | Per-row actions | `ActionCell` (small set) or `MenuCell` (overflow) |

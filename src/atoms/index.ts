@@ -168,7 +168,12 @@ export type { SplitButtonStyleProps } from "./split-button/resolve-half-props";
 export { Stat, type StatProps } from "./stat";
 
 // StatusBadge
-export { StatusBadge, type StatusBadgeProps } from "./status-badge";
+export {
+	STATUS_BADGE_TONES,
+	StatusBadge,
+	type StatusBadgeProps,
+	type StatusBadgeTone,
+} from "./status-badge";
 
 // TextInput
 export { TextInput, type TextInputProps } from "./text-input";

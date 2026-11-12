@@ -1,0 +1,56 @@
+import { Canvas, Meta, ArgTypes } from "@storybook/blocks";
+import * as Stories from "./status-badge.stories";
+
+<Meta of={Stories} />
+
+# StatusBadge
+
+A small pill that names a status. Say what the status **means** with `tone`;
+the badge paints the matching palette and follows the theme in light and dark
+mode.
+
+## Tone (preferred)
+
+<Canvas of={Stories.Default} />
+
+| `tone` | Means | Palette |
+|---|---|---|
+| `success` | Done, healthy, passed | `success` |
+| `warning` | Needs attention soon, degraded, at risk | `warning` |
+| `danger` | Failed, error, broken | `danger` |
+| `info` | Neutral notice, in progress | `info` |
+| `neutral` | No meaning beyond "it exists" | `gray` |
+| `accent` | The action hue — something to act on | `primary` |
+
+The four status tones are anker's status palettes (`docs/page-patterns.md`
+§11 Status palettes): a tone badge is a `subtle` badge on that palette. `info`
+shares the action hue by design, so `info` and `accent` look alike — pick by
+meaning.
+
+<Canvas of={Stories.Variants} />
+
+## Icon
+
+<Canvas of={Stories.WithIcon} />
+
+## Color — data-driven only
+
+`color` takes a colour that arrives as **data**: a status colour a user picked
+and the backend stores. The badge paints it as the background and picks a
+readable text colour.
+
+```tsx
+<StatusBadge label={status.name} color={status.color} />
+```
+
+Never write a colour literal into `color` — a status known in code takes a
+`tone`. A quoted hex literal is flagged by `checkAnkerRules()`
+(`no-hex-colour`); a variable is not.
+
+If both are given, `tone` wins. With neither, the badge is `neutral`.
+
+<Canvas of={Stories.DataDrivenColor} />
+
+## Props
+
+<ArgTypes of={Stories} />

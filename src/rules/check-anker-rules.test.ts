@@ -50,6 +50,30 @@ export const Screen = () => (
 		it("leaves anchors and tokens alone", () => {
 			expect(rules(`<a href="#top" /> <Box bg="bg-surface" />`)).toEqual([]);
 		});
+
+		it("flags a hex literal passed to StatusBadge's color", () => {
+			expect(rules(`<StatusBadge label="Active" color="#38A169" />`)).toEqual([
+				"no-hex-colour",
+			]);
+			expect(rules(`<StatusBadge label="Active" color={"#38a169"} />`)).toEqual(
+				["no-hex-colour"],
+			);
+			expect(rules(`<StatusBadgeCell colorMap={{ done: "#0f0" }} />`)).toEqual([
+				"no-hex-colour",
+			]);
+		});
+
+		it("leaves a data-driven colour passed to StatusBadge's color alone", () => {
+			expect(
+				rules(
+					`<StatusBadge label={status.name} color={status.color} />\n<StatusBadge label="x" color={someVariable} />`,
+				),
+			).toEqual([]);
+		});
+
+		it("leaves a tone alone", () => {
+			expect(rules(`<StatusBadge label="Failed" tone="danger" />`)).toEqual([]);
+		});
 	});
 
 	describe("settings-template-needs-tabs", () => {
