@@ -2,6 +2,20 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.12.0 — 2026-11-12
+
+### Added
+
+- **`ContextRail.Tabs` / `ContextRail.Tab`** (#309, knkCS/contenthub#660): a
+  rail can split its sections into controlled tabs (`value`, `onValueChange`)
+  under the header. Only the selected tab's sections render. Each tab can carry
+  an indicator, a count badge or a dot, each with an accessible label. Full
+  tablist ARIA, ←/→ (flipped in RTL) and Home/End. Collapsed, each tab is a
+  `ContextRail.IconButton` with the indicator on its icon; activating it
+  expands the rail on that tab. Setting `value` and bumping `expandOn`
+  together expands a collapsed rail on the chosen tab in one render.
+  `useContextRailMode()` also returns `expand()`.
+
 ## 5.11.1 — 2026-11-12
 
 ### Fixed
