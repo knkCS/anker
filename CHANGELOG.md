@@ -2,6 +2,31 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.13.0 — 2026-11-12
+
+### Added
+
+- **Status palettes usable through `colorPalette`** (#317, #304, Spec #303):
+  `success`, `warning`, `danger` and `info` now define every palette semantic
+  token (`solid`, `contrast`, `fg`, `muted`, `subtle`, `emphasized`,
+  `focusRing`, `border`) with light and dark values, so
+  `colorPalette="warning"` works on `Badge`, `Progress`, `Button`, `Alert` and
+  every other palette-aware component in both themes. The four status scales
+  are extended to 50–950 on their own hues; no new hues. Contrast is pinned to
+  WCAG AA. The flat `success` token keeps resolving as before. `danger` is the
+  status meaning; destructive actions keep `colorPalette="red"`
+  (`docs/page-patterns.md` §11).
+- **`StatusBadge` `tone`** (#320, #305): `success`, `warning`, `danger`,
+  `info`, `neutral` or `accent`, rendered through the status palettes — status
+  badges without hex. `tone` wins over `color`; `color` stays for data-driven
+  colours. `StatusBadgeCell` gains `toneMap` and `fallbackTone`. New exports
+  `STATUS_BADGE_TONES` and `StatusBadgeTone`.
+- **`ContextRail.StatusIcon` on the status palettes** (#321, #306): new tones
+  `success`, `warning`, `danger`, `info`, `neutral`; the legacy `green`,
+  `amber`, `red` and `gray` stay as aliases and render identically.
+  `ContextRailStatusIconTone` and `ContextRailStatusIconProps` are exported
+  from `/components`.
+
 ## 5.12.0 — 2026-11-12
 
 ### Added
