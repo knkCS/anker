@@ -816,7 +816,7 @@ collapsed.
 |------|---------|-------|
 | `<ContextRail.IconButton>` | Clickable action with tooltip. | `default · primary · outline-red · outline-primary · ghost` |
 | `<ContextRail.ValueTile>` | A number-with-tooltip. Hidden in collapsed mode when value is zero/empty unless `keepWhenEmpty`. | `default · muted` |
-| `<ContextRail.StatusIcon>` | Semantic state indicator. | `green · amber · red · gray` |
+| `<ContextRail.StatusIcon>` | Semantic state indicator. | `success · warning · danger · info · neutral` (legacy aliases: `green · amber · red · gray`) |
 | `<ContextRail.Avatar>` | Compact entity identity. | — |
 | `<ContextRail.Divider>` | Visual grouping. Renders narrow in collapsed mode. | — |
 
@@ -827,10 +827,20 @@ non-atom JSX inside sections are hidden — only atom-tagged children render.
 
 **Tone guidance for StatusIcon:**
 
-- `green` — healthy, no action needed.
-- `amber` — low adoption or informational nudge.
-- `red` — action required, broken state.
-- `gray` — neutral / informational (rarely needed; ValueTile usually fits better).
+The tones are anker's status palettes (§11 Status palettes): the circle
+paints the palette's `subtle` tint behind its `fg` colour, so it matches
+the rest of the UI and follows light and dark mode.
+
+- `success` — healthy, no action needed.
+- `warning` — needs attention soon, low adoption, at risk.
+- `danger` — action required, broken state.
+- `info` — informational notice, in progress.
+- `neutral` — no status meaning (the `gray` palette; rarely needed —
+  ValueTile usually fits better).
+
+`green`, `amber`, `red` and `gray` are legacy aliases of `success`,
+`warning`, `danger` and `neutral`: they render identically and keep
+existing screens working. Prefer the palette names in new code.
 
 **Example:**
 
@@ -841,7 +851,7 @@ non-atom JSX inside sections are hidden — only atom-tagged children render.
     <ContextRail.ValueTile value={total} label="Total users" />
     <ContextRail.ValueTile value={active} label="Active users" muted />
   </ContextRail.Section>
-  <ContextRail.StatusIcon tone="amber" icon={<Shield />} label="2FA: 0 of 100 enabled" />
+  <ContextRail.StatusIcon tone="warning" icon={<Shield />} label="2FA: 0 of 100 enabled" />
   <ContextRail.Divider />
   <ContextRail.IconButton label="Invite user" icon={<UserPlus />} onClick={…} />
 </ContextRail>

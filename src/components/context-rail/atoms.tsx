@@ -152,19 +152,41 @@ export function ContextRailValueTile({
 ContextRailValueTile.displayName = "ContextRail.ValueTile";
 (ContextRailValueTile as unknown as { railAtom: symbol }).railAtom = RAIL_ATOM;
 
-type StatusTone = "green" | "amber" | "red" | "gray";
+/**
+ * A StatusIcon tone: one of anker's status palettes (`success`, `warning`,
+ * `danger`, `info`) or `neutral` (the `gray` palette, for a state with no
+ * status meaning). `green`, `amber`, `red` and `gray` are legacy aliases of
+ * `success`, `warning`, `danger` and `neutral` and render identically.
+ */
+export type ContextRailStatusIconTone =
+	| "success"
+	| "warning"
+	| "danger"
+	| "info"
+	| "neutral"
+	| "green"
+	| "amber"
+	| "red"
+	| "gray";
 
 export interface ContextRailStatusIconProps {
 	icon: React.ReactNode;
 	label: string;
-	tone: StatusTone;
+	tone: ContextRailStatusIconTone;
 }
 
-const STATUS_TINTS: Record<StatusTone, { bg: string; color: string }> = {
-	green: { bg: "green.50", color: "green.700" },
-	amber: { bg: "yellow.50", color: "yellow.700" },
-	red: { bg: "red.50", color: "red.700" },
-	gray: { bg: "gray.100", color: "gray.700" },
+// The palette each tone draws from. The circle paints `colorPalette.subtle`
+// behind `colorPalette.fg`, so it follows the theme in light and dark mode.
+const STATUS_ICON_PALETTE: Record<ContextRailStatusIconTone, string> = {
+	success: "success",
+	warning: "warning",
+	danger: "danger",
+	info: "info",
+	neutral: "gray",
+	green: "success",
+	amber: "warning",
+	red: "danger",
+	gray: "gray",
 };
 
 export function ContextRailStatusIcon({
@@ -173,7 +195,7 @@ export function ContextRailStatusIcon({
 	tone,
 }: ContextRailStatusIconProps) {
 	const { collapsed } = useContextRailMode();
-	const tint = STATUS_TINTS[tone];
+	const colorPalette = STATUS_ICON_PALETTE[tone];
 
 	if (collapsed) {
 		return (
@@ -182,8 +204,9 @@ export function ContextRailStatusIcon({
 					w="8"
 					h="8"
 					borderRadius="full"
-					bg={tint.bg}
-					color={tint.color}
+					colorPalette={colorPalette}
+					bg="colorPalette.subtle"
+					color="colorPalette.fg"
 					align="center"
 					justify="center"
 					aria-label={label}
@@ -200,8 +223,9 @@ export function ContextRailStatusIcon({
 				w="6"
 				h="6"
 				borderRadius="full"
-				bg={tint.bg}
-				color={tint.color}
+				colorPalette={colorPalette}
+				bg="colorPalette.subtle"
+				color="colorPalette.fg"
 				align="center"
 				justify="center"
 				flexShrink={0}

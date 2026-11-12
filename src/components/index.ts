@@ -34,6 +34,8 @@ export type {
 	ContextRailProps,
 	ContextRailResizable,
 	ContextRailSectionProps,
+	ContextRailStatusIconProps,
+	ContextRailStatusIconTone,
 	ContextRailTabIndicator,
 	ContextRailTabProps,
 	ContextRailTabsProps,

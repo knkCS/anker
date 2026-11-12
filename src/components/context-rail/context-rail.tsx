@@ -36,6 +36,10 @@ import { ContextRailTab, ContextRailTabs } from "./context-rail-tabs";
 
 export { RAIL_ATOM, useContextRailMode };
 export type {
+	ContextRailStatusIconProps,
+	ContextRailStatusIconTone,
+} from "./atoms";
+export type {
 	ContextRailTabIndicator,
 	ContextRailTabProps,
 	ContextRailTabsProps,
