@@ -378,6 +378,16 @@ Full slot/prop tables: `docs/react-table-reference.md`. Mapping guide for common
 - `SearchInput` accepts a `ref` exposing `clear()` (empties the input,
   cancels pending debounce, emits `onSearch("")`) and `focus()`
   methods via `SearchInputHandle`.
+- **`IconSearch`** (`@knkcs/anker/forms`) is a `SearchInput` that rests as an
+  icon button and opens in place — for a field's label row or a dense
+  toolbar's end; a standing `SearchInput` is still the default. Same contract
+  (debounced `onSearch`, `value`/`onValueChange` or `defaultValue`, a ref with
+  `clear()` and `focus()`). `label` is required (the button's and input's
+  accessible name); `shortcut` (one key, e.g. `"/"`) opens it from anywhere
+  outside a field. It sits at the inline end of a flex row and grows towards
+  the inline start. Escape and the clear button empty and close it
+  (`onSearch("")`); blur closes it only while empty. `counter` renders next to
+  the open input for a match count and previous/next.
 
 ---
 
