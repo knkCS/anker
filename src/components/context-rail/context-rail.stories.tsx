@@ -22,6 +22,7 @@ import {
 import { useState } from "react";
 import { Button } from "../../atoms/button";
 import { Box, Flex } from "../../primitives/layout";
+import { writeStoredFlag } from "../../utils/safe-storage";
 import { ContextRail } from "./context-rail";
 
 /**
@@ -251,10 +252,8 @@ const statusIconTones = () =>
 
 export const StatusIconTones: Story = {
 	render: () => {
-		if (typeof window !== "undefined") {
-			localStorage.setItem("story-status-icon-tones-expanded", "false");
-			localStorage.setItem("story-status-icon-tones-collapsed", "true");
-		}
+		writeStoredFlag("story-status-icon-tones-expanded", false);
+		writeStoredFlag("story-status-icon-tones-collapsed", true);
 		return (
 			<Flex bg="bg-canvas" minH="100vh" justify="flex-end">
 				<Box bg="bg-surface" borderLeftWidth="1px" borderColor="border">

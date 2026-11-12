@@ -13,7 +13,6 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
-	AA_NON_TEXT,
 	AA_TEXT,
 	type ColorMode,
 	contrastRatio,
@@ -138,26 +137,50 @@ describe("ContextRail.StatusIcon — status palette tones", () => {
 	});
 });
 
+/** The palette the rendered circle points `colorPalette.subtle` at. */
+function renderedPalette(tone: Tone, layout: Layout): string {
+	const rules = rulesFor(renderCircle(tone, layout));
+	const match =
+		/--chakra-colors-color-palette-subtle:var\(--chakra-colors-([a-z]+)-subtle\)/.exec(
+			rules,
+		);
+	if (!match) throw new Error(`${tone}: no colorPalette.subtle in the CSS`);
+	return match[1];
+}
+
 describe("ContextRail.StatusIcon — tints in light and dark mode", () => {
-	for (const [tone, palette] of Object.entries(PALETTE_TONES)) {
-		for (const mode of MODES) {
-			const c = (name: string) => resolveColor(system, name, mode);
+	beforeEach(() => localStorage.clear());
+	afterEach(() => localStorage.clear());
 
-			it(`${tone} ${mode}: the icon stays legible on its tint`, () => {
-				// The icon is a glyph, so the non-text minimum applies; anker's
-				// status palettes clear the text minimum anyway.
-				const ratio = contrastRatio(c(`${palette}.fg`), c(`${palette}.subtle`));
-				expect(ratio).toBeGreaterThanOrEqual(
-					palette === "gray" ? AA_NON_TEXT : AA_TEXT,
-				);
-			});
+	const ALL_TONES = [
+		...Object.keys(PALETTE_TONES),
+		...Object.keys(LEGACY_ALIASES),
+	] as Tone[];
 
-			it(`${tone} ${mode}: the tint follows the colour mode`, () => {
-				const other: ColorMode = mode === "light" ? "dark" : "light";
-				expect(c(`${palette}.subtle`)).not.toBe(
-					resolveColor(system, `${palette}.subtle`, other),
-				);
-			});
+	for (const tone of ALL_TONES) {
+		const expected =
+			tone in PALETTE_TONES
+				? PALETTE_TONES[tone as keyof typeof PALETTE_TONES]
+				: PALETTE_TONES[LEGACY_ALIASES[tone as keyof typeof LEGACY_ALIASES]];
+		for (const layout of LAYOUTS) {
+			for (const mode of MODES) {
+				const c = (name: string) => resolveColor(system, name, mode);
+
+				it(`${tone} (${layout}, ${mode}): paints ${expected}'s tint, legible and mode-aware`, () => {
+					const palette = renderedPalette(tone, layout);
+					expect(palette).toBe(expected);
+					const subtle = c(`${palette}.subtle`);
+					const fg = c(`${palette}.fg`);
+					expect(subtle).toBe(c(`${expected}.subtle`));
+					expect(fg).toBe(c(`${expected}.fg`));
+					// The glyph sits on the tint; hold it to the text minimum.
+					expect(contrastRatio(fg, subtle)).toBeGreaterThanOrEqual(AA_TEXT);
+					const other: ColorMode = mode === "light" ? "dark" : "light";
+					expect(subtle).not.toBe(
+						resolveColor(system, `${palette}.subtle`, other),
+					);
+				});
+			}
 		}
 	}
 });
