@@ -1535,6 +1535,63 @@ Chakra's `Alert` `status` prop picks Chakra's own palettes (`warning` →
 orange, `error` → red), not anker's. Keep `status` for the icon and pass
 the anker palette explicitly — the explicit `colorPalette` wins.
 
+### Boards (`Kanban`)
+
+Work shown by status — Tasks of a Spec, items of a content workflow — is a
+`Kanban` board, not columns hand-built from `Stack`s and `Box`es. One
+column per status, a card per item:
+
+```tsx
+<Kanban
+  aria-label="Spec board"
+  columns={STATUSES.map((s) => ({
+    id: s,
+    title: LABEL[s],
+    items: tasks.filter((t) => t.status === s),
+  }))}
+  getItemKey={(t) => t.id}
+  renderCard={(t) => (
+    <Kanban.Card tone={toneOf(t)} href={t.url}>
+      <Kanban.CardMeta>
+        <Text as="span" fontFamily="mono">#{t.number}</Text>
+        <Kanban.CardAvatar><Avatar name={t.owner} size="2xs" /></Kanban.CardAvatar>
+      </Kanban.CardMeta>
+      <Kanban.CardTitle>{t.title}</Kanban.CardTitle>
+      <Kanban.CardBadges><StatusBadge tone="warning" label="Needs you" /></Kanban.CardBadges>
+    </Kanban.Card>
+  )}
+/>
+```
+
+- **When to use it**: the item's status is the main thing the screen
+  shows, and there are few enough statuses to sit side by side (up to
+  about seven). A long list sorted or filtered by status is a
+  `DataTable` with a `StatusBadgeCell`; a single item's progress is a
+  `Stepper` or `Timeline`.
+- **Card tones** say whether anyone must act, on the status palettes:
+  `default` for ordinary work, `quiet` (sunken surface, dashed border,
+  full-strength text) for an item that waits on nobody, `attention` (a
+  `warning` edge) for one someone must act on. Keep `attention` rare —
+  a board where every card is loud has no loud card. The tone is the
+  card's surface; what the status *is* still goes in a `StatusBadge`.
+- **A card opens the item**: give it `href` (a link), `onClick` (a
+  button) or `asChild` with a router `<Link>` inside. Always render
+  cards with `Kanban.Card` — the board steers keyboard focus through it.
+- **Read-only is the default.** A board over derived status (nobody
+  sets it by hand) shows no drag handles and suggests no editing.
+- **Columns**: `title` (also names the column's list for screen
+  readers, with its count), optional `count` when only a page of the
+  column is loaded, optional `action` in the header. Narrow screens
+  scroll the board sideways (`columnMinWidth`, default `16rem`);
+  `collapseEmptyColumns` draws empty columns as a narrow strip.
+- **Empty states**: an empty column says `emptyColumnLabel` ("No
+  cards") or its own `emptyState`; a board with no card at all shows
+  `emptyState` (an `EmptyState` by default) — pass `emptyState={false}`
+  to keep the empty columns on screen instead.
+- **Keyboard**: the board is one tab stop. Arrow keys move between
+  cards (↑/↓, Home/End) and columns (←/→, flipped in RTL, skipping
+  empty columns); Enter opens the focused card.
+
 ### Error Alert placement
 
 Inline errors on flush `bg-canvas` pages use `<Alert>` with explicit
