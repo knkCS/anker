@@ -2,6 +2,24 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.17.0 — 2026-11-13
+
+### Added
+
+- **`NavList` tree items** (#313, #351): `NavList.Item` takes `subItems`
+  (indented child items, nested at any depth) and `expanded` /
+  `onExpandedChange` (controlled; `defaultExpanded` for uncontrolled). A
+  chevron at the start of the row only toggles, so the label keeps its own
+  action (`asChild` button or link). Arrow Right opens a focused parent (or
+  moves into its first child), Arrow Left closes it (or moves from a child to
+  its parent). The chevron carries `aria-expanded`/`aria-controls`, and
+  children sit in a named `role="group"` (disclosure pattern, not
+  `role="tree"`). `indicator` is a roll-up slot that stays visible on a
+  collapsed parent and overlays the icon on `SubNavLayout`'s collapsed rail,
+  where chevrons and indentation are dropped. `toggleAriaLabel` names the
+  chevron. Flat lists render exactly as before. Documented in
+  `CLAUDE-ANKER.md` and `docs/page-patterns.md` §8.
+
 ## 5.16.0 — 2026-11-13
 
 ### Added
