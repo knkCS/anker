@@ -7,6 +7,11 @@
 // `renderCard`), like `VirtualizedMessageList`, so the board knows every
 // card: that is what lets it move focus across columns, and what a
 // virtualised column (#326) and drag and drop (#327) plug into.
+//
+// A column with more than `virtualizeAbove` cards scrolls within itself and
+// renders only the cards in its window (`KanbanCardList`). The board keeps
+// the focused card mounted and scrolls a column to a card the arrow keys
+// reach outside the window, so keyboard navigation spans the whole column.
 import type React from "react";
 import { useCallback, useId, useMemo, useRef, useState } from "react";
 import { EmptyState } from "../../atoms/empty-state";
@@ -21,6 +26,7 @@ import {
 	KanbanCardSlotContext,
 	KanbanCardTitle,
 } from "./kanban-card";
+import { KanbanCardList } from "./kanban-card-list";
 import { type KanbanDirection, nextPosition } from "./kanban-navigation";
 
 export interface KanbanColumn<T> {
@@ -77,6 +83,19 @@ export interface KanbanProps<T> {
 	headingLevel?: 2 | 3 | 4 | 5 | 6;
 	/** A column's minimum width; narrower boards scroll. @default "16rem" */
 	columnMinWidth?: string;
+	/**
+	 * A column with more cards than this scrolls within itself and renders
+	 * only the cards in view, so columns with hundreds of cards stay fast.
+	 * @default 100
+	 */
+	virtualizeAbove?: number;
+	/** The height a virtualised column scrolls within. @default "70vh" */
+	columnMaxHeight?: string;
+	/**
+	 * A card's expected height in pixels before it is measured, for a
+	 * virtualised column. @default 88
+	 */
+	estimateCardHeight?: number;
 }
 
 const defaultColumnLabel = (title: string, count: number) =>
@@ -103,10 +122,17 @@ function KanbanRoot<T>(props: KanbanProps<T>) {
 		formatColumnLabel = defaultColumnLabel,
 		headingLevel = 3,
 		columnMinWidth = "16rem",
+		virtualizeAbove = 100,
+		columnMaxHeight = "70vh",
+		estimateCardHeight = 88,
 	} = props;
 	const baseId = useId();
 	const boardRef = useRef<HTMLDivElement | null>(null);
 	const cards = useRef(new Map<string, HTMLElement>());
+	// Virtualised columns register how to scroll one of their cards into
+	// their window; a card the keys reach outside it is focused on mount.
+	const scrollers = useRef(new Map<string, (index: number) => void>());
+	const pendingFocus = useRef<string | null>(null);
 	const [active, setActive] = useState<ActiveCard | null>(null);
 
 	const keys = useMemo(
@@ -152,7 +178,18 @@ function KanbanRoot<T>(props: KanbanProps<T>) {
 				columnId: columns[to.column].id,
 				itemKey: keys[to.column][to.index],
 			};
-			cards.current.get(slotKey(target.columnId, target.itemKey))?.focus();
+			const key = slotKey(target.columnId, target.itemKey);
+			const element = cards.current.get(key);
+			if (element) {
+				pendingFocus.current = null;
+				element.focus();
+			} else {
+				// The column scrolls the card into its window; the card takes focus
+				// when it mounts, without a native scroll of its own that would
+				// fight the virtualiser's.
+				pendingFocus.current = key;
+				scrollers.current.get(target.columnId)?.(to.index);
+			}
 			setActive(target);
 		},
 		[columns, keys],
@@ -174,6 +211,13 @@ function KanbanRoot<T>(props: KanbanProps<T>) {
 			ref={boardRef}
 			role="group"
 			aria-label={ariaLabel}
+			onBlur={(event: React.FocusEvent<HTMLElement>) => {
+				// Focus left the board: a card the keys asked for must not take
+				// focus back when it mounts later.
+				if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+					pendingFocus.current = null;
+				}
+			}}
 			display="flex"
 			alignItems="flex-start"
 			gap="3"
@@ -186,6 +230,55 @@ function KanbanRoot<T>(props: KanbanProps<T>) {
 				const count = column.count ?? column.items.length;
 				const collapsed = collapseEmptyColumns && column.items.length === 0;
 				const titleId = `${baseId}-${column.id}`;
+				const listLabel = formatColumnLabel(column.title, count);
+				const virtualized = column.items.length > virtualizeAbove;
+				const keepIndex =
+					virtualized && tabStop?.columnId === column.id
+						? keys[c].indexOf(tabStop.itemKey)
+						: -1;
+				// One card, wrapped in its list item and handed the board's slot.
+				// A virtualised list adds its positioning props to the item.
+				const renderItem = (
+					index: number,
+					itemProps?: React.ComponentProps<typeof Box>,
+				) => {
+					const item = column.items[index];
+					const itemKey = keys[c][index];
+					const key = slotKey(column.id, itemKey);
+					const slot: KanbanCardSlot = {
+						tabIndex:
+							tabStop?.columnId === column.id && tabStop.itemKey === itemKey
+								? 0
+								: -1,
+						ref: (element) => {
+							if (element) {
+								cards.current.set(key, element);
+								if (pendingFocus.current === key) {
+									pendingFocus.current = null;
+									element.focus({ preventScroll: true });
+								}
+							} else cards.current.delete(key);
+						},
+						onFocus: () => {
+							if (pendingFocus.current !== key) pendingFocus.current = null;
+							setActive({ columnId: column.id, itemKey });
+						},
+						onKeyDown: (event) => onCardKeyDown(c, index, event),
+					};
+					return (
+						<Box
+							as="li"
+							key={itemKey}
+							aria-posinset={index + 1}
+							aria-setsize={count}
+							{...itemProps}
+						>
+							<KanbanCardSlotContext.Provider value={slot}>
+								{renderCard(item, { columnId: column.id, index })}
+							</KanbanCardSlotContext.Provider>
+						</Box>
+					);
+				};
 				return (
 					<Box
 						key={column.id}
@@ -235,46 +328,19 @@ function KanbanRoot<T>(props: KanbanProps<T>) {
 							</HStack>
 							{column.action}
 						</HStack>
-						<Box
-							as="ul"
-							aria-label={formatColumnLabel(column.title, count)}
-							listStyleType="none"
-							m="0"
-							p="0"
-							display="flex"
-							flexDirection="column"
-							gap="2"
-						>
-							{column.items.map((item, index) => {
-								const itemKey = keys[c][index];
-								const key = slotKey(column.id, itemKey);
-								const slot: KanbanCardSlot = {
-									tabIndex:
-										tabStop?.columnId === column.id &&
-										tabStop.itemKey === itemKey
-											? 0
-											: -1,
-									ref: (element) => {
-										if (element) cards.current.set(key, element);
-										else cards.current.delete(key);
-									},
-									onFocus: () => setActive({ columnId: column.id, itemKey }),
-									onKeyDown: (event) => onCardKeyDown(c, index, event),
-								};
-								return (
-									<Box
-										as="li"
-										key={itemKey}
-										aria-posinset={index + 1}
-										aria-setsize={count}
-									>
-										<KanbanCardSlotContext.Provider value={slot}>
-											{renderCard(item, { columnId: column.id, index })}
-										</KanbanCardSlotContext.Provider>
-									</Box>
-								);
-							})}
-						</Box>
+						<KanbanCardList
+							aria-label={listLabel}
+							itemKeys={keys[c]}
+							virtualized={virtualized}
+							estimateSize={estimateCardHeight}
+							maxHeight={columnMaxHeight}
+							keepIndex={keepIndex}
+							onScroller={(scroll) => {
+								if (scroll) scrollers.current.set(column.id, scroll);
+								else scrollers.current.delete(column.id);
+							}}
+							renderItem={renderItem}
+						/>
 						{column.items.length === 0 && !collapsed
 							? (column.emptyState ?? (
 									<Text fontSize="xs" color="subtle" px="2">

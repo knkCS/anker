@@ -674,6 +674,10 @@ screen shows items by status side by side — never hand-build columns from
 - `collapseEmptyColumns` narrows empty columns; a board with no card shows
   `emptyState` (`false` keeps the columns). Strings are props with English
   defaults (`emptyBoardLabel`, `emptyColumnLabel`, `formatColumnLabel`).
+- Long columns virtualise on their own: more than `virtualizeAbove` cards
+  (default 100) scroll within `columnMaxHeight` (default `70vh`) and only
+  the visible cards mount — keep `renderCard` free of side effects. The
+  arrow keys still reach every card.
 
 ---
 
