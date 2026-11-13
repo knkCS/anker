@@ -96,6 +96,21 @@ export type {
 	DescriptionListRowProps,
 } from "./description-list";
 export { DescriptionList } from "./description-list";
+// DiffView
+export type {
+	DiffChangeType,
+	DiffFile,
+	DiffHunk,
+	DiffLine,
+	DiffViewLabels,
+	DiffViewProps,
+	DiffViewVariant,
+} from "./diff-view";
+export {
+	DEFAULT_DIFF_VIEW_LABELS,
+	DiffView,
+	parseUnifiedDiff,
+} from "./diff-view";
 // Drawer
 export type { DrawerProps } from "./drawer";
 export { DrawerRoot } from "./drawer";
