@@ -38,7 +38,6 @@ import {
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
-import { getEventCoordinates } from "@dnd-kit/utilities";
 import type React from "react";
 import {
 	createContext,
@@ -106,24 +105,27 @@ interface Drag {
 interface LayerState {
 	drag: Drag | null;
 	describedBy: string;
+	/** The id of the column the moving card is in, while a drag runs. */
+	targetColumn: string | null;
 }
 
-const LayerContext = createContext<LayerState>({ drag: null, describedBy: "" });
+const LayerContext = createContext<LayerState>({
+	drag: null,
+	describedBy: "",
+	targetColumn: null,
+});
 
 function DndColumn({
 	columnId,
 	children,
 }: React.ComponentProps<KanbanDndApi["Column"]>) {
-	const { drag } = useContext(LayerContext);
+	const { targetColumn } = useContext(LayerContext);
 	const { setNodeRef } = useDroppable({
 		id: COLUMN_PREFIX + columnId,
 		data: { type: "column", columnId },
 	});
-	const target = useContext(TargetColumnContext) === columnId && drag != null;
-	return children({ ref: setNodeRef, target });
+	return children({ ref: setNodeRef, target: targetColumn === columnId });
 }
-
-const TargetColumnContext = createContext<string | null>(null);
 
 function DndItem({
 	itemKey,
@@ -275,21 +277,33 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 		}
 	}, [announce, committed, drag, onMove, preview]);
 
-	// A keyboard drag ends when focus leaves the board (Tab, a click away).
+	// A keyboard drag ends when focus leaves the board (Tab) or the pointer
+	// goes down outside it (a click away, which may not move focus at all).
 	const grabbedKey = drag?.via === "keyboard" ? drag.key : null;
 	const cancelRef = useRef(cancel);
 	cancelRef.current = cancel;
 	useEffect(() => {
 		if (grabbedKey == null) return;
-		const onFocusIn = (event: FocusEvent) => {
+		const onOutside = (event: Event) => {
 			const board = getBoard();
 			if (board && !board.contains(event.target as Node)) {
 				cancelRef.current(false);
 			}
 		};
-		document.addEventListener("focusin", onFocusIn);
-		return () => document.removeEventListener("focusin", onFocusIn);
+		document.addEventListener("focusin", onOutside);
+		document.addEventListener("pointerdown", onOutside);
+		return () => {
+			document.removeEventListener("focusin", onOutside);
+			document.removeEventListener("pointerdown", onOutside);
+		};
 	}, [grabbedKey, getBoard]);
+
+	// The dragged card left the board (the consumer removed it): the drag ends
+	// with it, rather than waiting on a card that can no longer take a key.
+	const orphaned = drag != null && locate(committed, drag.key) == null;
+	useEffect(() => {
+		if (orphaned) setDrag(null);
+	}, [orphaned]);
 
 	const onCardKeyDown = useCallback<KanbanDndApi["onCardKeyDown"]>(
 		(position, event) => {
@@ -307,13 +321,17 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 			}
 			if (drag.via !== "keyboard" || drag.key !== key) return false;
 			switch (event.key) {
+				// The drag owns these keys: a Drawer or Modal around the board must
+				// not also close on the Escape that cancels it.
 				case " ":
 				case "Enter":
 					event.preventDefault();
+					event.stopPropagation();
 					if (!event.repeat) drop();
 					return true;
 				case "Escape":
 					event.preventDefault();
+					event.stopPropagation();
 					cancel();
 					return true;
 				default: {
@@ -325,6 +343,7 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 					);
 					if (!to) return false;
 					event.preventDefault();
+					event.stopPropagation();
 					retarget(to);
 					return true;
 				}
@@ -341,7 +360,7 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 	);
 
 	const overFromEvent = (event: DragMoveEvent): PointerOver | null => {
-		const { over, activatorEvent, delta } = event;
+		const { over, active } = event;
 		if (!over) return null;
 		const data = over.data.current as
 			| { type: "card" | "column"; columnId?: string }
@@ -350,17 +369,19 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 			const column = columns.findIndex((c) => c.id === data.columnId);
 			return column >= 0 ? { kind: "column", column } : null;
 		}
-		const pointer = getEventCoordinates(activatorEvent);
-		const y = (pointer?.y ?? 0) + delta.y;
+		// The dragged card's middle against the card under it: both rects are
+		// measured by dnd-kit, so scrolling during the drag is accounted for.
+		const dragged = active.rect.current.translated;
+		const middle = dragged ? dragged.top + dragged.height / 2 : 0;
 		return {
 			kind: "card",
 			key: String(over.id),
-			after: y > over.rect.top + over.rect.height / 2,
+			after: middle > over.rect.top + over.rect.height / 2,
 		};
 	};
 
 	const onDragMove = (event: DragMoveEvent) => {
-		if (!drag || !preview) return;
+		if (drag?.via !== "pointer" || !preview) return;
 		const over = overFromEvent(event);
 		if (over) retarget(pointerTarget(preview, drag.key, over));
 	};
@@ -372,8 +393,8 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 	}, [columns, drag, preview]);
 
 	const layer = useMemo<LayerState>(
-		() => ({ drag, describedBy }),
-		[drag, describedBy],
+		() => ({ drag, describedBy, targetColumn }),
+		[drag, describedBy, targetColumn],
 	);
 
 	const api = useMemo<KanbanDndApi>(
@@ -385,27 +406,28 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 		<DndContext
 			sensors={sensors}
 			collisionDetection={collisionDetection}
-			measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
+			measuring={{ droppable: { strategy: MeasuringStrategy.WhileDragging } }}
 			accessibility={{
 				announcements: SILENT,
 				screenReaderInstructions: { draggable: labels.instructions },
 			}}
+			// A pointer drag replaces a keyboard drag still in progress.
 			onDragStart={(event: DragStartEvent) => {
-				if (drag) return;
 				start(String(event.active.id), "pointer");
 			}}
 			onDragMove={onDragMove}
 			onDragOver={onDragMove}
 			onDragEnd={(event: DragEndEvent) => {
+				if (drag?.via !== "pointer") return;
 				if (event.over) drop();
 				else cancel(false);
 			}}
-			onDragCancel={() => cancel()}
+			onDragCancel={() => {
+				if (drag?.via === "pointer") cancel(false);
+			}}
 		>
 			<LayerContext.Provider value={layer}>
-				<TargetColumnContext.Provider value={targetColumn}>
-					{children(api)}
-				</TargetColumnContext.Provider>
+				{children(api)}
 			</LayerContext.Provider>
 			{/* No drop animation: on drop the card is already in its place. */}
 			<DragOverlay dropAnimation={null}>

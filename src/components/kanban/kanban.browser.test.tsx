@@ -9,7 +9,7 @@ import { userEvent } from "@vitest/browser/context";
 import type { ReactNode } from "react";
 import { act, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { Button } from "../../atoms/button";
 import { DarkMode, LightMode } from "../../primitives/color-mode";
 import { Provider } from "../../primitives/provider";
@@ -926,6 +926,71 @@ describe("Kanban drag and drop", () => {
 		expect(document.activeElement?.textContent).toBe("After");
 		await vi.waitFor(() => expect(titlesIn(el, "waiting")).toEqual([]));
 		expect(onMove).not.toHaveBeenCalled();
+	});
+
+	it("cancels a keyboard drag on a click outside the board", async () => {
+		const onMove = vi.fn();
+		const el = await mount(
+			<>
+				<EditableBoard onMove={onMove} />
+				<p data-testid="outside">Elsewhere</p>
+			</>,
+		);
+		await editable(el);
+		card(el, "Write the parser").focus();
+		await userEvent.keyboard(" ");
+		await userEvent.keyboard("{ArrowRight}");
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "waiting")).toEqual(["Write the parser"]),
+		);
+		const outside = el.querySelector("[data-testid='outside']");
+		outside?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
+		await vi.waitFor(() => expect(titlesIn(el, "waiting")).toEqual([]));
+		expect(onMove).not.toHaveBeenCalled();
+	});
+
+	it("keeps the drag's keys from reaching handlers around the board", async () => {
+		const outer = vi.fn();
+		// Where a Drawer or Modal listens for Escape.
+		const onDocumentKey = (event: KeyboardEvent) => outer(event.key);
+		document.addEventListener("keydown", onDocumentKey);
+		onTestFinished(() =>
+			document.removeEventListener("keydown", onDocumentKey),
+		);
+		const el = await mount(<EditableBoard onMove={() => {}} />);
+		await editable(el);
+		card(el, "Write the parser").focus();
+		await userEvent.keyboard(" ");
+		await userEvent.keyboard("{ArrowDown}");
+		await userEvent.keyboard("{Escape}");
+		expect(outer).not.toHaveBeenCalledWith("Escape");
+		expect(outer).not.toHaveBeenCalledWith("ArrowDown");
+	});
+
+	it("ends a keyboard drag when the card leaves the board", async () => {
+		let remove: () => void = () => {};
+		function Removable() {
+			const [columns, setColumns] = useState(COLUMNS);
+			remove = () =>
+				setColumns((current) =>
+					current.map((c) => ({
+						...c,
+						items: c.items.filter((t) => t.id !== "t1"),
+					})),
+				);
+			return <Board columns={columns} onMove={() => {}} />;
+		}
+		const el = await mount(<Removable />);
+		await editable(el);
+		card(el, "Write the parser").focus();
+		await userEvent.keyboard(" ");
+		await act(async () => remove());
+		// A new drag can start: the old one did not linger.
+		card(el, "Ship it").focus();
+		await userEvent.keyboard(" ");
+		await vi.waitFor(() =>
+			expect(card(el, "Ship it").hasAttribute("data-grabbed")).toBe(true),
+		);
 	});
 
 	it("moves a card into a long column, past its window, with the keyboard", async () => {

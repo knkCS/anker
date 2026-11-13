@@ -277,6 +277,9 @@ function KanbanRoot<T>(props: KanbanProps<T>) {
 		focusCard,
 	};
 
+	// The board renders once more inside the drag layer when it arrives (a
+	// remount, before any drag can have started); later boards on the page
+	// find the module loaded and render editable from their first frame.
 	if (!dnd) {
 		return <KanbanBoard {...props} {...shared} keys={committed} api={null} />;
 	}
@@ -414,7 +417,14 @@ function KanbanBoard<T>(props: KanbanProps<T> & BoardShared<T>) {
 					(column.count ?? column.items.length) +
 					columnKeys.length -
 					column.items.length;
-				const collapsed = collapseEmptyColumns && columnKeys.length === 0;
+				// Collapsed only while empty both on the board and in a drag's
+				// preview: a column a card is dragged out of keeps its width, so the
+				// columns don't shift under the pointer, and one a card is dragged
+				// into opens up.
+				const collapsed =
+					collapseEmptyColumns &&
+					column.items.length === 0 &&
+					columnKeys.length === 0;
 				const titleId = `${baseId}-${column.id}`;
 				const listLabel = formatColumnLabel(column.title, count);
 				const virtualized = columnKeys.length > virtualizeAbove;
