@@ -14,7 +14,7 @@
  * chart surface in both modes. `chart-palette.test.ts` pins the contrast and
  * the distinctness; change a step only together with that test.
  *
- * Status hues (`success`, `danger`) are left out on purpose: a series must
+ * Status hues (`success`, `warning`, `danger`) are left out on purpose: a series must
  * never read as a status by accident. A series that *means* a status takes a
  * tone instead (see `CHART_TONES` in `@knkcs/anker/charts`).
  */
@@ -32,7 +32,7 @@ export const CHART_SERIES_SLOTS: readonly SeriesSlot[] = [
 	{ hue: "teal", light: "teal.600", dark: "teal.600" },
 	{ hue: "purple", light: "purple.500", dark: "purple.500" },
 	{ hue: "pink", light: "pink.600", dark: "pink.500" },
-	{ hue: "amber", light: "yellow.700", dark: "warning.600" },
+	{ hue: "cyan", light: "cyan.600", dark: "cyan.600" },
 ];
 
 /** How many series the palette colours before a chart must fold the rest. */

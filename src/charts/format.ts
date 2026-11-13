@@ -1,8 +1,9 @@
 // Value and time formatters for chart axes and tooltips. Like every value
 // anker formats itself, they write in the UI language: a `locale` when given,
 // else the language a hub set through react-i18next, else English
-// (`src/utils/ui-locale.ts`). The language is read when a value is formatted,
-// so a formatter created once follows a language switch.
+// (`src/utils/ui-locale.ts`). A chart passes the UI language it reads with
+// `useUiLocale` on every call, so a formatter created once follows a
+// language switch and the nearest I18nextProvider.
 import { resolveUiLocale } from "../utils/ui-locale";
 import type { ChartFormatter, ChartValue } from "./types";
 
@@ -32,19 +33,20 @@ function perLocale<T>(make: (locale: string) => T): (locale: string) => T {
  * A formatter for numbers — counts, currency, percentages — with
  * `Intl.NumberFormat` options: `numberFormatter({ style: "currency", currency:
  * "EUR" })`, `numberFormatter({ style: "percent" })` (which reads 0.42 as 42 %).
- * A value that is no number is shown as it is.
+ * A value that is no number is shown as it is. An explicit `locale` wins over
+ * the UI language the chart passes.
  */
 export function numberFormatter(
 	options: NumberFormatterOptions = {},
 ): ChartFormatter {
 	const { locale, ...intl } = options;
 	const get = perLocale((l) => new Intl.NumberFormat(l, intl));
-	return (value: ChartValue) => {
+	return (value: ChartValue, uiLocale?: string) => {
 		const n = typeof value === "number" ? value : Number(value);
 		if (value instanceof Date || value === "" || !Number.isFinite(n)) {
 			return String(value);
 		}
-		return get(resolveUiLocale(locale)).format(n);
+		return get(resolveUiLocale(locale ?? uiLocale)).format(n);
 	};
 }
 
@@ -81,9 +83,9 @@ export function timeFormatter(
 			? rest
 			: { hour: "2-digit", minute: "2-digit" };
 	const get = perLocale((l) => new Intl.DateTimeFormat(l, intl));
-	return (value: ChartValue) => {
+	return (value: ChartValue, uiLocale?: string) => {
 		const t = toTime(value);
 		if (t === undefined) return String(value);
-		return get(resolveUiLocale(locale)).format(t);
+		return get(resolveUiLocale(locale ?? uiLocale)).format(t);
 	};
 }

@@ -176,7 +176,7 @@ The ordered colours `@knkcs/anker/charts` gives its series — one semantic
 token per slot, `chart.series.1` … `chart.series.6`
 (`src/theme/tokens/chart-palette.ts`). Both columns are *selected* for
 their mode's chart surface (`bg-surface`), not flipped automatically. Slots
-3–6 come from Chakra's built-in teal, purple, pink and yellow scales, which
+3–6 come from Chakra's built-in teal, purple, pink and cyan scales, which
 anker's system carries (as `success` / `error` already use its green and
 red); no new scale is added.
 
@@ -187,11 +187,11 @@ red); no new scale is added.
 | `chart.series.3` | teal | `teal.600` | `teal.600` |
 | `chart.series.4` | purple | `purple.500` | `purple.500` |
 | `chart.series.5` | pink | `pink.600` | `pink.500` |
-| `chart.series.6` | amber | `yellow.700` | `warning.600` |
+| `chart.series.6` | cyan | `cyan.600` | `cyan.600` |
 
 The **order is the colour-blind safety**: neighbouring slots stay apart
-under protanopia and deuteranopia (adjacent OKLab ΔE ≥ 12.7 in both modes)
-and with full colour vision (≥ 15). Every slot reaches 3:1 on `bg-surface`
+under protanopia and deuteranopia (adjacent OKLab ΔE ≥ 10.3 light, ≥ 8.1
+dark) and with full colour vision (≥ 19). Every slot reaches 3:1 on `bg-surface`
 in both modes. `chart-palette.test.ts` pins the contrast, the full-vision neighbour
 separation and that no slot paints a status colour. A series that *means*
 a status takes a tone instead — the status palettes' `fg` step, `accent`,

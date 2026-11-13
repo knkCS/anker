@@ -1628,7 +1628,9 @@ import { AreaChart, LineChart, numberFormatter, timeFormatter } from "@knkcs/ank
   colour-blind separation on `bg-surface`). Give a series a `tone`
   (`accent`, `success`, `warning`, `danger`, `info`, `neutral`) only
   when its meaning matters — a limit, a failure rate. Status hues never
-  appear as an ordinary series.
+  appear as an ordinary series. `accent` and `info` share the action
+  blue (as on `StatusBadge`), close to the first palette slot — beside
+  palette series, prefer a status tone or `neutral`.
 - **Colour follows the series, not its rank.** To filter, mark a series
   `hidden` rather than removing it: the others keep their colours. More
   than six series is too many to tell apart — fold the rest into an

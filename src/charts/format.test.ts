@@ -22,6 +22,17 @@ describe("numberFormatter", () => {
 		).toBe("42%");
 	});
 
+	it("formats in the UI language a chart passes, unless given a locale", () => {
+		expect(numberFormatter()(1234.5, "de")).toBe("1.234,5");
+		expect(numberFormatter({ locale: "en" })(1234.5, "de")).toBe("1,234.5");
+		expect(
+			timeFormatter({ month: "long", timeZone: "UTC" })(
+				Date.UTC(2026, 2, 1),
+				"de",
+			),
+		).toBe("März");
+	});
+
 	it("falls back to English without a locale or UI language", () => {
 		expect(numberFormatter()(1234.5)).toBe("1,234.5");
 	});

@@ -6,9 +6,11 @@
 // states — asked of Chromium (the `layout` project of `vitest.config.ts`),
 // because jsdom neither lays out the SVG Recharts measures nor resolves CSS
 // variables.
+import i18next from "i18next";
 import type { ReactNode } from "react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { I18nextProvider } from "react-i18next";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Widget } from "../components/widget";
 import { DarkMode, LightMode } from "../primitives/color-mode";
@@ -454,6 +456,58 @@ describe("formatters", () => {
 	});
 });
 
+describe("UI language", () => {
+	it("formats with the language of the nearest I18nextProvider", async () => {
+		const i18n = i18next.createInstance();
+		await i18n.init({ lng: "de", resources: {} });
+		const el = await mount(
+			<I18nextProvider i18n={i18n}>
+				<LineChart
+					aria-label="Spend"
+					data={[
+						{ day: "Mon", spend: 0 },
+						{ day: "Tue", spend: 3000 },
+					]}
+					xKey="day"
+					series={[{ key: "spend" }]}
+				/>
+			</I18nextProvider>,
+		);
+		const y = await tickTexts(el, "y");
+		expect(y).toContain("3.000");
+	});
+});
+
+describe("time axis data", () => {
+	it("drops a row whose x is no time; only such rows is the empty state", async () => {
+		const el = await mount(
+			<>
+				<LineChart
+					aria-label="Some bad"
+					data={[
+						...DATA,
+						{ ...DATA[0], at: "not a time" as unknown as number },
+					]}
+					xKey="at"
+					xType="time"
+					series={[{ key: "load" }]}
+				/>
+				<LineChart
+					aria-label="All bad"
+					data={[{ at: "never", load: 1 }]}
+					xKey="at"
+					xType="time"
+					series={[{ key: "load" }]}
+				/>
+			</>,
+			{ width: 600, height: 600 },
+		);
+		expect(figure(el, "Some bad").dataset.state).toBe("ready");
+		expect(lines(el)[0].getAttribute("d")).not.toMatch(/NaN/);
+		expect(figure(el, "All bad").dataset.state).toBe("empty");
+	});
+});
+
 describe("sizing", () => {
 	it("fills its container's width and height by default", async () => {
 		const el = await mount(
@@ -550,6 +604,12 @@ describe("sizing", () => {
 			);
 		});
 		expect(figure(host, "Min").getBoundingClientRect().height).toBe(160);
+		// …and the plot inside it is drawn, not collapsed to nothing.
+		const el = host;
+		await settle(() => !!el.querySelector("svg.recharts-surface"));
+		expect(
+			el.querySelector("svg.recharts-surface")?.getBoundingClientRect().height,
+		).toBeGreaterThan(100);
 	});
 });
 

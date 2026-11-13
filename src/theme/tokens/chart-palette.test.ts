@@ -96,8 +96,10 @@ describe("chart series palette", () => {
 		it("never paints a series in a status colour", () => {
 			const status = [
 				"success.solid",
+				"warning.solid",
 				"danger.solid",
 				"success.fg",
+				"warning.fg",
 				"danger.fg",
 			].map((t) => resolveColor(system, t, mode));
 			for (const p of paint) expect(status).not.toContain(p);

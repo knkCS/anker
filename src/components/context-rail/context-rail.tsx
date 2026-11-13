@@ -12,6 +12,7 @@ import React, {
 import { IconButton } from "../../atoms/button";
 import { Box, Flex, Stack } from "../../primitives/layout";
 import { Heading, Text } from "../../primitives/typography";
+import { isDevMode } from "../../utils/dev-mode";
 import {
 	readStoredFlag,
 	readStoredValue,
@@ -64,16 +65,6 @@ const RailRootContext = createContext<boolean>(false);
  * Dev-mode helper: warn once per component-mount when a rail child is
  * rendered without a `<ContextRail>` Root ancestor. No-op in production.
  */
-function isDevMode(): boolean {
-	// `process` is a Node global; bundlers (Vite, tsup) replace
-	// `process.env.NODE_ENV` at build time, so this works in both Node
-	// (vitest, SSR) and browser bundles. We avoid `@types/node` by
-	// reaching through `globalThis`.
-	const proc = (globalThis as { process?: { env?: { NODE_ENV?: string } } })
-		.process;
-	return proc?.env?.NODE_ENV !== "production";
-}
-
 function useWarnIfOutsideRailRoot(componentName: string) {
 	const insideRoot = useContext(RailRootContext);
 	const warnedRef = useRef(false);

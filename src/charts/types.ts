@@ -16,8 +16,12 @@ export type ChartTone =
 /** A value on an axis or in a tooltip, as a chart reads it from a row. */
 export type ChartValue = string | number | Date;
 
-/** Turns a value into the text an axis tick or a tooltip shows. */
-export type ChartFormatter = (value: ChartValue) => string;
+/**
+ * Turns a value into the text an axis tick or a tooltip shows. The chart
+ * passes the UI language as `locale` (nearest `I18nextProvider`, else the
+ * registered i18next instance, else English), so a formatter can follow it.
+ */
+export type ChartFormatter = (value: ChartValue, locale?: string) => string;
 
 /** A data row: one point per series, plus the x value. */
 export type ChartDatum = Record<string, unknown>;
