@@ -7,9 +7,9 @@
 // because jsdom resolves neither CSS variables nor real key activation.
 import { userEvent } from "@vitest/browser/context";
 import type { ReactNode } from "react";
-import { act } from "react";
+import { act, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { Button } from "../../atoms/button";
 import { DarkMode, LightMode } from "../../primitives/color-mode";
 import { Provider } from "../../primitives/provider";
@@ -21,7 +21,13 @@ import {
 	toComputedRgb,
 } from "../../test/color-tokens";
 import system from "../../theme";
-import { Kanban, type KanbanCardTone, type KanbanColumn } from ".";
+import {
+	Kanban,
+	type KanbanCardTone,
+	type KanbanColumn,
+	type KanbanMove,
+	type KanbanProps,
+} from ".";
 
 interface Task {
 	id: string;
@@ -89,6 +95,7 @@ function Board({
 	emptyState?: ReactNode | false;
 	virtualizeAbove?: number;
 	columnMaxHeight?: string;
+	onMove?: KanbanProps<Task>["onMove"];
 }) {
 	return (
 		<Kanban
@@ -625,5 +632,497 @@ describe.each<ColorMode>([
 		expect(style.color).toBe(rgb("default"));
 		const viewport = viewportOf(lists(el)[0]);
 		expect(getComputedStyle(viewport).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+	});
+});
+
+// An editable board (#327): `onMove` makes cards draggable with the pointer
+// and the keyboard, and the consumer can veto a move.
+type Move = KanbanMove<Task>;
+
+function applyMove(columns: KanbanColumn<Task>[], move: Move) {
+	const next = columns.map((c) => ({ ...c, items: [...c.items] }));
+	const from = next.find((c) => c.id === move.from.columnId);
+	const to = next.find((c) => c.id === move.to.columnId);
+	if (!from || !to) return columns;
+	const [item] = from.items.splice(move.from.index, 1);
+	to.items.splice(move.to.index, 0, item);
+	return next;
+}
+
+function EditableBoard({
+	initial = COLUMNS,
+	onMove,
+	veto = false,
+	onOpen = () => {},
+	...rest
+}: {
+	initial?: KanbanColumn<Task>[];
+	onMove: (move: Move) => void;
+	veto?: boolean;
+	onOpen?: (id: string) => void;
+	columnMaxHeight?: string;
+}) {
+	const [columns, setColumns] = useState(initial);
+	return (
+		<Board
+			columns={columns}
+			onOpen={onOpen}
+			onMove={(move) => {
+				onMove(move);
+				if (veto) return false;
+				setColumns((current) => applyMove(current, move));
+			}}
+			{...rest}
+		/>
+	);
+}
+
+const titlesIn = (el: HTMLElement, columnId: string) =>
+	[
+		...el.querySelectorAll<HTMLElement>(
+			`[data-kanban-column='${columnId}'] [data-kanban-card]`,
+		),
+	].map((c) => c.textContent?.replace(/^#t\d+/, ""));
+
+const liveRegion = (el: HTMLElement) =>
+	el.querySelector("[role='status'][aria-live]")?.textContent ?? "";
+
+/** Waits for the lazily loaded drag-and-drop layer to wire the cards. */
+async function editable(el: HTMLElement) {
+	await vi.waitFor(() =>
+		expect(el.querySelector("[data-draggable]")).not.toBeNull(),
+	);
+}
+
+const frame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+
+const center = (element: Element) => {
+	const r = element.getBoundingClientRect();
+	return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+};
+
+/** Drags `source` to `target` with the mouse, in small steps as a hand would. */
+async function mouseDrag(
+	source: HTMLElement,
+	target: { x: number; y: number },
+) {
+	const start = center(source);
+	const fire = (type: string, on: EventTarget, at: { x: number; y: number }) =>
+		on.dispatchEvent(
+			new MouseEvent(type, {
+				bubbles: true,
+				cancelable: true,
+				clientX: at.x,
+				clientY: at.y,
+				button: 0,
+				buttons: 1,
+			}),
+		);
+	fire("mousedown", source, start);
+	const steps = 12;
+	for (let i = 1; i <= steps; i++) {
+		fire("mousemove", document, {
+			x: start.x + ((target.x - start.x) * i) / steps,
+			y: start.y + ((target.y - start.y) * i) / steps,
+		});
+		await frame();
+	}
+	await frame();
+	fire("mouseup", document, target);
+	await frame();
+}
+
+describe("Kanban drag and drop", () => {
+	it("marks cards draggable once onMove is given", async () => {
+		const el = await mount(<EditableBoard onMove={() => {}} />);
+		await editable(el);
+		for (const c of el.querySelectorAll<HTMLElement>("[data-kanban-card]")) {
+			expect(c.hasAttribute("data-draggable")).toBe(true);
+			expect(getComputedStyle(c).cursor).toBe("grab");
+			// Each card points at the keyboard instructions.
+			const id = c.getAttribute("aria-describedby") ?? "";
+			expect(document.getElementById(id)?.textContent).toMatch(/space/i);
+		}
+	});
+
+	it("moves a card to another column with the keyboard", async () => {
+		const onMove = vi.fn();
+		const el = await mount(<EditableBoard onMove={onMove} />);
+		await editable(el);
+		card(el, "Review the plan").focus();
+		await userEvent.keyboard(" ");
+		expect(card(el, "Review the plan").hasAttribute("data-grabbed")).toBe(true);
+		expect(liveRegion(el)).toContain("Picked up card at position 2 of 3");
+		// Into the empty column, then on to the next, then down a place.
+		await userEvent.keyboard("{ArrowRight}");
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "waiting")).toEqual(["Review the plan"]),
+		);
+		expect(document.activeElement).toBe(card(el, "Review the plan"));
+		await userEvent.keyboard("{ArrowRight}");
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "review")).toEqual([
+				"Review the plan",
+				"Approve the spec",
+				"Check the docs",
+			]),
+		);
+		await userEvent.keyboard("{ArrowDown}");
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "review")[1]).toBe("Review the plan"),
+		);
+		expect(liveRegion(el)).toContain("position 2 of 3 in In review");
+		expect(onMove).not.toHaveBeenCalled();
+		await userEvent.keyboard(" ");
+		expect(onMove).toHaveBeenCalledTimes(1);
+		expect(onMove).toHaveBeenCalledWith(
+			expect.objectContaining({
+				itemKey: "t2",
+				item: expect.objectContaining({ id: "t2" }),
+				from: { columnId: "ready", index: 1 },
+				to: { columnId: "review", index: 1 },
+			}),
+		);
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "ready")).toEqual(["Write the parser", "Ship it"]),
+		);
+		expect(titlesIn(el, "review")).toEqual([
+			"Approve the spec",
+			"Review the plan",
+			"Check the docs",
+		]);
+		expect(card(el, "Review the plan").hasAttribute("data-grabbed")).toBe(
+			false,
+		);
+		expect(document.activeElement).toBe(card(el, "Review the plan"));
+		expect(liveRegion(el)).toContain("Card dropped at position 2 of 3");
+	});
+
+	it("reorders within a column with the keyboard and drops with Enter", async () => {
+		const onMove = vi.fn();
+		const el = await mount(<EditableBoard onMove={onMove} />);
+		await editable(el);
+		card(el, "Write the parser").focus();
+		await userEvent.keyboard(" ");
+		await userEvent.keyboard("{End}");
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "ready")).toEqual([
+				"Review the plan",
+				"Ship it",
+				"Write the parser",
+			]),
+		);
+		await userEvent.keyboard("{ArrowUp}");
+		await userEvent.keyboard("{Enter}");
+		expect(onMove).toHaveBeenCalledWith(
+			expect.objectContaining({
+				from: { columnId: "ready", index: 0 },
+				to: { columnId: "ready", index: 1 },
+			}),
+		);
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "ready")).toEqual([
+				"Review the plan",
+				"Write the parser",
+				"Ship it",
+			]),
+		);
+	});
+
+	it("snaps a vetoed move back, keeping focus on the card", async () => {
+		const onMove = vi.fn();
+		const el = await mount(<EditableBoard onMove={onMove} veto />);
+		await editable(el);
+		card(el, "Ship it").focus();
+		await userEvent.keyboard(" ");
+		await userEvent.keyboard("{ArrowRight}{ArrowRight}");
+		await vi.waitFor(() => expect(titlesIn(el, "review")).toHaveLength(3));
+		await userEvent.keyboard(" ");
+		expect(onMove).toHaveBeenCalledTimes(1);
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "ready")).toEqual([
+				"Write the parser",
+				"Review the plan",
+				"Ship it",
+			]),
+		);
+		expect(titlesIn(el, "review")).toHaveLength(2);
+		expect(document.activeElement).toBe(card(el, "Ship it"));
+		expect(liveRegion(el)).toContain(
+			"Move not allowed. Card returned to position 3 of 3 in Ready",
+		);
+	});
+
+	it("cancels with Escape without calling onMove", async () => {
+		const onMove = vi.fn();
+		const el = await mount(<EditableBoard onMove={onMove} />);
+		await editable(el);
+		card(el, "Write the parser").focus();
+		await userEvent.keyboard(" ");
+		await userEvent.keyboard("{ArrowDown}");
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "ready")[1]).toBe("Write the parser"),
+		);
+		await userEvent.keyboard("{Escape}");
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "ready")[0]).toBe("Write the parser"),
+		);
+		expect(onMove).not.toHaveBeenCalled();
+		expect(liveRegion(el)).toContain("Move cancelled");
+		expect(document.activeElement).toBe(card(el, "Write the parser"));
+	});
+
+	it("does not call onMove when a card is dropped where it started", async () => {
+		const onMove = vi.fn();
+		const el = await mount(<EditableBoard onMove={onMove} />);
+		await editable(el);
+		card(el, "Write the parser").focus();
+		await userEvent.keyboard(" ");
+		await userEvent.keyboard("{ArrowDown}{ArrowUp}");
+		await userEvent.keyboard(" ");
+		expect(onMove).not.toHaveBeenCalled();
+	});
+
+	it("keeps Enter opening a card and the arrow keys moving focus when nothing is picked up", async () => {
+		const onOpen = vi.fn();
+		const onMove = vi.fn();
+		const el = await mount(<EditableBoard onMove={onMove} onOpen={onOpen} />);
+		await editable(el);
+		card(el, "Write the parser").focus();
+		await userEvent.keyboard("{ArrowDown}");
+		expect(document.activeElement).toBe(card(el, "Review the plan"));
+		await userEvent.keyboard("{Enter}");
+		expect(onOpen).toHaveBeenCalledWith("t2");
+		// Space picks a button card up rather than opening it.
+		onOpen.mockClear();
+		await userEvent.keyboard(" ");
+		expect(card(el, "Review the plan").hasAttribute("data-grabbed")).toBe(true);
+		expect(onOpen).not.toHaveBeenCalled();
+		await userEvent.keyboard(" ");
+		expect(onOpen).not.toHaveBeenCalled();
+		expect(onMove).not.toHaveBeenCalled();
+	});
+
+	it("stays one tab stop, and Tab away cancels a keyboard drag", async () => {
+		const onMove = vi.fn();
+		const el = await mount(
+			<>
+				<EditableBoard onMove={onMove} />
+				<button type="button">After</button>
+			</>,
+		);
+		await editable(el);
+		const tabbable = [
+			...el.querySelectorAll<HTMLElement>("[data-kanban-card]"),
+		].filter((c) => c.tabIndex === 0);
+		expect(tabbable).toHaveLength(1);
+		card(el, "Write the parser").focus();
+		await userEvent.keyboard(" ");
+		await userEvent.keyboard("{ArrowRight}");
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "waiting")).toEqual(["Write the parser"]),
+		);
+		await userEvent.tab();
+		expect(document.activeElement?.textContent).toBe("After");
+		await vi.waitFor(() => expect(titlesIn(el, "waiting")).toEqual([]));
+		expect(onMove).not.toHaveBeenCalled();
+	});
+
+	it("cancels a keyboard drag on a click outside the board", async () => {
+		const onMove = vi.fn();
+		const el = await mount(
+			<>
+				<EditableBoard onMove={onMove} />
+				<p data-testid="outside">Elsewhere</p>
+			</>,
+		);
+		await editable(el);
+		card(el, "Write the parser").focus();
+		await userEvent.keyboard(" ");
+		await userEvent.keyboard("{ArrowRight}");
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "waiting")).toEqual(["Write the parser"]),
+		);
+		const outside = el.querySelector("[data-testid='outside']");
+		outside?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
+		await vi.waitFor(() => expect(titlesIn(el, "waiting")).toEqual([]));
+		expect(onMove).not.toHaveBeenCalled();
+	});
+
+	it("keeps the drag's keys from reaching handlers around the board", async () => {
+		const outer = vi.fn();
+		// Where a Drawer or Modal listens for Escape.
+		const onDocumentKey = (event: KeyboardEvent) => outer(event.key);
+		document.addEventListener("keydown", onDocumentKey);
+		onTestFinished(() =>
+			document.removeEventListener("keydown", onDocumentKey),
+		);
+		const el = await mount(<EditableBoard onMove={() => {}} />);
+		await editable(el);
+		card(el, "Write the parser").focus();
+		await userEvent.keyboard(" ");
+		await userEvent.keyboard("{ArrowDown}");
+		await userEvent.keyboard("{Escape}");
+		expect(outer).not.toHaveBeenCalledWith("Escape");
+		expect(outer).not.toHaveBeenCalledWith("ArrowDown");
+	});
+
+	it("ends a keyboard drag when the card leaves the board", async () => {
+		let remove: () => void = () => {};
+		function Removable() {
+			const [columns, setColumns] = useState(COLUMNS);
+			remove = () =>
+				setColumns((current) =>
+					current.map((c) => ({
+						...c,
+						items: c.items.filter((t) => t.id !== "t1"),
+					})),
+				);
+			return <Board columns={columns} onMove={() => {}} />;
+		}
+		const el = await mount(<Removable />);
+		await editable(el);
+		card(el, "Write the parser").focus();
+		await userEvent.keyboard(" ");
+		await act(async () => remove());
+		// A new drag can start: the old one did not linger.
+		card(el, "Ship it").focus();
+		await userEvent.keyboard(" ");
+		await vi.waitFor(() =>
+			expect(card(el, "Ship it").hasAttribute("data-grabbed")).toBe(true),
+		);
+	});
+
+	it("moves a card into a long column, past its window, with the keyboard", async () => {
+		const onMove = vi.fn();
+		const el = await mount(
+			<EditableBoard
+				onMove={onMove}
+				initial={[
+					{ id: "short", title: "Short", items: many("s", 3) },
+					{ id: "long", title: "Backlog", items: many("b", 300) },
+				]}
+			/>,
+		);
+		await editable(el);
+		card(el, "s card 1").focus();
+		await userEvent.keyboard(" ");
+		await userEvent.keyboard("{ArrowRight}");
+		await userEvent.keyboard("{End}");
+		await vi.waitFor(() => {
+			expect(document.activeElement?.textContent).toContain("s card 1");
+			expect(focused()?.getAttribute("aria-posinset")).toBe("301");
+		});
+		await userEvent.keyboard(" ");
+		expect(onMove).toHaveBeenCalledWith(
+			expect.objectContaining({
+				itemKey: "s1",
+				from: { columnId: "short", index: 0 },
+				to: { columnId: "long", index: 300 },
+			}),
+		);
+	});
+
+	it("moves a card to another column with the mouse", async () => {
+		const onMove = vi.fn();
+		const el = await mount(<EditableBoard onMove={onMove} />);
+		await editable(el);
+		const waiting = el.querySelector("[data-kanban-column='waiting']");
+		if (!waiting) throw new Error("no waiting column");
+		await mouseDrag(card(el, "Ship it"), center(waiting));
+		await vi.waitFor(() => expect(onMove).toHaveBeenCalledTimes(1));
+		expect(onMove).toHaveBeenCalledWith(
+			expect.objectContaining({
+				itemKey: "t3",
+				from: { columnId: "ready", index: 2 },
+				to: { columnId: "waiting", index: 0 },
+			}),
+		);
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "waiting")).toEqual(["Ship it"]),
+		);
+		expect(el.querySelector("[data-kanban-drag-overlay]")).toBeNull();
+	});
+
+	it("reorders with the mouse, before a card in another column", async () => {
+		const onMove = vi.fn();
+		const el = await mount(<EditableBoard onMove={onMove} />);
+		await editable(el);
+		const target = card(el, "Approve the spec").getBoundingClientRect();
+		await mouseDrag(card(el, "Write the parser"), {
+			x: target.left + target.width / 2,
+			y: target.top + 4,
+		});
+		await vi.waitFor(() => expect(onMove).toHaveBeenCalledTimes(1));
+		expect(onMove.mock.calls[0][0]).toMatchObject({
+			from: { columnId: "ready", index: 0 },
+			to: { columnId: "review", index: 0 },
+		});
+	});
+
+	it("snaps a vetoed mouse move back", async () => {
+		const onMove = vi.fn();
+		const el = await mount(<EditableBoard onMove={onMove} veto />);
+		await editable(el);
+		const waiting = el.querySelector("[data-kanban-column='waiting']");
+		if (!waiting) throw new Error("no waiting column");
+		await mouseDrag(card(el, "Ship it"), center(waiting));
+		await vi.waitFor(() => expect(onMove).toHaveBeenCalledTimes(1));
+		await vi.waitFor(() => expect(titlesIn(el, "waiting")).toEqual([]));
+		expect(titlesIn(el, "ready")).toEqual([
+			"Write the parser",
+			"Review the plan",
+			"Ship it",
+		]);
+	});
+
+	it("still opens a card on a click without a drag", async () => {
+		const onOpen = vi.fn();
+		const onMove = vi.fn();
+		const el = await mount(<EditableBoard onMove={onMove} onOpen={onOpen} />);
+		await editable(el);
+		await userEvent.click(card(el, "Review the plan"));
+		expect(onOpen).toHaveBeenCalledWith("t2");
+		expect(onMove).not.toHaveBeenCalled();
+	});
+});
+
+describe.each<ColorMode>([
+	"light",
+	"dark",
+])("Kanban drag and drop in %s mode", (mode) => {
+	const rgb = (name: string) => toComputedRgb(resolveColor(system, name, mode));
+
+	it("outlines the picked-up card in the accent colour and tints its column", async () => {
+		const Wrap = mode === "dark" ? DarkMode : LightMode;
+		const el = await mount(
+			<Wrap>
+				<EditableBoard onMove={() => {}} />
+			</Wrap>,
+		);
+		await editable(el);
+		const ready = el.querySelector<HTMLElement>("[data-kanban-column='ready']");
+		if (!ready) throw new Error("no ready column");
+		expect(getComputedStyle(ready).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+		card(el, "Approve the spec").focus();
+		await userEvent.keyboard(" ");
+		// Read once the card's colour transition has settled.
+		await vi.waitFor(() => {
+			const grabbed = getComputedStyle(card(el, "Approve the spec"));
+			expect(grabbed.borderTopColor).toBe(rgb("accent"));
+			expect(grabbed.borderTopStyle).toBe("solid");
+		});
+		await userEvent.keyboard("{ArrowLeft}{ArrowLeft}");
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "ready")).toContain("Approve the spec"),
+		);
+		expect(ready.hasAttribute("data-drop-target")).toBe(true);
+		await vi.waitFor(() =>
+			expect(getComputedStyle(ready).backgroundColor).toBe(rgb("bg-muted")),
+		);
+		await userEvent.keyboard("{Escape}");
+		await vi.waitFor(() =>
+			expect(ready.hasAttribute("data-drop-target")).toBe(false),
+		);
 	});
 });

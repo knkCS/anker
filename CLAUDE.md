@@ -31,7 +31,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in twelve lay
 |---------|--------|
 | UI framework | Chakra UI v3 (recipes, slot recipes, semantic tokens) |
 | Data tables | TanStack React Table v8 (headless, generic DataTable wrapper) |
-| Drag and drop | dnd-kit (`@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities`, peer dependencies) — DataTable row reorder |
+| Drag and drop | dnd-kit (`@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities`, peer dependencies) — DataTable row reorder; editable Kanban boards (`onMove`), whose drag layer `kanban-dnd.tsx` is a dynamic import so a read-only board never loads it |
 | Icons | Lucide React (replacing FontAwesome from Core) |
 | Form state | React Hook Form (replacing Formik from Core) |
 | Validation | Zod (replacing Yup from Core) |
@@ -582,9 +582,9 @@ Consuming projects must install:
 - react-router-dom >= 6
 - react-i18next >= 12
 - @tanstack/react-table ^8.0.0 (required for DataTable component)
-- @dnd-kit/core ^6.3.1 (required for DataTable row reorder)
+- @dnd-kit/core ^6.3.1 (required for DataTable row reorder and editable Kanban boards)
 - @dnd-kit/sortable ^8.0.0 (required for DataTable row reorder)
-- @dnd-kit/utilities ^3.2.2 (required for DataTable row reorder)
+- @dnd-kit/utilities ^3.2.2 (required for DataTable row reorder and editable Kanban boards)
 - react-grid-layout ^2.2.3 (optional — required only for the Dashboard component)
 - recharts ^3.10.0 (optional — required only for `@knkcs/anker/charts`)
 

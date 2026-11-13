@@ -1,11 +1,15 @@
 // Kanban.Card and the card building blocks (title, meta line, badges, avatar
 // slot). The card reads its place on the board — roving tabindex, the arrow
 // keys, its ref — from `KanbanCardSlotContext`, which `<Kanban>` provides
-// around every card it renders. Outside a board the card is a plain card.
+// around every card it renders. On an editable board the slot also carries
+// the drag wiring (`drag`): the pointer listeners, the keyboard
+// instructions, and whether the card is picked up. Outside a board the card
+// is a plain card.
 import type React from "react";
 import { createContext, useContext } from "react";
 import { Box, type BoxProps, HStack } from "../../primitives/layout";
 import { Text } from "../../primitives/typography";
+import type { KanbanCardDrag } from "./kanban-dnd-types";
 
 /**
  * How loudly a card speaks:
@@ -24,6 +28,8 @@ export interface KanbanCardSlot {
 	ref: (element: HTMLElement | null) => void;
 	onFocus: () => void;
 	onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => void;
+	/** Set on an editable board (`onMove`). */
+	drag?: KanbanCardDrag;
 }
 
 export const KanbanCardSlotContext = createContext<KanbanCardSlot | null>(null);
@@ -66,9 +72,39 @@ export interface KanbanCardProps
 	children?: React.ReactNode;
 }
 
+// A picked-up card (keyboard) is outlined in the accent colour and lifted; the
+// card a pointer drags leaves a dashed accent outline in its place.
+const GRABBED_STYLES: BoxProps = {
+	borderStyle: "solid",
+	borderColor: "accent",
+	boxShadow: "lg",
+};
+const DRAGGING_STYLES: BoxProps = {
+	borderStyle: "dashed",
+	borderColor: "accent",
+	opacity: 0.5,
+};
+
+/** The drag listeners merged with the consumer's handlers of the same name. */
+function dragHandlers(
+	drag: KanbanCardDrag | undefined,
+	rest: Record<string, unknown>,
+): Record<string, (event: never) => void> {
+	const merged: Record<string, (event: never) => void> = {};
+	for (const [name, listener] of Object.entries(drag?.listeners ?? {})) {
+		const own = rest[name] as ((event: never) => void) | undefined;
+		merged[name] = (event) => {
+			own?.(event);
+			listener(event);
+		};
+	}
+	return merged;
+}
+
 export function KanbanCard(props: KanbanCardProps) {
 	const { tone = "default", href, onClick, asChild, children, ...rest } = props;
 	const slot = useContext(KanbanCardSlotContext);
+	const drag = slot?.drag;
 	const interactive = asChild || href != null || onClick != null;
 	const element = href != null ? "a" : onClick != null ? "button" : "div";
 	// `Box` types its props as a div's; the element's own attributes go in
@@ -106,7 +142,23 @@ export function KanbanCard(props: KanbanCardProps) {
 				? { cursor: "pointer", _hover: { boxShadow: "sm" } }
 				: undefined)}
 			{...TONE_STYLES[tone]}
+			{...(drag
+				? {
+						cursor: "grab",
+						"data-draggable": "",
+						"data-grabbed": drag.grabbed ? "" : undefined,
+						"data-dragging": drag.dragging ? "" : undefined,
+						...(drag.grabbed ? GRABBED_STYLES : undefined),
+						...(drag.dragging ? DRAGGING_STYLES : undefined),
+					}
+				: undefined)}
 			{...rest}
+			{...dragHandlers(drag, rest)}
+			aria-describedby={
+				[rest["aria-describedby"], drag?.describedBy]
+					.filter(Boolean)
+					.join(" ") || undefined
+			}
 			tabIndex={slot?.tabIndex ?? rest.tabIndex}
 			ref={slot?.ref}
 			onFocus={(event: React.FocusEvent<HTMLElement>) => {

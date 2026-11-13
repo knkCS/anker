@@ -1578,7 +1578,35 @@ column per status, a card per item:
   button) or `asChild` with a router `<Link>` inside. Always render
   cards with `Kanban.Card` — the board steers keyboard focus through it.
 - **Read-only is the default.** A board over derived status (nobody
-  sets it by hand) shows no drag handles and suggests no editing.
+  sets it by hand) shows no drag affordance and suggests no editing.
+- **Editable boards** pass `onMove` — and only those: it is what makes
+  cards draggable and what loads the drag-and-drop code (a lazily
+  imported module over dnd-kit; a read-only board never loads it).
+  The board stays controlled: `onMove({ item, itemKey, from, to })`
+  reports a drop with `{ columnId, index }` positions, where `to.index`
+  is the card's index in the target column once moved (remove it from
+  `from`, insert it at `to`). Apply it to your `columns`, or return
+  `false` to veto — the card snaps back. Validate where the rule lives
+  (a card that may not leave "Done"), not after the fact:
+
+  ```tsx
+  onMove={(move) => {
+    if (!canTransition(move.from.columnId, move.to.columnId)) return false;
+    setTasks((tasks) => applyMove(tasks, move));
+  }}
+  ```
+
+  A move that needs the server: apply it optimistically and revert on
+  failure — `onMove` answers synchronously.
+- **Dragging**: the whole card is the handle. With a pointer it drags
+  after a few pixels (on touch after a press, so a swipe still
+  scrolls), so a click still opens the card. With the keyboard, Space
+  picks the focused card up (Enter still opens it), the arrow keys
+  move it — into empty columns too — Home/End to the column's ends,
+  Space or Enter drops it and Escape cancels; Tab away cancels as well.
+  The board stays one tab stop and the card keeps focus. The picked-up
+  card is outlined in `accent`, its column tinted `bg-muted`, and each
+  step is announced (`dragLabels`, English defaults).
 - **Columns**: `title` (also names the column's list for screen
   readers, with its count), optional `count` when only a page of the
   column is loaded, optional `action` in the header. Narrow screens
