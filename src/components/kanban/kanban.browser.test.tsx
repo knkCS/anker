@@ -701,10 +701,16 @@ const center = (element: Element) => {
 	return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
 };
 
-/** Drags `source` to `target` with the mouse, in small steps as a hand would. */
+/**
+ * Drags `source` to `target` with the mouse, in small steps as a hand would.
+ * `hurried` lets several moves pass between frames and releases right after
+ * the last one, as a fast hand on a slow machine does: the board renders
+ * behind the pointer.
+ */
 async function mouseDrag(
 	source: HTMLElement,
 	target: { x: number; y: number },
+	{ hurried = false } = {},
 ) {
 	const start = center(source);
 	const fire = (type: string, on: EventTarget, at: { x: number; y: number }) =>
@@ -725,9 +731,9 @@ async function mouseDrag(
 			x: start.x + ((target.x - start.x) * i) / steps,
 			y: start.y + ((target.y - start.y) * i) / steps,
 		});
-		await frame();
+		if (!hurried || i % 4 === 0) await frame();
 	}
-	await frame();
+	if (!hurried) await frame();
 	fire("mouseup", document, target);
 	await frame();
 }
@@ -1053,6 +1059,23 @@ describe("Kanban drag and drop", () => {
 			x: target.left + target.width / 2,
 			y: target.top + 4,
 		});
+		await vi.waitFor(() => expect(onMove).toHaveBeenCalledTimes(1));
+		expect(onMove.mock.calls[0][0]).toMatchObject({
+			from: { columnId: "ready", index: 0 },
+			to: { columnId: "review", index: 0 },
+		});
+	});
+
+	it("drops where the mouse is released, however far the board lags behind", async () => {
+		const onMove = vi.fn();
+		const el = await mount(<EditableBoard onMove={onMove} />);
+		await editable(el);
+		const target = card(el, "Approve the spec").getBoundingClientRect();
+		await mouseDrag(
+			card(el, "Write the parser"),
+			{ x: target.left + target.width / 2, y: target.top + 4 },
+			{ hurried: true },
+		);
 		await vi.waitFor(() => expect(onMove).toHaveBeenCalledTimes(1));
 		expect(onMove.mock.calls[0][0]).toMatchObject({
 			from: { columnId: "ready", index: 0 },

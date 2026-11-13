@@ -25,14 +25,13 @@
 import {
 	type CollisionDetection,
 	DndContext,
-	type DragEndEvent,
-	type DragMoveEvent,
 	DragOverlay,
 	type DragStartEvent,
 	MeasuringStrategy,
 	MouseSensor,
 	pointerWithin,
 	TouchSensor,
+	type UniqueIdentifier,
 	useDraggable,
 	useDroppable,
 	useSensor,
@@ -158,7 +157,7 @@ function DndItem({
 }
 
 // Prefer the card under the pointer; between and below cards, its column.
-const collisionDetection: CollisionDetection = (args) => {
+const cardOrColumnUnderPointer: CollisionDetection = (args) => {
 	const hits = pointerWithin(args);
 	const cards = hits.filter(
 		(hit) =>
@@ -167,6 +166,34 @@ const collisionDetection: CollisionDetection = (args) => {
 	);
 	return cards.length > 0 ? cards : hits;
 };
+
+/**
+ * The collision under the pointer as a target: a column, or a card and
+ * whether the pointer is past its middle — judged by the pointer itself, not
+ * the dragged card's rect, whose middle depends on where it was grabbed.
+ */
+function resolveOver(
+	id: UniqueIdentifier | undefined,
+	args: Parameters<CollisionDetection>[0],
+	columns: readonly { id: string }[],
+): PointerOver | null {
+	if (id == null) return null;
+	const container = args.droppableContainers.find((c) => c.id === id);
+	const data = container?.data.current as
+		| { type: "card" | "column"; columnId?: string }
+		| undefined;
+	if (data?.type === "column") {
+		const column = columns.findIndex((c) => c.id === data.columnId);
+		return column >= 0 ? { kind: "column", column } : null;
+	}
+	const rect = args.droppableRects.get(id);
+	const y = args.pointerCoordinates?.y;
+	return {
+		kind: "card",
+		key: String(id),
+		after: rect != null && y != null && y > rect.top + rect.height / 2,
+	};
+}
 
 function KanbanDndBoard(props: KanbanDndBoardProps) {
 	const {
@@ -185,7 +212,38 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 		[labelOverrides],
 	);
 	const describedBy = useId();
-	const [drag, setDrag] = useState<Drag | null>(null);
+	const [drag, setDragState] = useState<Drag | null>(null);
+	// The drag as of the last event, ahead of the render it schedules. dnd-kit
+	// fires pointer events faster than React renders, so every handler reads
+	// and writes the drag here — never a render's possibly stale snapshot, or
+	// a move (or the drop) lands where an earlier event left the card.
+	const dragRef = useRef<Drag | null>(null);
+	const committedRef = useRef(committed);
+	committedRef.current = committed;
+	const setDrag = useCallback((next: Drag | null) => {
+		dragRef.current = next;
+		setDragState(next);
+	}, []);
+	/** The drag in progress, its preview in line with the board. */
+	const current = useCallback((): Drag | null => {
+		const d = dragRef.current;
+		return d
+			? { ...d, preview: reconcile(d.preview, committedRef.current) }
+			: null;
+	}, []);
+	// What is under the pointer, as collision detection last found it. Read
+	// from here rather than from an event's `over`: dnd-kit commits `over` a
+	// render after it computes the collisions, so a release that closely
+	// follows the last move reports the target the pointer had *before* it —
+	// on a slow machine, a whole column away.
+	const underPointer = useRef<PointerOver | null>(null);
+	const columnsRef = useRef(columns);
+	columnsRef.current = columns;
+	const collisionDetection = useCallback<CollisionDetection>((args) => {
+		const hits = cardOrColumnUnderPointer(args);
+		underPointer.current = resolveOver(hits[0]?.id, args, columnsRef.current);
+		return hits;
+	}, []);
 	const [announcement, setAnnouncement] = useState("");
 	// A card to focus once the arrangement it moved in has rendered.
 	const focusKey = useRef<string | null>(null);
@@ -228,54 +286,60 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 
 	const start = useCallback(
 		(key: string, via: Drag["via"]) => {
-			setDrag({ key, via, preview: committed });
-			announce("pickedUp", committed, key);
+			const board = committedRef.current;
+			setDrag({ key, via, preview: board });
+			announce("pickedUp", board, key);
 		},
-		[announce, committed],
+		[announce, setDrag],
 	);
 
 	const retarget = useCallback(
-		(to: KanbanPosition | null) => {
-			if (!drag || !preview || !to) return;
-			const from = locate(preview, drag.key);
+		(target: (d: Drag) => KanbanPosition | null) => {
+			const d = current();
+			const to = d && target(d);
+			if (!d || !to) return;
+			const from = locate(d.preview, d.key);
 			if (!from || (from.column === to.column && from.index === to.index)) {
 				return;
 			}
-			const next = moveCard(preview, drag.key, to);
-			setDrag({ ...drag, preview: next });
-			announce("moved", next, drag.key);
-			if (drag.via === "keyboard") focusKey.current = drag.key;
+			const next = moveCard(d.preview, d.key, to);
+			setDrag({ ...d, preview: next });
+			announce("moved", next, d.key);
+			if (d.via === "keyboard") focusKey.current = d.key;
 		},
-		[announce, drag, preview],
+		[announce, current, setDrag],
 	);
 
 	// `refocus: false` when focus already left the board: the card must not
 	// take it back.
 	const cancel = useCallback(
 		(refocus = true) => {
-			if (!drag) return;
+			const d = current();
+			if (!d) return;
 			setDrag(null);
-			announce("cancelled", committed, drag.key);
-			if (drag.via === "keyboard" && refocus) focusKey.current = drag.key;
+			announce("cancelled", committedRef.current, d.key);
+			if (d.via === "keyboard" && refocus) focusKey.current = d.key;
 		},
-		[announce, committed, drag],
+		[announce, current, setDrag],
 	);
 
 	const drop = useCallback(() => {
-		if (!drag || !preview) return;
+		const d = current();
+		if (!d) return;
+		const board = committedRef.current;
 		setDrag(null);
-		if (drag.via === "keyboard") focusKey.current = drag.key;
-		const move = resolveMove(committed, preview, drag.key);
+		if (d.via === "keyboard") focusKey.current = d.key;
+		const move = resolveMove(board, d.preview, d.key);
 		if (!move) {
-			announce("dropped", committed, drag.key);
+			announce("dropped", board, d.key);
 			return;
 		}
-		if (!onMove(drag.key, move.from, move.to)) {
-			announce("vetoed", committed, drag.key);
+		if (!onMove(d.key, move.from, move.to)) {
+			announce("vetoed", board, d.key);
 		} else {
-			announce("dropped", preview, drag.key);
+			announce("dropped", d.preview, d.key);
 		}
-	}, [announce, committed, drag, onMove, preview]);
+	}, [announce, current, onMove, setDrag]);
 
 	// A keyboard drag ends when focus leaves the board (Tab) or the pointer
 	// goes down outside it (a click away, which may not move focus at all).
@@ -303,7 +367,7 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 	const orphaned = drag != null && locate(committed, drag.key) == null;
 	useEffect(() => {
 		if (orphaned) setDrag(null);
-	}, [orphaned]);
+	}, [orphaned, setDrag]);
 
 	const onCardKeyDown = useCallback<KanbanDndApi["onCardKeyDown"]>(
 		(position, event) => {
@@ -311,15 +375,17 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 			if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
 				return false;
 			}
-			const key = arrangement[position.column]?.[position.index];
+			const d = current();
+			const shown = d?.preview ?? committedRef.current;
+			const key = shown[position.column]?.[position.index];
 			if (key == null) return false;
-			if (!drag) {
+			if (!d) {
 				if (event.key !== " ") return false;
 				event.preventDefault();
 				if (!event.repeat) start(key, "keyboard");
 				return true;
 			}
-			if (drag.via !== "keyboard" || drag.key !== key) return false;
+			if (d.via !== "keyboard" || d.key !== key) return false;
 			switch (event.key) {
 				// The drag owns these keys: a Drawer or Modal around the board must
 				// not also close on the Escape that cancels it.
@@ -335,21 +401,16 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 					cancel();
 					return true;
 				default: {
-					const to = keyboardMoveTarget(
-						arrangement,
-						key,
-						event.key,
-						getDirection(),
-					);
+					const to = keyboardMoveTarget(shown, key, event.key, getDirection());
 					if (!to) return false;
 					event.preventDefault();
 					event.stopPropagation();
-					retarget(to);
+					retarget(() => to);
 					return true;
 				}
 			}
 		},
-		[arrangement, cancel, drag, drop, getDirection, retarget, start],
+		[cancel, current, drop, getDirection, retarget, start],
 	);
 
 	const sensors = useSensors(
@@ -359,31 +420,10 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 		}),
 	);
 
-	const overFromEvent = (event: DragMoveEvent): PointerOver | null => {
-		const { over, active } = event;
-		if (!over) return null;
-		const data = over.data.current as
-			| { type: "card" | "column"; columnId?: string }
-			| undefined;
-		if (data?.type === "column") {
-			const column = columns.findIndex((c) => c.id === data.columnId);
-			return column >= 0 ? { kind: "column", column } : null;
-		}
-		// The dragged card's middle against the card under it: both rects are
-		// measured by dnd-kit, so scrolling during the drag is accounted for.
-		const dragged = active.rect.current.translated;
-		const middle = dragged ? dragged.top + dragged.height / 2 : 0;
-		return {
-			kind: "card",
-			key: String(over.id),
-			after: middle > over.rect.top + over.rect.height / 2,
-		};
-	};
-
-	const onDragMove = (event: DragMoveEvent) => {
-		if (drag?.via !== "pointer" || !preview) return;
-		const over = overFromEvent(event);
-		if (over) retarget(pointerTarget(preview, drag.key, over));
+	const onDragMove = () => {
+		if (dragRef.current?.via !== "pointer") return;
+		const over = underPointer.current;
+		if (over) retarget((d) => pointerTarget(d.preview, d.key, over));
 	};
 
 	const targetColumn = useMemo(() => {
@@ -413,17 +453,25 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 			}}
 			// A pointer drag replaces a keyboard drag still in progress.
 			onDragStart={(event: DragStartEvent) => {
+				underPointer.current = null;
 				start(String(event.active.id), "pointer");
 			}}
 			onDragMove={onDragMove}
 			onDragOver={onDragMove}
-			onDragEnd={(event: DragEndEvent) => {
-				if (drag?.via !== "pointer") return;
-				if (event.over) drop();
-				else cancel(false);
+			onDragEnd={() => {
+				if (dragRef.current?.via !== "pointer") return;
+				// Released off the board: nothing under the pointer.
+				if (!underPointer.current) {
+					cancel(false);
+					return;
+				}
+				// The drop lands where the pointer is at release, whether or not a
+				// move event got there first.
+				onDragMove();
+				drop();
 			}}
 			onDragCancel={() => {
-				if (drag?.via === "pointer") cancel(false);
+				if (dragRef.current?.via === "pointer") cancel(false);
 			}}
 		>
 			<LayerContext.Provider value={layer}>
