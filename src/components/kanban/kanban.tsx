@@ -9,7 +9,7 @@
 // virtualised column (#326) and drag and drop (#327) plug into.
 //
 // A column with more than `virtualizeAbove` cards scrolls within itself and
-// renders only the cards in its window (`KanbanVirtualList`). The board keeps
+// renders only the cards in its window (`KanbanCardList`). The board keeps
 // the focused card mounted and scrolls a column to a card the arrow keys
 // reach outside the window, so keyboard navigation spans the whole column.
 import type React from "react";
@@ -26,8 +26,8 @@ import {
 	KanbanCardSlotContext,
 	KanbanCardTitle,
 } from "./kanban-card";
+import { KanbanCardList } from "./kanban-card-list";
 import { type KanbanDirection, nextPosition } from "./kanban-navigation";
-import { KanbanVirtualList } from "./kanban-virtual-list";
 
 export interface KanbanColumn<T> {
 	/** Stable id of the column. */
@@ -184,6 +184,9 @@ function KanbanRoot<T>(props: KanbanProps<T>) {
 				pendingFocus.current = null;
 				element.focus();
 			} else {
+				// The column scrolls the card into its window; the card takes focus
+				// when it mounts, without a native scroll of its own that would
+				// fight the virtualiser's.
 				pendingFocus.current = key;
 				scrollers.current.get(target.columnId)?.(to.index);
 			}
@@ -208,6 +211,13 @@ function KanbanRoot<T>(props: KanbanProps<T>) {
 			ref={boardRef}
 			role="group"
 			aria-label={ariaLabel}
+			onBlur={(event: React.FocusEvent<HTMLElement>) => {
+				// Focus left the board: a card the keys asked for must not take
+				// focus back when it mounts later.
+				if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+					pendingFocus.current = null;
+				}
+			}}
 			display="flex"
 			alignItems="flex-start"
 			gap="3"
@@ -245,11 +255,14 @@ function KanbanRoot<T>(props: KanbanProps<T>) {
 								cards.current.set(key, element);
 								if (pendingFocus.current === key) {
 									pendingFocus.current = null;
-									element.focus();
+									element.focus({ preventScroll: true });
 								}
 							} else cards.current.delete(key);
 						},
-						onFocus: () => setActive({ columnId: column.id, itemKey }),
+						onFocus: () => {
+							if (pendingFocus.current !== key) pendingFocus.current = null;
+							setActive({ columnId: column.id, itemKey });
+						},
 						onKeyDown: (event) => onCardKeyDown(c, index, event),
 					};
 					return (
@@ -315,33 +328,19 @@ function KanbanRoot<T>(props: KanbanProps<T>) {
 							</HStack>
 							{column.action}
 						</HStack>
-						{virtualized ? (
-							<KanbanVirtualList
-								aria-label={listLabel}
-								itemKeys={keys[c]}
-								estimateSize={estimateCardHeight}
-								maxHeight={columnMaxHeight}
-								keepIndex={keepIndex}
-								onScroller={(scroll) => {
-									if (scroll) scrollers.current.set(column.id, scroll);
-									else scrollers.current.delete(column.id);
-								}}
-								renderItem={renderItem}
-							/>
-						) : (
-							<Box
-								as="ul"
-								aria-label={listLabel}
-								listStyleType="none"
-								m="0"
-								p="0"
-								display="flex"
-								flexDirection="column"
-								gap="2"
-							>
-								{column.items.map((_, index) => renderItem(index))}
-							</Box>
-						)}
+						<KanbanCardList
+							aria-label={listLabel}
+							itemKeys={keys[c]}
+							virtualized={virtualized}
+							estimateSize={estimateCardHeight}
+							maxHeight={columnMaxHeight}
+							keepIndex={keepIndex}
+							onScroller={(scroll) => {
+								if (scroll) scrollers.current.set(column.id, scroll);
+								else scrollers.current.delete(column.id);
+							}}
+							renderItem={renderItem}
+						/>
 						{column.items.length === 0 && !collapsed
 							? (column.emptyState ?? (
 									<Text fontSize="xs" color="subtle" px="2">

@@ -535,6 +535,59 @@ describe("Kanban long columns", () => {
 		expect(first.tabIndex).toBe(0);
 	});
 
+	it("keeps the focused card when its column crosses virtualizeAbove", async () => {
+		const few = (n: number) => [{ id: "c", title: "C", items: many("c", n) }];
+		const el = await mount(<Board columns={few(3)} virtualizeAbove={3} />);
+		const focusedCard = card(el, "c card 2");
+		focusedCard.focus();
+		await act(async () => {
+			root?.render(
+				<Provider forcedTheme="light">
+					<Board columns={few(4)} virtualizeAbove={3} />
+				</Provider>,
+			);
+		});
+		expect(getComputedStyle(viewportOf(lists(el)[0])).overflowY).toBe("auto");
+		expect(focusedCard.isConnected).toBe(true);
+		expect(document.activeElement).toBe(focusedCard);
+	});
+
+	it("stays one tab stop with several long columns", async () => {
+		const el = await mount(
+			<>
+				<Board columns={LONG} />
+				<button type="button">After</button>
+			</>,
+		);
+		card(el, "s card 1").focus();
+		await userEvent.tab();
+		expect(document.activeElement?.textContent).toBe("After");
+	});
+
+	it("measures cards of different heights so they never overlap", async () => {
+		const el = await mount(
+			<Kanban
+				columns={[LONG[1]]}
+				getItemKey={(task) => task.id}
+				renderCard={(task, { index }) => (
+					<Kanban.Card>
+						<Kanban.CardTitle>{task.title}</Kanban.CardTitle>
+						{index % 2 === 0 ? <div style={{ height: 120 }} /> : null}
+					</Kanban.Card>
+				)}
+			/>,
+		);
+		await vi.waitFor(() => {
+			const rects = [
+				...lists(el)[0].querySelectorAll<HTMLElement>("[data-kanban-card]"),
+			].map((c) => c.getBoundingClientRect());
+			expect(rects.length).toBeGreaterThan(2);
+			for (let i = 1; i < rects.length; i++) {
+				expect(rects[i].top - rects[i - 1].bottom).toBeCloseTo(8, 0);
+			}
+		});
+	});
+
 	it("virtualises from virtualizeAbove cards", async () => {
 		const el = await mount(
 			<Board
