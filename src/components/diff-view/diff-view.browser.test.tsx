@@ -554,7 +554,7 @@ describe("DiffView comments", () => {
 		expect(comment.closest("section")?.dataset.diffFile).toBe("src/app.ts");
 		expect(comment.getAttribute("role")).toBe("article");
 		expect(comment.getAttribute("aria-label")).toBe(
-			"Comment by Reviewer on line 11",
+			"Comment by Reviewer on src/app.ts, line 11",
 		);
 		expect(comment.dataset.side).toBe("new");
 		expect(commentEl(el, "on-removed").dataset.side).toBe("old");
@@ -707,6 +707,34 @@ describe("DiffView keyboard jumps", () => {
 		// From a comment, j goes on to the next file.
 		await userEvent.keyboard("j");
 		expect(focusedFile()).toBe("docs/new.md");
+	});
+
+	it("k from inside a file goes to the previous file, not its own header", async () => {
+		const el = await mount(<DiffView diff={DIFF} comments={COMMENTS} />);
+		el.querySelector<HTMLElement>("[data-diff-comment='c2']")?.focus();
+		expect(focusedFile()).toBe("old.go");
+		await userEvent.keyboard("k");
+		expect(focusedFile()).toBe("docs/new.md");
+	});
+
+	it("leaves keys to a menu or listbox inside a comment", async () => {
+		const el = await mount(
+			<DiffView
+				diff={DIFF}
+				comments={COMMENTS}
+				renderComment={(c) => (
+					<div role="menu" aria-label={`Actions ${c.id}`}>
+						<button type="button" role="menuitem">
+							New for {c.id}
+						</button>
+					</div>
+				)}
+			/>,
+		);
+		const item = el.querySelector<HTMLElement>("[role='menuitem']");
+		item?.focus();
+		await userEvent.keyboard("nj");
+		expect(focused()).toBe(item);
 	});
 
 	it("jumps from focus inside a comment's own content", async () => {

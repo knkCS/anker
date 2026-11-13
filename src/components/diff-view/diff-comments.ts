@@ -22,12 +22,16 @@ export function groupCommentsByFile(
 ): CommentsByFile {
 	const byFile = new Map<DiffFile, DiffComment[]>();
 	const orphans: DiffComment[] = [];
+	const byKey = new Map<string, DiffFile>();
+	const byPath = new Map<string, DiffFile>();
+	for (const f of files) {
+		byKey.set(f.key, f);
+		for (const path of [f.newPath, f.oldPath]) {
+			if (path !== null && !byPath.has(path)) byPath.set(path, f);
+		}
+	}
 	for (const comment of comments) {
-		const file =
-			files.find((f) => f.key === comment.path) ??
-			files.find(
-				(f) => f.newPath === comment.path || f.oldPath === comment.path,
-			);
+		const file = byKey.get(comment.path) ?? byPath.get(comment.path);
 		if (!file) {
 			orphans.push(comment);
 			continue;
@@ -57,9 +61,25 @@ export function anchorComments(
 ): AnchoredComments {
 	const byLine = new Map<DiffLine, DiffComment[]>();
 	const fileLevel: DiffComment[] = [];
+	if (comments.length === 0) return { byLine, fileLevel };
+	// Each line number once per side; the first line wins.
+	const newLines = new Map<number, DiffLine>();
+	const oldLines = new Map<number, DiffLine>();
+	for (const hunk of file.hunks) {
+		for (const line of hunk.lines) {
+			if (line.newNumber !== null && !newLines.has(line.newNumber)) {
+				newLines.set(line.newNumber, line);
+			}
+			if (line.oldNumber !== null && !oldLines.has(line.oldNumber)) {
+				oldLines.set(line.oldNumber, line);
+			}
+		}
+	}
 	for (const comment of comments) {
 		const line =
-			comment.line === undefined ? undefined : findLine(file, comment);
+			comment.line == null
+				? undefined
+				: (comment.side === "old" ? oldLines : newLines).get(comment.line);
 		if (!line) {
 			fileLevel.push(comment);
 			continue;
@@ -69,16 +89,4 @@ export function anchorComments(
 		else byLine.set(line, [comment]);
 	}
 	return { byLine, fileLevel };
-}
-
-function findLine(file: DiffFile, comment: DiffComment): DiffLine | undefined {
-	const old = comment.side === "old";
-	for (const hunk of file.hunks) {
-		for (const line of hunk.lines) {
-			if ((old ? line.oldNumber : line.newNumber) === comment.line) {
-				return line;
-			}
-		}
-	}
-	return undefined;
 }

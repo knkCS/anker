@@ -1643,7 +1643,8 @@ const files = parseUnifiedDiff(text).filter((f) => !f.path.endsWith(".lock"));
   "Line N"; one on a file the diff does not contain shows after the files.
   None is dropped. `renderComment(comment, file)` replaces the content
   while anker keeps the frame. The header counts each file's comments, so
-  a collapsed file still says it has some.
+  a collapsed file still says it has some. Memoise the `comments` array:
+  a new one re-places every comment.
 
   ```tsx
   <DiffView
@@ -1659,8 +1660,8 @@ const files = parseUnifiedDiff(text).filter((f) => !f.path.endsWith(".lock"));
 - **Keyboard**: with focus inside the diff, `j` / `k` jump to the next /
   previous file (its toggle, or its heading in `compact`) and `n` / `p` to
   the next / previous comment (each comment is a focusable `article`).
-  Ignored in text fields and with a modifier key; a collapsed file's
-  comments are skipped. `keyboardNavigation={false}` turns the jumps off
+  Ignored in text fields, menus and listboxes, and with a modifier key; a
+  collapsed file's comments are skipped. `keyboardNavigation={false}` turns the jumps off
   where the page already binds these keys.
 - **Typography**: anker's `mono` font, whitespace kept, `tabSize` (default
   4). Long lines scroll the file sideways rather than wrap; line numbers

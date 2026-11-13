@@ -81,6 +81,7 @@ describe("anchorComments", () => {
 	it("sends comments without a line, between hunks or on the wrong side to the file level", () => {
 		const { byLine, fileLevel } = anchorComments(app, [
 			{ id: "file", path: "src/app.ts" },
+			{ id: "null-line", path: "src/app.ts", line: null },
 			{ id: "between-hunks", path: "src/app.ts", line: 25 },
 			{ id: "past-the-end", path: "src/app.ts", line: 900 },
 			// Line 42 exists on the new side only.
@@ -89,6 +90,7 @@ describe("anchorComments", () => {
 		expect(byLine.size).toBe(0);
 		expect(ids(fileLevel)).toEqual([
 			"file",
+			"null-line",
 			"between-hunks",
 			"past-the-end",
 			"old-42",

@@ -88,7 +88,7 @@ describe("buildDiffRows", () => {
 		);
 		const fold = buildDiffRows(file).find((row) => row.type === "fold");
 		if (fold?.type !== "fold") throw new Error("no fold");
-		const rows = buildDiffRows(file, { expanded: new Set([fold.key]) });
+		const rows = buildDiffRows(file, { expanded: new Set(fold.lineKeys) });
 		expect(shape(rows)).not.toContain("fold(6)");
 		expect(shape(rows).filter((s) => s.startsWith("c"))).toHaveLength(12);
 	});
@@ -183,6 +183,21 @@ describe("buildDiffRows", () => {
 			]);
 			const keys = rows.map((row) => row.key);
 			expect(new Set(keys).size).toBe(keys.length);
+		});
+
+		it("keeps an expanded fold open when a comment lands inside it", () => {
+			const file = fileWith(
+				["-a", "+a", ...context(2, 20), "-b", "+b"],
+				"@@ -1,22 +1,22 @@",
+			);
+			const fold = buildDiffRows(file).find((row) => row.type === "fold");
+			if (fold?.type !== "fold") throw new Error("no fold");
+			const { byLine } = anchorComments(file, [comment("late", 12)]);
+			const rows = buildDiffRows(file, {
+				expanded: new Set(fold.lineKeys),
+				comments: byLine,
+			});
+			expect(rows.some((row) => row.type === "fold")).toBe(false);
 		});
 	});
 });

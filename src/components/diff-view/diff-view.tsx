@@ -98,11 +98,11 @@ export const DEFAULT_DIFF_VIEW_LABELS: DiffViewLabels = {
 	formatLine: (line, side) => `${side === "old" ? "Old line" : "Line"} ${line}`,
 	formatCommentLabel: (comment) => {
 		const by = comment.author ? ` by ${comment.author}` : "";
-		const on =
-			comment.line === undefined
-				? ` on ${comment.path}`
-				: ` on ${comment.side === "old" ? "old line" : "line"} ${comment.line}`;
-		return `Comment${by}${on}`;
+		const line =
+			comment.line == null
+				? ""
+				: `, ${comment.side === "old" ? "old line" : "line"} ${comment.line}`;
+		return `Comment${by} on ${comment.path}${line}`;
 	},
 	otherFilesComments: "Comments on files not in this diff",
 };
@@ -137,7 +137,8 @@ export interface DiffViewProps {
 	 * Comments anchored to a file and, optionally, a line (new or old side).
 	 * Each renders under its line; one without a line, or on a line outside
 	 * the hunks, at the top of its file; one on a file the diff does not
-	 * contain, after the files. A commented line is never folded.
+	 * contain, after the files. A commented line is never folded. Pass a
+	 * memoised array: a new one re-places every comment.
 	 */
 	comments?: readonly DiffComment[];
 	/**
@@ -227,24 +228,38 @@ function findJumpTarget(
 	direction: 1 | -1,
 ): HTMLElement | undefined {
 	const targets = [...root.querySelectorAll<HTMLElement>(selector)];
+	// A file jump counts from the file focus is in, not from its header.
+	const origin =
+		selector === FILE_TARGET
+			? (from.closest<HTMLElement>("[data-diff-file]") ?? from)
+			: from;
 	const side =
 		direction === 1
 			? Node.DOCUMENT_POSITION_FOLLOWING
 			: Node.DOCUMENT_POSITION_PRECEDING;
 	const candidates = targets.filter((target) => {
-		if (target === from) return false;
-		const position = from.compareDocumentPosition(target);
+		if (target === origin) return false;
+		const position = origin.compareDocumentPosition(target);
 		return (
 			(position & side) !== 0 &&
-			(position & Node.DOCUMENT_POSITION_CONTAINS) === 0
+			(position &
+				(Node.DOCUMENT_POSITION_CONTAINS |
+					Node.DOCUMENT_POSITION_CONTAINED_BY)) ===
+				0
 		);
 	});
 	return direction === 1 ? candidates[0] : candidates.at(-1);
 }
 
-const isTextEntry = (element: HTMLElement) =>
-	element.isContentEditable ||
-	element.closest("input, textarea, select, [contenteditable='true']") !== null;
+/**
+ * Keys typed here belong to the element: text entry, and widgets with their
+ * own typeahead (a menu or listbox from `renderFileActions`).
+ */
+const OWNS_KEYS =
+	"input, textarea, select, [contenteditable='true'], [role='menu'], [role='menubar'], [role='menuitem'], [role='listbox'], [role='option'], [role='combobox'], [role='tree'], [role='grid']";
+
+const ownsKeys = (element: HTMLElement) =>
+	element.isContentEditable || element.closest(OWNS_KEYS) !== null;
 
 const VARIANT_STYLES: Record<
 	DiffViewVariant,
@@ -283,7 +298,11 @@ export function DiffView(props: DiffViewProps) {
 			if (event.altKey || event.ctrlKey || event.metaKey) return;
 			const jump = JUMPS[event.key];
 			const from = event.target as HTMLElement;
-			if (!jump || isTextEntry(from)) return;
+			// A portal (a menu opened from a comment) bubbles through React
+			// but is not in the diff's DOM: not ours.
+			if (!jump || !event.currentTarget.contains(from) || ownsKeys(from)) {
+				return;
+			}
 			const next = findJumpTarget(
 				event.currentTarget,
 				jump.selector,
@@ -335,6 +354,7 @@ export function DiffView(props: DiffViewProps) {
 			{files.map((file) => (
 				<DiffFileSection
 					{...props}
+					headingLevel={headingLevel}
 					key={file.key}
 					file={file}
 					fileComments={grouped.byFile.get(file)}
@@ -372,7 +392,7 @@ export function DiffView(props: DiffViewProps) {
 						labels={labels}
 						renderComment={props.renderComment}
 						caption={(comment) =>
-							comment.line === undefined
+							comment.line == null
 								? comment.path
 								: `${comment.path} · ${labels.formatLine(comment.line, comment.side ?? "new")}`
 						}
@@ -385,7 +405,8 @@ export function DiffView(props: DiffViewProps) {
 }
 DiffView.displayName = "DiffView";
 
-interface DiffFileSectionProps extends DiffViewProps {
+interface DiffFileSectionProps extends Omit<DiffViewProps, "headingLevel"> {
+	headingLevel: NonNullable<DiffViewProps["headingLevel"]>;
 	file: DiffFile;
 	fileComments: readonly DiffComment[] | undefined;
 	labels: DiffViewLabels;
@@ -402,7 +423,7 @@ function DiffFileSection(props: DiffFileSectionProps) {
 		onFileCollapsedChange,
 		renderFileActions,
 		tabSize = 4,
-		headingLevel = 3,
+		headingLevel,
 		fileComments,
 		renderComment,
 	} = props;
@@ -448,11 +469,12 @@ function DiffFileSection(props: DiffFileSectionProps) {
 		onFileCollapsedChange?.(file, next);
 	}, [collapsed, file, onFileCollapsedChange]);
 	const expand = useCallback(
-		(key: string) => {
-			setExpansions((current) => ({
-				file,
-				keys: new Set(current.file === file ? current.keys : []).add(key),
-			}));
+		(lineKeys: readonly string[]) => {
+			setExpansions((current) => {
+				const keys = new Set(current.file === file ? current.keys : []);
+				for (const key of lineKeys) keys.add(key);
+				return { file, keys };
+			});
 		},
 		[file],
 	);
@@ -638,7 +660,7 @@ function DiffFileSection(props: DiffFileSectionProps) {
 								labels={labels}
 								renderComment={renderComment}
 								caption={(comment) =>
-									comment.line === undefined
+									comment.line == null
 										? undefined
 										: labels.formatLine(comment.line, comment.side ?? "new")
 								}
@@ -669,7 +691,7 @@ interface FileBodyProps {
 	labels: DiffViewLabels;
 	variant: DiffViewVariant;
 	tabSize: number;
-	onExpand: (key: string) => void;
+	onExpand: (lineKeys: readonly string[]) => void;
 	renderComment: DiffViewProps["renderComment"];
 }
 
@@ -768,7 +790,7 @@ function FileBody({
 									<Box
 										as="button"
 										{...{ type: "button" }}
-										onClick={() => onExpand(row.key)}
+										onClick={() => onExpand(row.lineKeys)}
 										display="flex"
 										alignItems="center"
 										gap="1.5"
@@ -904,21 +926,25 @@ function CommentList({
 	caption,
 	px,
 }: CommentListProps) {
+	// A repeated id must not merge two comments: the second gets `id#2`.
+	const seen = new Map<string, number>();
 	return (
 		<Stack gap="2" px={px} py="2">
 			{comments.map((comment) => {
+				const nth = (seen.get(comment.id) ?? 0) + 1;
+				seen.set(comment.id, nth);
 				const tone = comment.tone ?? "neutral";
 				const where = caption?.(comment);
 				return (
 					<Box
-						key={comment.id}
+						key={nth === 1 ? comment.id : `${comment.id}#${nth}`}
 						role="article"
 						tabIndex={0}
 						aria-label={labels.formatCommentLabel(comment)}
 						data-diff-comment={comment.id}
 						data-tone={tone}
 						data-side={
-							comment.line === undefined ? undefined : (comment.side ?? "new")
+							comment.line == null ? undefined : (comment.side ?? "new")
 						}
 						ps="3"
 						py="1"

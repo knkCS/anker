@@ -78,8 +78,11 @@ export interface DiffComment {
 	 * path the diff does not contain shows after the files.
 	 */
 	path: string;
-	/** The line number on `side`; without one, the comment is on the file. */
-	line?: number;
+	/**
+	 * The line number on `side`; without one (`undefined` or `null`), the
+	 * comment is on the file.
+	 */
+	line?: number | null;
 	/** The side `line` counts on: the new file or the old one. @default "new" */
 	side?: DiffSide;
 	/** The author's display name. */

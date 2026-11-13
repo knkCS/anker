@@ -15,6 +15,8 @@ export type DiffRow =
 			key: string;
 			/** The unchanged lines the fold hides, in order. */
 			lines: DiffLine[];
+			/** The keys those lines' rows get once expanded. */
+			lineKeys: string[];
 	  }
 	| {
 			type: "comments";
@@ -30,7 +32,7 @@ export interface BuildDiffRowsOptions {
 	 * lines is folded. `Infinity` folds nothing. @default 3
 	 */
 	contextLines?: number;
-	/** Keys of the folds the reader expanded. */
+	/** Row keys of the folded lines the reader expanded (a fold's `lineKeys`). */
 	expanded?: ReadonlySet<string>;
 	/**
 	 * Comments by the line they are anchored to (`anchorComments`). Each
@@ -86,23 +88,30 @@ export function buildDiffRows(
 			// Keep `keep` lines on each side that touches a change.
 			const hideFrom = leading ? i : i + keep;
 			const hideTo = trailing && !leading ? end : end - keep;
-			const hidden = hideTo - hideFrom;
-			const foldKey = `h${h}:fold${hideFrom}`;
-			const fold =
-				hidden >= MIN_FOLD &&
-				Number.isFinite(hidden) &&
-				!expanded?.has(foldKey);
-			for (let j = i; j < end; j++) {
-				if (fold && j === hideFrom) {
+			const foldable = Number.isFinite(hideTo - hideFrom);
+			// Lines the reader expanded stay shown; every stretch of the
+			// others long enough folds. Keyed by line, an expansion survives
+			// a comment that later splits the run.
+			const hidden = (j: number) =>
+				foldable && j >= hideFrom && j < hideTo && !expanded?.has(`h${h}:${j}`);
+			let j = i;
+			while (j < end) {
+				let stop = j;
+				while (stop < end && hidden(stop)) stop++;
+				if (stop - j >= MIN_FOLD) {
+					const lineKeys: string[] = [];
+					for (let k = j; k < stop; k++) lineKeys.push(`h${h}:${k}`);
 					rows.push({
 						type: "fold",
-						key: foldKey,
-						lines: lines.slice(hideFrom, hideTo),
+						key: `h${h}:fold${j}`,
+						lines: lines.slice(j, stop),
+						lineKeys,
 					});
-					j = hideTo - 1;
+					j = stop;
 					continue;
 				}
 				pushLine(`h${h}:${j}`, lines[j]);
+				j++;
 			}
 			i = end;
 		}
