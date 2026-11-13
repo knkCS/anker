@@ -1,16 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 import { ExternalLink } from "lucide-react";
-import { IconButton } from "../../atoms/button";
+import { Button, IconButton } from "../../atoms/button";
+import { Avatar } from "../../primitives/avatar";
 import { DarkMode, LightMode } from "../../primitives/color-mode";
-import { Box, Grid } from "../../primitives/layout";
+import { Box, Grid, HStack, Stack } from "../../primitives/layout";
+import { Text } from "../../primitives/typography";
 import { DiffView } from "./diff-view";
+import type { DiffComment } from "./types";
 
 /**
  * A unified diff (as `git diff` prints it) rendered per file: path, change
  * type and line counts in the header, old and new line numbers, added and
  * removed lines on the `success` and `danger` palettes, long unchanged runs
  * folded behind an expand control. Click a file's path to collapse it.
+ * Comments anchor to a file and line; with focus inside the diff, `j` / `k`
+ * jump between files and `n` / `p` between comments.
  * Toggle the toolbar theme, or open "Light and dark", for both modes.
  */
 const meta = {
@@ -198,4 +203,144 @@ export const CompactLightAndDark: Story = {
 /** An empty diff. */
 export const Empty: Story = {
 	args: { diff: "" },
+};
+
+/** Reviewer findings of one Review Round, as a Change Request view shows them. */
+const REVIEW: DiffComment[] = [
+	{
+		id: "f1",
+		path: "internal/runner/runner.go",
+		line: 13,
+		author: "Reviewer",
+		avatar: <Avatar name="Reviewer" size="xs" />,
+		timestamp: "14:03",
+		tone: "danger",
+		label: "Blocking",
+		body: "Wrap with %w so callers can still match the cause with errors.Is.",
+	},
+	{
+		id: "f2",
+		path: "internal/runner/runner.go",
+		line: 13,
+		side: "old",
+		author: "Reviewer",
+		timestamp: "14:03",
+		tone: "info",
+		label: "Note",
+		body: "The bare return lost the step name.",
+	},
+	{
+		id: "f3",
+		path: "internal/runner/runner.go",
+		line: 22,
+		author: "Reviewer",
+		timestamp: "14:04",
+		tone: "warning",
+		label: "Suggestion",
+		body: "This unchanged line stays visible because a comment is on it.",
+	},
+	{
+		id: "f4",
+		path: "internal/runner/runner.go",
+		line: 120,
+		author: "Reviewer",
+		timestamp: "14:05",
+		tone: "warning",
+		label: "Suggestion",
+		body: "Line 120 is outside the diff's hunks, so this shows at the file level.",
+	},
+	{
+		id: "f5",
+		path: "docs/runner.md",
+		author: "Reviewer",
+		timestamp: "14:06",
+		tone: "success",
+		label: "Looks good",
+		body: "Clear and short.",
+	},
+	{
+		id: "f6",
+		path: "internal/runner/runner_test.go",
+		line: 8,
+		author: "Reviewer",
+		timestamp: "14:07",
+		tone: "danger",
+		label: "Blocking",
+		body: "A file the diff does not contain: listed after the files.",
+	},
+];
+
+/**
+ * Comments under their lines (new and old side), at the file level when the
+ * line is outside the hunks, and after the files when the file is not in the
+ * diff. Focus a file's path, then press `n` / `p` and `j` / `k`.
+ */
+export const Comments: Story = {
+	args: { diff: MULTI_FILE, comments: REVIEW },
+};
+
+/** Comments in both modes: tone edges and badges follow the theme. */
+export const CommentsLightAndDark: Story = {
+	args: { diff: MULTI_FILE, comments: REVIEW },
+	parameters: { layout: "fullscreen" },
+	render: (args) => (
+		<Grid templateColumns="1fr" gap="0">
+			<LightMode>
+				<Box bg="bg-canvas" p="6">
+					<DiffView {...args} />
+				</Box>
+			</LightMode>
+			<DarkMode>
+				<Box bg="bg-canvas" p="6">
+					<DiffView {...args} />
+				</Box>
+			</DarkMode>
+		</Grid>
+	),
+};
+
+/** `renderComment` replaces the content; anker keeps the frame and the jumps. */
+export const CustomCommentContent: Story = {
+	args: {
+		diff: SINGLE_FILE,
+		comments: REVIEW.slice(0, 2),
+		renderComment: (comment) => (
+			<Stack gap="1">
+				<HStack gap="2">
+					<Text fontSize="sm" fontWeight="medium">
+						{comment.author}
+					</Text>
+					<Text fontSize="xs" color="muted">
+						{comment.timestamp}
+					</Text>
+				</HStack>
+				<Text fontSize="sm">{comment.body}</Text>
+				<Box>
+					<Button size="xs" variant="ghost">
+						Resolve
+					</Button>
+				</Box>
+			</Stack>
+		),
+	},
+};
+
+/** The compact variant with comments, in light and dark mode. */
+export const CompactCommentsLightAndDark: Story = {
+	args: { diff: SINGLE_FILE, variant: "compact", comments: REVIEW.slice(0, 2) },
+	parameters: { layout: "fullscreen" },
+	render: (args) => (
+		<Grid templateColumns="1fr 1fr" gap="0">
+			<LightMode>
+				<Box bg="bg-canvas" p="4">
+					<DiffView {...args} />
+				</Box>
+			</LightMode>
+			<DarkMode>
+				<Box bg="bg-canvas" p="4">
+					<DiffView {...args} />
+				</Box>
+			</DarkMode>
+		</Grid>
+	),
 };

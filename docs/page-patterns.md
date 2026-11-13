@@ -1632,11 +1632,43 @@ const files = parseUnifiedDiff(text).filter((f) => !f.path.endsWith(".lock"));
 - **`variant="compact"`** is for one file inside a narrow pane: smaller
   type, a slim header that does not collapse and shows a change badge only
   when the file is not a plain modification.
+- **Comments** (`comments`): each `DiffComment` names a `path` (a file's
+  path or `key`), optionally a `line` and a `side` (`"new"`, the default,
+  or `"old"`), and carries `author`, `avatar`, `timestamp`, `tone`, `label`
+  and `body`. It renders under its line — a commented line is never folded
+  — as a `MessageGroup` + `MessageBubble` edged in its tone (`label` is a
+  `StatusBadge` in that tone; give one whenever the tone means something).
+  A comment without a line, or on a line outside the hunks (lines between
+  hunks are not in the diff text), shows at the top of its file with
+  "Line N"; one on a file the diff does not contain shows after the files.
+  None is dropped. `renderComment(comment, file)` replaces the content
+  while anker keeps the frame. The header counts each file's comments, so
+  a collapsed file still says it has some. Memoise the `comments` array:
+  a new one re-places every comment.
+
+  ```tsx
+  <DiffView
+    diff={changeRequest.diff}
+    comments={round.findings.map((f) => ({
+      id: f.id, path: f.path, line: f.line, author: "Reviewer",
+      tone: f.blocking ? "danger" : "warning",
+      label: f.blocking ? "Blocking" : "Suggestion",
+      timestamp: <RelativeDateTime date={f.createdAt} />, body: f.body,
+    }))}
+  />
+  ```
+- **Keyboard**: with focus inside the diff, `j` / `k` jump to the next /
+  previous file (its toggle, or its heading in `compact`) and `n` / `p` to
+  the next / previous comment (each comment is a focusable `article`).
+  Ignored in text fields, menus and listboxes, and with a modifier key; a
+  collapsed file's comments are skipped. `keyboardNavigation={false}` turns the jumps off
+  where the page already binds these keys.
 - **Typography**: anker's `mono` font, whitespace kept, `tabSize` (default
   4). Long lines scroll the file sideways rather than wrap; line numbers
   and signs are not selected when the reader copies code.
 - Strings are props with English defaults (`labels`). Syntax
-  highlighting, a side-by-side view and editing are out of scope.
+  highlighting, a side-by-side view and writing or editing comments are
+  out of scope.
 
 ### Charts (`LineChart`, `AreaChart`, `BarChart`)
 

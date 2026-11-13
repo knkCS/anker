@@ -696,6 +696,15 @@ monospace block with line numbers and colours. Full guidance:
   `defaultCollapsed` (`true` or a predicate) and `onFileCollapsedChange`.
   `renderFileActions(file)` adds header actions.
 - **`variant="compact"`** for a single file in a detail pane or inspector.
+- **Comments**: `comments` takes `DiffComment`s (`id`, `path`, optional
+  `line` and `side: "new" | "old"`, `author`, `avatar`, `timestamp`,
+  `tone`, `label`, `body`). Each renders under its line (never folded away)
+  with anker's message blocks, edged in its tone; give a `label` whenever
+  the tone means something. A comment outside the hunks shows at the top
+  of its file, one on a file not in the diff after the files — none is
+  dropped. `renderComment(comment, file)` supplies your own content.
+- **Keyboard**: `j` / `k` jump between files, `n` / `p` between comments
+  while focus is in the diff (`keyboardNavigation={false}` to turn off).
 - Strings are props with English defaults (`labels`).
 
 ---

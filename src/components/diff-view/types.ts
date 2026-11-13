@@ -4,6 +4,9 @@
  * or annotate files, and hand the result to `DiffView` as `files`.
  */
 
+import type { ReactNode } from "react";
+import type { StatusBadgeTone } from "../../atoms/status-badge";
+
 /** How a file changed. A binary file carries its own `binary` flag. */
 export type DiffChangeType = "added" | "modified" | "deleted" | "renamed";
 
@@ -54,4 +57,47 @@ export interface DiffFile {
 	/** Number of removed lines. */
 	deletions: number;
 	hunks: DiffHunk[];
+}
+
+/** The side of a diff a comment's line number counts on. */
+export type DiffSide = "new" | "old";
+
+/** What a comment means: one of anker's status tones. */
+export type DiffCommentTone = StatusBadgeTone;
+
+/**
+ * A comment anchored to a file and, optionally, a line of it — a review
+ * finding, a note. `DiffView` renders it under that line, or at the file's
+ * top when the line is not in the diff's hunks.
+ */
+export interface DiffComment {
+	/** Unique among the comments passed to one `DiffView`. */
+	id: string;
+	/**
+	 * The file: a `DiffFile`'s `key`, or its new or old path. A comment on a
+	 * path the diff does not contain shows after the files.
+	 */
+	path: string;
+	/**
+	 * The line number on `side`; without one (`undefined` or `null`), the
+	 * comment is on the file.
+	 */
+	line?: number | null;
+	/** The side `line` counts on: the new file or the old one. @default "new" */
+	side?: DiffSide;
+	/** The author's display name. */
+	author?: string;
+	/** Avatar slot, e.g. `<Persona hideDetails />`. anker never fetches. */
+	avatar?: ReactNode;
+	/** The time, formatted by the consumer (or a `<DateTime />`). */
+	timestamp?: ReactNode;
+	/** What the comment means; paints its edge and its `label`. @default "neutral" */
+	tone?: DiffCommentTone;
+	/**
+	 * A badge in the comment's tone ("Blocking", "Suggestion"). Give one
+	 * whenever the tone carries meaning, so it never rests on hue alone.
+	 */
+	label?: string;
+	/** The comment's content. */
+	body?: ReactNode;
 }

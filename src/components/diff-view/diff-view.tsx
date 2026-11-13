@@ -1,21 +1,39 @@
 // DiffView (#330, Spec #316) — a unified diff rendered per file: a header
 // with the path, change type and line counts; old and new line numbers;
 // added and removed lines on the `success` and `danger` status palettes;
-// collapsible files; long unchanged runs folded behind an expand control.
+// collapsible files; long unchanged runs folded behind an expand control;
+// comments (#331) anchored to a line, under that line, or at the file level
+// when the line is not in the hunks — none dropped; `j`/`k` and `n`/`p` jump
+// between files and comments.
 //
 // Text in (`diff`, parsed by `parseUnifiedDiff`) or data in (`files`), so a
 // consumer that parses once — to filter files, to count them — hands the
 // result straight over. Each file renders the flat row list `buildDiffRows`
 // builds, the seam line comments (#331) and virtualisation (#332) plug into.
-import { ArrowRight, Ban, ChevronRight, UnfoldVertical } from "lucide-react";
+import {
+	ArrowRight,
+	Ban,
+	ChevronRight,
+	MessageSquare,
+	UnfoldVertical,
+} from "lucide-react";
 import type React from "react";
 import { useCallback, useId, useMemo, useState } from "react";
 import { StatusBadge, type StatusBadgeTone } from "../../atoms/status-badge";
 import { Box, HStack, Stack } from "../../primitives/layout";
 import { Text } from "../../primitives/typography";
+import { MessageBubble, MessageGroup } from "../message";
+import { anchorComments, groupCommentsByFile } from "./diff-comments";
 import { buildDiffRows, type DiffRow } from "./diff-rows";
 import { parseUnifiedDiff } from "./parse-unified-diff";
-import type { DiffChangeType, DiffFile, DiffLine } from "./types";
+import type {
+	DiffChangeType,
+	DiffComment,
+	DiffCommentTone,
+	DiffFile,
+	DiffLine,
+	DiffSide,
+} from "./types";
 
 export type DiffViewVariant = "default" | "compact";
 
@@ -45,6 +63,14 @@ export interface DiffViewLabels {
 	formatExpand: (count: number) => string;
 	/** The line counts as read by assistive tech. */
 	formatLineCounts: (additions: number, deletions: number) => string;
+	/** The comment count in a file's header. */
+	formatCommentCount: (count: number) => string;
+	/** Where a file-level comment points: a line outside the hunks. */
+	formatLine: (line: number, side: DiffSide) => string;
+	/** Names a comment for assistive tech. */
+	formatCommentLabel: (comment: DiffComment) => string;
+	/** The heading over comments on files the diff does not contain. */
+	otherFilesComments: string;
 }
 
 const plural = (count: number, one: string, many: string) =>
@@ -68,6 +94,17 @@ export const DEFAULT_DIFF_VIEW_LABELS: DiffViewLabels = {
 		`Expand ${plural(count, "unchanged line", "unchanged lines")}`,
 	formatLineCounts: (additions, deletions) =>
 		`${plural(additions, "addition", "additions")}, ${plural(deletions, "deletion", "deletions")}`,
+	formatCommentCount: (count) => plural(count, "comment", "comments"),
+	formatLine: (line, side) => `${side === "old" ? "Old line" : "Line"} ${line}`,
+	formatCommentLabel: (comment) => {
+		const by = comment.author ? ` by ${comment.author}` : "";
+		const line =
+			comment.line == null
+				? ""
+				: `, ${comment.side === "old" ? "old line" : "line"} ${comment.line}`;
+		return `Comment${by} on ${comment.path}${line}`;
+	},
+	otherFilesComments: "Comments on files not in this diff",
 };
 
 export interface DiffViewProps {
@@ -96,6 +133,31 @@ export interface DiffViewProps {
 	onFileCollapsedChange?: (file: DiffFile, collapsed: boolean) => void;
 	/** Extra content at the end of a file's header (a link, a menu). */
 	renderFileActions?: (file: DiffFile) => React.ReactNode;
+	/**
+	 * Comments anchored to a file and, optionally, a line (new or old side).
+	 * Each renders under its line; one without a line, or on a line outside
+	 * the hunks, at the top of its file; one on a file the diff does not
+	 * contain, after the files. A commented line is never folded. Pass a
+	 * memoised array: a new one re-places every comment.
+	 */
+	comments?: readonly DiffComment[];
+	/**
+	 * Renders a comment's content in place of anker's default (a
+	 * `MessageGroup` with the author and avatar, a `MessageBubble` with the
+	 * timestamp, the `label` badge and the `body`). anker keeps the frame:
+	 * the tone edge, focus and the keyboard jumps. `file` is `null` for a
+	 * comment on a file the diff does not contain.
+	 */
+	renderComment?: (
+		comment: DiffComment,
+		file: DiffFile | null,
+	) => React.ReactNode;
+	/**
+	 * Keyboard jumps while focus is inside the diff: `j` / `k` to the next /
+	 * previous file, `n` / `p` to the next / previous comment. Ignored in
+	 * text fields and with a modifier key. @default true
+	 */
+	keyboardNavigation?: boolean;
 	/** The width of a tab character, in spaces. @default 4 */
 	tabSize?: number;
 	/** The heading level of the file paths. @default 3 */
@@ -133,6 +195,72 @@ const KIND_STYLES: Record<
 	},
 };
 
+/** The inline-start edge of a comment, per tone. */
+const TONE_EDGE: Record<DiffCommentTone, string> = {
+	success: "success.border",
+	warning: "warning.border",
+	danger: "danger.border",
+	info: "info.border",
+	neutral: "border-emphasized",
+	accent: "primary.border",
+};
+
+/** Marks the element a file jump focuses: its toggle, or its heading. */
+const FILE_TARGET = "[data-diff-file-focus]";
+const COMMENT_TARGET = "[data-diff-comment]";
+
+const JUMPS: Record<string, { selector: string; direction: 1 | -1 }> = {
+	j: { selector: FILE_TARGET, direction: 1 },
+	k: { selector: FILE_TARGET, direction: -1 },
+	n: { selector: COMMENT_TARGET, direction: 1 },
+	p: { selector: COMMENT_TARGET, direction: -1 },
+};
+
+/**
+ * The next (or previous) target in document order from `from`, skipping the
+ * target `from` sits in. Reads the rendered DOM: a collapsed file's
+ * comments are not rendered, so a jump passes over them.
+ */
+function findJumpTarget(
+	root: HTMLElement,
+	selector: string,
+	from: Element,
+	direction: 1 | -1,
+): HTMLElement | undefined {
+	const targets = [...root.querySelectorAll<HTMLElement>(selector)];
+	// A file jump counts from the file focus is in, not from its header.
+	const origin =
+		selector === FILE_TARGET
+			? (from.closest<HTMLElement>("[data-diff-file]") ?? from)
+			: from;
+	const side =
+		direction === 1
+			? Node.DOCUMENT_POSITION_FOLLOWING
+			: Node.DOCUMENT_POSITION_PRECEDING;
+	const candidates = targets.filter((target) => {
+		if (target === origin) return false;
+		const position = origin.compareDocumentPosition(target);
+		return (
+			(position & side) !== 0 &&
+			(position &
+				(Node.DOCUMENT_POSITION_CONTAINS |
+					Node.DOCUMENT_POSITION_CONTAINED_BY)) ===
+				0
+		);
+	});
+	return direction === 1 ? candidates[0] : candidates.at(-1);
+}
+
+/**
+ * Keys typed here belong to the element: text entry, and widgets with their
+ * own typeahead (a menu or listbox from `renderFileActions`).
+ */
+const OWNS_KEYS =
+	"input, textarea, select, [contenteditable='true'], [role='menu'], [role='menubar'], [role='menuitem'], [role='listbox'], [role='option'], [role='combobox'], [role='tree'], [role='grid']";
+
+const ownsKeys = (element: HTMLElement) =>
+	element.isContentEditable || element.closest(OWNS_KEYS) !== null;
+
 const VARIANT_STYLES: Record<
 	DiffViewVariant,
 	{ fontSize: string; cellX: string; headerY: string; headerX: string }
@@ -148,6 +276,9 @@ export function DiffView(props: DiffViewProps) {
 		variant = "default",
 		labels: labelOverrides,
 		"aria-label": ariaLabel,
+		comments,
+		keyboardNavigation = true,
+		headingLevel = 3,
 	} = props;
 	const files = useMemo(
 		() => givenFiles ?? parseUnifiedDiff(diff ?? ""),
@@ -157,8 +288,35 @@ export function DiffView(props: DiffViewProps) {
 		() => ({ ...DEFAULT_DIFF_VIEW_LABELS, ...labelOverrides }),
 		[labelOverrides],
 	);
+	const grouped = useMemo(
+		() => groupCommentsByFile(files, comments ?? []),
+		[files, comments],
+	);
+	const onKeyDown = useCallback(
+		(event: React.KeyboardEvent<HTMLElement>) => {
+			if (!keyboardNavigation || event.defaultPrevented) return;
+			if (event.altKey || event.ctrlKey || event.metaKey) return;
+			const jump = JUMPS[event.key];
+			const from = event.target as HTMLElement;
+			// A portal (a menu opened from a comment) bubbles through React
+			// but is not in the diff's DOM: not ours.
+			if (!jump || !event.currentTarget.contains(from) || ownsKeys(from)) {
+				return;
+			}
+			const next = findJumpTarget(
+				event.currentTarget,
+				jump.selector,
+				from,
+				jump.direction,
+			);
+			if (!next) return;
+			event.preventDefault();
+			next.focus();
+		},
+		[keyboardNavigation],
+	);
 
-	if (files.length === 0) {
+	if (files.length === 0 && grouped.orphans.length === 0) {
 		return (
 			<Box
 				data-diff-view=""
@@ -186,23 +344,71 @@ export function DiffView(props: DiffViewProps) {
 			aria-label={ariaLabel}
 			role={ariaLabel ? "region" : undefined}
 			gap={variant === "compact" ? "2" : "4"}
+			onKeyDown={onKeyDown}
 		>
+			{files.length === 0 ? (
+				<Text fontSize="sm" color="muted" px="3" py="4">
+					{labels.empty}
+				</Text>
+			) : null}
 			{files.map((file) => (
 				<DiffFileSection
 					{...props}
+					headingLevel={headingLevel}
 					key={file.key}
 					file={file}
+					fileComments={grouped.byFile.get(file)}
 					labels={labels}
 					variant={variant}
 				/>
 			))}
+			{grouped.orphans.length > 0 ? (
+				<Box
+					as="section"
+					data-diff-other-comments=""
+					aria-label={labels.otherFilesComments}
+					borderWidth="1px"
+					borderColor="border"
+					borderRadius="md"
+					bg="bg-subtle"
+					overflow="hidden"
+				>
+					<Box
+						as={`h${headingLevel}`}
+						m="0"
+						px={VARIANT_STYLES[variant].headerX}
+						py={VARIANT_STYLES[variant].headerY}
+						fontSize={VARIANT_STYLES[variant].fontSize}
+						fontWeight="medium"
+						color="default"
+						borderBottomWidth="1px"
+						borderColor="border"
+					>
+						{labels.otherFilesComments}
+					</Box>
+					<CommentList
+						comments={grouped.orphans}
+						file={null}
+						labels={labels}
+						renderComment={props.renderComment}
+						caption={(comment) =>
+							comment.line == null
+								? comment.path
+								: `${comment.path} · ${labels.formatLine(comment.line, comment.side ?? "new")}`
+						}
+						px={VARIANT_STYLES[variant].headerX}
+					/>
+				</Box>
+			) : null}
 		</Stack>
 	);
 }
 DiffView.displayName = "DiffView";
 
-interface DiffFileSectionProps extends DiffViewProps {
+interface DiffFileSectionProps extends Omit<DiffViewProps, "headingLevel"> {
+	headingLevel: NonNullable<DiffViewProps["headingLevel"]>;
 	file: DiffFile;
+	fileComments: readonly DiffComment[] | undefined;
 	labels: DiffViewLabels;
 	variant: DiffViewVariant;
 }
@@ -217,7 +423,9 @@ function DiffFileSection(props: DiffFileSectionProps) {
 		onFileCollapsedChange,
 		renderFileActions,
 		tabSize = 4,
-		headingLevel = 3,
+		headingLevel,
+		fileComments,
+		renderComment,
 	} = props;
 	const id = useId();
 	const titleId = `${id}-title`;
@@ -241,21 +449,32 @@ function DiffFileSection(props: DiffFileSectionProps) {
 		() => (expansions.file === file ? expansions.keys : new Set<string>()),
 		[expansions, file],
 	);
-	const rows = useMemo(
-		() => buildDiffRows(file, { contextLines, expanded }),
-		[file, contextLines, expanded],
+	const anchored = useMemo(
+		() => anchorComments(file, fileComments ?? []),
+		[file, fileComments],
 	);
+	const rows = useMemo(
+		() =>
+			buildDiffRows(file, {
+				contextLines,
+				expanded,
+				comments: anchored.byLine,
+			}),
+		[file, contextLines, expanded, anchored],
+	);
+	const commentCount = fileComments?.length ?? 0;
 	const toggle = useCallback(() => {
 		const next = !collapsed;
 		setCollapsed(next);
 		onFileCollapsedChange?.(file, next);
 	}, [collapsed, file, onFileCollapsedChange]);
 	const expand = useCallback(
-		(key: string) => {
-			setExpansions((current) => ({
-				file,
-				keys: new Set(current.file === file ? current.keys : []).add(key),
-			}));
+		(lineKeys: readonly string[]) => {
+			setExpansions((current) => {
+				const keys = new Set(current.file === file ? current.keys : []);
+				for (const key of lineKeys) keys.add(key);
+				return { file, keys };
+			});
 		},
 		[file],
 	);
@@ -317,11 +536,20 @@ function DiffFileSection(props: DiffFileSectionProps) {
 					fontWeight="medium"
 					fontFamily="mono"
 					color="default"
+					{...(collapsible
+						? {}
+						: {
+								"data-diff-file-focus": "",
+								tabIndex: -1,
+								_focusVisible: { outline: "none", boxShadow: "focus-ring" },
+								borderRadius: "sm",
+							})}
 				>
 					{collapsible ? (
 						<Box
 							as="button"
 							{...{ type: "button" }}
+							data-diff-file-focus=""
 							aria-expanded={!collapsed}
 							aria-controls={collapsed ? undefined : bodyId}
 							onClick={toggle}
@@ -398,6 +626,19 @@ function DiffFileSection(props: DiffFileSectionProps) {
 						</Box>
 					</Text>
 				)}
+				{commentCount > 0 ? (
+					<HStack
+						as="span"
+						data-diff-comment-count=""
+						gap="1"
+						flexShrink={0}
+						fontSize="xs"
+						color="muted"
+					>
+						<MessageSquare size={12} aria-hidden />
+						{labels.formatCommentCount(commentCount)}
+					</HStack>
+				) : null}
 				{renderFileActions ? (
 					<HStack gap="1" flexShrink={0}>
 						{renderFileActions(file)}
@@ -405,15 +646,39 @@ function DiffFileSection(props: DiffFileSectionProps) {
 				) : null}
 			</HStack>
 			{collapsed ? null : (
-				<Box id={bodyId} data-diff-file-body="" overflowX="auto">
-					<FileBody
-						file={file}
-						rows={rows}
-						labels={labels}
-						variant={variant}
-						tabSize={tabSize}
-						onExpand={expand}
-					/>
+				<Box id={bodyId} data-diff-file-body="">
+					{anchored.fileLevel.length > 0 ? (
+						<Box
+							data-diff-file-comments=""
+							bg="bg-subtle"
+							borderBottomWidth="1px"
+							borderColor="border"
+						>
+							<CommentList
+								comments={anchored.fileLevel}
+								file={file}
+								labels={labels}
+								renderComment={renderComment}
+								caption={(comment) =>
+									comment.line == null
+										? undefined
+										: labels.formatLine(comment.line, comment.side ?? "new")
+								}
+								px={v.headerX}
+							/>
+						</Box>
+					) : null}
+					<Box overflowX="auto">
+						<FileBody
+							file={file}
+							rows={rows}
+							labels={labels}
+							variant={variant}
+							tabSize={tabSize}
+							onExpand={expand}
+							renderComment={renderComment}
+						/>
+					</Box>
 				</Box>
 			)}
 		</Box>
@@ -426,7 +691,8 @@ interface FileBodyProps {
 	labels: DiffViewLabels;
 	variant: DiffViewVariant;
 	tabSize: number;
-	onExpand: (key: string) => void;
+	onExpand: (lineKeys: readonly string[]) => void;
+	renderComment: DiffViewProps["renderComment"];
 }
 
 function FileBody({
@@ -436,6 +702,7 @@ function FileBody({
 	variant,
 	tabSize,
 	onExpand,
+	renderComment,
 }: FileBodyProps) {
 	const v = VARIANT_STYLES[variant];
 	if (file.binary || file.hunks.length === 0) {
@@ -486,6 +753,36 @@ function FileBody({
 							</Box>
 						);
 					}
+					if (row.type === "comments") {
+						return (
+							<Box
+								as="tr"
+								key={row.key}
+								data-diff-row="comments"
+								data-old-line={row.line.oldNumber ?? undefined}
+								data-new-line={row.line.newNumber ?? undefined}
+							>
+								<Box
+									as="td"
+									{...{ colSpan: 4 }}
+									p="0"
+									bg="bg-subtle"
+									borderYWidth="1px"
+									borderColor="border"
+									fontFamily="body"
+									whiteSpace="normal"
+								>
+									<CommentList
+										comments={row.comments}
+										file={file}
+										labels={labels}
+										renderComment={renderComment}
+										px={v.headerX}
+									/>
+								</Box>
+							</Box>
+						);
+					}
 					if (row.type === "fold") {
 						return (
 							<Box as="tr" key={row.key} data-diff-row="fold">
@@ -493,7 +790,7 @@ function FileBody({
 									<Box
 										as="button"
 										{...{ type: "button" }}
-										onClick={() => onExpand(row.key)}
+										onClick={() => onExpand(row.lineKeys)}
 										display="flex"
 										alignItems="center"
 										gap="1.5"
@@ -608,5 +905,85 @@ function LineRow({
 				) : null}
 			</Box>
 		</Box>
+	);
+}
+
+interface CommentListProps {
+	comments: readonly DiffComment[];
+	file: DiffFile | null;
+	labels: DiffViewLabels;
+	renderComment: DiffViewProps["renderComment"];
+	/** A line above a comment saying where it points, when its place does not. */
+	caption?: (comment: DiffComment) => string | undefined;
+	px: string;
+}
+
+function CommentList({
+	comments,
+	file,
+	labels,
+	renderComment,
+	caption,
+	px,
+}: CommentListProps) {
+	// A repeated id must not merge two comments: the second gets `id#2`.
+	const seen = new Map<string, number>();
+	return (
+		<Stack gap="2" px={px} py="2">
+			{comments.map((comment) => {
+				const nth = (seen.get(comment.id) ?? 0) + 1;
+				seen.set(comment.id, nth);
+				const tone = comment.tone ?? "neutral";
+				const where = caption?.(comment);
+				return (
+					<Box
+						key={nth === 1 ? comment.id : `${comment.id}#${nth}`}
+						role="article"
+						tabIndex={0}
+						aria-label={labels.formatCommentLabel(comment)}
+						data-diff-comment={comment.id}
+						data-tone={tone}
+						data-side={
+							comment.line == null ? undefined : (comment.side ?? "new")
+						}
+						ps="3"
+						py="1"
+						borderStartWidth="3px"
+						borderColor={TONE_EDGE[tone]}
+						fontFamily="body"
+						fontSize="sm"
+						color="default"
+						whiteSpace="normal"
+						_focusVisible={{ outline: "none", boxShadow: "focus-ring" }}
+					>
+						{where ? (
+							<Text
+								data-diff-comment-anchor=""
+								fontSize="xs"
+								color="muted"
+								fontFamily="mono"
+								mb="1"
+							>
+								{where}
+							</Text>
+						) : null}
+						{renderComment ? (
+							renderComment(comment, file)
+						) : (
+							<MessageGroup author={comment.author} avatar={comment.avatar}>
+								<MessageBubble timestamp={comment.timestamp}>
+									<Stack gap="1" align="flex-start">
+										{comment.label ? (
+											<StatusBadge tone={tone} label={comment.label} />
+										) : null}
+										{comment.body}
+									</Stack>
+								</MessageBubble>
+							</MessageGroup>
+						)}
+					</Box>
+				);
+			})}
+		</Stack>
 	);
 }
