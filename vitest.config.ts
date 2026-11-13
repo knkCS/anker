@@ -43,6 +43,19 @@ export default defineConfig({
 				},
 			},
 			{
+				// Vite's dependency scan starts from the test files' static
+				// imports. A module only reached through a dynamic import — the
+				// Kanban drag layer, `import("./kanban-dnd")` (#327) — brings its
+				// dependencies in mid-run: Vite re-optimises and reloads the page
+				// under the running tests, which then fail on a cold cache (CI)
+				// and pass on a warm one. Pre-bundle them up front.
+				optimizeDeps: {
+					include: [
+						"react/jsx-dev-runtime",
+						"@dnd-kit/core",
+						"@dnd-kit/utilities",
+					],
+				},
 				test: {
 					name: "layout",
 					include: [BROWSER_TESTS],
