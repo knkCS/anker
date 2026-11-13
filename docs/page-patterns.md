@@ -1592,14 +1592,14 @@ column per status, a card per item:
   cards (↑/↓, Home/End) and columns (←/→, flipped in RTL, skipping
   empty columns); Enter opens the focused card.
 
-### Charts (`LineChart`, `AreaChart`)
+### Charts (`LineChart`, `AreaChart`, `BarChart`)
 
 A value over time — machine load, spend, throughput — is a chart from
 `@knkcs/anker/charts`, never a chart library coloured by hand. You pass
 data and series definitions; anker picks every colour:
 
 ```tsx
-import { AreaChart, LineChart, numberFormatter, timeFormatter } from "@knkcs/anker/charts";
+import { AreaChart, BarChart, LineChart, numberFormatter, timeFormatter } from "@knkcs/anker/charts";
 
 <LineChart
   aria-label="Load over time"
@@ -1619,9 +1619,10 @@ import { AreaChart, LineChart, numberFormatter, timeFormatter } from "@knkcs/ank
   may cross and overlap without hiding each other. `AreaChart` shows
   *volume* (load, spend) where the area under the line means something;
   `stacked` when the series add up to a whole (spend per project), so
-  the top edge is the total. One headline number is a stat tile, not a
-  chart. Bar charts, threshold lines and bands, a text alternative and
-  calm live updates are not here yet.
+  the top edge is the total. `BarChart` compares *amounts per category*
+  (a day, a project, a service): series grouped side by side, or
+  `stacked` so the bar is the total. On a `time` axis each reading gets
+  its own bar. One headline number is a stat tile, not a chart.
 - **Colours come from the series palette**, never from you: a series
   takes the slot of its position in `series` (`chart.series.1` …
   `chart.series.6`, selected per mode and validated for contrast and
@@ -1656,7 +1657,21 @@ import { AreaChart, LineChart, numberFormatter, timeFormatter } from "@knkcs/ank
 - **Legend** for two or more series, none for one (the title names it);
   `legend` overrides. Legend and tooltip text stay in text tokens — the
   swatch beside a name carries the colour.
-- `aria-label` is required: it names the figure for screen readers.
+- **Thresholds**: `thresholds={[{ value: 40, label: "Daily budget" }]}`
+  draws a dashed line across the plot; add `to` for a band (a target
+  range: `{ value: 2, to: 3, label: "Target", tone: "success" }`). A
+  threshold reads in its `tone` (`warning` by default) with its label on
+  the plot; the y axis grows to show it, so a limit not yet reached is
+  still there. Use a threshold, not a constant series, for a limit.
+- **Text alternative**: `aria-label` is required — it names the figure.
+  Every chart holds its data as a visually hidden table (rows in the
+  axis formats; head the x column with `xLabel`, e.g. "Day"), which
+  screen readers read instead of the plot. Add `summary` — one sentence
+  on what the chart shows ("Spend passed the budget on Sunday") — to
+  describe the figure; the thresholds are read with it.
+- **Live data**: pass the new rows; the chart draws the new point in
+  place and nothing else moves. `animate` animates the first draw only —
+  later updates never re-animate the whole chart.
 
 ### Error Alert placement
 

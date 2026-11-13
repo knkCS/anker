@@ -23,7 +23,7 @@ Single npm package (`@knkcs/anker`) with subpath exports organized in twelve lay
 9. **`/navigation`** — Unsaved-changes navigation guards: `UnsavedChangesGuard`, `useUnsavedChangesBlocker`, tab dirty context.
 10. **`/host`** — The host contract (ADR 0003): `HostProvider` (mounted once by whoever draws the page frame), `usePageFrame` (a screen reports structured page-frame state mirroring `PageHeaderProps`), `usePageRail` (a screen reports its side-rail node on its own channel; re-exported by `/templates`), `useScreenActions` / `useReportedScreenActions` (a screen reports its actions as `ScreenAction` data on a third channel; the host reads them — odon-ui's `HostSidebar` shows them as "On this page"), `useHostIdentity` (`HostIdentity`: user id, workspace id, members accessor), `TestHost` for package tests. No-op / empty default without a provider. The page templates report through it; `AppShell` is its first consumer.
 11. **`/rules`** — `checkAnkerRules(sources)`: the mechanical half of `CLAUDE-ANKER.md` (raw Chakra import, hex colour, `SettingsPageTemplate` without `tabs`, `maxW` on a `Card`) for a consuming package's `anker-rules.test.ts`. Pure string checks — no React, no Chakra, no file system; the package reads its own sources. No components.
-12. **`/charts`** — Token-coloured `LineChart` and `AreaChart` over Recharts (an optional peer dependency reachable only through this entry): series take colours from the `chart.series.*` palette or a tone, never from the consumer; `numberFormatter` / `timeFormatter` for axes and tooltips (see Charts below).
+12. **`/charts`** — Token-coloured `LineChart`, `AreaChart` and `BarChart` (grouped or stacked) over Recharts (an optional peer dependency reachable only through this entry): series take colours from the `chart.series.*` palette or a tone, never from the consumer; threshold lines and bands, a visually hidden data table and summary for screen readers, first-draw-only animation; `numberFormatter` / `timeFormatter` for axes and tooltips (see Charts below).
 
 ### Key Technology Choices
 
@@ -56,7 +56,7 @@ src/
 ├── forms/           # React Hook Form controls (InputField, ArrayField, etc.) + SearchInput
 ├── feedback/        # ConfirmModal + provider, UploadToastStack
 ├── dashboard/       # Widget contract, registry, <Dashboard> grid engine
-├── charts/          # LineChart, AreaChart over Recharts; series palette + formatters
+├── charts/          # LineChart, AreaChart, BarChart over Recharts; series palette + formatters
 ├── templates/       # AppShell, SubNavLayout, page templates
 ├── navigation/      # Unsaved-changes guards, tab dirty context
 ├── host/            # Host contract: HostProvider, usePageFrame, usePageRail, useScreenActions, useHostIdentity, TestHost
@@ -385,19 +385,27 @@ schema-driven config form, and a toolbar.
 ### Charts
 
 `src/charts/` (exported from `@knkcs/anker/charts`) wraps Recharts in
-`LineChart` and `AreaChart`. Consumers pass `data`, `xKey` and `series`
+`LineChart`, `AreaChart` and `BarChart`. Consumers pass `data`, `xKey` and `series`
 (`{ key, label?, tone?, hidden? }`), never colours: `resolveSeries` gives a
 series the CSS variable of the palette slot of its position
 (`chart.series.N`, defined in `src/theme/tokens/chart-palette.ts` and pinned
 for 3:1 on `bg-surface` and neighbour separation in both modes by
 `chart-palette.test.ts`) or of its tone (the status palettes' `fg`, `accent`,
-`subtle`). `useCartesianParts` builds the themed grid, axes and tooltip;
+`subtle`). `useCartesianParts` builds the themed grid, axes, threshold lines and bands
+(`ReferenceLine` / `ReferenceArea`, `extendDomain`, a band behind the marks
+and a line over them) and tooltip, the text alternative (a data table in the
+axis formats, plus the `summary` and thresholds as the figure's
+`aria-describedby`) and the first-draw-only animation (`isAnimationActive`
+drops once the first `onAnimationEnd` fires, so appended data never
+re-animates); `{ bands: true }` keeps a `time` x axis categorical for bars.
 `ChartFrame` owns sizing (fills its container, `minHeight` 160), the loading
-and empty states and the legend. Both are the seam the bar charts,
-thresholds and accessible summary plug into. `recharts` is an optional peer
+and empty states, the legend and the visually hidden text. A chart component
+spreads the hook's `frame`, `animation` and `margin` and adds only its
+marks. `recharts` is an optional peer
 in tsup `external`; `scripts/check-optional-deps.ts` fails the build if any
 other entry imports it. Behaviour (resolved colours in light and dark mode,
-formatters, sizing, states) is proven in Chromium by
+formatters, sizing, states, thresholds, the data table, live updates that do
+not re-animate) is proven in Chromium by
 `charts.browser.test.tsx`. Usage: `docs/page-patterns.md` §11 "Charts".
 
 ### Host contract

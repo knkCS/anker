@@ -49,6 +49,23 @@ export interface ChartSeries<TDatum extends ChartDatum = ChartDatum> {
 	hidden?: boolean;
 }
 
+/**
+ * A threshold drawn across the plot: a line at `value` (a budget limit, an
+ * SLO), or — with `to` — a band from `value` to `to` (a target range). It
+ * reads in its `tone` and carries its `label` on the plot and in the chart's
+ * accessible description. The y axis grows to show it.
+ */
+export interface ChartThreshold {
+	/** Where the line sits, or where the band starts, on the y axis. */
+	value: number;
+	/** Where the band ends. Without it the threshold is a line. */
+	to?: number;
+	/** What it is ("Budget limit"), shown on the plot and read out. */
+	label: string;
+	/** The tone it is drawn in. @default "warning" */
+	tone?: ChartTone;
+}
+
 /** How the x axis reads its values. */
 export type ChartXType = "category" | "time";
 
@@ -71,6 +88,20 @@ export interface ChartBaseProps<TDatum extends ChartDatum = ChartDatum> {
 	 * only the call site knows it.
 	 */
 	"aria-label": string;
+	/**
+	 * What the x values are ("Time", "Day") — the heading of the x column in
+	 * the chart's data table, which screen readers read instead of the plot.
+	 * @default xKey
+	 */
+	xLabel?: string;
+	/**
+	 * A sentence on what the chart shows ("Load rose from 1 to 6 and stayed
+	 * under the limit"), read by screen readers as the figure's description,
+	 * before its data table.
+	 */
+	summary?: string;
+	/** Threshold lines and bands drawn across the plot. */
+	thresholds?: readonly ChartThreshold[];
 	/** Formats x values on the axis and as the tooltip's heading. */
 	formatX?: ChartFormatter;
 	/** Formats y values on the axis and in the tooltip. */
@@ -95,6 +126,10 @@ export interface ChartBaseProps<TDatum extends ChartDatum = ChartDatum> {
 	emptyLabel?: ReactNode;
 	/** Accessible name of the loading placeholder. @default "Loading chart" */
 	loadingLabel?: string;
-	/** Animate the series when they first draw. @default false */
+	/**
+	 * Animate the series when they first draw. Only the first draw: data that
+	 * changes later (a live point appended) is drawn in place, never
+	 * re-animated. @default false
+	 */
 	animate?: boolean;
 }

@@ -853,7 +853,7 @@ Discard reverts.
 
 ## Charts
 
-`LineChart` and `AreaChart` (`@knkcs/anker/charts`) are token-coloured
+`LineChart`, `AreaChart` and `BarChart` (`@knkcs/anker/charts`) are token-coloured
 charts over Recharts. Install `recharts@^3.10.0` (optional peer dep, required
 only by services that import `@knkcs/anker/charts`). Full guidance:
 `docs/page-patterns.md` §11 "Charts".
@@ -865,7 +865,15 @@ only by services that import `@knkcs/anker/charts`). Full guidance:
   only when its meaning matters ("over budget" → `warning`).
 - **Which chart**: `LineChart` to compare how a few series move;
   `AreaChart` when the volume matters, `stacked` when the series add up to
-  a whole. One headline number is a stat tile, not a chart.
+  a whole; `BarChart` to compare amounts per category, grouped or
+  `stacked`. One headline number is a stat tile, not a chart.
+- **Thresholds**: `thresholds={[{ value, to?, label, tone? }]}` — a line
+  (a budget limit) or, with `to`, a band; `tone` defaults to `warning`.
+  Never a constant series for a limit.
+- **Text alternative**: every chart holds its data as a hidden table for
+  screen readers; give `xLabel` (the x column's heading) and a one-sentence
+  `summary`.
+- **Live data**: pass new rows; `animate` animates the first draw only.
 - **Formatters** apply to axis and tooltip: `formatX`, `formatValue`; build
   them with `numberFormatter({ style: "currency", currency: "EUR" })` /
   `timeFormatter({ hour: "2-digit", minute: "2-digit" })` (UI language).
