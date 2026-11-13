@@ -23,26 +23,13 @@ export interface LineChartProps<TDatum extends ChartDatum = ChartDatum>
 export function LineChart<TDatum extends ChartDatum = ChartDatum>(
 	props: LineChartProps<TDatum>,
 ): React.ReactElement {
-	const { dots = false, animate = false } = props;
-	const { data, visible, parts } = useCartesianParts(props);
-	const showLegend = props.legend ?? visible.length > 1;
+	const { dots = false } = props;
+	const { data, visible, parts, frame, animation, margin } =
+		useCartesianParts(props);
 	return (
-		<ChartFrame
-			kind="line"
-			label={props["aria-label"]}
-			height={props.height}
-			minHeight={props.minHeight}
-			loading={props.loading}
-			loadingLabel={props.loadingLabel}
-			empty={data.length === 0 || visible.length === 0}
-			emptyLabel={props.emptyLabel}
-			legend={showLegend ? visible : undefined}
-		>
+		<ChartFrame kind="line" {...frame}>
 			<ResponsiveContainer width="100%" height="100%">
-				<RechartsLineChart
-					data={data}
-					margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
-				>
+				<RechartsLineChart data={data} margin={margin}>
 					{parts}
 					{visible.map((s) => (
 						<Line
@@ -59,7 +46,7 @@ export function LineChart<TDatum extends ChartDatum = ChartDatum>(
 								stroke: tokenColor("bg-surface"),
 								strokeWidth: 2,
 							}}
-							isAnimationActive={animate}
+							{...animation}
 						/>
 					))}
 				</RechartsLineChart>

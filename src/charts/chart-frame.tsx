@@ -1,9 +1,24 @@
 // The parts every cartesian chart shares: the frame (sizing, loading, empty,
 // legend), the themed axes, grid and tooltip, and the series resolved to
-// their colours. `LineChart` and `AreaChart` add only their marks; the bar
-// charts, thresholds and the accessible summary (#329) plug in here.
-import { type ReactNode, useEffect, useMemo } from "react";
-import { CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
+// their colours, the threshold lines and bands, the accessible description
+// and data table, and the first-draw-only animation. `LineChart`,
+// `AreaChart` and `BarChart` add only their marks.
+import {
+	type ReactNode,
+	useCallback,
+	useEffect,
+	useId,
+	useMemo,
+	useState,
+} from "react";
+import {
+	CartesianGrid,
+	ReferenceArea,
+	ReferenceLine,
+	Tooltip,
+	XAxis,
+	YAxis,
+} from "recharts";
 import { Box, Flex, HStack } from "../primitives/layout";
 import { Skeleton } from "../primitives/skeleton";
 import { Text } from "../primitives/typography";
@@ -11,6 +26,7 @@ import { isDevMode } from "../utils/dev-mode";
 import { useUiLocale } from "../utils/ui-locale";
 import {
 	CHART_SERIES_PALETTE_SIZE,
+	chartToneColor,
 	resolveSeriesColor,
 	tokenColor,
 } from "./colors";
@@ -20,6 +36,7 @@ import type {
 	ChartDatum,
 	ChartFormatter,
 	ChartSeries,
+	ChartThreshold,
 	ChartValue,
 } from "./types";
 
@@ -85,31 +102,151 @@ function seriesSignature(series: readonly SeriesShape[]): string {
 	);
 }
 
+/** The tone a threshold takes when it names none. */
+const DEFAULT_THRESHOLD_TONE = "warning";
+
+/** A threshold in words: "Budget limit: 4", "Target: 2 – 3". */
+export function describeThreshold(
+	threshold: ChartThreshold,
+	format: (value: ChartValue) => string,
+): string {
+	const { label, value, to } = threshold;
+	return to === undefined
+		? `${label}: ${format(value)}`
+		: `${label}: ${format(value)} – ${format(to)}`;
+}
+
+/**
+ * Where thresholds sit among Recharts' layers: a band behind the marks (over
+ * the grid), a line over them — a limit stays visible across the bars it
+ * cuts. Their labels sit on Recharts' label layer, above both.
+ */
+const BAND_Z = -75;
+const LINE_Z = 450;
+
+/** The space above the plot: room for a line threshold's label at the top. */
+const PLOT_TOP = 8;
+const PLOT_TOP_WITH_LABEL = 20;
+
+/** A threshold's label: its tone on a halo of the surface, legible on marks. */
+function thresholdLabel(
+	label: string,
+	color: string,
+	position: "insideBottomRight" | "insideTopLeft",
+) {
+	return {
+		value: label,
+		position,
+		fill: color,
+		stroke: tokenColor("bg-surface"),
+		strokeWidth: 3,
+		paintOrder: "stroke",
+	};
+}
+
+/** The threshold lines and bands, keyed, to render inside a Recharts chart. */
+function thresholdParts(thresholds: readonly ChartThreshold[]): ReactNode[] {
+	return thresholds.map((t, i) => {
+		const color = chartToneColor(t.tone ?? DEFAULT_THRESHOLD_TONE);
+		const key = `threshold-${i}`;
+		// `extendDomain`: the y axis grows to show the threshold, so a limit
+		// the data has not reached yet is still on the plot.
+		return t.to === undefined ? (
+			<ReferenceLine
+				key={key}
+				y={t.value}
+				className="anker-chart-threshold"
+				stroke={color}
+				strokeWidth={1.5}
+				strokeDasharray="4 4"
+				ifOverflow="extendDomain"
+				zIndex={LINE_Z}
+				label={thresholdLabel(t.label, color, "insideBottomRight")}
+			/>
+		) : (
+			<ReferenceArea
+				key={key}
+				y1={t.value}
+				y2={t.to}
+				className="anker-chart-threshold"
+				fill={color}
+				fillOpacity={0.12}
+				stroke="none"
+				ifOverflow="extendDomain"
+				zIndex={BAND_Z}
+				label={thresholdLabel(t.label, color, "insideTopLeft")}
+			/>
+		);
+	});
+}
+
+/**
+ * Animate a chart's marks on its first draw only. Once the first animation
+ * ends, data that changes (a live point appended) is drawn in place: the
+ * marks never re-animate from scratch and nothing on the plot moves but what
+ * changed.
+ */
+function useFirstDrawAnimation(animate: boolean): ChartAnimation {
+	const [drawn, setDrawn] = useState(false);
+	const onAnimationEnd = useCallback(() => setDrawn(true), []);
+	return { isAnimationActive: animate && !drawn, onAnimationEnd };
+}
+
+/** What a chart spreads onto each of its Recharts marks. */
+export interface ChartAnimation {
+	isAnimationActive: boolean;
+	onAnimationEnd: () => void;
+}
+
 /** What a chart component hands to its Recharts root besides its marks. */
 export interface CartesianParts<TDatum extends ChartDatum> {
 	data: TDatum[];
 	visible: ResolvedSeries<TDatum>[];
-	/** Grid, axes and tooltip, keyed, to render inside the Recharts chart. */
+	/** Grid, axes, thresholds and tooltip, keyed, to render inside the Recharts chart. */
 	parts: ReactNode[];
+	/** What the chart spreads onto its `ChartFrame`, besides `kind`. */
+	frame: Omit<ChartFrameProps, "kind" | "children">;
+	/** What the chart spreads onto each of its marks. */
+	animation: ChartAnimation;
+	/** The Recharts root's margin: room above the plot for threshold labels. */
+	margin: { top: number; right: number; bottom: number; left: number };
+}
+
+/** How a chart's marks shape the shared parts. */
+export interface CartesianOptions {
+	/**
+	 * Marks that sit in bands (bars): the x axis stays a category axis even
+	 * for time — each reading is a band, formatted as a time — and the
+	 * tooltip's cursor fills the band instead of drawing a line.
+	 */
+	bands?: boolean;
 }
 
 /**
- * The data, the visible series and the themed grid, axes and tooltip of a
- * cartesian chart.
+ * The data, the visible series, the themed grid, axes, thresholds and
+ * tooltip, the frame and the animation of a cartesian chart.
  */
 export function useCartesianParts<TDatum extends ChartDatum>(
 	props: ChartBaseProps<TDatum>,
+	options: CartesianOptions = {},
 ): CartesianParts<TDatum> {
 	const {
 		data,
 		series,
 		xKey,
 		xType = "category",
+		xLabel,
+		summary,
+		thresholds,
 		formatX,
 		formatValue = defaultValueFormat,
 		grid = true,
+		animate = false,
 	} = props;
+	const { bands = false } = options;
 	const time = xType === "time";
+	// A numeric time scale, unless the marks sit in bands.
+	const timeScale = time && !bands;
 	const formatXValue =
 		formatX ?? (time ? defaultTimeFormat : defaultCategoryFormat);
 
@@ -143,9 +280,20 @@ export function useCartesianParts<TDatum extends ChartDatum>(
 		[data, time, xKey],
 	);
 
+	const fx = useCallback(
+		(v: ChartValue) => formatXValue(v, locale),
+		[formatXValue, locale],
+	);
+	const fy = useCallback(
+		(v: ChartValue) => formatValue(v, locale),
+		[formatValue, locale],
+	);
+
+	const thresholdSignature = JSON.stringify(thresholds ?? []);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the signature, not the array's identity
+	const thresholdList = useMemo(() => thresholds ?? [], [thresholdSignature]);
+
 	const parts = useMemo(() => {
-		const fx = (v: ChartValue) => formatXValue(v, locale);
-		const fy = (v: ChartValue) => formatValue(v, locale);
 		return [
 			grid ? (
 				<CartesianGrid
@@ -158,9 +306,9 @@ export function useCartesianParts<TDatum extends ChartDatum>(
 			<XAxis
 				key="x"
 				dataKey={xKey}
-				type={time ? "number" : "category"}
-				scale={time ? "time" : "auto"}
-				domain={time ? ["dataMin", "dataMax"] : undefined}
+				type={timeScale ? "number" : "category"}
+				scale={timeScale ? "time" : "auto"}
+				domain={timeScale ? ["dataMin", "dataMax"] : undefined}
 				tickFormatter={fx}
 				tick={TICK}
 				tickLine={false}
@@ -175,9 +323,14 @@ export function useCartesianParts<TDatum extends ChartDatum>(
 				tickLine={false}
 				axisLine={false}
 			/>,
+			...thresholdParts(thresholdList),
 			<Tooltip
 				key="tooltip"
-				cursor={{ stroke: tokenColor("border-emphasized") }}
+				cursor={
+					bands
+						? { fill: tokenColor("bg-subtle") }
+						: { stroke: tokenColor("border-emphasized") }
+				}
 				isAnimationActive={false}
 				content={({ active, label, payload }) => (
 					<ChartTooltip
@@ -191,9 +344,61 @@ export function useCartesianParts<TDatum extends ChartDatum>(
 				)}
 			/>,
 		];
-	}, [grid, xKey, time, formatXValue, formatValue, locale, visible]);
+	}, [grid, xKey, timeScale, bands, fx, fy, visible, thresholdList]);
 
-	return { data: plotted, visible, parts };
+	// The text alternative: one row per datum, one column per visible series,
+	// in the formats the axes and tooltip use.
+	const table = useMemo<ChartTable>(
+		() => ({
+			columns: [xLabel ?? xKey, ...visible.map((s) => s.label)],
+			rows: plotted.map((row) => [
+				fx(row[xKey] as ChartValue),
+				...visible.map((s) => {
+					const value = row[s.key];
+					return value == null ? "" : fy(value as ChartValue);
+				}),
+			]),
+		}),
+		[plotted, visible, xKey, xLabel, fx, fy],
+	);
+	const notes = useMemo(
+		() => thresholdList.map((t) => describeThreshold(t, fy)),
+		[thresholdList, fy],
+	);
+
+	const animation = useFirstDrawAnimation(animate);
+	const lineLabel = thresholdList.some((t) => t.to === undefined);
+	const margin = useMemo(
+		() => ({
+			top: lineLabel ? PLOT_TOP_WITH_LABEL : PLOT_TOP,
+			right: 8,
+			bottom: 0,
+			left: 0,
+		}),
+		[lineLabel],
+	);
+	const showLegend = props.legend ?? visible.length > 1;
+
+	return {
+		data: plotted,
+		visible,
+		parts,
+		animation,
+		margin,
+		frame: {
+			label: props["aria-label"],
+			height: props.height,
+			minHeight: props.minHeight,
+			loading: props.loading,
+			loadingLabel: props.loadingLabel,
+			empty: plotted.length === 0 || visible.length === 0,
+			emptyLabel: props.emptyLabel,
+			legend: showLegend ? visible : undefined,
+			summary,
+			notes,
+			table,
+		},
+	};
 }
 
 interface TooltipEntry {
@@ -297,7 +502,86 @@ function ChartLegend({ series }: { series: readonly PaintedSeries[] }) {
 	);
 }
 
-interface ChartFrameProps {
+/** The chart's data as text: column headings and formatted cells. */
+export interface ChartTable {
+	columns: string[];
+	rows: string[][];
+}
+
+/**
+ * What screen readers read instead of the plot: the summary and the
+ * thresholds as the figure's description, then the data as a table. Visually
+ * hidden; the plot carries the same for sighted users.
+ */
+function ChartText({
+	label,
+	descriptionId,
+	summary,
+	notes,
+	table,
+}: {
+	label: string;
+	descriptionId?: string;
+	summary?: string;
+	notes: readonly string[];
+	table?: ChartTable;
+}) {
+	return (
+		<>
+			{descriptionId && (
+				<Box id={descriptionId} srOnly data-chart-description="">
+					{summary && <Text>{summary}</Text>}
+					{notes.length > 0 && (
+						<Box as="ul">
+							{notes.map((note) => (
+								<Box as="li" key={note}>
+									{note}
+								</Box>
+							))}
+						</Box>
+					)}
+				</Box>
+			)}
+			{table && (
+				<Box srOnly data-chart-table="">
+					<table>
+						<caption>{label}</caption>
+						<thead>
+							<tr>
+								{table.columns.map((c, i) => (
+									// biome-ignore lint/suspicious/noArrayIndexKey: columns are positional; two series may share a label
+									<th key={i} scope="col">
+										{c}
+									</th>
+								))}
+							</tr>
+						</thead>
+						<tbody>
+							{table.rows.map((row, r) => (
+								// biome-ignore lint/suspicious/noArrayIndexKey: rows are the data in order
+								<tr key={r}>
+									{row.map((cell, c) =>
+										c === 0 ? (
+											// biome-ignore lint/suspicious/noArrayIndexKey: cells are positional
+											<th key={c} scope="row">
+												{cell}
+											</th>
+										) : (
+											// biome-ignore lint/suspicious/noArrayIndexKey: cells are positional
+											<td key={c}>{cell}</td>
+										),
+									)}
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</Box>
+			)}
+		</>
+	);
+}
+
+export interface ChartFrameProps {
 	label: string;
 	/** Which chart this is, for `data-chart` (e.g. `line`). */
 	kind: string;
@@ -308,6 +592,12 @@ interface ChartFrameProps {
 	empty: boolean;
 	emptyLabel?: ReactNode;
 	legend?: readonly PaintedSeries[];
+	/** A sentence on what the chart shows, read as the figure's description. */
+	summary?: string;
+	/** Further description lines — the thresholds in words. */
+	notes?: readonly string[];
+	/** The data as text, the plot's alternative for screen readers. */
+	table?: ChartTable;
 	children: ReactNode;
 }
 
@@ -326,13 +616,20 @@ export function ChartFrame({
 	empty,
 	emptyLabel = "No data",
 	legend,
+	summary,
+	notes = [],
+	table,
 	children,
 }: ChartFrameProps) {
 	const state = loading ? "loading" : empty ? "empty" : "ready";
+	const id = useId();
+	const described = state === "ready" && (!!summary || notes.length > 0);
+	const descriptionId = described ? `${id}-description` : undefined;
 	return (
 		<Flex
 			role="figure"
 			aria-label={label}
+			aria-describedby={descriptionId}
 			aria-busy={loading || undefined}
 			data-chart={kind}
 			data-state={state}
@@ -379,6 +676,13 @@ export function ChartFrame({
 							{children}
 						</Box>
 					</Box>
+					<ChartText
+						label={label}
+						descriptionId={descriptionId}
+						summary={summary}
+						notes={notes}
+						table={table}
+					/>
 				</>
 			)}
 		</Flex>

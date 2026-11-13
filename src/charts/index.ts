@@ -5,6 +5,7 @@
 // (`scripts/check-optional-deps.ts`), so a consumer who never imports charts
 // never loads it.
 export { AreaChart, type AreaChartProps } from "./area-chart";
+export { BarChart, type BarChartProps } from "./bar-chart";
 export {
 	CHART_SERIES_PALETTE_SIZE,
 	CHART_TONES,
@@ -23,6 +24,7 @@ export type {
 	ChartDatum,
 	ChartFormatter,
 	ChartSeries,
+	ChartThreshold,
 	ChartTone,
 	ChartValue,
 	ChartXType,

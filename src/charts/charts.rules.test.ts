@@ -1,4 +1,4 @@
-// The charts stay inside anker's own consumer rules (#328): their sources and
+// The charts stay inside anker's own consumer rules (#328, #329): their sources and
 // their stories pass `checkAnkerRules()` — no raw Chakra import, no hex
 // colour — because consumers copy the stories, and a chart built from them
 // must pass the same check in their `anker-rules.test.ts`.
@@ -21,8 +21,10 @@ describe("charts and checkAnkerRules", () => {
 		const files = sources.map((s) => s.file);
 		expect(files).toContain("line-chart.tsx");
 		expect(files).toContain("area-chart.tsx");
+		expect(files).toContain("bar-chart.tsx");
 		expect(files).toContain("chart-frame.tsx");
 		expect(files).toContain("charts.stories.tsx");
+		expect(files).toContain("bar-chart.stories.tsx");
 	});
 
 	it("passes", () => {

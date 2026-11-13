@@ -28,26 +28,13 @@ export interface AreaChartProps<TDatum extends ChartDatum = ChartDatum>
 export function AreaChart<TDatum extends ChartDatum = ChartDatum>(
 	props: AreaChartProps<TDatum>,
 ): React.ReactElement {
-	const { stacked = false, animate = false } = props;
-	const { data, visible, parts } = useCartesianParts(props);
-	const showLegend = props.legend ?? visible.length > 1;
+	const { stacked = false } = props;
+	const { data, visible, parts, frame, animation, margin } =
+		useCartesianParts(props);
 	return (
-		<ChartFrame
-			kind="area"
-			label={props["aria-label"]}
-			height={props.height}
-			minHeight={props.minHeight}
-			loading={props.loading}
-			loadingLabel={props.loadingLabel}
-			empty={data.length === 0 || visible.length === 0}
-			emptyLabel={props.emptyLabel}
-			legend={showLegend ? visible : undefined}
-		>
+		<ChartFrame kind="area" {...frame}>
 			<ResponsiveContainer width="100%" height="100%">
-				<RechartsAreaChart
-					data={data}
-					margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
-				>
+				<RechartsAreaChart data={data} margin={margin}>
 					{parts}
 					{visible.map((s) => (
 						<Area
@@ -67,7 +54,7 @@ export function AreaChart<TDatum extends ChartDatum = ChartDatum>(
 								stroke: tokenColor("bg-surface"),
 								strokeWidth: 2,
 							}}
-							isAnimationActive={animate}
+							{...animation}
 						/>
 					))}
 				</RechartsAreaChart>

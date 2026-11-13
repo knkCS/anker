@@ -1,4 +1,5 @@
-// LineChart and AreaChart as a consumer sees them (#328), in a real browser.
+// LineChart, AreaChart and BarChart as a consumer sees them (#328, #329), in
+// a real browser.
 //
 // The rendered structure (a named figure, one mark per visible series, the
 // legend), the series colours resolved to their tokens in light and dark mode,
@@ -23,6 +24,7 @@ import {
 import system from "../theme";
 import {
 	AreaChart,
+	BarChart,
 	CHART_SERIES_PALETTE_SIZE,
 	type ChartSeries,
 	LineChart,
@@ -90,6 +92,20 @@ async function mount(
 	});
 	await settle(() => !!host?.querySelector("svg.recharts-surface"), 20);
 	return host;
+}
+
+/** Renders `node` again into the mounted root, as a data update does. */
+async function rerender(node: ReactNode): Promise<void> {
+	await act(async () => {
+		root?.render(<Provider forcedTheme="light">{node}</Provider>);
+	});
+}
+
+/** Lets real time pass, with React's updates flushed. */
+async function wait(ms: number): Promise<void> {
+	await act(async () => {
+		await new Promise((resolve) => setTimeout(resolve, ms));
+	});
 }
 
 afterEach(() => {
@@ -666,5 +682,454 @@ describe("empty and loading states", () => {
 		const status = fig.querySelector<HTMLElement>("[role='status']");
 		expect(status?.getAttribute("aria-label")).toBe("Loading load");
 		expect(status?.getBoundingClientRect().height).toBe(260);
+	});
+});
+
+const bars = (el: HTMLElement) => [
+	...el.querySelectorAll<SVGPathElement>(".recharts-bar-rectangle path"),
+];
+/** The bars of each series, in series order. */
+const barsBySeries = (el: HTMLElement) =>
+	[...el.querySelectorAll(".recharts-bar")].map((g) => [
+		...g.querySelectorAll<SVGPathElement>(".recharts-bar-rectangle path"),
+	]);
+
+interface Spend {
+	day: string;
+	core: number;
+	shell: number;
+	odon: number;
+}
+
+const SPEND: Spend[] = [
+	{ day: "Mon", core: 4, shell: 2, odon: 1 },
+	{ day: "Tue", core: 5, shell: 3, odon: 1 },
+	{ day: "Wed", core: 3, shell: 2, odon: 2 },
+];
+
+const SPEND_SERIES: ChartSeries<Spend>[] = [
+	{ key: "core", label: "Core" },
+	{ key: "shell", label: "Shell" },
+	{ key: "odon", label: "Odon" },
+];
+
+describe("BarChart", () => {
+	it("renders a named figure with one bar per series and row, coloured by palette slot", async () => {
+		const el = await mount(
+			<BarChart
+				aria-label="Spend per day"
+				data={SPEND}
+				xKey="day"
+				series={SPEND_SERIES}
+			/>,
+		);
+		const fig = figure(el, "Spend per day");
+		expect(fig.dataset.chart).toBe("bar");
+		expect(fig.dataset.state).toBe("ready");
+		await settle(() => bars(el).length === 9);
+		const groups = barsBySeries(el);
+		expect(groups.map((g) => g.length)).toEqual([3, 3, 3]);
+		expect(groups.map((g) => g[0].getAttribute("fill"))).toEqual([
+			"var(--chakra-colors-chart-series-1)",
+			"var(--chakra-colors-chart-series-2)",
+			"var(--chakra-colors-chart-series-3)",
+		]);
+		expect(
+			[...el.querySelectorAll("[data-chart-legend] li")].map(
+				(li) => li.textContent,
+			),
+		).toEqual(["Core", "Shell", "Odon"]);
+	});
+
+	it("groups the series side by side by default, on a common baseline", async () => {
+		const el = await mount(
+			<BarChart
+				aria-label="Grouped"
+				data={SPEND}
+				xKey="day"
+				series={SPEND_SERIES}
+			/>,
+		);
+		await settle(() => bars(el).length === 9);
+		const monday = barsBySeries(el).map((g) => g[0].getBoundingClientRect());
+		for (let i = 1; i < monday.length; i++) {
+			expect(monday[i].left).toBeGreaterThanOrEqual(monday[i - 1].right);
+			expect(monday[i].bottom).toBeCloseTo(monday[0].bottom, 0);
+		}
+	});
+
+	it("`stacked` puts each series on top of the one before, in one bar", async () => {
+		const el = await mount(
+			<BarChart
+				aria-label="Stacked"
+				data={SPEND}
+				xKey="day"
+				series={SPEND_SERIES}
+				stacked
+			/>,
+		);
+		await settle(() => bars(el).length === 9);
+		const monday = barsBySeries(el).map((g) => g[0].getBoundingClientRect());
+		for (let i = 1; i < monday.length; i++) {
+			expect(monday[i].left).toBeCloseTo(monday[0].left, 0);
+			expect(monday[i].bottom).toBeCloseTo(monday[i - 1].top, 0);
+		}
+	});
+
+	it("paints a tone in its token and a hidden series keeps the others' slots", async () => {
+		const el = await mount(
+			<BarChart
+				aria-label="Tones"
+				data={SPEND}
+				xKey="day"
+				series={[
+					{ key: "core", hidden: true },
+					{ key: "shell" },
+					{ key: "odon", tone: "danger" },
+				]}
+			/>,
+		);
+		await settle(() => bars(el).length === 6);
+		expect(barsBySeries(el).map((g) => g[0].getAttribute("fill"))).toEqual([
+			"var(--chakra-colors-chart-series-2)",
+			"var(--chakra-colors-danger-fg)",
+		]);
+	});
+
+	it("gives each reading of a time axis its own bar, labelled as a time", async () => {
+		const el = await mount(
+			<BarChart
+				aria-label="Load per slot"
+				data={DATA}
+				xKey="at"
+				xType="time"
+				series={[{ key: "load" }]}
+				formatX={timeFormatter({
+					locale: "en",
+					hour: "2-digit",
+					minute: "2-digit",
+					hour12: false,
+					timeZone: "UTC",
+				})}
+			/>,
+		);
+		await settle(() => bars(el).length === DATA.length);
+		expect(bars(el)).toHaveLength(DATA.length);
+		const x = await tickTexts(el, "x");
+		expect(x[0]).toBe("09:00");
+	});
+
+	it("shows the empty and loading states like the other charts", async () => {
+		const el = await mount(
+			<>
+				<BarChart
+					aria-label="Empty"
+					data={[]}
+					xKey="day"
+					series={SPEND_SERIES}
+				/>
+				<BarChart
+					aria-label="Loading"
+					data={SPEND}
+					xKey="day"
+					series={SPEND_SERIES}
+					loading
+				/>
+			</>,
+			{ width: 600, height: 600 },
+		);
+		expect(figure(el, "Empty").dataset.state).toBe("empty");
+		expect(figure(el, "Loading").getAttribute("aria-busy")).toBe("true");
+	});
+});
+
+describe.each<ColorMode>([
+	"light",
+	"dark",
+])("bar and threshold colours resolve in %s mode", (mode) => {
+	const token = (name: string) =>
+		toComputedRgb(resolveColor(system, name, mode));
+	const Wrap = mode === "dark" ? DarkMode : LightMode;
+
+	it("bar fills resolve to their palette slot or tone", async () => {
+		const el = await mount(
+			<Wrap>
+				<BarChart
+					aria-label="Spend"
+					data={SPEND}
+					xKey="day"
+					series={[
+						{ key: "core" },
+						{ key: "shell" },
+						{ key: "odon", tone: "success" },
+					]}
+				/>
+			</Wrap>,
+		);
+		await settle(() => bars(el).length === 9);
+		expect(barsBySeries(el).map((g) => getComputedStyle(g[0]).fill)).toEqual([
+			token("chart.series.1"),
+			token("chart.series.2"),
+			token("success.fg"),
+		]);
+	});
+
+	it("a threshold line and band paint in their tone, labels too", async () => {
+		const el = await mount(
+			<Wrap>
+				<LineChart
+					aria-label="Load"
+					data={DATA}
+					xKey="at"
+					series={[{ key: "load" }]}
+					thresholds={[
+						{ value: 5, label: "Admission limit", tone: "danger" },
+						{ value: 2, to: 3, label: "Target" },
+					]}
+				/>
+			</Wrap>,
+		);
+		const read = () => ({
+			line: el.querySelector<SVGLineElement>(".recharts-reference-line line"),
+			area: el.querySelector<SVGPathElement>(
+				".recharts-reference-area path, .recharts-reference-area rect",
+			),
+		});
+		await settle(() => !!read().line && !!read().area);
+		const { line, area } = read();
+		if (!line || !area) throw new Error("no threshold drawn");
+		expect(getComputedStyle(line).stroke).toBe(token("danger.fg"));
+		expect(getComputedStyle(area).fill).toBe(token("warning.fg"));
+		const labels = [
+			...el.querySelectorAll<SVGTextElement>("text.recharts-label"),
+		];
+		expect(labels.map((l) => l.textContent)).toEqual([
+			"Admission limit",
+			"Target",
+		]);
+		expect(labels.map((l) => getComputedStyle(l).fill)).toEqual([
+			token("danger.fg"),
+			token("warning.fg"),
+		]);
+	});
+});
+
+describe("thresholds", () => {
+	it.each([
+		["line", LineChart],
+		["area", AreaChart],
+		["bar", BarChart],
+	] as const)("draw on a %s chart", async (_, Chart) => {
+		const el = await mount(
+			<Chart
+				aria-label="With limit"
+				data={DATA}
+				xKey="at"
+				series={[{ key: "load" }]}
+				thresholds={[
+					{ value: 4, label: "Budget" },
+					{ value: 1, to: 2, label: "Calm", tone: "success" },
+				]}
+			/>,
+		);
+		await settle(() => !!el.querySelector(".recharts-reference-line line"));
+		expect(
+			el.querySelector(".recharts-reference-line line")?.getAttribute("stroke"),
+		).toBe("var(--chakra-colors-warning-fg)");
+		expect(el.querySelectorAll(".recharts-reference-area")).toHaveLength(1);
+	});
+
+	it("the y axis grows to show a threshold above the data", async () => {
+		const el = await mount(
+			<LineChart
+				aria-label="Budget"
+				data={DATA}
+				xKey="at"
+				series={[{ key: "load" }]}
+				formatValue={numberFormatter({ locale: "en" })}
+				thresholds={[{ value: 20, label: "Budget limit" }]}
+			/>,
+		);
+		const y = (await tickTexts(el, "y")).map(Number);
+		expect(Math.max(...y)).toBeGreaterThanOrEqual(20);
+	});
+});
+
+describe("accessible text alternative", () => {
+	it("holds the data as a visually hidden table in the figure, in the axis formats", async () => {
+		const el = await mount(
+			<BarChart
+				aria-label="Spend per day"
+				data={SPEND}
+				xKey="day"
+				xLabel="Day"
+				series={[
+					{ key: "core", label: "Core" },
+					{ key: "shell", label: "Shell", hidden: true },
+					{ key: "odon", label: "Odon" },
+				]}
+				formatValue={(v) => `${v} EUR`}
+			/>,
+		);
+		const fig = figure(el, "Spend per day");
+		const table = fig.querySelector("table");
+		const wrapper = fig.querySelector("[data-chart-table]");
+		if (!table || !wrapper) throw new Error("no data table");
+		expect(table.querySelector("caption")?.textContent).toBe("Spend per day");
+		expect(
+			[...table.querySelectorAll("thead th")].map((th) => th.textContent),
+		).toEqual(["Day", "Core", "Odon"]);
+		const rows = [...table.querySelectorAll("tbody tr")].map((tr) =>
+			[...tr.children].map((c) => c.textContent),
+		);
+		expect(rows).toEqual([
+			["Mon", "4 EUR", "1 EUR"],
+			["Tue", "5 EUR", "1 EUR"],
+			["Wed", "3 EUR", "2 EUR"],
+		]);
+		expect(table.querySelector("tbody th")?.getAttribute("scope")).toBe("row");
+		// Read by screen readers, not seen: the plot shows the same.
+		const box = wrapper.getBoundingClientRect();
+		expect(box.width * box.height).toBeLessThanOrEqual(1);
+	});
+
+	it("describes the figure with its summary and thresholds", async () => {
+		const el = await mount(
+			<LineChart
+				aria-label="Load"
+				data={DATA}
+				xKey="at"
+				series={[{ key: "load" }]}
+				summary="Load rose from 1 to 6 within the hour."
+				formatValue={numberFormatter({ locale: "en" })}
+				thresholds={[
+					{ value: 4, label: "Admission limit" },
+					{ value: 1, to: 2, label: "Calm" },
+				]}
+			/>,
+		);
+		const fig = figure(el, "Load");
+		const id = fig.getAttribute("aria-describedby");
+		expect(id).toBeTruthy();
+		const description = document.getElementById(id ?? "");
+		expect(fig.contains(description)).toBe(true);
+		expect(description?.textContent).toContain(
+			"Load rose from 1 to 6 within the hour.",
+		);
+		expect(description?.textContent).toContain("Admission limit: 4");
+		expect(description?.textContent).toContain("Calm: 1 – 2");
+	});
+
+	it("has no description without a summary or thresholds, and no table while empty or loading", async () => {
+		const el = await mount(
+			<>
+				<LineChart aria-label="Plain" data={DATA} xKey="at" series={SERIES} />
+				<LineChart aria-label="Empty" data={[]} xKey="at" series={SERIES} />
+				<LineChart
+					aria-label="Loading"
+					data={DATA}
+					xKey="at"
+					series={SERIES}
+					loading
+				/>
+			</>,
+			{ width: 600, height: 900 },
+		);
+		expect(figure(el, "Plain").hasAttribute("aria-describedby")).toBe(false);
+		expect(figure(el, "Plain").querySelector("table")).not.toBeNull();
+		expect(figure(el, "Empty").querySelector("table")).toBeNull();
+		expect(figure(el, "Loading").querySelector("table")).toBeNull();
+	});
+});
+
+describe("live updates", () => {
+	const more = (n: number): Reading[] =>
+		Array.from({ length: n }, (_, i) => ({
+			at: START + i * 10 * MINUTE,
+			cpu: 0.2,
+			memory: 0.5,
+			load: 1 + (i % 4),
+			limit: 4,
+		}));
+
+	it("the first draw animates when `animate` is set", async () => {
+		const el = await mount(
+			<LineChart
+				aria-label="Live"
+				data={more(6)}
+				xKey="at"
+				series={[{ key: "load" }]}
+				animate
+			/>,
+		);
+		await settle(() => lines(el).length > 0);
+		// The line draws itself in: its dash grows from nothing to its length.
+		const early = lines(el)[0].outerHTML;
+		await wait(1800);
+		expect(lines(el)[0].outerHTML).not.toBe(early);
+	});
+
+	it.each([
+		["animated", true],
+		["still", false],
+	])("appending a point to a line chart (%s) draws it in place, without re-animating", async (_, animate) => {
+		const chart = (data: Reading[]) => (
+			<LineChart
+				aria-label="Live"
+				data={data}
+				xKey="at"
+				series={[
+					{ key: "load", label: "Load" },
+					{ key: "limit", label: "Limit" },
+				]}
+				animate={animate}
+			/>
+		);
+		const el = await mount(chart(more(6)));
+		await wait(animate ? 1800 : 50);
+		const fig = figure(el, "Live");
+		const before = fig.getBoundingClientRect();
+		const legend = el.querySelector("[data-chart-legend]");
+
+		await rerender(chart(more(7)));
+		await act(async () => {
+			await frame();
+		});
+		// Seven points, drawn at once: the path is final on the first frame…
+		const drawn = lines(el).map((l) => l.outerHTML);
+		expect(el.querySelectorAll("table tbody tr")).toHaveLength(7);
+		await wait(600);
+		// …and does not move afterwards, as an animation would.
+		expect(lines(el).map((l) => l.outerHTML)).toEqual(drawn);
+		// No layout jump: the frame keeps its size and the legend its node.
+		expect(figure(el, "Live").getBoundingClientRect()).toEqual(before);
+		expect(el.querySelector("[data-chart-legend]")).toBe(legend);
+	});
+
+	it("appending a point to an animated bar chart draws the new bar at once", async () => {
+		const chart = (data: Reading[]) => (
+			<BarChart
+				aria-label="Live bars"
+				data={data}
+				xKey="at"
+				xType="time"
+				series={[{ key: "load" }]}
+				thresholds={[{ value: 5, label: "Limit" }]}
+				animate
+			/>
+		);
+		const el = await mount(chart(more(6)));
+		await wait(1000);
+		await rerender(chart(more(7)));
+		await act(async () => {
+			await frame();
+		});
+		const heights = () =>
+			bars(el).map((b) => Math.round(b.getBoundingClientRect().height));
+		const first = heights();
+		expect(first).toHaveLength(7);
+		expect(first.every((h) => h > 0)).toBe(true);
+		await wait(500);
+		expect(heights()).toEqual(first);
 	});
 });
