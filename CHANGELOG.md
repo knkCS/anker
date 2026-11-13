@@ -2,6 +2,24 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.15.0 — 2026-11-13
+
+### Added
+
+- **`DiffView`** (#340, #330, #342, #331, #344, #332, Spec #316): renders
+  unified diff text (or files parsed by the new pure `parseUnifiedDiff`) as one
+  section per file with path, change type, counts, old and new line numbers,
+  added and removed lines on the `success` and `danger` palettes, collapsible
+  files and folded unchanged regions (`contextLines`), and a `compact` variant.
+  `comments` anchor `DiffComment`s to a file and line (new or old side) and
+  render inline, with a file-level fallback for lines outside the hunks and a
+  trailing section for files not in the diff; `j`/`k` jump between files and
+  `n`/`p` between comments. Files above `virtualizeAbove` rows (default 500)
+  render in a virtualised pane.
+- **`Kanban` virtualised long columns** (#343, #326): a column above
+  `virtualizeAbove` cards (default 100) scrolls within `columnMaxHeight` and
+  mounts only the visible cards; arrow-key navigation reaches every card.
+
 ## 5.14.0 — 2026-11-13
 
 ### Added

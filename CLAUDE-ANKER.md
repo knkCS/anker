@@ -717,6 +717,11 @@ monospace block with line numbers and colours. Full guidance:
   dropped. `renderComment(comment, file)` supplies your own content.
 - **Keyboard**: `j` / `k` jump between files, `n` / `p` between comments
   while focus is in the diff (`keyboardNavigation={false}` to turn off).
+- **Large files** virtualise on their own: a file of more than
+  `virtualizeAbove` rows (default 500, folds closed) scrolls in a pane of its
+  own, at most 70% of the viewport tall, that draws only the code lines in
+  view; comments stay drawn. Line numbers, folds, comments and `n` / `p` work
+  as in any file. `Infinity` renders every file whole.
 - Strings are props with English defaults (`labels`).
 
 ---
