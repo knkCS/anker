@@ -185,6 +185,32 @@ describe("ContextRail with tabs in an AppShell", () => {
 		).toBe(true);
 	});
 
+	it("underlines the selected tab in the accent colour, and moves the underline with the selection", async () => {
+		const container = await mount(undefined, { tabs: true });
+		await expect.poll(() => width(container, "context-rail")).toBe(360);
+		const underline = (tab: HTMLElement) => {
+			const style = getComputedStyle(tab);
+			return {
+				width: style.borderBottomWidth,
+				style: style.borderBottomStyle,
+				transparent: style.borderBottomColor === "rgba(0, 0, 0, 0)",
+			};
+		};
+		const [branch, field] = [
+			...container.querySelectorAll<HTMLElement>("[role='tab']"),
+		];
+		expect(underline(branch)).toEqual({
+			width: "2px",
+			style: "solid",
+			transparent: false,
+		});
+		expect(underline(field).transparent).toBe(true);
+		await act(async () => field.click());
+		await expect.poll(() => underline(field).transparent).toBe(false);
+		expect(underline(field)).toMatchObject({ width: "2px", style: "solid" });
+		expect(underline(branch).transparent).toBe(true);
+	});
+
 	it("collapsed, stacks the tab buttons with their indicators inside 44px, and a tab expands the rail on it", async () => {
 		const container = await mount(undefined, { collapsed: true, tabs: true });
 		await expect.poll(() => width(container, "context-rail")).toBe(44);
