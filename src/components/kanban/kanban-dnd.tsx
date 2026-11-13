@@ -268,7 +268,7 @@ function KanbanDndBoard(props: KanbanDndBoardProps) {
 			announce("dropped", committed, drag.key);
 			return;
 		}
-		if (onMove(drag.key, move.from, move.to) === false) {
+		if (!onMove(drag.key, move.from, move.to)) {
 			announce("vetoed", committed, drag.key);
 		} else {
 			announce("dropped", preview, drag.key);

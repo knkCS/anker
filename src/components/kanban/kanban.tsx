@@ -127,7 +127,8 @@ export interface KanbanProps<T> {
 	 * `columns`, or return `false` to veto it — the card snaps back. Without
 	 * it the board is read-only and loads no drag-and-drop code.
 	 */
-	onMove?: (move: KanbanMove<T>) => boolean | undefined;
+	// biome-ignore lint/suspicious/noConfusingVoidType: a handler that applies the move returns nothing.
+	onMove?: (move: KanbanMove<T>) => boolean | void;
 	/** What screen readers hear while a card is dragged. English defaults. */
 	dragLabels?: Partial<KanbanDragLabels>;
 }
@@ -224,6 +225,7 @@ function KanbanRoot<T>(props: KanbanProps<T>) {
 		return map;
 	}, [columns, committed]);
 
+	const getBoard = useCallback(() => boardRef.current, []);
 	const getDirection = useCallback(
 		(): KanbanDirection =>
 			boardRef.current && getComputedStyle(boardRef.current).direction === "rtl"
@@ -260,7 +262,7 @@ function KanbanRoot<T>(props: KanbanProps<T>) {
 				itemKey,
 				from: { columnId: columns[from.column].id, index: from.index },
 				to: { columnId: columns[to.column].id, index: to.index },
-			}),
+			}) !== false,
 		[columns, itemByKey, onMove],
 	);
 
@@ -285,7 +287,7 @@ function KanbanRoot<T>(props: KanbanProps<T>) {
 			committed={committed}
 			onMove={onMoveCard}
 			focusCard={focusCard}
-			getBoard={() => boardRef.current}
+			getBoard={getBoard}
 			getDirection={getDirection}
 			labels={dragLabels}
 			renderOverlay={(itemKey) => {

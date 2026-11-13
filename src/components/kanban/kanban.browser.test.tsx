@@ -26,6 +26,7 @@ import {
 	type KanbanCardTone,
 	type KanbanColumn,
 	type KanbanMove,
+	type KanbanProps,
 } from ".";
 
 interface Task {
@@ -94,7 +95,7 @@ function Board({
 	emptyState?: ReactNode | false;
 	virtualizeAbove?: number;
 	columnMaxHeight?: string;
-	onMove?: (move: KanbanMove<Task>) => boolean | undefined;
+	onMove?: KanbanProps<Task>["onMove"];
 }) {
 	return (
 		<Kanban

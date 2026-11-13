@@ -88,12 +88,12 @@ export interface KanbanDndBoardProps {
 	columns: readonly { id: string; title: string }[];
 	/** The arrangement the consumer's `columns` describe. */
 	committed: readonly (readonly string[])[];
-	/** Calls the consumer's `onMove`; `false` is a veto. */
+	/** Calls the consumer's `onMove`; `false` when it vetoed the move. */
 	onMove: (
 		itemKey: string,
 		from: KanbanPosition,
 		to: KanbanPosition,
-	) => boolean | undefined;
+	) => boolean;
 	/** Moves focus to a card, scrolling a virtualised column to it. */
 	focusCard: (position: KanbanPosition, itemKey: string) => void;
 	getBoard: () => HTMLElement | null;
