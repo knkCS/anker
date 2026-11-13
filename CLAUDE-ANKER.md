@@ -42,7 +42,7 @@ consumers run React 19. See `CHANGELOG.md` for migration notes if you're on 18.
 **Semantic tokens** (prefer these over raw):
 - `bg-canvas` (page frame), `bg-surface` (cards/modals), `bg-subtle` (toolbars), `bg-muted` (hover)
 - `default` / `emphasized` / `muted` / `subtle` (text)
-- `border` (standard 1px), `accent` (action), `success`, `error`
+- `border` (standard 1px), `border-emphasized` (a border that must show on a sunken `bg-canvas` surface), `accent` (action), `success`, `error`
 
 **Status palettes** — pass as `colorPalette` on `Badge`, `Button`, `Alert`, `Progress`, `Tag` and every other palette-aware component; light + dark mode, `solid` / `subtle` / `outline`:
 - `success` — done, healthy, passed ("Active", "Merged", "Passed")
@@ -647,6 +647,31 @@ order, and all fetching.
   `getItemDate` to disable.
 - The scroll region is a `role="log"` landmark — set `aria-label` (default
   "Message history").
+
+---
+
+## Kanban
+
+`Kanban` (`@knkcs/anker/components`) is a read-only board: columns with a
+title, a count and an action slot, and cards you render. Use it whenever a
+screen shows items by status side by side — never hand-build columns from
+`Stack`s. Full guidance: `docs/page-patterns.md` §11 "Boards".
+
+- **Data in, cards out**: `columns` (`{ id, title, items, count?, action?,
+  emptyState? }`), `getItemKey`, and `renderCard(item)` returning a
+  `Kanban.Card`. Status derivation stays in your code.
+- **Always render `Kanban.Card`** — the board moves keyboard focus through
+  it. Build its content from `Kanban.CardMeta` (with `Kanban.CardAvatar`
+  inside), `Kanban.CardTitle` and `Kanban.CardBadges`.
+- **A card opens the item**: `href` (link), `onClick` (button), or `asChild`
+  around a router `<Link>`.
+- **Tones** say whether anyone must act: `default`; `quiet` — waits on
+  nobody (sunken surface, dashed border); `attention` — someone must act (a
+  `warning` edge). Keep `attention` rare. The status itself still goes in a
+  `StatusBadge` with a `tone`.
+- `collapseEmptyColumns` narrows empty columns; a board with no card shows
+  `emptyState` (`false` keeps the columns). Strings are props with English
+  defaults (`emptyBoardLabel`, `emptyColumnLabel`, `formatColumnLabel`).
 
 ---
 

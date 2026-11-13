@@ -105,6 +105,19 @@ export { FactBox } from "./fact-box";
 // InlineCreatableList
 export type { InlineCreatableListProps } from "./inline-creatable-list";
 export { InlineCreatableList } from "./inline-creatable-list";
+// Kanban
+export type {
+	KanbanCardAvatarProps,
+	KanbanCardBadgesProps,
+	KanbanCardContext,
+	KanbanCardMetaProps,
+	KanbanCardProps,
+	KanbanCardTitleProps,
+	KanbanCardTone,
+	KanbanColumn,
+	KanbanProps,
+} from "./kanban";
+export { KANBAN_CARD_TONES, Kanban } from "./kanban";
 // KnkLogo
 export type { KnkLogoProps } from "./knk-logo";
 export { KnkLogo } from "./knk-logo";

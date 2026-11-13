@@ -27,6 +27,7 @@ const SEMANTIC_TOKENS = [
 	"subtle",
 	"border",
 	"border-muted",
+	"border-emphasized",
 	"accent",
 	"success",
 	"error",

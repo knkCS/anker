@@ -1,0 +1,225 @@
+import type { Meta, StoryObj } from "@storybook/react";
+import { fn } from "@storybook/test";
+import { Plus } from "lucide-react";
+import { IconButton } from "../../atoms/button";
+import { StatusBadge } from "../../atoms/status-badge";
+import { Avatar } from "../../primitives/avatar";
+import { DarkMode, LightMode } from "../../primitives/color-mode";
+import { Box, Grid } from "../../primitives/layout";
+import { Text } from "../../primitives/typography";
+import type { KanbanColumn, KanbanProps } from "./kanban";
+import { Kanban } from "./kanban";
+import type { KanbanCardTone } from "./kanban-card";
+
+/**
+ * A read-only board: columns with a title, a count and an action slot; cards
+ * rendered with `Kanban.Card` and its building blocks. Click a card, then use
+ * the arrow keys to move between cards and columns and Enter to open one.
+ * Toggle the toolbar theme, or open "Light and dark", to see the tones in
+ * both modes.
+ */
+const meta = {
+	title: "Components/Kanban",
+	component: Kanban,
+	parameters: { layout: "padded" },
+} satisfies Meta<typeof Kanban>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+interface Task {
+	id: string;
+	title: string;
+	owner: string;
+	tone?: KanbanCardTone;
+	badge?: { label: string; tone: "warning" | "info" | "success" | "neutral" };
+}
+
+const COLUMNS: KanbanColumn<Task>[] = [
+	{
+		id: "awaiting",
+		title: "Awaiting approval",
+		items: [
+			{
+				id: "41",
+				title: "Approve the migration plan",
+				owner: "Mara Lind",
+				tone: "quiet",
+			},
+		],
+	},
+	{
+		id: "ready",
+		title: "Ready",
+		items: [
+			{ id: "42", title: "Write the parser for spec files", owner: "Ola Berg" },
+			{ id: "43", title: "Add retry to the webhook sender", owner: "Kai Moe" },
+		],
+		action: (
+			<IconButton aria-label="Add a task to Ready" size="xs" variant="ghost">
+				<Plus />
+			</IconButton>
+		),
+	},
+	{
+		id: "in-progress",
+		title: "In progress",
+		items: [
+			{
+				id: "44",
+				title: "Render the board in the Spec view",
+				owner: "Ola Berg",
+			},
+		],
+	},
+	{
+		id: "needs-you",
+		title: "Needs you",
+		items: [
+			{
+				id: "45",
+				title: "Answer the agent's question about auth scopes",
+				owner: "Mara Lind",
+				tone: "attention",
+				badge: { label: "Needs you", tone: "warning" },
+			},
+		],
+	},
+	{ id: "review", title: "In review", items: [] },
+	{
+		id: "done",
+		title: "Done",
+		items: [
+			{
+				id: "40",
+				title: "Scaffold the repository",
+				owner: "Kai Moe",
+				badge: { label: "Merged", tone: "success" },
+			},
+		],
+	},
+];
+
+function TaskCard({ task }: { task: Task }) {
+	return (
+		<Kanban.Card tone={task.tone} href={`#task-${task.id}`}>
+			<Kanban.CardMeta>
+				<Text as="span" fontFamily="mono">
+					#{task.id}
+				</Text>
+				<Kanban.CardAvatar>
+					<Avatar name={task.owner} size="2xs" />
+				</Kanban.CardAvatar>
+			</Kanban.CardMeta>
+			<Kanban.CardTitle>{task.title}</Kanban.CardTitle>
+			{task.badge ? (
+				<Kanban.CardBadges>
+					<StatusBadge label={task.badge.label} tone={task.badge.tone} />
+				</Kanban.CardBadges>
+			) : null}
+		</Kanban.Card>
+	);
+}
+
+const boardArgs: KanbanProps<Task> = {
+	"aria-label": "Spec board",
+	columns: COLUMNS,
+	getItemKey: (task) => task.id,
+	renderCard: (task) => <TaskCard task={task} />,
+};
+
+// `Kanban` is generic; Storybook's args type is `KanbanProps<unknown>`.
+const args = boardArgs as unknown as Story["args"];
+
+export const Default: Story = { args };
+
+/** Default, quiet (nobody needs to act) and attention (someone must act). */
+export const Tones: Story = {
+	args,
+	render: () => (
+		<Grid templateColumns="repeat(3, 16rem)" gap="3">
+			<Kanban.Card>
+				<Kanban.CardMeta>default</Kanban.CardMeta>
+				<Kanban.CardTitle>Work that just happens</Kanban.CardTitle>
+			</Kanban.Card>
+			<Kanban.Card tone="quiet">
+				<Kanban.CardMeta>quiet</Kanban.CardMeta>
+				<Kanban.CardTitle>Waiting on nobody</Kanban.CardTitle>
+			</Kanban.Card>
+			<Kanban.Card tone="attention">
+				<Kanban.CardMeta>attention</Kanban.CardMeta>
+				<Kanban.CardTitle>Someone must act</Kanban.CardTitle>
+			</Kanban.Card>
+		</Grid>
+	),
+};
+
+/** The board and its tones in light and dark mode side by side. */
+export const LightAndDark: Story = {
+	args,
+	parameters: { layout: "fullscreen" },
+	render: () => (
+		<Grid templateColumns="1fr" gap="0">
+			<LightMode>
+				<Box bg="bg-canvas" p="6">
+					<Kanban {...boardArgs} />
+				</Box>
+			</LightMode>
+			<DarkMode>
+				<Box bg="bg-canvas" p="6">
+					<Kanban {...boardArgs} />
+				</Box>
+			</DarkMode>
+		</Grid>
+	),
+};
+
+const openTask = fn();
+
+/** Cards as buttons: `onClick` instead of `href` (see the Actions panel). */
+export const ButtonCards: Story = {
+	args: {
+		...boardArgs,
+		renderCard: (task: Task) => (
+			<Kanban.Card tone={task.tone} onClick={() => openTask(task.id)}>
+				<Kanban.CardMeta>#{task.id}</Kanban.CardMeta>
+				<Kanban.CardTitle>{task.title}</Kanban.CardTitle>
+			</Kanban.Card>
+		),
+	} as unknown as Story["args"],
+};
+
+/** `collapseEmptyColumns` draws empty columns as a narrow strip. */
+export const CollapsedEmptyColumns: Story = {
+	args: {
+		...boardArgs,
+		collapseEmptyColumns: true,
+	} as unknown as Story["args"],
+};
+
+/** On a narrow screen the board scrolls sideways instead of squeezing. */
+export const NarrowScreen: Story = {
+	args,
+	render: () => (
+		<Box maxW="360px" borderWidth="1px" borderColor="border" p="2">
+			<Kanban {...boardArgs} />
+		</Box>
+	),
+};
+
+/** No column has a card: the empty-board state. */
+export const EmptyBoard: Story = {
+	args: {
+		...boardArgs,
+		columns: COLUMNS.map((column) => ({ ...column, items: [] })),
+	} as unknown as Story["args"],
+};
+
+/** `emptyState={false}` keeps empty columns on screen, each with its state. */
+export const EmptyColumns: Story = {
+	args: {
+		...boardArgs,
+		columns: COLUMNS.map((column) => ({ ...column, items: [] })),
+		emptyState: false,
+	} as unknown as Story["args"],
+};
