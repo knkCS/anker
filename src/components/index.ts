@@ -133,6 +133,10 @@ export type {
 	KanbanCardTitleProps,
 	KanbanCardTone,
 	KanbanColumn,
+	KanbanDragLabels,
+	KanbanDragPlace,
+	KanbanMove,
+	KanbanMovePosition,
 	KanbanProps,
 } from "./kanban";
 export { KANBAN_CARD_TONES, Kanban } from "./kanban";

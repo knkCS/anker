@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 import { Plus } from "lucide-react";
+import { useState } from "react";
 import { IconButton } from "../../atoms/button";
 import { StatusBadge } from "../../atoms/status-badge";
 import { Avatar } from "../../primitives/avatar";
@@ -10,11 +11,13 @@ import { Text } from "../../primitives/typography";
 import type { KanbanColumn, KanbanProps } from "./kanban";
 import { Kanban } from "./kanban";
 import type { KanbanCardTone } from "./kanban-card";
+import type { KanbanMove } from "./kanban-dnd-types";
 
 /**
- * A read-only board: columns with a title, a count and an action slot; cards
- * rendered with `Kanban.Card` and its building blocks. Click a card, then use
- * the arrow keys to move between cards and columns and Enter to open one.
+ * A board: columns with a title, a count and an action slot; cards rendered
+ * with `Kanban.Card` and its building blocks. Click a card, then use the
+ * arrow keys to move between cards and columns and Enter to open one.
+ * Read-only unless `onMove` is passed — see "Editable" for drag and drop.
  * Toggle the toolbar theme, or open "Light and dark", to see the tones in
  * both modes.
  */
@@ -282,5 +285,94 @@ export const LongColumnsLightAndDark: Story = {
 				</Box>
 			</DarkMode>
 		</Grid>
+	),
+};
+
+const moved = fn();
+
+/** Applies a move to the columns: out of `from`, into `to` at its index. */
+function applyMove<T>(columns: KanbanColumn<T>[], move: KanbanMove<T>) {
+	const next = columns.map((column) => ({
+		...column,
+		items: [...column.items],
+	}));
+	const from = next.find((column) => column.id === move.from.columnId);
+	const to = next.find((column) => column.id === move.to.columnId);
+	if (!from || !to) return columns;
+	const [item] = from.items.splice(move.from.index, 1);
+	to.items.splice(move.to.index, 0, item);
+	return next;
+}
+
+/**
+ * The consumer's side of an editable board: it owns the columns, applies an
+ * accepted move, and vetoes one by returning `false` — here, nothing leaves
+ * Done, so a card dragged out of it snaps back.
+ */
+function EditableBoard({
+	initial = COLUMNS,
+	...rest
+}: { initial?: KanbanColumn<Task>[] } & Partial<KanbanProps<Task>>) {
+	const [columns, setColumns] = useState(initial);
+	return (
+		<Kanban
+			{...boardArgs}
+			{...rest}
+			columns={columns}
+			onMove={(move) => {
+				moved(move);
+				if (
+					move.from.columnId.startsWith("done") &&
+					move.to.columnId !== move.from.columnId
+				) {
+					return false;
+				}
+				setColumns((current) => applyMove(current, move));
+			}}
+		/>
+	);
+}
+
+/**
+ * `onMove` makes the board editable. Drag a card with the mouse (or press
+ * and hold on touch) between and within columns. With the keyboard, focus a
+ * card and press Space to pick it up, the arrow keys to move it, Space or
+ * Enter to drop it, Escape to cancel. Dragging a card out of Done is vetoed
+ * and snaps back (see the Actions panel for each `onMove`).
+ */
+export const Editable: Story = {
+	args,
+	render: () => <EditableBoard />,
+};
+
+/** An editable board in light and dark mode side by side. */
+export const EditableLightAndDark: Story = {
+	args,
+	parameters: { layout: "fullscreen" },
+	render: () => (
+		<Grid templateColumns="1fr" gap="0">
+			<LightMode>
+				<Box bg="bg-canvas" p="6">
+					<EditableBoard />
+				</Box>
+			</LightMode>
+			<DarkMode>
+				<Box bg="bg-canvas" p="6">
+					<EditableBoard />
+				</Box>
+			</DarkMode>
+		</Grid>
+	),
+};
+
+/**
+ * Drag and drop over long, virtualised columns: a column scrolls while a
+ * card is dragged near its edge, and the keyboard reaches every place —
+ * pick a card up and press End to move it to the bottom of the Backlog.
+ */
+export const EditableLongColumns: Story = {
+	args: longArgs as unknown as Story["args"],
+	render: () => (
+		<EditableBoard initial={LONG_COLUMNS} columnMaxHeight="32rem" />
 	),
 };

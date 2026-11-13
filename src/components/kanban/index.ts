@@ -9,3 +9,9 @@ export type {
 	KanbanCardTone,
 } from "./kanban-card";
 export { KANBAN_CARD_TONES } from "./kanban-card";
+export type {
+	KanbanDragLabels,
+	KanbanDragPlace,
+	KanbanMove,
+	KanbanMovePosition,
+} from "./kanban-dnd-types";

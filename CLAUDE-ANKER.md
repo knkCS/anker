@@ -654,8 +654,9 @@ order, and all fetching.
 
 ## Kanban
 
-`Kanban` (`@knkcs/anker/components`) is a read-only board: columns with a
-title, a count and an action slot, and cards you render. Use it whenever a
+`Kanban` (`@knkcs/anker/components`) is a board — read-only unless you pass
+`onMove`: columns with a title, a count and an action slot, and cards you
+render. Use it whenever a
 screen shows items by status side by side — never hand-build columns from
 `Stack`s. Full guidance: `docs/page-patterns.md` §11 "Boards".
 
@@ -678,6 +679,13 @@ screen shows items by status side by side — never hand-build columns from
   (default 100) scroll within `columnMaxHeight` (default `70vh`) and only
   the visible cards mount — keep `renderCard` free of side effects. The
   arrow keys still reach every card.
+- **Editable boards**: pass `onMove(move)` only when users set the status by
+  hand. Cards then drag between and within columns with the pointer, and
+  with the keyboard (Space picks up, arrows move, Space/Enter drops, Escape
+  cancels). `move` is `{ item, itemKey, from, to }` with `{ columnId, index }`
+  positions — `to.index` is the card's index once moved. Apply it to your
+  `columns`, or return `false` to veto: the card snaps back. A board over
+  derived status passes no `onMove` and loads no drag-and-drop code.
 
 ---
 
