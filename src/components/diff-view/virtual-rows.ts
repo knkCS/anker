@@ -6,20 +6,16 @@
 import type { DiffRow } from "./diff-rows";
 import type { DiffFile } from "./types";
 
-/** Rows a file shows with nothing folded: its hunk headers and lines. */
-export function fileRowCount(file: DiffFile): number {
-	let count = 0;
-	for (const hunk of file.hunks) count += 1 + hunk.lines.length;
-	return count;
-}
-
 /**
- * Whether a file renders in a virtualised pane. Decided on the file alone —
- * not on folds or comments — so expanding a fold never swaps the body out
- * from under the reader.
+ * Whether a file renders in a virtualised pane: more rows than `threshold`
+ * as first shown (`rowCount`, folds closed). Binary files have no rows.
  */
-export function shouldVirtualize(file: DiffFile, threshold: number): boolean {
-	return !file.binary && fileRowCount(file) > threshold;
+export function shouldVirtualize(
+	file: DiffFile,
+	rowCount: number,
+	threshold: number,
+): boolean {
+	return !file.binary && rowCount > threshold;
 }
 
 /** Pixels per code line: the `sm` (default) or `xs` (compact) size at 1.5. */
@@ -113,9 +109,9 @@ export function windowWithGaps(
 }
 
 /**
- * The rows to draw: the virtualiser's window plus rows kept outside it — the
- * row holding focus, a row about to receive it — each with the line before
- * a comment row, so a comment never shows without its line.
+ * The rows to draw: the virtualiser's window plus rows kept outside it —
+ * comment rows, the row holding focus — each comment row with the line
+ * before it, so a comment never shows without its line.
  */
 export function withKeptRows(
 	window: readonly number[],

@@ -22,26 +22,12 @@ import {
 	UnfoldVertical,
 } from "lucide-react";
 import type React from "react";
-import {
-	useCallback,
-	useId,
-	useLayoutEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import { useCallback, useId, useMemo, useRef, useState } from "react";
 import { StatusBadge, type StatusBadgeTone } from "../../atoms/status-badge";
 import { Box, HStack, Stack } from "../../primitives/layout";
 import { Text } from "../../primitives/typography";
 import { MessageBubble, MessageGroup } from "../message";
 import { anchorComments, groupCommentsByFile } from "./diff-comments";
-import {
-	findCommentJump,
-	findFileTarget,
-	type PaneComment,
-	ROW_INDEX_ATTR,
-	registerVirtualPane,
-} from "./diff-jumps";
 import { buildDiffRows, type DiffRow } from "./diff-rows";
 import { parseUnifiedDiff } from "./parse-unified-diff";
 import type {
@@ -187,11 +173,12 @@ export interface DiffViewProps {
 	/** The width of a tab character, in spaces. @default 4 */
 	tabSize?: number;
 	/**
-	 * A file with more rows than this (hunk headers and lines, folds aside)
-	 * renders in a scrolling pane of its own, at most 70% of the viewport
-	 * tall, that draws only the rows in view — line numbers, folds, comments
-	 * and the keyboard jumps work as in any file. `Infinity` renders every
-	 * file whole. @default 500
+	 * A file with more rows than this as first shown (hunk headers, lines,
+	 * folds, comment rows) renders in a scrolling pane of its own, at most
+	 * 70% of the viewport tall, that draws only the code lines in view;
+	 * comments stay drawn. Line numbers, folds, comments and the keyboard
+	 * jumps work as in any file. `Infinity` renders every file whole.
+	 * @default 500
 	 */
 	virtualizeAbove?: number;
 	/** The heading level of the file paths. @default 3 */
@@ -239,6 +226,52 @@ const TONE_EDGE: Record<DiffCommentTone, string> = {
 	accent: "primary.border",
 };
 
+/** Marks the element a file jump focuses: its toggle, or its heading. */
+const FILE_TARGET = "[data-diff-file-focus]";
+const COMMENT_TARGET = "[data-diff-comment]";
+
+const JUMPS: Record<string, { selector: string; direction: 1 | -1 }> = {
+	j: { selector: FILE_TARGET, direction: 1 },
+	k: { selector: FILE_TARGET, direction: -1 },
+	n: { selector: COMMENT_TARGET, direction: 1 },
+	p: { selector: COMMENT_TARGET, direction: -1 },
+};
+
+/**
+ * The next (or previous) target in document order from `from`, skipping the
+ * target `from` sits in. Reads the rendered DOM: a collapsed file's
+ * comments are not rendered, so a jump passes over them.
+ */
+function findJumpTarget(
+	root: HTMLElement,
+	selector: string,
+	from: Element,
+	direction: 1 | -1,
+): HTMLElement | undefined {
+	const targets = [...root.querySelectorAll<HTMLElement>(selector)];
+	// A file jump counts from the file focus is in, not from its header.
+	const origin =
+		selector === FILE_TARGET
+			? (from.closest<HTMLElement>("[data-diff-file]") ?? from)
+			: from;
+	const side =
+		direction === 1
+			? Node.DOCUMENT_POSITION_FOLLOWING
+			: Node.DOCUMENT_POSITION_PRECEDING;
+	const candidates = targets.filter((target) => {
+		if (target === origin) return false;
+		const position = origin.compareDocumentPosition(target);
+		return (
+			(position & side) !== 0 &&
+			(position &
+				(Node.DOCUMENT_POSITION_CONTAINS |
+					Node.DOCUMENT_POSITION_CONTAINED_BY)) ===
+				0
+		);
+	});
+	return direction === 1 ? candidates[0] : candidates.at(-1);
+}
+
 /**
  * Keys typed here belong to the element: text entry, and widgets with their
  * own typeahead (a menu or listbox from `renderFileActions`).
@@ -248,13 +281,6 @@ const OWNS_KEYS =
 
 const ownsKeys = (element: HTMLElement) =>
 	element.isContentEditable || element.closest(OWNS_KEYS) !== null;
-
-const JUMPS: Record<string, { to: "file" | "comment"; direction: 1 | -1 }> = {
-	j: { to: "file", direction: 1 },
-	k: { to: "file", direction: -1 },
-	n: { to: "comment", direction: 1 },
-	p: { to: "comment", direction: -1 },
-};
 
 const VARIANT_STYLES: Record<
 	DiffViewVariant,
@@ -298,15 +324,15 @@ export function DiffView(props: DiffViewProps) {
 			if (!jump || !event.currentTarget.contains(from) || ownsKeys(from)) {
 				return;
 			}
-			const root = event.currentTarget;
-			const go =
-				jump.to === "file"
-					? findFileTarget(root, from, jump.direction)
-					: findCommentJump(root, from, jump.direction);
-			if (!go) return;
+			const next = findJumpTarget(
+				event.currentTarget,
+				jump.selector,
+				from,
+				jump.direction,
+			);
+			if (!next) return;
 			event.preventDefault();
-			if (typeof go === "function") go();
-			else go.focus();
+			next.focus();
 		},
 		[keyboardNavigation],
 	);
@@ -457,6 +483,17 @@ function DiffFileSection(props: DiffFileSectionProps) {
 				comments: anchored.byLine,
 			}),
 		[file, contextLines, expanded, anchored],
+	);
+	// Decided on the rows as first folded, not as the reader expanded them:
+	// opening a fold never swaps the body out from under the reader.
+	const virtualize = useMemo(
+		() =>
+			shouldVirtualize(
+				file,
+				buildDiffRows(file, { contextLines, comments: anchored.byLine }).length,
+				virtualizeAbove,
+			),
+		[file, contextLines, anchored, virtualizeAbove],
 	);
 	const commentCount = fileComments?.length ?? 0;
 	const toggle = useCallback(() => {
@@ -670,7 +707,7 @@ function DiffFileSection(props: DiffFileSectionProps) {
 						labels={labels}
 						variant={variant}
 						tabSize={tabSize}
-						virtualize={shouldVirtualize(file, virtualizeAbove)}
+						virtualize={virtualize}
 						onExpand={expand}
 						renderComment={renderComment}
 					/>
@@ -710,7 +747,8 @@ interface RowContext {
 /** Extra attributes a virtualised pane puts on each drawn row. */
 interface RowProps {
 	ref?: React.Ref<HTMLTableRowElement>;
-	[ROW_INDEX_ATTR]?: number;
+	"data-diff-row-index"?: number;
+	"aria-rowindex"?: number;
 }
 
 function FileBody(props: FileBodyProps) {
@@ -768,15 +806,19 @@ function useRowContext({
 function RowsTable({
 	variant,
 	tabSize,
+	rowCount,
 	children,
 }: {
 	variant: DiffViewVariant;
 	tabSize: number;
+	/** All the rows, when only some are drawn. */
+	rowCount?: number;
 	children: React.ReactNode;
 }) {
 	return (
 		<Box
 			as="table"
+			aria-rowcount={rowCount}
 			width="full"
 			borderCollapse="collapse"
 			fontFamily="mono"
@@ -800,100 +842,78 @@ function WholeBody(props: FileBodyProps) {
 	);
 }
 
+/** A drawn row's index in its pane's rows (what the virtualiser measures by). */
+const ROW_INDEX_ATTR = "data-diff-row-index";
+
 /**
- * A large file's rows in a scrolling pane that draws only the rows in view
- * (`@tanstack/react-virtual`), with spacer rows standing in for the rest.
- * The row holding focus stays drawn when it scrolls out of view, and the
- * pane registers its comments so `n` / `p` reach the ones not drawn.
+ * A large file's rows in a scrolling pane that draws only the code lines in
+ * view (`@tanstack/react-virtual`), with spacer rows standing in for the
+ * rest. Comment rows — and the line each belongs to — stay drawn wherever
+ * they are: a comment keeps its state (a half-typed reply) while the pane
+ * scrolls, and the `n` / `p` jumps find every comment in the DOM, whose
+ * `focus()` scrolls the pane to it. The row holding focus stays drawn too.
  */
 function VirtualBody(props: FileBodyProps) {
 	const { rows, variant } = props;
 	const ctx = useRowContext(props);
 	const paneRef = useRef<HTMLDivElement>(null);
-	// Rows kept drawn outside the window, by key: rows shift as folds open.
+	// The focused row, by key: rows shift as folds open.
 	const [focusedKey, setFocusedKey] = useState<string>();
-	const [pending, setPending] = useState<{ key: string; nth: number }>();
-	const indexOf = useCallback(
-		(key: string | undefined) =>
-			key == null ? undefined : rows.findIndex((row) => row.key === key),
+	const indexByKey = useMemo(
+		() => new Map(rows.map((row, index) => [row.key, index])),
 		[rows],
 	);
-	const focusedIndex = indexOf(focusedKey);
-	const pendingIndex = indexOf(pending?.key);
+	const commentRows = useMemo(
+		() =>
+			rows.flatMap((row, index) => (row.type === "comments" ? [index] : [])),
+		[rows],
+	);
+	const focusedIndex =
+		focusedKey == null ? undefined : indexByKey.get(focusedKey);
 	const rangeExtractor = useCallback(
 		(range: Parameters<typeof defaultRangeExtractor>[0]) =>
 			withKeptRows(
 				defaultRangeExtractor(range),
-				[focusedIndex, pendingIndex],
+				[...commentRows, focusedIndex],
 				rows,
 			),
-		[focusedIndex, pendingIndex, rows],
+		[commentRows, focusedIndex, rows],
+	);
+	const estimateSize = useCallback(
+		(index: number) => estimateRowSize(rows[index], variant),
+		[rows, variant],
+	);
+	const getItemKey = useCallback(
+		(index: number) => rows[index]?.key ?? index,
+		[rows],
 	);
 	const virtualizer = useVirtualizer({
 		count: rows.length,
 		getScrollElement: () => paneRef.current,
-		estimateSize: (index) => estimateRowSize(rows[index], variant),
-		getItemKey: (index) => rows[index]?.key ?? index,
+		estimateSize,
+		getItemKey,
 		indexAttribute: ROW_INDEX_ATTR,
 		overscan: 10,
 		rangeExtractor,
 	});
 
-	// The comment to focus once its row is drawn.
-	const focusComment = useCallback((index: number, nth: number) => {
-		const row = paneRef.current?.querySelector(
-			`[${ROW_INDEX_ATTR}="${index}"]`,
-		);
-		const target = row?.querySelectorAll<HTMLElement>("[data-diff-comment]")[
-			nth
-		];
-		target?.focus();
-		return target != null;
-	}, []);
-	useLayoutEffect(() => {
-		if (!pending || pendingIndex == null) return;
-		if (pendingIndex < 0 || focusComment(pendingIndex, pending.nth)) {
-			setPending(undefined);
-		}
-	});
-
-	// What `n` / `p` need of the pane, read fresh at each keypress.
-	const rowsRef = useRef(rows);
-	rowsRef.current = rows;
-	useLayoutEffect(() => {
-		const pane = paneRef.current;
-		if (!pane) return;
-		return registerVirtualPane(pane, {
-			comments: () => {
-				const list: PaneComment[] = [];
-				rowsRef.current.forEach((row, index) => {
-					if (row.type !== "comments") return;
-					for (let nth = 0; nth < row.comments.length; nth++) {
-						list.push({ row: index, nth });
-					}
-				});
-				return list;
-			},
-			reveal: ({ row, nth }) => {
-				if (focusComment(row, nth)) return;
-				const key = rowsRef.current[row]?.key;
-				if (key != null) setPending({ key, nth });
-			},
-		});
-	}, [focusComment]);
-
-	const onFocus = useCallback((event: React.FocusEvent<HTMLElement>) => {
-		const row = (event.target as HTMLElement).closest(`[${ROW_INDEX_ATTR}]`);
-		const index = Number(row?.getAttribute(ROW_INDEX_ATTR));
-		setFocusedKey(row ? rowsRef.current[index]?.key : undefined);
-	}, []);
+	const onFocus = useCallback(
+		(event: React.FocusEvent<HTMLElement>) => {
+			const row = (event.target as HTMLElement).closest(`[${ROW_INDEX_ATTR}]`);
+			const index = Number(row?.getAttribute(ROW_INDEX_ATTR));
+			setFocusedKey(row ? rows[index]?.key : undefined);
+		},
+		[rows],
+	);
 	const onBlur = useCallback((event: React.FocusEvent<HTMLElement>) => {
 		const next = event.relatedTarget as Node | null;
 		if (!next || !event.currentTarget.contains(next)) setFocusedKey(undefined);
 	}, []);
 
-	const items = virtualizer.getVirtualItems();
-	const entries = windowWithGaps(items, virtualizer.getTotalSize());
+	const entries = windowWithGaps(
+		virtualizer.getVirtualItems(),
+		virtualizer.getTotalSize(),
+	);
 	return (
 		<Box
 			ref={paneRef}
@@ -903,7 +923,11 @@ function VirtualBody(props: FileBodyProps) {
 			onFocus={onFocus}
 			onBlur={onBlur}
 		>
-			<RowsTable variant={variant} tabSize={props.tabSize}>
+			<RowsTable
+				variant={variant}
+				tabSize={props.tabSize}
+				rowCount={rows.length}
+			>
 				{entries.map((entry) => {
 					if (entry.type === "gap") {
 						return (
@@ -913,10 +937,10 @@ function VirtualBody(props: FileBodyProps) {
 							</tr>
 						);
 					}
-					const row = rows[entry.index];
-					return renderRow(row, ctx, {
+					return renderRow(rows[entry.index], ctx, {
 						ref: virtualizer.measureElement,
 						[ROW_INDEX_ATTR]: entry.index,
+						"aria-rowindex": entry.index + 1,
 					});
 				})}
 			</RowsTable>

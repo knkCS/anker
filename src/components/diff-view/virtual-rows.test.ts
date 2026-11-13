@@ -4,7 +4,6 @@ import { buildDiffRows } from "./diff-rows";
 import { parseUnifiedDiff } from "./parse-unified-diff";
 import {
 	estimateRowSize,
-	fileRowCount,
 	lineNumberDigits,
 	shouldVirtualize,
 	widestLine,
@@ -25,19 +24,17 @@ const added = (count: number) =>
 		`@@ -0,0 +1,${count} @@`,
 	);
 
-describe("fileRowCount and shouldVirtualize", () => {
-	it("counts hunk headers and lines, folds aside", () => {
-		expect(fileRowCount(added(10))).toBe(11);
-	});
-
-	it("virtualises a file above the threshold, never a binary one", () => {
-		expect(shouldVirtualize(added(10), 11)).toBe(false);
-		expect(shouldVirtualize(added(10), 10)).toBe(true);
-		expect(shouldVirtualize(added(10), Number.POSITIVE_INFINITY)).toBe(false);
+describe("shouldVirtualize", () => {
+	it("virtualises a file with more rows than the threshold, never a binary one", () => {
+		expect(shouldVirtualize(added(10), 11, 11)).toBe(false);
+		expect(shouldVirtualize(added(10), 11, 10)).toBe(true);
+		expect(shouldVirtualize(added(10), 11, Number.POSITIVE_INFINITY)).toBe(
+			false,
+		);
 		const [binary] = parseUnifiedDiff(
 			"diff --git a/a.png b/a.png\nBinary files a/a.png and b/a.png differ",
 		);
-		expect(shouldVirtualize(binary, 0)).toBe(false);
+		expect(shouldVirtualize(binary, 1, 0)).toBe(false);
 	});
 });
 

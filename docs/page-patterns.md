@@ -1663,16 +1663,18 @@ const files = parseUnifiedDiff(text).filter((f) => !f.path.endsWith(".lock"));
   Ignored in text fields, menus and listboxes, and with a modifier key; a
   collapsed file's comments are skipped. `keyboardNavigation={false}` turns the jumps off
   where the page already binds these keys.
-- **Large files**: a file of more than `virtualizeAbove` rows (hunk
-  headers and lines, default 500) renders in a scrolling pane of its own,
-  at most 70% of the viewport tall, that draws only the rows in view
-  (`@tanstack/react-virtual`) — a 5,000-line file costs the same as a
-  50-line one. Line numbers, expanded folds and comments stay correct while
-  it scrolls; the row holding focus stays drawn; `n` / `p` reach comments
-  the pane has not drawn yet and scroll to them. The decision is per file,
-  on its size alone, so expanding a fold never swaps the pane in or out;
-  many small files are each rendered whole. Both variants virtualise.
-  `virtualizeAbove={Infinity}` renders every file whole.
+- **Large files**: a file of more than `virtualizeAbove` rows as first
+  shown (hunk headers, lines, folds and comment rows; default 500) renders
+  in a scrolling pane of its own, at most 70% of the viewport tall, that
+  draws only the code lines in view (`@tanstack/react-virtual`) — a
+  5,000-line file costs about what a 50-line one does. Comment rows, with
+  their lines, stay drawn wherever they are, so a comment keeps its state
+  (a half-typed reply) and `n` / `p` scroll the pane to it; the row holding
+  focus stays drawn too. Line numbers and expanded folds stay correct while
+  it scrolls. The decision is per file and made with the folds closed, so
+  expanding a fold never swaps the pane in or out; many small files are
+  each rendered whole. Both variants virtualise. `virtualizeAbove={Infinity}`
+  renders every file whole.
 - **Typography**: anker's `mono` font, whitespace kept, `tabSize` (default
   4). Long lines scroll the file sideways rather than wrap; line numbers
   and signs are not selected when the reader copies code.

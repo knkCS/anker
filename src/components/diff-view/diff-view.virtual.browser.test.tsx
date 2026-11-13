@@ -1,7 +1,7 @@
-// DiffView with large files (#332), in a real browser: a file longer than
-// `virtualizeAbove` lines renders in a pane of its own that draws only the
-// rows in view — line numbers, expanded folds, comments and the `n` / `p`
-// jumps stay correct while it scrolls. Asked of Chromium (the `layout`
+// DiffView with large files (#332), in a real browser: a file of more than
+// `virtualizeAbove` rows renders in a pane of its own that draws only the
+// code lines in view — line numbers, expanded folds, comments (always
+// drawn) and the `n` / `p` jumps stay correct while it scrolls. Asked of Chromium (the `layout`
 // project of `vitest.config.ts`), because a virtualiser needs real layout.
 import { userEvent } from "@vitest/browser/context";
 import type { ReactNode } from "react";
@@ -202,7 +202,8 @@ describe("DiffView large files: folds", () => {
 	const FOLDED = modifiedFile("folded.ts", 3000, 100);
 
 	it("folds long unchanged runs and keeps an expansion while scrolling", async () => {
-		const el = await mount(<DiffView diff={FOLDED} />);
+		// About 270 rows as folded: past a threshold of 100.
+		const el = await mount(<DiffView diff={FOLDED} virtualizeAbove={100} />);
 		const file = section(el, "folded.ts");
 		expect(file.querySelector("[data-diff-virtual]")).not.toBeNull();
 		const fold = file.querySelector<HTMLElement>(
@@ -242,11 +243,16 @@ describe("DiffView large files: comments", () => {
 	const lineAbove = (comment: HTMLElement) =>
 		comment.closest("tr")?.previousElementSibling as HTMLElement | null;
 
-	it("renders a comment under its line once scrolled into view", async () => {
+	it("draws every comment under its line, in view or not", async () => {
 		const el = await mount(<DiffView diff={DIFFS} comments={COMMENTS} />);
 		const big = section(el, "big.ts");
-		expect(big.querySelector("[data-diff-comment='near']")).not.toBeNull();
-		expect(big.querySelector("[data-diff-comment='deep']")).toBeNull();
+		expect(newNumbers(big).length).toBeLessThan(150);
+		// Off-screen comments are drawn with their line, the lines between not.
+		const offscreen = big.querySelector<HTMLElement>(
+			"[data-diff-comment='deeper']",
+		);
+		expect(lineAbove(offscreen as HTMLElement)?.dataset.newLine).toBe("4500");
+		expect(newNumbers(big)).not.toContain(4499);
 		expect(big.querySelector("[data-diff-comment-count]")?.textContent).toBe(
 			"3 comments",
 		);
@@ -261,7 +267,41 @@ describe("DiffView large files: comments", () => {
 		const deep = big.querySelector<HTMLElement>("[data-diff-comment='deep']");
 		expect(deep?.textContent).toContain("deep down");
 		expect(lineAbove(deep as HTMLElement)?.dataset.newLine).toBe("4000");
-		expect(big.querySelector("[data-diff-comment='near']")).toBeNull();
+		expect(newNumbers(big)).toContain(3999);
+		expect(newNumbers(big)).not.toContain(5);
+	});
+
+	it("keeps a comment's own state while the pane scrolls", async () => {
+		const el = await mount(
+			<DiffView
+				diff={DIFFS}
+				comments={COMMENTS}
+				renderComment={(c) => <textarea aria-label={`Reply ${c.id}`} />}
+			/>,
+		);
+		const big = section(el, "big.ts");
+		const reply = big.querySelector<HTMLTextAreaElement>(
+			"[aria-label='Reply near']",
+		);
+		await userEvent.type(reply as HTMLElement, "half a reply");
+		(reply as HTMLElement).blur();
+		await scrollPane(big, pane(big).scrollHeight);
+		await scrollPane(big, 0);
+		expect(
+			big.querySelector<HTMLTextAreaElement>("[aria-label='Reply near']"),
+		).toBe(reply);
+		expect(reply?.value).toBe("half a reply");
+	});
+
+	it("tells assistive tech how many rows the pane holds", async () => {
+		const el = await mount(<DiffView diff={BIG} />);
+		const big = section(el, "big.ts");
+		expect(big.querySelector("table")?.getAttribute("aria-rowcount")).toBe(
+			"5001",
+		);
+		await scrollPane(big, pane(big).scrollHeight);
+		const last = lineRows(big).at(-1);
+		expect(last?.getAttribute("aria-rowindex")).toBe("5001");
 	});
 
 	it("n and p reach comments the pane has not drawn, in reading order", async () => {
