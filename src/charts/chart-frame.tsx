@@ -106,7 +106,7 @@ function seriesSignature(series: readonly SeriesShape[]): string {
 const DEFAULT_THRESHOLD_TONE = "warning";
 
 /** A threshold in words: "Budget limit: 4", "Target: 2 – 3". */
-export function describeThreshold(
+function describeThreshold(
 	threshold: ChartThreshold,
 	format: (value: ChartValue) => string,
 ): string {
@@ -533,8 +533,9 @@ function ChartText({
 					{summary && <Text>{summary}</Text>}
 					{notes.length > 0 && (
 						<Box as="ul">
-							{notes.map((note) => (
-								<Box as="li" key={note}>
+							{notes.map((note, i) => (
+								// biome-ignore lint/suspicious/noArrayIndexKey: two thresholds may read alike
+								<Box as="li" key={i}>
 									{note}
 								</Box>
 							))}
