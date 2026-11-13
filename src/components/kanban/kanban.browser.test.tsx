@@ -87,6 +87,8 @@ function Board({
 	onOpen?: (id: string) => void;
 	collapseEmptyColumns?: boolean;
 	emptyState?: ReactNode | false;
+	virtualizeAbove?: number;
+	columnMaxHeight?: string;
 }) {
 	return (
 		<Kanban
@@ -385,5 +387,190 @@ describe.each<ColorMode>([
 		expect(s.borderLeftColor).toBe(rgb("warning.solid"));
 		expect(s.borderLeftWidth).toBe("4px");
 		expect(s.borderTopColor).toBe(rgb("border"));
+	});
+});
+
+// A column with hundreds of cards (#326) renders only the cards in its
+// scroll window; the arrow keys still reach every card.
+const many = (prefix: string, n: number, tone?: KanbanCardTone): Task[] =>
+	Array.from({ length: n }, (_, i) => ({
+		id: `${prefix}${i + 1}`,
+		title: `${prefix} card ${i + 1}`,
+		tone,
+	}));
+
+const viewportOf = (list: HTMLElement) => {
+	const viewport = list.parentElement;
+	if (!viewport) throw new Error("no viewport");
+	return viewport;
+};
+
+const focused = () =>
+	(document.activeElement as HTMLElement | null)?.closest("li");
+
+describe("Kanban long columns", () => {
+	const LONG: KanbanColumn<Task>[] = [
+		{ id: "short", title: "Short", items: many("s", 3) },
+		{ id: "long", title: "Backlog", items: many("b", 1000) },
+		{ id: "other", title: "Other", items: many("o", 1000) },
+	];
+
+	it("renders only the visible window of a 1,000-card column", async () => {
+		const el = await mount(<Board columns={LONG} />);
+		const list = lists(el)[1];
+		expect(list.getAttribute("aria-label")).toBe("Backlog, 1000 cards");
+		const items = list.querySelectorAll("li");
+		expect(items.length).toBeGreaterThan(0);
+		expect(items.length).toBeLessThan(60);
+		expect(items[0].getAttribute("aria-posinset")).toBe("1");
+		expect(items[0].getAttribute("aria-setsize")).toBe("1000");
+		// The column scrolls within itself rather than growing the page.
+		const viewport = viewportOf(list);
+		expect(getComputedStyle(viewport).overflowY).toBe("auto");
+		expect(viewport.scrollHeight).toBeGreaterThan(viewport.clientHeight);
+		// A short column still renders every card.
+		expect(lists(el)[0].querySelectorAll("li")).toHaveLength(3);
+	});
+
+	it("reveals the rest of the column on scroll", async () => {
+		const el = await mount(<Board columns={LONG} />);
+		const list = lists(el)[1];
+		const viewport = viewportOf(list);
+		viewport.scrollTop = viewport.scrollHeight;
+		await vi.waitFor(() => {
+			const last = [...list.querySelectorAll("li")].find(
+				(li) => li.getAttribute("aria-posinset") === "1000",
+			);
+			expect(last?.textContent).toContain("b card 1000");
+		});
+		expect(list.querySelectorAll("li").length).toBeLessThan(60);
+	});
+
+	it("hands renderCard the card's index in the whole column", async () => {
+		const renderCard = vi.fn((task: Task) => (
+			<Kanban.Card>{task.title}</Kanban.Card>
+		));
+		const el = await mount(
+			<Kanban
+				columns={[LONG[1]]}
+				getItemKey={(task) => task.id}
+				renderCard={renderCard}
+			/>,
+		);
+		const viewport = viewportOf(lists(el)[0]);
+		viewport.scrollTop = viewport.scrollHeight;
+		await vi.waitFor(() =>
+			expect(renderCard).toHaveBeenCalledWith(
+				expect.objectContaining({ id: "b1000" }),
+				{ columnId: "long", index: 999 },
+			),
+		);
+		expect(renderCard).not.toHaveBeenCalledWith(
+			expect.objectContaining({ id: "b500" }),
+			expect.anything(),
+		);
+	});
+
+	it("End and Home reach the ends of the column outside the window", async () => {
+		const el = await mount(<Board columns={LONG} />);
+		card(el, "b card 1").focus();
+		await userEvent.keyboard("{End}");
+		await vi.waitFor(() =>
+			expect(focused()?.getAttribute("aria-posinset")).toBe("1000"),
+		);
+		expect(document.activeElement?.textContent).toContain("b card 1000");
+		await userEvent.keyboard("{Home}");
+		await vi.waitFor(() =>
+			expect(focused()?.getAttribute("aria-posinset")).toBe("1"),
+		);
+	});
+
+	it("ArrowDown walks past the initial window", async () => {
+		const el = await mount(<Board columns={LONG} />);
+		const initial = lists(el)[1].querySelectorAll("li").length;
+		card(el, "b card 1").focus();
+		for (let i = 0; i < initial + 10; i++) {
+			await userEvent.keyboard("{ArrowDown}");
+		}
+		await vi.waitFor(() =>
+			expect(focused()?.getAttribute("aria-posinset")).toBe(
+				String(initial + 11),
+			),
+		);
+		expect(card(el, `b card ${initial + 11}`).tabIndex).toBe(0);
+	});
+
+	it("ArrowRight keeps the row between long columns, outside the window", async () => {
+		const el = await mount(<Board columns={LONG} />);
+		card(el, "b card 1").focus();
+		await userEvent.keyboard("{End}");
+		await vi.waitFor(() =>
+			expect(focused()?.getAttribute("aria-posinset")).toBe("1000"),
+		);
+		await userEvent.keyboard("{ArrowRight}");
+		await vi.waitFor(() =>
+			expect(document.activeElement?.textContent).toContain("o card 1000"),
+		);
+		await userEvent.keyboard("{ArrowLeft}{ArrowLeft}");
+		await vi.waitFor(() =>
+			expect(document.activeElement?.textContent).toContain("s card 3"),
+		);
+	});
+
+	it("keeps the focused card (the tab stop) when it scrolls out of view", async () => {
+		const el = await mount(<Board columns={LONG} />);
+		const first = card(el, "b card 1");
+		first.focus();
+		const viewport = viewportOf(lists(el)[1]);
+		viewport.scrollTop = viewport.scrollHeight;
+		await vi.waitFor(() =>
+			expect(
+				[...lists(el)[1].querySelectorAll("li")].some(
+					(li) => li.getAttribute("aria-posinset") === "1000",
+				),
+			).toBe(true),
+		);
+		expect(first.isConnected).toBe(true);
+		expect(document.activeElement).toBe(first);
+		expect(first.tabIndex).toBe(0);
+	});
+
+	it("virtualises from virtualizeAbove cards", async () => {
+		const el = await mount(
+			<Board
+				columns={[{ id: "few", title: "Few", items: many("f", 5) }]}
+				virtualizeAbove={3}
+				columnMaxHeight="10rem"
+			/>,
+		);
+		const viewport = viewportOf(lists(el)[0]);
+		expect(getComputedStyle(viewport).overflowY).toBe("auto");
+		expect(viewport.getBoundingClientRect().height).toBeLessThanOrEqual(160);
+	});
+});
+
+describe.each<ColorMode>([
+	"light",
+	"dark",
+])("Kanban long column in %s mode", (mode) => {
+	const rgb = (name: string) => toComputedRgb(resolveColor(system, name, mode));
+
+	it("draws its cards with the tone tokens and no surface of its own", async () => {
+		const Wrap = mode === "dark" ? DarkMode : LightMode;
+		const el = await mount(
+			<Wrap>
+				<Board
+					columns={[
+						{ id: "a", title: "Alerts", items: many("a", 500, "attention") },
+					]}
+				/>
+			</Wrap>,
+		);
+		const style = getComputedStyle(card(el, "a card 1"));
+		expect(style.backgroundColor).toBe(rgb("bg-surface"));
+		expect(style.borderLeftColor).toBe(rgb("warning.solid"));
+		expect(style.color).toBe(rgb("default"));
+		const viewport = viewportOf(lists(el)[0]);
+		expect(getComputedStyle(viewport).backgroundColor).toBe("rgba(0, 0, 0, 0)");
 	});
 });

@@ -1591,6 +1591,15 @@ column per status, a card per item:
 - **Keyboard**: the board is one tab stop. Arrow keys move between
   cards (↑/↓, Home/End) and columns (←/→, flipped in RTL, skipping
   empty columns); Enter opens the focused card.
+- **Long columns virtualise**: a column with more than
+  `virtualizeAbove` cards (default 100) scrolls within `columnMaxHeight`
+  (default `70vh`) and renders only the cards in view; cards are
+  measured, so their heights may differ (`estimateCardHeight`, default
+  88, is only the first guess). The arrow keys still reach every card —
+  the board scrolls the column to it — and the focused card stays
+  mounted. `renderCard` runs only for mounted cards, so keep it free of
+  side effects; pass the full column in `items` (or a server total in
+  `count`) so `aria-setsize` stays honest.
 
 ### Diffs (`DiffView`)
 

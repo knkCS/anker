@@ -223,3 +223,64 @@ export const EmptyColumns: Story = {
 		emptyState: false,
 	} as unknown as Story["args"],
 };
+
+const OWNERS = ["Ola Berg", "Kai Moe", "Mara Lind"];
+const longColumn = (
+	id: string,
+	title: string,
+	n: number,
+): KanbanColumn<Task> => ({
+	id,
+	title,
+	items: Array.from({ length: n }, (_, i) => ({
+		id: `${id}-${i + 1}`,
+		title:
+			i % 3 === 0
+				? `Backlog item ${i + 1} with a title long enough to wrap onto a second line`
+				: `Backlog item ${i + 1}`,
+		owner: OWNERS[i % OWNERS.length],
+		tone: i % 17 === 0 ? "attention" : i % 5 === 0 ? "quiet" : undefined,
+	})),
+});
+
+const LONG_COLUMNS: KanbanColumn<Task>[] = [
+	COLUMNS[1],
+	longColumn("backlog", "Backlog", 1000),
+	longColumn("done-long", "Done", 400),
+];
+
+const longArgs: KanbanProps<Task> = {
+	...boardArgs,
+	columns: LONG_COLUMNS,
+	columnMaxHeight: "32rem",
+};
+
+/**
+ * Columns with more than `virtualizeAbove` cards (default 100) scroll within
+ * `columnMaxHeight` and render only the cards in view. Focus a card and hold
+ * ArrowDown, or press End, to reach card 1,000; ArrowLeft / ArrowRight keep
+ * the row across long columns.
+ */
+export const LongColumns: Story = {
+	args: longArgs as unknown as Story["args"],
+};
+
+/** Long, virtualised columns in light and dark mode side by side. */
+export const LongColumnsLightAndDark: Story = {
+	args: longArgs as unknown as Story["args"],
+	parameters: { layout: "fullscreen" },
+	render: () => (
+		<Grid templateColumns="1fr" gap="0">
+			<LightMode>
+				<Box bg="bg-canvas" p="6">
+					<Kanban {...longArgs} columnMaxHeight="20rem" />
+				</Box>
+			</LightMode>
+			<DarkMode>
+				<Box bg="bg-canvas" p="6">
+					<Kanban {...longArgs} columnMaxHeight="20rem" />
+				</Box>
+			</DarkMode>
+		</Grid>
+	),
+};
