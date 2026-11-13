@@ -99,9 +99,12 @@ export { DescriptionList } from "./description-list";
 // DiffView
 export type {
 	DiffChangeType,
+	DiffComment,
+	DiffCommentTone,
 	DiffFile,
 	DiffHunk,
 	DiffLine,
+	DiffSide,
 	DiffViewLabels,
 	DiffViewProps,
 	DiffViewVariant,

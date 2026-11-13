@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { anchorComments } from "./diff-comments";
 import { buildDiffRows, type DiffRow } from "./diff-rows";
 import { parseUnifiedDiff } from "./parse-unified-diff";
 
@@ -18,7 +19,9 @@ const shape = (rows: DiffRow[]) =>
 			? `${row.line.kind[0]}${row.line.newNumber ?? row.line.oldNumber}`
 			: row.type === "fold"
 				? `fold(${row.lines.length})`
-				: "hunk",
+				: row.type === "comments"
+					? `comments(${row.comments.map((c) => c.id).join(",")})`
+					: "hunk",
 	);
 
 describe("buildDiffRows", () => {
@@ -119,5 +122,67 @@ describe("buildDiffRows", () => {
 		);
 		const keys = buildDiffRows(file).map((row) => row.key);
 		expect(new Set(keys).size).toBe(keys.length);
+	});
+
+	describe("with comments", () => {
+		const comment = (id: string, line: number, side?: "old" | "new") => ({
+			id,
+			path: "x",
+			line,
+			side,
+		});
+
+		it("puts a comments row right after the line each comment is anchored to", () => {
+			const file = fileWith(["-a", "+b", " c"], "@@ -1,2 +1,2 @@");
+			const { byLine } = anchorComments(file, [
+				comment("on-added", 1),
+				comment("on-removed", 1, "old"),
+				comment("on-context", 2),
+				comment("also-added", 1),
+			]);
+			expect(shape(buildDiffRows(file, { comments: byLine }))).toEqual([
+				"hunk",
+				"r1",
+				"comments(on-removed)",
+				"a1",
+				"comments(on-added,also-added)",
+				"c2",
+				"comments(on-context)",
+			]);
+		});
+
+		it("never folds a commented line, keeping context around it", () => {
+			const file = fileWith(
+				["-a", "+a", ...context(2, 20), "-b", "+b"],
+				"@@ -1,22 +1,22 @@",
+			);
+			const { byLine } = anchorComments(file, [comment("mid", 12)]);
+			const rows = buildDiffRows(file, { comments: byLine });
+			expect(shape(rows)).toEqual([
+				"hunk",
+				"r1",
+				"a1",
+				"c2",
+				"c3",
+				"c4",
+				"fold(4)",
+				"c9",
+				"c10",
+				"c11",
+				"c12",
+				"comments(mid)",
+				"c13",
+				"c14",
+				"c15",
+				"fold(3)",
+				"c19",
+				"c20",
+				"c21",
+				"r22",
+				"a22",
+			]);
+			const keys = rows.map((row) => row.key);
+			expect(new Set(keys).size).toBe(keys.length);
+		});
 	});
 });

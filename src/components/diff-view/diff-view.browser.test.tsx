@@ -21,7 +21,7 @@ import {
 	toComputedRgb,
 } from "../../test/color-tokens";
 import system from "../../theme";
-import { DiffView, parseUnifiedDiff } from ".";
+import { type DiffComment, type DiffFile, DiffView, parseUnifiedDiff } from ".";
 
 let root: Root | undefined;
 let host: HTMLDivElement | undefined;
@@ -502,5 +502,333 @@ describe.each<ColorMode>([
 				token("bg-surface"),
 			]).size,
 		).toBe(3);
+	});
+});
+
+describe("DiffView comments", () => {
+	const commentEl = (el: HTMLElement, id: string) => {
+		const found = el.querySelector<HTMLElement>(`[data-diff-comment='${id}']`);
+		if (!found) throw new Error(`no comment ${id}`);
+		return found;
+	};
+	/** The line row a line comment sits under. */
+	const lineAbove = (comment: HTMLElement) =>
+		comment.closest("tr")?.previousElementSibling as HTMLElement | null;
+
+	const COMMENTS: DiffComment[] = [
+		{
+			id: "on-added",
+			path: "src/app.ts",
+			line: 11,
+			author: "Reviewer",
+			timestamp: "14:03",
+			tone: "danger",
+			label: "Blocking",
+			body: "b must stay 2",
+		},
+		{
+			id: "on-removed",
+			path: "src/app.ts",
+			line: 11,
+			side: "old",
+			body: "Why?",
+		},
+		{ id: "on-context", path: "src/app.ts", line: 10, body: "Fine" },
+		{ id: "between-hunks", path: "src/app.ts", line: 200, body: "Far away" },
+		{ id: "on-file", path: "docs/new.md", body: "Whole file" },
+		{ id: "on-binary", path: "logo.png", line: 1, body: "Too big" },
+		{ id: "elsewhere", path: "README.md", line: 3, body: "Not in the diff" },
+	];
+
+	it("renders each comment under its line on its side, with author, label, timestamp and body", async () => {
+		const el = await mount(<DiffView diff={DIFF} comments={COMMENTS} />);
+		const added = lineAbove(commentEl(el, "on-added"));
+		expect(added?.dataset.kind).toBe("added");
+		expect(added?.dataset.newLine).toBe("11");
+		const removed = lineAbove(commentEl(el, "on-removed"));
+		expect(removed?.dataset.kind).toBe("removed");
+		expect(removed?.dataset.oldLine).toBe("11");
+		expect(lineAbove(commentEl(el, "on-context"))?.dataset.newLine).toBe("10");
+
+		const comment = commentEl(el, "on-added");
+		expect(comment.closest("section")?.dataset.diffFile).toBe("src/app.ts");
+		expect(comment.getAttribute("role")).toBe("article");
+		expect(comment.getAttribute("aria-label")).toBe(
+			"Comment by Reviewer on line 11",
+		);
+		expect(comment.dataset.side).toBe("new");
+		expect(commentEl(el, "on-removed").dataset.side).toBe("old");
+		for (const text of ["Reviewer", "Blocking", "14:03", "b must stay 2"]) {
+			expect(comment.textContent).toContain(text);
+		}
+	});
+
+	it("shows comments outside the hunks at the file level, and drops none", async () => {
+		const el = await mount(<DiffView diff={DIFF} comments={COMMENTS} />);
+		const fileLevel = (key: string) =>
+			section(el, key).querySelector<HTMLElement>("[data-diff-file-comments]");
+
+		const far = commentEl(el, "between-hunks");
+		expect(fileLevel("src/app.ts")?.contains(far)).toBe(true);
+		expect(far.closest("table")).toBeNull();
+		expect(far.textContent).toContain("Line 200");
+		expect(fileLevel("docs/new.md")?.contains(commentEl(el, "on-file"))).toBe(
+			true,
+		);
+		expect(fileLevel("logo.png")?.contains(commentEl(el, "on-binary"))).toBe(
+			true,
+		);
+		const other = el.querySelector<HTMLElement>("[data-diff-other-comments]");
+		expect(other?.textContent).toContain("Comments on files not in this diff");
+		expect(other?.contains(commentEl(el, "elsewhere"))).toBe(true);
+		expect(commentEl(el, "elsewhere").textContent).toContain(
+			"README.md · Line 3",
+		);
+
+		const rendered = [
+			...el.querySelectorAll<HTMLElement>("[data-diff-comment]"),
+		].map((c) => c.dataset.diffComment);
+		expect(rendered.sort()).toEqual(COMMENTS.map((c) => c.id).sort());
+	});
+
+	it("keeps comments on files when the diff is empty", async () => {
+		const el = await mount(
+			<DiffView diff="" comments={[{ id: "x", path: "a.ts", body: "Hi" }]} />,
+		);
+		expect(el.textContent).toContain("No changes");
+		expect(el.querySelector("[data-diff-comment='x']")).not.toBeNull();
+	});
+
+	it("never folds a commented line", async () => {
+		const el = await mount(
+			<DiffView
+				diff={DIFF}
+				comments={[{ id: "deep", path: "src/app.ts", line: 17, body: "Here" }]}
+			/>,
+		);
+		const line = lineAbove(commentEl(el, "deep"));
+		expect(line?.dataset.newLine).toBe("17");
+	});
+
+	it("counts each file's comments in its header", async () => {
+		const el = await mount(<DiffView diff={DIFF} comments={COMMENTS} />);
+		const count = (key: string) =>
+			section(el, key).querySelector("[data-diff-comment-count]")?.textContent;
+		expect(count("src/app.ts")).toBe("4 comments");
+		expect(count("docs/new.md")).toBe("1 comment");
+		expect(count("old.go")).toBeUndefined();
+	});
+
+	it("renders the consumer's content inside anker's frame", async () => {
+		const renderComment = vi.fn(
+			(comment: DiffComment, file: DiffFile | null) => (
+				<span data-testid="own">
+					{comment.id} in {file?.path ?? "nowhere"}
+				</span>
+			),
+		);
+		const el = await mount(
+			<DiffView
+				diff={DIFF}
+				comments={COMMENTS}
+				renderComment={renderComment}
+			/>,
+		);
+		expect(commentEl(el, "on-added").textContent).toBe(
+			"on-added in src/app.ts",
+		);
+		expect(commentEl(el, "elsewhere").textContent).toContain(
+			"elsewhere in nowhere",
+		);
+		// The frame stays anker's: focusable, named, toned.
+		expect(commentEl(el, "on-added").tabIndex).toBe(0);
+		expect(commentEl(el, "on-added").dataset.tone).toBe("danger");
+		expect(renderComment).toHaveBeenCalledWith(
+			expect.objectContaining({ id: "on-file" }),
+			expect.objectContaining({ key: "docs/new.md" }),
+		);
+	});
+
+	it("hides a collapsed file's comments with its lines", async () => {
+		const el = await mount(
+			<DiffView diff={DIFF} comments={COMMENTS} defaultCollapsed />,
+		);
+		expect(
+			el.querySelector("section[data-diff-file] [data-diff-comment]"),
+		).toBeNull();
+		// The comment on a file outside the diff stays.
+		expect(el.querySelector("[data-diff-comment='elsewhere']")).not.toBeNull();
+		expect(
+			section(el, "src/app.ts").querySelector("[data-diff-comment-count]")
+				?.textContent,
+		).toBe("4 comments");
+	});
+});
+
+describe("DiffView keyboard jumps", () => {
+	const COMMENTS: DiffComment[] = [
+		{ id: "c1", path: "src/app.ts", line: 11, body: "one" },
+		{ id: "c0", path: "src/app.ts", line: 999, body: "file level" },
+		{ id: "c2", path: "old.go", line: 1, side: "old", body: "two" },
+		{ id: "c3", path: "elsewhere.ts", body: "three" },
+	];
+	const focused = () => document.activeElement as HTMLElement | null;
+	const focusedFile = () => focused()?.closest("section")?.dataset.diffFile;
+
+	it("j and k move between files", async () => {
+		const el = await mount(<DiffView diff={DIFF} />);
+		const first = el.querySelector<HTMLElement>("section h3 button");
+		first?.focus();
+		await userEvent.keyboard("j");
+		expect(focusedFile()).toBe("docs/new.md");
+		expect(focused()?.tagName).toBe("BUTTON");
+		await userEvent.keyboard("jj");
+		expect(focusedFile()).toBe("b.ts");
+		await userEvent.keyboard("k");
+		expect(focusedFile()).toBe("old.go");
+		// At the last file, j stays put.
+		await userEvent.keyboard("jjjj");
+		expect(focusedFile()).toBe("logo.png");
+	});
+
+	it("n and p move between comments in reading order, file level first", async () => {
+		const el = await mount(<DiffView diff={DIFF} comments={COMMENTS} />);
+		el.querySelector<HTMLElement>("section h3 button")?.focus();
+		await userEvent.keyboard("n");
+		expect(focused()?.dataset.diffComment).toBe("c0");
+		await userEvent.keyboard("n");
+		expect(focused()?.dataset.diffComment).toBe("c1");
+		await userEvent.keyboard("n");
+		expect(focused()?.dataset.diffComment).toBe("c2");
+		await userEvent.keyboard("n");
+		expect(focused()?.dataset.diffComment).toBe("c3");
+		await userEvent.keyboard("pp");
+		expect(focused()?.dataset.diffComment).toBe("c1");
+		// From a comment, j goes on to the next file.
+		await userEvent.keyboard("j");
+		expect(focusedFile()).toBe("docs/new.md");
+	});
+
+	it("jumps from focus inside a comment's own content", async () => {
+		const el = await mount(
+			<DiffView
+				diff={DIFF}
+				comments={COMMENTS}
+				renderComment={(c) => <button type="button">Reply to {c.id}</button>}
+			/>,
+		);
+		const reply = [...el.querySelectorAll("button")].find(
+			(b) => b.textContent === "Reply to c1",
+		);
+		reply?.focus();
+		await userEvent.keyboard("n");
+		expect(focused()?.dataset.diffComment).toBe("c2");
+		reply?.focus();
+		await userEvent.keyboard("p");
+		expect(focused()?.dataset.diffComment).toBe("c0");
+	});
+
+	it("leaves typing alone, and does nothing when turned off", async () => {
+		const el = await mount(
+			<>
+				<DiffView
+					diff={DIFF}
+					comments={COMMENTS}
+					renderComment={(c) => <input aria-label={`Reply ${c.id}`} />}
+				/>
+				<DiffView diff={DIFF} keyboardNavigation={false} />
+			</>,
+		);
+		const input = el.querySelector<HTMLInputElement>("input");
+		input?.focus();
+		await userEvent.keyboard("nj");
+		expect(focused()).toBe(input);
+		expect(input?.value).toBe("nj");
+
+		const off = el.querySelectorAll<HTMLElement>("[data-diff-view]")[1];
+		const toggle = off.querySelector<HTMLElement>("section h3 button");
+		toggle?.focus();
+		await userEvent.keyboard("jn");
+		expect(focused()).toBe(toggle);
+	});
+
+	it("focuses the file heading in the compact variant", async () => {
+		const el = await mount(<DiffView diff={DIFF} variant="compact" />);
+		const headings = el.querySelectorAll<HTMLElement>("section h3");
+		headings[0].focus();
+		await userEvent.keyboard("j");
+		expect(focused()).toBe(headings[1]);
+	});
+});
+
+describe.each<ColorMode>([
+	"light",
+	"dark",
+])("DiffView comment colours in %s mode", (mode) => {
+	const rgb = (name: string) => toComputedRgb(resolveColor(system, name, mode));
+
+	async function mountToned() {
+		const Wrap = mode === "dark" ? DarkMode : LightMode;
+		const tones = ["danger", "warning", "success", "info", "neutral"] as const;
+		return mount(
+			<Wrap>
+				<DiffView
+					diff={DIFF}
+					comments={[
+						...tones.map((tone) => ({
+							id: tone,
+							path: "src/app.ts",
+							line: 11,
+							tone,
+							label: tone,
+							body: tone,
+						})),
+						{ id: "untoned", path: "src/app.ts", line: 12, body: "x" },
+					]}
+				/>
+			</Wrap>,
+		);
+	}
+
+	it("edges each comment in its tone's border colour", async () => {
+		const el = await mountToned();
+		const edge = (id: string) =>
+			getComputedStyle(
+				el.querySelector(`[data-diff-comment='${id}']`) as HTMLElement,
+			).borderInlineStartColor;
+		for (const tone of ["danger", "warning", "success", "info"]) {
+			expect(edge(tone)).toBe(rgb(`${tone}.border`));
+		}
+		expect(edge("neutral")).toBe(rgb("border-emphasized"));
+		expect(edge("untoned")).toBe(rgb("border-emphasized"));
+	});
+
+	it("sets comment rows apart from code on the subtle surface", async () => {
+		const el = await mountToned();
+		const td = el.querySelector<HTMLElement>("tr[data-diff-row='comments'] td");
+		expect(getComputedStyle(td as HTMLElement).backgroundColor).toBe(
+			rgb("bg-subtle"),
+		);
+		const comment = el.querySelector<HTMLElement>(
+			"[data-diff-comment='danger']",
+		);
+		expect(getComputedStyle(comment as HTMLElement).color).toBe(rgb("default"));
+	});
+
+	it("keeps every tone edge visible against the comment surface", () => {
+		for (const name of [
+			"danger.border",
+			"warning.border",
+			"success.border",
+			"info.border",
+			"border-emphasized",
+		]) {
+			expect(
+				contrastRatio(
+					resolveColor(system, name, mode),
+					resolveColor(system, "bg-subtle", mode),
+				),
+			).toBeGreaterThan(1.2);
+		}
 	});
 });
