@@ -27,6 +27,10 @@
       "import": "./dist/dashboard/index.js",
       "types": "./dist/dashboard/index.d.ts"
     },
+    "./charts": {
+      "import": "./dist/charts/index.js",
+      "types": "./dist/charts/index.d.ts"
+    },
     "./atoms": {
       "import": "./dist/atoms/index.js",
       "types": "./dist/atoms/index.d.ts"
@@ -88,10 +92,14 @@
     "react-hook-form": "^7.0.0",
     "react-i18next": ">=12",
     "react-router-dom": ">=6",
+    "recharts": "^3.10.0",
     "zod": "^3.0.0"
   },
   "peerDependenciesMeta": {
     "react-grid-layout": {
+      "optional": true
+    },
+    "recharts": {
       "optional": true
     }
   },
@@ -131,6 +139,7 @@
     "react-hook-form": "^7.54.0",
     "react-i18next": "^14.0.0",
     "react-router-dom": "^7.14.0",
+    "recharts": "^3.10.1",
     "remark-gfm": "^4.0.0",
     "storybook": "^8.4.0",
     "tsup": "^8.3.0",

@@ -54,6 +54,8 @@ consumers run React 19. See `CHANGELOG.md` for migration notes if you're on 18.
 - `Alert`'s `status` prop picks Chakra's palettes, not anker's — write `<Alert status="error" colorPalette="danger">`.
 - A status badge in code is `<StatusBadge tone="success" label="Passed" />` (`success` / `warning` / `danger` / `info` / `neutral` / `accent`); in a table, `<StatusBadgeCell toneMap={…} />`. `color` / `colorMap` are only for a colour that arrives as data (a user-picked status colour from the backend) — never a literal.
 
+**Chart series palette** — `chart.series.1` … `chart.series.6`, the colours `@knkcs/anker/charts` gives its series in order (light + dark mode). Never colour a chart yourself; see **Charts**.
+
 **Defaults:**
 - Border radius: `md` = 6px (use this for buttons, inputs, small cards)
 - Body font size: `md` = 14px
@@ -848,3 +850,36 @@ Discard reverts.
 - **Don't import any `react-grid-layout` CSS** — anker ships the grid styles. Just `npm i react-grid-layout@^2.2.3` (optional peer dep, required only by services that import `@knkcs/anker/dashboard`).
 - **Don't rebuild draft / discard / dirty logic** — anker owns the edit
   session; read `onDraftChange` if you need an unsaved-changes indicator.
+
+## Charts
+
+`LineChart` and `AreaChart` (`@knkcs/anker/charts`) are token-coloured
+charts over Recharts. Install `recharts@^3.10.0` (optional peer dep, required
+only by services that import `@knkcs/anker/charts`). Full guidance:
+`docs/page-patterns.md` §11 "Charts".
+
+- **Data and series in, never colours**: `data`, `xKey`, `series`
+  (`{ key, label?, tone?, hidden? }`) and a required `aria-label`. A series
+  takes the palette slot of its position (`chart.series.1` …); give it a
+  `tone` (`accent` / `success` / `warning` / `danger` / `info` / `neutral`)
+  only when its meaning matters ("over budget" → `warning`).
+- **Which chart**: `LineChart` to compare how a few series move;
+  `AreaChart` when the volume matters, `stacked` when the series add up to
+  a whole. One headline number is a stat tile, not a chart.
+- **Formatters** apply to axis and tooltip: `formatX`, `formatValue`; build
+  them with `numberFormatter({ style: "currency", currency: "EUR" })` /
+  `timeFormatter({ hour: "2-digit", minute: "2-digit" })` (UI language).
+  `xType="time"` reads epoch ms, `Date`s and ISO strings.
+- **Sizing**: fills its container — in a `Widget` / `<Dashboard>` cell give
+  it no height; elsewhere pass `height`.
+- **States**: `loading` and an empty state (`emptyLabel`) in the chart's
+  footprint.
+
+### Don't
+- **Don't import `recharts` to draw a chart yourself**, and never pass a hex,
+  `rgb()` or raw colour step to a chart — `checkAnkerRules()` flags hex.
+  Why: raw colours don't follow dark mode or the palette.
+- **Don't remove a series to filter it** — set `hidden`, so the others keep
+  their colours.
+- **Don't put two scales on one chart** (no second y axis) and don't chart
+  more than six series — fold the rest into "Other" or split the chart.
