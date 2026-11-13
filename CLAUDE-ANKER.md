@@ -116,6 +116,7 @@ Available templates:
 **Rule:** if a template doesn't fit your page, file an issue — don't reinvent the layout.
 
 - For multi-resource navigation inside a tab body, use `<SubNavLayout>` rather than rolling your own master-detail. It owns collapse state, persistence, and the divider — wire `<NavList.Item asChild>` to `<NavLink>` for URL deep-linking.
+- For a tree in a `NavList` (a node and its child nodes, an outline), give the parent `NavList.Item` its children as `subItems` — never fake the nesting with padding. Own the open state: `expanded` + `onExpandedChange` (persistence, auto-expanding the selected item's parents, Expand all are yours). The chevron at the row start only toggles; the label keeps its own action (`asChild` button or link). Put a hidden child's status in the parent's `indicator` slot (it stays visible while collapsed) and its meaning in the label's accessible name. Arrow Right / Left open and close, and Arrow Left on a child focuses its parent, for free. See `docs/page-patterns.md` §8 "Nested items".
 
 Full spec with composition diagrams, slot tables, and authoring rules: `docs/page-patterns.md` in the anker repo (linked from the GitHub Pages docs site).
 

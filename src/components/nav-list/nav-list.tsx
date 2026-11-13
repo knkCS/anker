@@ -1,11 +1,26 @@
 // src/components/nav-list/nav-list.tsx
-import type { ReactNode } from "react";
-import React from "react";
+import { ChevronRight } from "lucide-react";
+import type { KeyboardEvent, ReactNode } from "react";
+import React, {
+	useCallback,
+	useId,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from "react";
 import { formatUnreadCount } from "../../atoms/unread-badge/format-count";
 import { Box, Flex } from "../../primitives/layout";
 import { Tooltip } from "../../primitives/tooltip";
 import { Text } from "../../primitives/typography";
 import { useNavListMode } from "./nav-list-context";
+import {
+	focusItemRow,
+	LABEL_ATTR,
+	NavListTreeLevelProvider,
+	ROW_ATTR,
+	TOGGLE_ATTR,
+	useNavListTreeLevel,
+} from "./nav-list-tree";
 
 export interface NavListProps {
 	"aria-label"?: string;
@@ -14,7 +29,7 @@ export interface NavListProps {
 
 const NavListRoot = ({ children, ...rest }: NavListProps) => (
 	<Box as="nav" aria-label={rest["aria-label"]}>
-		{children}
+		<NavListTreeLevelProvider depth={0}>{children}</NavListTreeLevelProvider>
 	</Box>
 );
 NavListRoot.displayName = "NavList";
@@ -43,7 +58,9 @@ const NavListGroup = ({ label, children }: NavListGroupProps) => {
 				</Text>
 			)}
 			<Flex direction="column" gap="2" data-testid="nav-list-group-items">
-				{children}
+				<NavListTreeLevelProvider depth={0}>
+					{children}
+				</NavListTreeLevelProvider>
 			</Flex>
 		</Box>
 	);
@@ -91,6 +108,36 @@ export interface NavListItemProps {
 	label?: string;
 	/** data-testid for the root element (non-asChild branch). Defaults to "nav-list-item". */
 	testId?: string;
+	/**
+	 * Child items (`NavList.Item`s), rendered indented below this one while
+	 * it is expanded. Any number of levels nests. An item with child items
+	 * gets a chevron at the start of its row that only toggles; the label
+	 * keeps its own action. Empty (e.g. every child filtered out) renders
+	 * a plain item.
+	 */
+	subItems?: ReactNode;
+	/**
+	 * Whether the child items show. Controlled: pair it with
+	 * `onExpandedChange` and own the state (persistence, auto-expanding the
+	 * selected item's parents, Expand all). Omit it for uncontrolled use.
+	 */
+	expanded?: boolean;
+	/** Initial `expanded` when uncontrolled. @default false */
+	defaultExpanded?: boolean;
+	/** Called with the next state from the chevron or Arrow Right / Left. */
+	onExpandedChange?: (expanded: boolean) => void;
+	/**
+	 * The roll-up slot: shown at the end of the row whether or not the item
+	 * is expanded — e.g. a dot saying a hidden child has unsaved changes.
+	 * Visual only; put its meaning in the item's accessible name. On the
+	 * collapsed rail it overlays the icon (unless a `badge` is there).
+	 */
+	indicator?: ReactNode;
+	/**
+	 * Accessible name of the chevron. Its state is `aria-expanded`, so the
+	 * name stays the same open or closed. @default "Toggle {label}"
+	 */
+	toggleAriaLabel?: string;
 	children: ReactNode;
 }
 
@@ -217,9 +264,36 @@ const NavListItem = ({
 	asChild,
 	label,
 	testId = "nav-list-item",
+	subItems,
+	expanded: expandedProp,
+	defaultExpanded = false,
+	onExpandedChange,
+	indicator,
+	toggleAriaLabel,
 	children,
 }: NavListItemProps) => {
 	const { collapsed } = useNavListMode();
+	const level = useNavListTreeLevel();
+	const isParent = React.Children.toArray(subItems).length > 0;
+	const [ownExpanded, setOwnExpanded] = useState(defaultExpanded);
+	const expanded = isParent && (expandedProp ?? ownExpanded);
+	const setExpanded = (next: boolean) => {
+		if (expandedProp === undefined) setOwnExpanded(next);
+		onExpandedChange?.(next);
+	};
+	const { registerParent } = level;
+	useLayoutEffect(
+		() => (isParent ? registerParent() : undefined),
+		[isParent, registerParent],
+	);
+	const rowRef = useRef<HTMLDivElement>(null);
+	const groupRef = useRef<HTMLDivElement>(null);
+	const groupId = useId();
+	const focusSelf = useCallback(() => focusItemRow(rowRef.current), []);
+	// Part of a tree: indented by depth, and when any item at this level is
+	// expandable, every label at it leaves room for the chevron so they align.
+	const inTree = isParent || level.depth > 0 || level.hasParents;
+	const reserveChevron = isParent || level.hasParents;
 
 	const itemStyle: React.CSSProperties = {
 		display: "flex",
@@ -227,6 +301,11 @@ const NavListItem = ({
 		justifyContent: collapsed ? "center" : "flex-start",
 		gap: "var(--chakra-spacing-2)",
 		paddingInline: "var(--chakra-spacing-3)",
+		...(inTree && !collapsed
+			? {
+					paddingInlineStart: `calc(var(--chakra-spacing-3) + ${level.depth} * var(--chakra-spacing-5) + ${reserveChevron ? "var(--chakra-spacing-5)" : "0px"})`,
+				}
+			: {}),
 		paddingBlock: "var(--chakra-spacing-3)",
 		borderRadius: "var(--chakra-radii-sm)",
 		fontSize: "var(--chakra-font-sizes-sm)",
@@ -251,18 +330,52 @@ const NavListItem = ({
 	// On the rail the badge overlays the icon; without an icon to anchor to it
 	// stays in the row.
 	const badgeOnRail = hasBadge && collapsed && Boolean(icon);
+	const hasIndicator =
+		indicator !== undefined && indicator !== null && indicator !== false;
+	// On the rail the indicator overlays the icon too — unless the badge
+	// already sits there; without an icon it stays in the row.
+	const indicatorOnRail =
+		hasIndicator && collapsed && Boolean(icon) && !badgeOnRail;
+	const indicatorInRow = hasIndicator && (!collapsed || !icon);
 
 	const iconEl = icon ? (
 		<Box
 			display="inline-flex"
 			alignItems="center"
 			flexShrink={0}
-			position={badgeOnRail ? "relative" : undefined}
+			position={badgeOnRail || indicatorOnRail ? "relative" : undefined}
 		>
 			{icon}
 			{badgeOnRail && shownBadgeText !== null ? (
 				<NavBadge text={shownBadgeText} tone={badgeTone} placement="rail" />
 			) : null}
+			{indicatorOnRail ? (
+				<Box
+					data-testid="nav-list-indicator"
+					data-placement="rail"
+					position="absolute"
+					top="-1"
+					insetInlineEnd="-1"
+					display="inline-flex"
+				>
+					{indicator}
+				</Box>
+			) : null}
+		</Box>
+	) : null;
+
+	// The indicator leads the trailing items, so it takes the auto-margin.
+	const indicatorEl = indicatorInRow ? (
+		<Box
+			as="span"
+			data-testid="nav-list-indicator"
+			data-placement="inline"
+			display="inline-flex"
+			alignItems="center"
+			flexShrink={0}
+			marginInlineStart={collapsed ? undefined : "auto"}
+		>
+			{indicator}
 		</Box>
 	) : null;
 
@@ -273,7 +386,7 @@ const NavListItem = ({
 				fontSize="xs"
 				color={active ? "primary.700" : "subtle"}
 				flexShrink={0}
-				marginInlineStart="auto"
+				marginInlineStart={indicatorInRow ? "var(--chakra-spacing-2)" : "auto"}
 				style={{ fontVariantNumeric: "tabular-nums" }}
 			>
 				{count}
@@ -288,7 +401,9 @@ const NavListItem = ({
 				tone={badgeTone}
 				placement="inline"
 				marginInlineStart={
-					hasCount || collapsed ? "var(--chakra-spacing-2)" : "auto"
+					hasCount || collapsed || indicatorInRow
+						? "var(--chakra-spacing-2)"
+						: "auto"
 				}
 			/>
 		) : null;
@@ -307,7 +422,7 @@ const NavListItem = ({
 					borderRadius: 999,
 					flexShrink: 0,
 					marginInlineStart:
-						count !== undefined || hasBadge
+						count !== undefined || hasBadge || indicatorInRow
 							? "var(--chakra-spacing-2)"
 							: "auto",
 				}}
@@ -369,6 +484,39 @@ const NavListItem = ({
 			node
 		);
 
+	// Arrow Right opens a closed parent, or moves into an open one's first
+	// child; Arrow Left closes an open parent, or moves up to the parent.
+	const onTreeKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+		if (event.defaultPrevented) return;
+		if (event.key === "ArrowRight" && isParent) {
+			event.preventDefault();
+			if (!expanded) setExpanded(true);
+			else
+				focusItemRow(
+					groupRef.current?.querySelector<HTMLElement>(`[${ROW_ATTR}]`) ?? null,
+				);
+		} else if (event.key === "ArrowLeft") {
+			if (isParent && expanded) {
+				event.preventDefault();
+				setExpanded(false);
+			} else if (level.focusParent) {
+				event.preventDefault();
+				level.focusParent();
+			}
+		}
+	};
+	// A parent's row wrapper handles the keys (for the label and the
+	// chevron alike); a leaf's label does, once it sits under a parent.
+	const leafKeys = !isParent && level.focusParent !== undefined;
+	// Flat lists keep their markup: the tree attributes appear only in a tree.
+	const treeLabelProps = inTree
+		? {
+				[LABEL_ATTR]: "",
+				...(isParent ? {} : { [ROW_ATTR]: "" }),
+			}
+		: {};
+
+	let labelEl: React.ReactElement;
 	if (asChild) {
 		const child = React.Children.only(children) as React.ReactElement<
 			React.HTMLAttributes<HTMLElement> & {
@@ -376,12 +524,22 @@ const NavListItem = ({
 				children?: ReactNode;
 			}
 		>;
-		const cloned = React.cloneElement(
+		const childKeyDown = child.props.onKeyDown;
+		labelEl = React.cloneElement(
 			child,
 			{
 				"data-active": active ? "true" : "false",
 				"aria-current": active ? "page" : undefined,
 				...(badgeAriaLabel ? { "aria-label": badgeAriaLabel } : {}),
+				...treeLabelProps,
+				...(leafKeys
+					? {
+							onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
+								childKeyDown?.(event);
+								onTreeKeyDown(event);
+							},
+						}
+					: {}),
 				style: {
 					...itemStyle,
 					...(child.props.style as React.CSSProperties | undefined),
@@ -390,27 +548,109 @@ const NavListItem = ({
 			iconEl,
 			collapsed ? null : child.props.children,
 			badgeA11yEl,
+			indicatorEl,
 			countEl,
 			inlineBadgeEl,
 			pillEl,
 		);
-		return wrapTooltip(cloned);
+	} else {
+		labelEl = (
+			<Box
+				data-testid={testId}
+				data-active={active ? "true" : "false"}
+				aria-current={active ? "page" : undefined}
+				{...treeLabelProps}
+				onKeyDown={leafKeys ? onTreeKeyDown : undefined}
+				style={itemStyle}
+			>
+				{iconEl}
+				{!collapsed && children}
+				{badgeA11yEl}
+				{indicatorEl}
+				{countEl}
+				{inlineBadgeEl}
+				{pillEl}
+			</Box>
+		);
 	}
 
-	return wrapTooltip(
+	if (!isParent) return wrapTooltip(labelEl);
+
+	// The chevron only toggles. It sits over the label's start padding — a
+	// sibling of the label, never inside it, so a link or button label
+	// keeps its own action. The rail has no room for it; the keys still work.
+	const toggleEl = collapsed ? null : (
 		<Box
-			data-testid={testId}
-			data-active={active ? "true" : "false"}
-			aria-current={active ? "page" : undefined}
-			style={itemStyle}
+			as="button"
+			{...{ type: "button", [TOGGLE_ATTR]: "" }}
+			aria-label={toggleAriaLabel ?? `Toggle ${itemName}`.trim()}
+			aria-expanded={expanded}
+			aria-controls={expanded ? groupId : undefined}
+			onClick={() => setExpanded(!expanded)}
+			position="absolute"
+			top="0"
+			bottom="0"
+			insetInlineStart={`calc(${level.depth} * var(--chakra-spacing-5))`}
+			width="calc(var(--chakra-spacing-3) + var(--chakra-spacing-5))"
+			zIndex={1}
+			display="flex"
+			alignItems="center"
+			justifyContent="flex-end"
+			p="0"
+			bg="transparent"
+			border="none"
+			borderRadius="sm"
+			color="subtle"
+			cursor="pointer"
+			_hover={{ color: "default" }}
+			_focusVisible={{
+				outline: "2px solid",
+				outlineColor: "accent",
+				outlineOffset: "-2px",
+			}}
 		>
-			{iconEl}
-			{!collapsed && children}
-			{badgeA11yEl}
-			{countEl}
-			{inlineBadgeEl}
-			{pillEl}
-		</Box>,
+			<Box
+				as="span"
+				display="inline-flex"
+				transition="transform 150ms ease-out"
+				transform={expanded ? "rotate(90deg)" : undefined}
+				_rtl={{ transform: expanded ? "rotate(90deg)" : "scaleX(-1)" }}
+			>
+				<ChevronRight size={14} aria-hidden="true" />
+			</Box>
+		</Box>
+	);
+
+	return (
+		<Flex direction="column" gap="2" data-testid="nav-list-tree-item">
+			<Flex
+				ref={rowRef}
+				direction="column"
+				position="relative"
+				{...{ [ROW_ATTR]: "" }}
+				onKeyDown={onTreeKeyDown}
+			>
+				{toggleEl}
+				{wrapTooltip(labelEl)}
+			</Flex>
+			{expanded ? (
+				<Flex
+					ref={groupRef}
+					id={groupId}
+					role="group"
+					aria-label={itemName || undefined}
+					direction="column"
+					gap="2"
+				>
+					<NavListTreeLevelProvider
+						depth={level.depth + 1}
+						focusParent={focusSelf}
+					>
+						{subItems}
+					</NavListTreeLevelProvider>
+				</Flex>
+			) : null}
+		</Flex>
 	);
 };
 NavListItem.displayName = "NavList.Item";
