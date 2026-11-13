@@ -677,6 +677,29 @@ screen shows items by status side by side — never hand-build columns from
 
 ---
 
+## DiffView
+
+`DiffView` (`@knkcs/anker/components`) renders a unified diff per file. Use
+it whenever a screen shows what changed in code — never hand-build a
+monospace block with line numbers and colours. Full guidance:
+`docs/page-patterns.md` §11 "Diffs".
+
+- **Text in**: `diff` takes the text exactly as `git diff` prints it
+  (also `diff -u` output or bare `@@` hunks). Or parse once with
+  `parseUnifiedDiff(text)` — plain `DiffFile` data with path, change type,
+  binary flag, counts and numbered lines — and pass `files`.
+- Each file gets a header (path, change type badge, `+N -N`), old and new
+  line numbers, added lines on `success`, removed on `danger`. Colours are
+  fixed; never restyle the lines.
+- Long unchanged runs fold behind an expand control (`contextLines`,
+  default 3; `Infinity` folds nothing). Files collapse from their header;
+  `defaultCollapsed` (`true` or a predicate) and `onFileCollapsedChange`.
+  `renderFileActions(file)` adds header actions.
+- **`variant="compact"`** for a single file in a detail pane or inspector.
+- Strings are props with English defaults (`labels`).
+
+---
+
 ## Composer
 
 `Composer` (`@knkcs/anker/components`) is the chat message input: auto-growing

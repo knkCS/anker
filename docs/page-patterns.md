@@ -1592,6 +1592,52 @@ column per status, a card per item:
   cards (↑/↓, Home/End) and columns (←/→, flipped in RTL, skipping
   empty columns); Enter opens the focused card.
 
+### Diffs (`DiffView`)
+
+What changed in code — a Change Request, a tool call's patch, a history
+entry — is a `DiffView`, not a monospace block coloured by hand. Pass the
+unified diff text exactly as `git diff` prints it:
+
+```tsx
+<DiffView diff={changeRequest.diff} />
+
+// One file in a detail pane or an inspector:
+<DiffView diff={event.patch} variant="compact" />
+
+// Parse once to filter or count, then hand the files over:
+const files = parseUnifiedDiff(text).filter((f) => !f.path.endsWith(".lock"));
+<DiffView files={files} defaultCollapsed={(f) => f.path.startsWith("gen/")} />
+```
+
+- **One section per file**: a header with the path (`old → new` for a
+  rename), the change type as a `StatusBadge` (`Added` on `success`,
+  `Deleted` on `danger`, `Renamed` on `info`, `Modified` neutral, plus
+  `Binary`) and the line counts; then old and new line numbers and the
+  lines. Binary files, pure renames and mode-only changes say so instead
+  of showing lines.
+- **Colours are fixed**: added lines on `success.subtle`, removed lines on
+  `danger.subtle` (numbers and sign in the palette's `fg`, code in
+  `default`), unchanged lines on `bg-surface`, hunk headers on `info`.
+  Each changed line also carries a `+`/`-` sign and a screen-reader label,
+  so the change never rests on hue alone. Never recolour lines.
+- **Folding**: a run of unchanged lines longer than `contextLines` (default
+  3) on each side of a change folds behind "Expand N unchanged lines".
+  `contextLines={Infinity}` shows everything. Lines outside the diff's
+  hunks are not in the text, so they cannot be expanded.
+- **Collapsing files** (`default` variant): the path in each header is a
+  toggle; `defaultCollapsed` (`true` or a predicate) starts files closed
+  — lockfiles, generated code — and `onFileCollapsedChange(file,
+  collapsed)` reports each toggle. `renderFileActions(file)` adds a link
+  or a menu to the header.
+- **`variant="compact"`** is for one file inside a narrow pane: smaller
+  type, a slim header that does not collapse and shows a change badge only
+  when the file is not a plain modification.
+- **Typography**: anker's `mono` font, whitespace kept, `tabSize` (default
+  4). Long lines scroll the file sideways rather than wrap; line numbers
+  and signs are not selected when the reader copies code.
+- Strings are props with English defaults (`labels`). Syntax
+  highlighting, a side-by-side view and editing are out of scope.
+
 ### Charts (`LineChart`, `AreaChart`, `BarChart`)
 
 A value over time — machine load, spend, throughput — is a chart from
