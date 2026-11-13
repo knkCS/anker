@@ -41,11 +41,12 @@ const defaultValueFormat = numberFormatter();
 const defaultTimeFormat = timeFormatter();
 const defaultCategoryFormat: ChartFormatter = (value) => String(value);
 
-/** Axis text: anker's `xs` size in the `muted` ink, never a series colour. */
-const TICK = {
-	fill: tokenColor("muted"),
-	fontSize: "var(--chakra-font-sizes-xs)",
-};
+/**
+ * Axis text in the `muted` ink, never a series colour. Its size is inherited
+ * from the frame (`xs`): an SVG `font-size` attribute does not resolve a CSS
+ * variable, so the size cannot be passed here.
+ */
+const TICK = { fill: tokenColor("muted") };
 
 /** Not a production build — the same check as ContextRail's dev warning. */
 function isDevMode(): boolean {
@@ -312,6 +313,7 @@ export function ChartFrame({
 			height={height}
 			minHeight={minHeight}
 			fontFamily="body"
+			fontSize="xs"
 		>
 			{state === "loading" && (
 				<Skeleton

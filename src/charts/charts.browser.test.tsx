@@ -282,6 +282,23 @@ describe.each<ColorMode>([
 		expect(fills).toEqual([token("chart.series.1"), token("accent")]);
 	});
 
+	it("axis text is muted, in anker's xs size and body font", async () => {
+		const el = await mount(
+			<Wrap>
+				<LineChart aria-label="Load" data={DATA} xKey="at" series={SERIES} />
+			</Wrap>,
+		);
+		await tickTexts(el, "x");
+		const tick = el.querySelector(".recharts-xAxis-tick-labels text");
+		const legend = el.querySelector("[data-chart-legend] li");
+		if (!tick || !legend) throw new Error("no tick or legend");
+		const t = getComputedStyle(tick);
+		expect(t.fill).toBe(token("muted"));
+		expect(t.fontSize).toBe(getComputedStyle(legend).fontSize);
+		expect(t.fontSize).toBe("12px");
+		expect(t.fontFamily).toBe(getComputedStyle(legend).fontFamily);
+	});
+
 	it("legend swatches resolve to the series colours, text stays muted", async () => {
 		const el = await mount(
 			<Wrap>
