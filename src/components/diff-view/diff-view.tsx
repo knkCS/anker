@@ -908,7 +908,8 @@ function VirtualBody(props: FileBodyProps) {
 					if (entry.type === "gap") {
 						return (
 							<tr key={entry.key} aria-hidden data-diff-row="spacer">
-								<Box as="td" {...{ colSpan: 4 }} p="0" h={`${entry.size}px`} />
+								{/* Inline: a style prop would mint a class per height. */}
+								<td colSpan={4} style={{ padding: 0, height: entry.size }} />
 							</tr>
 						);
 					}
