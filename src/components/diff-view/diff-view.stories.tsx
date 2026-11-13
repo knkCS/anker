@@ -15,7 +15,9 @@ import type { DiffComment } from "./types";
  * removed lines on the `success` and `danger` palettes, long unchanged runs
  * folded behind an expand control. Click a file's path to collapse it.
  * Comments anchor to a file and line; with focus inside the diff, `j` / `k`
- * jump between files and `n` / `p` between comments.
+ * jump between files and `n` / `p` between comments. A file of more than
+ * `virtualizeAbove` rows scrolls in a pane that draws only the rows in view
+ * ("Large diff").
  * Toggle the toolbar theme, or open "Light and dark", for both modes.
  */
 const meta = {
@@ -328,6 +330,80 @@ export const CustomCommentContent: Story = {
 /** The compact variant with comments, in light and dark mode. */
 export const CompactCommentsLightAndDark: Story = {
 	args: { diff: SINGLE_FILE, variant: "compact", comments: REVIEW.slice(0, 2) },
+	parameters: { layout: "fullscreen" },
+	render: (args) => (
+		<Grid templateColumns="1fr 1fr" gap="0">
+			<LightMode>
+				<Box bg="bg-canvas" p="4">
+					<DiffView {...args} />
+				</Box>
+			</LightMode>
+			<DarkMode>
+				<Box bg="bg-canvas" p="4">
+					<DiffView {...args} />
+				</Box>
+			</DarkMode>
+		</Grid>
+	),
+};
+
+/**
+ * A 5,000-line file: longer than `virtualizeAbove` (500 rows), so it renders
+ * in a pane of its own that draws only the rows in view. A change every 40
+ * lines leaves unchanged runs to fold; comments sit deep in the file — focus
+ * the diff and press `n` to jump to them.
+ */
+const LARGE_FILE = (() => {
+	const lines: string[] = [];
+	for (let i = 1; i <= 5000; i++) {
+		if (i % 40 === 0) {
+			lines.push(`-\tstep(${i});`, `+\tstep(${i}, { retry: true });`);
+		} else {
+			lines.push(` \tstep(${i});`);
+		}
+	}
+	return [
+		"diff --git a/internal/runner/steps.go b/internal/runner/steps.go",
+		"index 3b18e51..a3c5d2f 100644",
+		"--- a/internal/runner/steps.go",
+		"+++ b/internal/runner/steps.go",
+		"@@ -1,5000 +1,5000 @@ func steps() {",
+		...lines,
+	].join("\n");
+})();
+
+const LARGE_COMMENTS: DiffComment[] = [
+	{
+		id: "large-1",
+		path: "internal/runner/steps.go",
+		line: 1200,
+		author: "Reviewer",
+		tone: "warning",
+		label: "Suggestion",
+		body: "Retrying here doubles the step's side effects.",
+	},
+	{
+		id: "large-2",
+		path: "internal/runner/steps.go",
+		line: 4800,
+		author: "Reviewer",
+		tone: "danger",
+		label: "Blocking",
+		body: "This step must not retry: it is not idempotent.",
+	},
+];
+
+export const LargeDiff: Story = {
+	args: {
+		diff: `${LARGE_FILE}\n${SINGLE_FILE}`,
+		comments: LARGE_COMMENTS,
+		contextLines: Number.POSITIVE_INFINITY,
+	},
+};
+
+/** The large file, its folds and comments in light and dark mode. */
+export const LargeDiffLightAndDark: Story = {
+	args: { diff: LARGE_FILE, comments: LARGE_COMMENTS },
 	parameters: { layout: "fullscreen" },
 	render: (args) => (
 		<Grid templateColumns="1fr 1fr" gap="0">

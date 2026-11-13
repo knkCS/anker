@@ -4,12 +4,16 @@
 // collapsible files; long unchanged runs folded behind an expand control;
 // comments (#331) anchored to a line, under that line, or at the file level
 // when the line is not in the hunks — none dropped; `j`/`k` and `n`/`p` jump
-// between files and comments.
+// between files and comments. A file longer than `virtualizeAbove` rows
+// (#332) renders in a scrolling pane of its own that draws only the rows in
+// view.
 //
 // Text in (`diff`, parsed by `parseUnifiedDiff`) or data in (`files`), so a
 // consumer that parses once — to filter files, to count them — hands the
 // result straight over. Each file renders the flat row list `buildDiffRows`
 // builds, the seam line comments (#331) and virtualisation (#332) plug into.
+
+import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
 import {
 	ArrowRight,
 	Ban,
@@ -18,12 +22,26 @@ import {
 	UnfoldVertical,
 } from "lucide-react";
 import type React from "react";
-import { useCallback, useId, useMemo, useState } from "react";
+import {
+	useCallback,
+	useId,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { StatusBadge, type StatusBadgeTone } from "../../atoms/status-badge";
 import { Box, HStack, Stack } from "../../primitives/layout";
 import { Text } from "../../primitives/typography";
 import { MessageBubble, MessageGroup } from "../message";
 import { anchorComments, groupCommentsByFile } from "./diff-comments";
+import {
+	findCommentJump,
+	findFileTarget,
+	type PaneComment,
+	ROW_INDEX_ATTR,
+	registerVirtualPane,
+} from "./diff-jumps";
 import { buildDiffRows, type DiffRow } from "./diff-rows";
 import { parseUnifiedDiff } from "./parse-unified-diff";
 import type {
@@ -34,6 +52,14 @@ import type {
 	DiffLine,
 	DiffSide,
 } from "./types";
+import {
+	estimateRowSize,
+	lineNumberDigits,
+	shouldVirtualize,
+	widestLine,
+	windowWithGaps,
+	withKeptRows,
+} from "./virtual-rows";
 
 export type DiffViewVariant = "default" | "compact";
 
@@ -160,6 +186,14 @@ export interface DiffViewProps {
 	keyboardNavigation?: boolean;
 	/** The width of a tab character, in spaces. @default 4 */
 	tabSize?: number;
+	/**
+	 * A file with more rows than this (hunk headers and lines, folds aside)
+	 * renders in a scrolling pane of its own, at most 70% of the viewport
+	 * tall, that draws only the rows in view — line numbers, folds, comments
+	 * and the keyboard jumps work as in any file. `Infinity` renders every
+	 * file whole. @default 500
+	 */
+	virtualizeAbove?: number;
 	/** The heading level of the file paths. @default 3 */
 	headingLevel?: 2 | 3 | 4 | 5 | 6;
 	/** Names the whole diff for assistive tech. */
@@ -205,52 +239,6 @@ const TONE_EDGE: Record<DiffCommentTone, string> = {
 	accent: "primary.border",
 };
 
-/** Marks the element a file jump focuses: its toggle, or its heading. */
-const FILE_TARGET = "[data-diff-file-focus]";
-const COMMENT_TARGET = "[data-diff-comment]";
-
-const JUMPS: Record<string, { selector: string; direction: 1 | -1 }> = {
-	j: { selector: FILE_TARGET, direction: 1 },
-	k: { selector: FILE_TARGET, direction: -1 },
-	n: { selector: COMMENT_TARGET, direction: 1 },
-	p: { selector: COMMENT_TARGET, direction: -1 },
-};
-
-/**
- * The next (or previous) target in document order from `from`, skipping the
- * target `from` sits in. Reads the rendered DOM: a collapsed file's
- * comments are not rendered, so a jump passes over them.
- */
-function findJumpTarget(
-	root: HTMLElement,
-	selector: string,
-	from: Element,
-	direction: 1 | -1,
-): HTMLElement | undefined {
-	const targets = [...root.querySelectorAll<HTMLElement>(selector)];
-	// A file jump counts from the file focus is in, not from its header.
-	const origin =
-		selector === FILE_TARGET
-			? (from.closest<HTMLElement>("[data-diff-file]") ?? from)
-			: from;
-	const side =
-		direction === 1
-			? Node.DOCUMENT_POSITION_FOLLOWING
-			: Node.DOCUMENT_POSITION_PRECEDING;
-	const candidates = targets.filter((target) => {
-		if (target === origin) return false;
-		const position = origin.compareDocumentPosition(target);
-		return (
-			(position & side) !== 0 &&
-			(position &
-				(Node.DOCUMENT_POSITION_CONTAINS |
-					Node.DOCUMENT_POSITION_CONTAINED_BY)) ===
-				0
-		);
-	});
-	return direction === 1 ? candidates[0] : candidates.at(-1);
-}
-
 /**
  * Keys typed here belong to the element: text entry, and widgets with their
  * own typeahead (a menu or listbox from `renderFileActions`).
@@ -260,6 +248,13 @@ const OWNS_KEYS =
 
 const ownsKeys = (element: HTMLElement) =>
 	element.isContentEditable || element.closest(OWNS_KEYS) !== null;
+
+const JUMPS: Record<string, { to: "file" | "comment"; direction: 1 | -1 }> = {
+	j: { to: "file", direction: 1 },
+	k: { to: "file", direction: -1 },
+	n: { to: "comment", direction: 1 },
+	p: { to: "comment", direction: -1 },
+};
 
 const VARIANT_STYLES: Record<
 	DiffViewVariant,
@@ -303,15 +298,15 @@ export function DiffView(props: DiffViewProps) {
 			if (!jump || !event.currentTarget.contains(from) || ownsKeys(from)) {
 				return;
 			}
-			const next = findJumpTarget(
-				event.currentTarget,
-				jump.selector,
-				from,
-				jump.direction,
-			);
-			if (!next) return;
+			const root = event.currentTarget;
+			const go =
+				jump.to === "file"
+					? findFileTarget(root, from, jump.direction)
+					: findCommentJump(root, from, jump.direction);
+			if (!go) return;
 			event.preventDefault();
-			next.focus();
+			if (typeof go === "function") go();
+			else go.focus();
 		},
 		[keyboardNavigation],
 	);
@@ -423,6 +418,7 @@ function DiffFileSection(props: DiffFileSectionProps) {
 		onFileCollapsedChange,
 		renderFileActions,
 		tabSize = 4,
+		virtualizeAbove = 500,
 		headingLevel,
 		fileComments,
 		renderComment,
@@ -668,17 +664,16 @@ function DiffFileSection(props: DiffFileSectionProps) {
 							/>
 						</Box>
 					) : null}
-					<Box overflowX="auto">
-						<FileBody
-							file={file}
-							rows={rows}
-							labels={labels}
-							variant={variant}
-							tabSize={tabSize}
-							onExpand={expand}
-							renderComment={renderComment}
-						/>
-					</Box>
+					<FileBody
+						file={file}
+						rows={rows}
+						labels={labels}
+						variant={variant}
+						tabSize={tabSize}
+						virtualize={shouldVirtualize(file, virtualizeAbove)}
+						onExpand={expand}
+						renderComment={renderComment}
+					/>
 				</Box>
 			)}
 		</Box>
@@ -691,19 +686,35 @@ interface FileBodyProps {
 	labels: DiffViewLabels;
 	variant: DiffViewVariant;
 	tabSize: number;
+	/** Render in a virtualised pane (#332) instead of a whole table. */
+	virtualize: boolean;
 	onExpand: (lineKeys: readonly string[]) => void;
 	renderComment: DiffViewProps["renderComment"];
 }
 
-function FileBody({
-	file,
-	rows,
-	labels,
-	variant,
-	tabSize,
-	onExpand,
-	renderComment,
-}: FileBodyProps) {
+/** What every row needs to render, whichever body draws it. */
+interface RowContext {
+	file: DiffFile;
+	labels: DiffViewLabels;
+	cellX: string;
+	/** Comment rows' inline padding, as in the file header. */
+	headerX: string;
+	/** The line-number columns' minimum width, sized to the file's numbers. */
+	gutterW: string;
+	/** The code column's minimum width, in a pane; unset in a whole table. */
+	contentW?: string;
+	onExpand: (lineKeys: readonly string[]) => void;
+	renderComment: DiffViewProps["renderComment"];
+}
+
+/** Extra attributes a virtualised pane puts on each drawn row. */
+interface RowProps {
+	ref?: React.Ref<HTMLTableRowElement>;
+	[ROW_INDEX_ATTR]?: number;
+}
+
+function FileBody(props: FileBodyProps) {
+	const { file, labels, variant, virtualize } = props;
 	const v = VARIANT_STYLES[variant];
 	if (file.binary || file.hunks.length === 0) {
 		const message = file.binary
@@ -723,123 +734,294 @@ function FileBody({
 			</Text>
 		);
 	}
+	return virtualize ? <VirtualBody {...props} /> : <WholeBody {...props} />;
+}
 
+function useRowContext({
+	file,
+	labels,
+	variant,
+	tabSize,
+	virtualize,
+	onExpand,
+	renderComment,
+}: FileBodyProps): RowContext {
+	const digits = useMemo(() => lineNumberDigits(file), [file]);
+	const widest = useMemo(
+		() => (virtualize ? widestLine(file, tabSize) : 0),
+		[virtualize, file, tabSize],
+	);
+	return {
+		file,
+		labels,
+		cellX: VARIANT_STYLES[variant].cellX,
+		headerX: VARIANT_STYLES[variant].headerX,
+		gutterW: `${Math.max(3, digits)}ch`,
+		// A pane draws a few rows at a time: sized to the widest line, the
+		// code column does not jump as rows come and go.
+		contentW: virtualize ? `${widest}ch` : undefined,
+		onExpand,
+		renderComment,
+	};
+}
+
+function RowsTable({
+	variant,
+	tabSize,
+	children,
+}: {
+	variant: DiffViewVariant;
+	tabSize: number;
+	children: React.ReactNode;
+}) {
 	return (
 		<Box
 			as="table"
 			width="full"
 			borderCollapse="collapse"
 			fontFamily="mono"
-			fontSize={v.fontSize}
+			fontSize={VARIANT_STYLES[variant].fontSize}
 			lineHeight="1.5"
 			style={{ tabSize }}
 		>
-			<tbody>
-				{rows.map((row) => {
-					if (row.type === "hunk") {
-						return (
-							<Box as="tr" key={row.key} data-diff-row="hunk">
-								<Box
-									as="td"
-									{...{ colSpan: 4 }}
-									px={v.cellX}
-									py="0.5"
-									bg="info.subtle"
-									color="info.fg"
-									whiteSpace="pre"
-								>
-									{row.hunk.header}
-								</Box>
-							</Box>
-						);
-					}
-					if (row.type === "comments") {
-						return (
-							<Box
-								as="tr"
-								key={row.key}
-								data-diff-row="comments"
-								data-old-line={row.line.oldNumber ?? undefined}
-								data-new-line={row.line.newNumber ?? undefined}
-							>
-								<Box
-									as="td"
-									{...{ colSpan: 4 }}
-									p="0"
-									bg="bg-subtle"
-									borderYWidth="1px"
-									borderColor="border"
-									fontFamily="body"
-									whiteSpace="normal"
-								>
-									<CommentList
-										comments={row.comments}
-										file={file}
-										labels={labels}
-										renderComment={renderComment}
-										px={v.headerX}
-									/>
-								</Box>
-							</Box>
-						);
-					}
-					if (row.type === "fold") {
-						return (
-							<Box as="tr" key={row.key} data-diff-row="fold">
-								<Box as="td" {...{ colSpan: 4 }} p="0" bg="bg-subtle">
-									<Box
-										as="button"
-										{...{ type: "button" }}
-										onClick={() => onExpand(row.lineKeys)}
-										display="flex"
-										alignItems="center"
-										gap="1.5"
-										width="full"
-										minH="44px"
-										px={v.cellX}
-										fontFamily="body"
-										fontSize="xs"
-										color="accent"
-										cursor="pointer"
-										textAlign="start"
-										_hover={{ bg: "bg-muted" }}
-										_focusVisible={{ outline: "none", boxShadow: "focus-ring" }}
-									>
-										<UnfoldVertical size={14} aria-hidden />
-										{labels.formatExpand(row.lines.length)}
-									</Box>
-								</Box>
-							</Box>
-						);
-					}
-					return (
-						<LineRow
-							key={row.key}
-							line={row.line}
-							labels={labels}
-							cellX={v.cellX}
-						/>
-					);
-				})}
-			</tbody>
+			<tbody>{children}</tbody>
 		</Box>
+	);
+}
+
+function WholeBody(props: FileBodyProps) {
+	const ctx = useRowContext(props);
+	return (
+		<Box overflowX="auto">
+			<RowsTable variant={props.variant} tabSize={props.tabSize}>
+				{props.rows.map((row) => renderRow(row, ctx))}
+			</RowsTable>
+		</Box>
+	);
+}
+
+/**
+ * A large file's rows in a scrolling pane that draws only the rows in view
+ * (`@tanstack/react-virtual`), with spacer rows standing in for the rest.
+ * The row holding focus stays drawn when it scrolls out of view, and the
+ * pane registers its comments so `n` / `p` reach the ones not drawn.
+ */
+function VirtualBody(props: FileBodyProps) {
+	const { rows, variant } = props;
+	const ctx = useRowContext(props);
+	const paneRef = useRef<HTMLDivElement>(null);
+	// Rows kept drawn outside the window, by key: rows shift as folds open.
+	const [focusedKey, setFocusedKey] = useState<string>();
+	const [pending, setPending] = useState<{ key: string; nth: number }>();
+	const indexOf = useCallback(
+		(key: string | undefined) =>
+			key == null ? undefined : rows.findIndex((row) => row.key === key),
+		[rows],
+	);
+	const focusedIndex = indexOf(focusedKey);
+	const pendingIndex = indexOf(pending?.key);
+	const rangeExtractor = useCallback(
+		(range: Parameters<typeof defaultRangeExtractor>[0]) =>
+			withKeptRows(
+				defaultRangeExtractor(range),
+				[focusedIndex, pendingIndex],
+				rows,
+			),
+		[focusedIndex, pendingIndex, rows],
+	);
+	const virtualizer = useVirtualizer({
+		count: rows.length,
+		getScrollElement: () => paneRef.current,
+		estimateSize: (index) => estimateRowSize(rows[index], variant),
+		getItemKey: (index) => rows[index]?.key ?? index,
+		indexAttribute: ROW_INDEX_ATTR,
+		overscan: 10,
+		rangeExtractor,
+	});
+
+	// The comment to focus once its row is drawn.
+	const focusComment = useCallback((index: number, nth: number) => {
+		const row = paneRef.current?.querySelector(
+			`[${ROW_INDEX_ATTR}="${index}"]`,
+		);
+		const target = row?.querySelectorAll<HTMLElement>("[data-diff-comment]")[
+			nth
+		];
+		target?.focus();
+		return target != null;
+	}, []);
+	useLayoutEffect(() => {
+		if (!pending || pendingIndex == null) return;
+		if (pendingIndex < 0 || focusComment(pendingIndex, pending.nth)) {
+			setPending(undefined);
+		}
+	});
+
+	// What `n` / `p` need of the pane, read fresh at each keypress.
+	const rowsRef = useRef(rows);
+	rowsRef.current = rows;
+	useLayoutEffect(() => {
+		const pane = paneRef.current;
+		if (!pane) return;
+		return registerVirtualPane(pane, {
+			comments: () => {
+				const list: PaneComment[] = [];
+				rowsRef.current.forEach((row, index) => {
+					if (row.type !== "comments") return;
+					for (let nth = 0; nth < row.comments.length; nth++) {
+						list.push({ row: index, nth });
+					}
+				});
+				return list;
+			},
+			reveal: ({ row, nth }) => {
+				if (focusComment(row, nth)) return;
+				const key = rowsRef.current[row]?.key;
+				if (key != null) setPending({ key, nth });
+			},
+		});
+	}, [focusComment]);
+
+	const onFocus = useCallback((event: React.FocusEvent<HTMLElement>) => {
+		const row = (event.target as HTMLElement).closest(`[${ROW_INDEX_ATTR}]`);
+		const index = Number(row?.getAttribute(ROW_INDEX_ATTR));
+		setFocusedKey(row ? rowsRef.current[index]?.key : undefined);
+	}, []);
+	const onBlur = useCallback((event: React.FocusEvent<HTMLElement>) => {
+		const next = event.relatedTarget as Node | null;
+		if (!next || !event.currentTarget.contains(next)) setFocusedKey(undefined);
+	}, []);
+
+	const items = virtualizer.getVirtualItems();
+	const entries = windowWithGaps(items, virtualizer.getTotalSize());
+	return (
+		<Box
+			ref={paneRef}
+			data-diff-virtual=""
+			overflow="auto"
+			maxH="70vh"
+			onFocus={onFocus}
+			onBlur={onBlur}
+		>
+			<RowsTable variant={variant} tabSize={props.tabSize}>
+				{entries.map((entry) => {
+					if (entry.type === "gap") {
+						return (
+							<tr key={entry.key} aria-hidden data-diff-row="spacer">
+								<Box as="td" {...{ colSpan: 4 }} p="0" h={`${entry.size}px`} />
+							</tr>
+						);
+					}
+					const row = rows[entry.index];
+					return renderRow(row, ctx, {
+						ref: virtualizer.measureElement,
+						[ROW_INDEX_ATTR]: entry.index,
+					});
+				})}
+			</RowsTable>
+		</Box>
+	);
+}
+
+function renderRow(row: DiffRow, ctx: RowContext, rowProps: RowProps = {}) {
+	const { file, labels, cellX, headerX, onExpand, renderComment } = ctx;
+	if (row.type === "hunk") {
+		return (
+			<Box as="tr" key={row.key} data-diff-row="hunk" {...rowProps}>
+				<Box
+					as="td"
+					{...{ colSpan: 4 }}
+					px={cellX}
+					py="0.5"
+					bg="info.subtle"
+					color="info.fg"
+					whiteSpace="pre"
+				>
+					{row.hunk.header}
+				</Box>
+			</Box>
+		);
+	}
+	if (row.type === "comments") {
+		return (
+			<Box
+				as="tr"
+				key={row.key}
+				data-diff-row="comments"
+				data-old-line={row.line.oldNumber ?? undefined}
+				data-new-line={row.line.newNumber ?? undefined}
+				{...rowProps}
+			>
+				<Box
+					as="td"
+					{...{ colSpan: 4 }}
+					p="0"
+					bg="bg-subtle"
+					borderYWidth="1px"
+					borderColor="border"
+					fontFamily="body"
+					whiteSpace="normal"
+				>
+					<CommentList
+						comments={row.comments}
+						file={file}
+						labels={labels}
+						renderComment={renderComment}
+						px={headerX}
+					/>
+				</Box>
+			</Box>
+		);
+	}
+	if (row.type === "fold") {
+		return (
+			<Box as="tr" key={row.key} data-diff-row="fold" {...rowProps}>
+				<Box as="td" {...{ colSpan: 4 }} p="0" bg="bg-subtle">
+					<Box
+						as="button"
+						{...{ type: "button" }}
+						onClick={() => onExpand(row.lineKeys)}
+						display="flex"
+						alignItems="center"
+						gap="1.5"
+						width="full"
+						minH="44px"
+						px={cellX}
+						fontFamily="body"
+						fontSize="xs"
+						color="accent"
+						cursor="pointer"
+						textAlign="start"
+						_hover={{ bg: "bg-muted" }}
+						_focusVisible={{ outline: "none", boxShadow: "focus-ring" }}
+					>
+						<UnfoldVertical size={14} aria-hidden />
+						{labels.formatExpand(row.lines.length)}
+					</Box>
+				</Box>
+			</Box>
+		);
+	}
+	return (
+		<LineRow key={row.key} line={row.line} ctx={ctx} rowProps={rowProps} />
 	);
 }
 
 function LineRow({
 	line,
-	labels,
-	cellX,
+	ctx,
+	rowProps,
 }: {
 	line: DiffLine;
-	labels: DiffViewLabels;
-	cellX: string;
+	ctx: RowContext;
+	rowProps: RowProps;
 }) {
+	const { labels, cellX, gutterW, contentW } = ctx;
 	const paint = KIND_STYLES[line.kind];
 	const gutter = {
 		px: cellX,
 		width: "1%",
-		minW: "3ch",
+		minW: gutterW,
 		textAlign: "end" as const,
 		color: paint.gutter,
 		whiteSpace: "nowrap" as const,
@@ -854,6 +1036,7 @@ function LineRow({
 			data-old-line={line.oldNumber ?? undefined}
 			data-new-line={line.newNumber ?? undefined}
 			bg={paint.bg}
+			{...rowProps}
 		>
 			<Box as="td" data-diff-gutter="old" {...gutter}>
 				{line.oldNumber}
@@ -878,6 +1061,7 @@ function LineRow({
 				as="td"
 				data-diff-content=""
 				pe={cellX}
+				minW={contentW}
 				color="default"
 				whiteSpace="pre"
 			>
