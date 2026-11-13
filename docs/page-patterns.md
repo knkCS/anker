@@ -1264,7 +1264,9 @@ Rules:
   children are not rendered.
 - **Alignment:** once a level holds a parent, every label at that level
   leaves room for the chevron, so leaves and parents line up; each level
-  indents by `spacing.5`. A flat list renders exactly as before.
+  indents by `spacing.5`. A flat list renders exactly as before. Delete any
+  hand-rolled nesting padding when adopting this: an `asChild` child's own
+  `style.paddingInlineStart` still wins over the tree's indent.
 - **On the collapsed rail** the chevron and indentation drop: the open
   items list as icons with tooltips, and the `indicator` overlays the icon
   (unless a `badge` already sits there). The keys still work.

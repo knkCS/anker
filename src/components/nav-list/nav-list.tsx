@@ -14,11 +14,13 @@ import { Tooltip } from "../../primitives/tooltip";
 import { Text } from "../../primitives/typography";
 import { useNavListMode } from "./nav-list-context";
 import {
+	CHEVRON_COLUMN,
 	focusItemRow,
 	LABEL_ATTR,
 	NavListTreeLevelProvider,
 	ROW_ATTR,
 	TOGGLE_ATTR,
+	treeIndent,
 	useNavListTreeLevel,
 } from "./nav-list-tree";
 
@@ -303,7 +305,7 @@ const NavListItem = ({
 		paddingInline: "var(--chakra-spacing-3)",
 		...(inTree && !collapsed
 			? {
-					paddingInlineStart: `calc(var(--chakra-spacing-3) + ${level.depth} * var(--chakra-spacing-5) + ${reserveChevron ? "var(--chakra-spacing-5)" : "0px"})`,
+					paddingInlineStart: `calc(var(--chakra-spacing-3) + ${treeIndent(level.depth)} + ${reserveChevron ? CHEVRON_COLUMN : "0px"})`,
 				}
 			: {}),
 		paddingBlock: "var(--chakra-spacing-3)",
@@ -507,7 +509,7 @@ const NavListItem = ({
 	};
 	// A parent's row wrapper handles the keys (for the label and the
 	// chevron alike); a leaf's label does, once it sits under a parent.
-	const leafKeys = !isParent && level.focusParent !== undefined;
+	const leafHandlesTreeKeys = !isParent && level.focusParent !== undefined;
 	// Flat lists keep their markup: the tree attributes appear only in a tree.
 	const treeLabelProps = inTree
 		? {
@@ -532,7 +534,7 @@ const NavListItem = ({
 				"aria-current": active ? "page" : undefined,
 				...(badgeAriaLabel ? { "aria-label": badgeAriaLabel } : {}),
 				...treeLabelProps,
-				...(leafKeys
+				...(leafHandlesTreeKeys
 					? {
 							onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
 								childKeyDown?.(event);
@@ -560,7 +562,7 @@ const NavListItem = ({
 				data-active={active ? "true" : "false"}
 				aria-current={active ? "page" : undefined}
 				{...treeLabelProps}
-				onKeyDown={leafKeys ? onTreeKeyDown : undefined}
+				onKeyDown={leafHandlesTreeKeys ? onTreeKeyDown : undefined}
 				style={itemStyle}
 			>
 				{iconEl}
@@ -590,8 +592,8 @@ const NavListItem = ({
 			position="absolute"
 			top="0"
 			bottom="0"
-			insetInlineStart={`calc(${level.depth} * var(--chakra-spacing-5))`}
-			width="calc(var(--chakra-spacing-3) + var(--chakra-spacing-5))"
+			insetInlineStart={treeIndent(level.depth)}
+			width={`calc(var(--chakra-spacing-3) + ${CHEVRON_COLUMN})`}
 			zIndex={1}
 			display="flex"
 			alignItems="center"
@@ -603,16 +605,15 @@ const NavListItem = ({
 			color="subtle"
 			cursor="pointer"
 			_hover={{ color: "default" }}
-			_focusVisible={{
-				outline: "2px solid",
-				outlineColor: "accent",
-				outlineOffset: "-2px",
-			}}
+			outline="none"
+			_focusVisible={{ boxShadow: "focus-ring" }}
 		>
 			<Box
 				as="span"
 				display="inline-flex"
-				transition="transform 150ms ease-out"
+				transitionProperty="transform"
+				transitionDuration="fast"
+				transitionTimingFunction="ease-out"
 				transform={expanded ? "rotate(90deg)" : undefined}
 				_rtl={{ transform: expanded ? "rotate(90deg)" : "scaleX(-1)" }}
 			>

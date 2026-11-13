@@ -73,14 +73,15 @@ function Tree({
 const toggleFor = (name: string) =>
 	screen.getByRole("button", { name: `Toggle ${name}` });
 
+const padStart = (el: HTMLElement) =>
+	el.getAttribute("style")?.match(/padding-inline-start: ([^;]+)/)?.[1];
+
 describe("NavList.Item tree", () => {
 	it("hides child items while collapsed and shows them indented when expanded", () => {
 		renderWithChakra(<Tree initialOpen={["table"]} />);
 		const table = screen.getByRole("button", { name: "Table" });
 		const row = screen.getByRole("button", { name: "Row" });
 		expect(screen.queryByRole("button", { name: "Cell" })).toBeNull();
-		const padStart = (el: HTMLElement) =>
-			el.getAttribute("style")?.match(/padding-inline-start: ([^;]+)/)?.[1];
 		expect(padStart(row)).not.toEqual(padStart(table));
 		expect(padStart(row)).toContain("1 * var(--chakra-spacing-5)");
 		expect(padStart(table)).toContain("0 * var(--chakra-spacing-5)");
@@ -257,8 +258,6 @@ describe("NavList.Item tree", () => {
 		renderWithChakra(<Tree />);
 		const paragraph = screen.getByRole("button", { name: "Paragraph" });
 		const table = screen.getByRole("button", { name: "Table" });
-		const padStart = (el: HTMLElement) =>
-			el.getAttribute("style")?.match(/padding-inline-start: ([^;]+)/)?.[1];
 		expect(padStart(paragraph)).toEqual(padStart(table));
 	});
 

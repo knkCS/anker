@@ -64,6 +64,13 @@ export function NavListTreeLevelProvider({
 	);
 }
 
+/** Width of the chevron column; also each level's indentation step. */
+export const CHEVRON_COLUMN = "var(--chakra-spacing-5)";
+
+/** How far an item at `depth` is indented. */
+export const treeIndent = (depth: number) =>
+	`calc(${depth} * ${CHEVRON_COLUMN})`;
+
 /** Marks an item's label element. */
 export const LABEL_ATTR = "data-nav-list-label";
 /** Marks an item's outermost row: a leaf's label, or a parent's row wrapper. */
