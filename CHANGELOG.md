@@ -2,6 +2,20 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.16.0 — 2026-11-13
+
+### Added
+
+- **`Kanban` drag and drop** (#347, #348, #327, Spec #314): passing `onMove`
+  makes a board editable. Cards move between and within columns by mouse,
+  touch and keyboard (Space picks up, arrows/Home/End move, Space/Enter drops,
+  Escape cancels); `onMove({item, itemKey, from, to})` reports
+  `{columnId, index}` positions and returning `false` vetoes the move, which
+  snaps back. The drag layer is a lazily loaded chunk, so read-only boards
+  never load it; `@dnd-kit` stays a required peer (DataTable's row reorder
+  imports it statically). Placement follows the pointer, not dnd-kit's
+  one-render-late `over`.
+
 ## 5.15.0 — 2026-11-13
 
 ### Added
