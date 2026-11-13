@@ -292,7 +292,10 @@ function unquote(quoted: string): string {
 	for (let i = 0; i < body.length; i++) {
 		const c = body[i];
 		if (c !== "\\") {
-			bytes.push(...encoder.encode(c));
+			// A whole code point, so a surrogate pair encodes as one character.
+			const point = String.fromCodePoint(body.codePointAt(i) ?? 0);
+			bytes.push(...encoder.encode(point));
+			i += point.length - 1;
 			continue;
 		}
 		const next = body[i + 1];

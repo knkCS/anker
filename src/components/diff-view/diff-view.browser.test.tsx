@@ -269,6 +269,7 @@ describe("DiffView file collapse", () => {
 
 		await userEvent.click(button);
 		expect(button.getAttribute("aria-expanded")).toBe("false");
+		expect(button.hasAttribute("aria-controls")).toBe(false);
 		expect(section(el, "src/app.ts").hasAttribute("data-collapsed")).toBe(true);
 		expect(lineRows(section(el, "src/app.ts"))).toHaveLength(0);
 		expect(onChange).toHaveBeenLastCalledWith(
@@ -331,6 +332,24 @@ describe("DiffView unchanged regions", () => {
 		const line17 = lineRows(app).find((r) => r.dataset.newLine === "17");
 		expect(line17 && cell(line17, "gutter='old'")).toBe("17");
 		expect(line17 && cell(line17, "content")).toBe("line 17");
+	});
+
+	it("folds a new revision of the same file again", async () => {
+		const el = await mount(<DiffView diff={DIFF} />);
+		const app = () => section(el, "src/app.ts");
+		const button = app().querySelector<HTMLButtonElement>(
+			"tr[data-diff-row='fold'] button",
+		);
+		await userEvent.click(button as HTMLButtonElement);
+		expect(app().querySelector("tr[data-diff-row='fold']")).toBeNull();
+		await act(async () => {
+			root?.render(
+				<Provider forcedTheme="light">
+					<DiffView diff={`${DIFF}\n`} />
+				</Provider>,
+			);
+		});
+		expect(app().querySelector("tr[data-diff-row='fold']")).not.toBeNull();
 	});
 
 	it("folds nothing with contextLines={Infinity}", async () => {

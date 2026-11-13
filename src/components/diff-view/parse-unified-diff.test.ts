@@ -328,6 +328,19 @@ describe("parseUnifiedDiff", () => {
 		expect(file.path).toBe('with "quote".txt');
 	});
 
+	it("decodes octal-escaped UTF-8 and keeps unescaped non-ASCII in quoted paths", () => {
+		const [file] = parseUnifiedDiff(
+			lines(
+				'--- "a/caf\\303\\251 \u{1F600}.txt"',
+				'+++ "b/caf\\303\\251 \u{1F600}.txt"',
+				"@@ -1 +1 @@",
+				"-a",
+				"+b",
+			),
+		);
+		expect(file.path).toBe("caf\u00e9 \u{1F600}.txt");
+	});
+
 	it("parses bare hunks without any file header as one untitled file", () => {
 		const [file] = parseUnifiedDiff(lines("@@ -1,2 +1,2 @@", " a", "-b", "+c"));
 		expect(file).toMatchObject({

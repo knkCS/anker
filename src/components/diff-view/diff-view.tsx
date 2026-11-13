@@ -230,8 +230,16 @@ function DiffFileSection(props: DiffFileSectionProps) {
 				? defaultCollapsed(file)
 				: defaultCollapsed),
 	);
-	const [expanded, setExpanded] = useState<ReadonlySet<string>>(
-		() => new Set(),
+	// Fold keys are positions in this file's hunks, so the reader's
+	// expansions belong to this `file` object: a new revision of the same
+	// path starts folded again. (Collapse persists by path.)
+	const [expansions, setExpansions] = useState<{
+		file: DiffFile;
+		keys: ReadonlySet<string>;
+	}>(() => ({ file, keys: new Set() }));
+	const expanded = useMemo(
+		() => (expansions.file === file ? expansions.keys : new Set<string>()),
+		[expansions, file],
 	);
 	const rows = useMemo(
 		() => buildDiffRows(file, { contextLines, expanded }),
@@ -242,9 +250,15 @@ function DiffFileSection(props: DiffFileSectionProps) {
 		setCollapsed(next);
 		onFileCollapsedChange?.(file, next);
 	}, [collapsed, file, onFileCollapsedChange]);
-	const expand = useCallback((key: string) => {
-		setExpanded((current) => new Set(current).add(key));
-	}, []);
+	const expand = useCallback(
+		(key: string) => {
+			setExpansions((current) => ({
+				file,
+				keys: new Set(current.file === file ? current.keys : []).add(key),
+			}));
+		},
+		[file],
+	);
 
 	const v = VARIANT_STYLES[variant];
 	const title = file.path || labels.untitledFile;
@@ -309,7 +323,7 @@ function DiffFileSection(props: DiffFileSectionProps) {
 							as="button"
 							{...{ type: "button" }}
 							aria-expanded={!collapsed}
-							aria-controls={bodyId}
+							aria-controls={collapsed ? undefined : bodyId}
 							onClick={toggle}
 							display="inline-flex"
 							alignItems="center"
@@ -484,7 +498,7 @@ function FileBody({
 										alignItems="center"
 										gap="1.5"
 										width="full"
-										minH={variant === "compact" ? "32px" : "44px"}
+										minH="44px"
 										px={v.cellX}
 										fontFamily="body"
 										fontSize="xs"
@@ -492,11 +506,7 @@ function FileBody({
 										cursor="pointer"
 										textAlign="start"
 										_hover={{ bg: "bg-muted" }}
-										_focusVisible={{
-											outline: "2px solid",
-											outlineColor: "accent",
-											outlineOffset: "-2px",
-										}}
+										_focusVisible={{ outline: "none", boxShadow: "focus-ring" }}
 									>
 										<UnfoldVertical size={14} aria-hidden />
 										{labels.formatExpand(row.lines.length)}
