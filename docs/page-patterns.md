@@ -1213,6 +1213,64 @@ AppShell
 </AppShell>
 ```
 
+### Nested items (tree)
+
+When the nav lists a tree — a table node with its row and cell, a list
+with its item, an outline — the parent `<NavList.Item>` holds its children
+in `subItems`. They render indented below it while it is expanded, and they
+can hold children of their own.
+
+```tsx
+<NavList.Item
+  asChild
+  active={selected === "table"}
+  expanded={open.has("table")}
+  onExpandedChange={(next) => setOpen(toggle(open, "table", next))}
+  indicator={hiddenChildDirty ? <DirtyDot /> : null}
+  subItems={
+    <NavList.Item asChild active={selected === "row"}>
+      <button type="button" onClick={() => select("row")}>Row</button>
+    </NavList.Item>
+  }
+>
+  <button
+    type="button"
+    onClick={() => select("table")}
+    aria-label={hiddenChildDirty ? "Table, unsaved changes" : undefined}
+  >
+    Table
+  </button>
+</NavList.Item>
+```
+
+| Prop | Meaning |
+|---|---|
+| `subItems` | The child `NavList.Item`s. Empty (every child filtered out) renders a plain item. |
+| `expanded` / `onExpandedChange` | Controlled open state. The consumer owns it: persistence, auto-expanding the parents of the selected (or invalid, or dirty) item, search hits, Expand all / Collapse all in a toolbar. `defaultExpanded` for uncontrolled use. |
+| `indicator` | The roll-up slot at the end of the row, visible open or closed — a closed parent shows its hidden child's status dot here. Visual only: say the same thing in the label's accessible name. |
+| `toggleAriaLabel` | The chevron's name. Default `"Toggle {label}"`; its state is `aria-expanded`. |
+
+Rules:
+
+- **The chevron only toggles; the label keeps its own action.** The chevron
+  is a separate button at the row start, over the label's start padding —
+  never inside the label — so one click never both selects and toggles.
+- **Keys:** with a parent's label or chevron focused, Arrow Right opens it
+  (or, if open, moves to its first child) and Arrow Left closes it; Arrow
+  Left on a child moves focus to its parent. Up / Down are not taken —
+  Tab moves between rows, as in the rest of `NavList`.
+- **Semantics:** the chevron carries `aria-expanded` and `aria-controls`;
+  the children sit in a `role="group"` named after the parent. Collapsed
+  children are not rendered.
+- **Alignment:** once a level holds a parent, every label at that level
+  leaves room for the chevron, so leaves and parents line up; each level
+  indents by `spacing.5`. A flat list renders exactly as before. Delete any
+  hand-rolled nesting padding when adopting this: an `asChild` child's own
+  `style.paddingInlineStart` still wins over the tree's indent.
+- **On the collapsed rail** the chevron and indentation drop: the open
+  items list as icons with tooltips, and the `indicator` overlays the icon
+  (unless a `badge` already sits there). The keys still work.
+
 ### SubNavLayout sizing
 
 `<SubNavLayout>` self-stretches to fill its parent's height. The only
