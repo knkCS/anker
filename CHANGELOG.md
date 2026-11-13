@@ -2,6 +2,29 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.14.0 — 2026-11-13
+
+### Added
+
+- **`Kanban` board, read-only** (#334, #325, Spec #314): `Kanban` in
+  `/components` takes `columns`, `getItemKey` and `renderCard`. Columns are
+  lists named with their counts, with an action slot, collapsible empty
+  columns and empty states. `Kanban.Card` is a link, button, router link
+  (`asChild`) or static, in the tones `default`, `quiet` and `attention`
+  (status palettes), built from `CardTitle`, `CardMeta`, `CardBadges` and
+  `CardAvatar`. The board is one tab stop with arrow-key navigation (RTL
+  aware). New semantic token `border-emphasized`. Virtualisation and drag and
+  drop follow in #326 and #327.
+- **Charts entry `@knkcs/anker/charts`** (#337, #328, #338, #329, Spec #315):
+  `LineChart`, `AreaChart` (optionally `stacked`) and `BarChart` (grouped or
+  `stacked`) over Recharts, an optional peer (`^3.10.0`) importable only from
+  this entry. Consumers pass `data`, `xKey` and `series` and never a colour:
+  series take the new `chart.series.1`–`6` tokens or a `tone`. Threshold lines
+  and bands (`thresholds`), an accessible summary and hidden data table, value
+  and time formatters in the UI language, responsive sizing, loading and empty
+  states, and first-draw-only animation for calm live updates. No second y
+  axis, by design (`docs/page-patterns.md`, Charts).
+
 ## 5.13.0 — 2026-11-12
 
 ### Added
