@@ -9,6 +9,7 @@
  * `"gray.50"` are stored verbatim into the CSS custom property and yield
  * invalid CSS at runtime.
  */
+import { chartSeriesTokens } from "./chart-palette";
 import { statusPaletteTokens } from "./status-palettes";
 
 const semanticTokens = {
@@ -171,6 +172,9 @@ const semanticTokens = {
 				},
 			},
 		},
+		// The chart series palette (`chart.series.1` …) that
+		// `@knkcs/anker/charts` colours its series from — see chart-palette.ts.
+		chart: chartSeriesTokens,
 		// Accent surface tokens
 		"bg-accent": {
 			value: { base: "{colors.primary.700}", _dark: "{colors.primary.400}" },

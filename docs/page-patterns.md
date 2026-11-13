@@ -1592,6 +1592,72 @@ column per status, a card per item:
   cards (↑/↓, Home/End) and columns (←/→, flipped in RTL, skipping
   empty columns); Enter opens the focused card.
 
+### Charts (`LineChart`, `AreaChart`)
+
+A value over time — machine load, spend, throughput — is a chart from
+`@knkcs/anker/charts`, never a chart library coloured by hand. You pass
+data and series definitions; anker picks every colour:
+
+```tsx
+import { AreaChart, LineChart, numberFormatter, timeFormatter } from "@knkcs/anker/charts";
+
+<LineChart
+  aria-label="Load over time"
+  data={readings}            // [{ at: 1763024400000, load: 2.1, limit: 4 }, …]
+  xKey="at"
+  xType="time"
+  series={[
+    { key: "load", label: "1-minute load" },
+    { key: "limit", label: "Admission limit", tone: "warning" },
+  ]}
+  formatX={timeFormatter({ hour: "2-digit", minute: "2-digit" })}
+  formatValue={numberFormatter({ maximumFractionDigits: 1 })}
+/>
+```
+
+- **Which chart**: `LineChart` compares how a few series *move* — lines
+  may cross and overlap without hiding each other. `AreaChart` shows
+  *volume* (load, spend) where the area under the line means something;
+  `stacked` when the series add up to a whole (spend per project), so
+  the top edge is the total. One headline number is a stat tile, not a
+  chart. Bar charts, threshold lines and bands, a text alternative and
+  calm live updates are not here yet.
+- **Colours come from the series palette**, never from you: a series
+  takes the slot of its position in `series` (`chart.series.1` …
+  `chart.series.6`, selected per mode and validated for contrast and
+  colour-blind separation on `bg-surface`). Give a series a `tone`
+  (`accent`, `success`, `warning`, `danger`, `info`, `neutral`) only
+  when its meaning matters — a limit, a failure rate. Status hues never
+  appear as an ordinary series. `accent` and `info` share the action
+  blue (as on `StatusBadge`), close to the first palette slot — beside
+  palette series, prefer a status tone or `neutral`.
+- **Colour follows the series, not its rank.** To filter, mark a series
+  `hidden` rather than removing it: the others keep their colours. More
+  than six series is too many to tell apart — fold the rest into an
+  "Other" series or split the chart (series past six paint neutral, with
+  a console warning).
+- **One y axis.** Two measures of different scale (load and a
+  percentage) are two charts side by side, not one chart with a second
+  axis.
+- **Formatters** apply to the axis ticks and the tooltip alike:
+  `formatX` for x values, `formatValue` for y values.
+  `numberFormatter(Intl.NumberFormatOptions)` (currency, percent — 0.42
+  reads 42 %) and `timeFormatter(Intl.DateTimeFormatOptions)` write in
+  the UI language, like every value anker formats. A `time` x axis reads
+  epoch milliseconds, `Date`s and ISO strings.
+- **Sizing**: the chart fills its container's width, and its height
+  unless you give `height`. In a dashboard widget (`Widget`,
+  `<Dashboard>` cells) give it nothing — it takes the widget's body.
+  Outside one, give a `height`; `minHeight` (160px) keeps it from
+  collapsing.
+- **States**: `loading` shows a placeholder the chart's size, marked
+  busy; no rows (or every series hidden) shows `emptyLabel` ("No data")
+  in the same footprint, so the layout never jumps.
+- **Legend** for two or more series, none for one (the title names it);
+  `legend` overrides. Legend and tooltip text stay in text tokens — the
+  swatch beside a name carries the colour.
+- `aria-label` is required: it names the figure for screen readers.
+
 ### Error Alert placement
 
 Inline errors on flush `bg-canvas` pages use `<Alert>` with explicit

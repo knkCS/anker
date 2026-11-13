@@ -74,6 +74,29 @@ export const Screen = () => (
 		it("leaves a tone alone", () => {
 			expect(rules(`<StatusBadge label="Failed" tone="danger" />`)).toEqual([]);
 		});
+
+		it("flags a hex colour in chart props (#328)", () => {
+			expect(
+				rules(
+					`<LineChart aria-label="Load" data={rows} xKey="at" series={[{ key: "load", color: "#134788" }]} />`,
+				),
+			).toEqual(["no-hex-colour"]);
+			expect(
+				rules(`<AreaChart\n\tseries={series}\n\tstroke={\`#f00\`}\n/>`),
+			).toEqual(["no-hex-colour"]);
+			// Raw Recharts children an escape hatch might take stay token-only too.
+			expect(
+				rules(`<Line dataKey="cpu" stroke="#38a169" fill='#38a16980' />`),
+			).toEqual(["no-hex-colour", "no-hex-colour"]);
+		});
+
+		it("leaves a chart coloured through tones and tokens alone", () => {
+			expect(
+				rules(
+					`<LineChart aria-label="Load" data={rows} xKey="at" series={[{ key: "load" }, { key: "limit", tone: "warning" }]} />\n<Line stroke={chartSeriesColor(0)} />`,
+				),
+			).toEqual([]);
+		});
 	});
 
 	describe("settings-template-needs-tabs", () => {

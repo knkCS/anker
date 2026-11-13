@@ -1,53 +1,61 @@
-// Fails if any non-dashboard dist entry references an optional peer.
+// Fails if a dist entry references an optional peer it does not own.
 // Guards #147: react-grid-layout must only be reachable via ./dashboard.
+// Guards #328: recharts must only be reachable via ./charts, so a consumer
+// who never imports the charts entry never loads (or installs) Recharts.
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const OPTIONAL_DEPS = ["react-grid-layout"];
-const ALLOWED_DIRS = new Set(["dashboard"]);
+/** Each optional peer and the one dist entry directory allowed to import it. */
+const OPTIONAL_DEPS: Record<string, string> = {
+	"react-grid-layout": "dashboard",
+	recharts: "charts",
+};
 
 const distDir = join(process.cwd(), "dist");
 const offenders: string[] = [];
 
-function walk(dir: string, topLevel: string) {
+function references(content: string, dep: string): boolean {
+	// Match import/require specifiers (the package or a subpath of it), not the
+	// string in a comment.
+	const spec = `["']${dep}(?:/[^"']*)?["']`;
+	return new RegExp(
+		`(from\\s*${spec}|require\\(${spec}|import\\(${spec})`,
+	).test(content);
+}
+
+function check(file: string, label: string, top: string | null) {
+	if (!/\.(js|cjs|mjs)$/.test(file)) return;
+	const content = readFileSync(file, "utf8");
+	for (const [dep, allowed] of Object.entries(OPTIONAL_DEPS)) {
+		if (top === allowed) continue;
+		if (references(content, dep)) offenders.push(`${label} references ${dep}`);
+	}
+}
+
+function walk(dir: string, top: string) {
 	for (const name of readdirSync(dir)) {
 		const full = join(dir, name);
-		if (statSync(full).isDirectory()) {
-			walk(full, topLevel);
-		} else if (/\.(js|cjs|mjs)$/.test(name)) {
-			const content = readFileSync(full, "utf8");
-			for (const dep of OPTIONAL_DEPS) {
-				// Match import/require specifiers, not the string in a comment:
-				if (new RegExp(`(from\\s*["']${dep}|require\\(["']${dep}|import\\(["']${dep})`).test(content)) {
-					offenders.push(`${full.replace(distDir + "/", "")} references ${dep}`);
-				}
-			}
-		}
+		if (statSync(full).isDirectory()) walk(full, top);
+		else check(full, full.replace(`${distDir}/`, ""), top);
 	}
 }
 
 for (const top of readdirSync(distDir)) {
 	const full = join(distDir, top);
-	if (!statSync(full).isDirectory()) {
+	if (statSync(full).isDirectory()) {
+		walk(full, top);
+	} else {
 		// Shared chunks at dist root are reachable from every entry — they
 		// must not reference optional deps either.
-		if (/\.(js|cjs|mjs)$/.test(top)) {
-			const content = readFileSync(full, "utf8");
-			for (const dep of OPTIONAL_DEPS) {
-				if (new RegExp(`(from\\s*["']${dep}|require\\(["']${dep}|import\\(["']${dep})`).test(content)) {
-					offenders.push(`${top} (shared chunk) references ${dep}`);
-				}
-			}
-		}
-		continue;
+		check(full, `${top} (shared chunk)`, null);
 	}
-	if (ALLOWED_DIRS.has(top)) continue;
-	walk(full, top);
 }
 
 if (offenders.length > 0) {
-	console.error("check-optional-deps: optional peer leaked into non-dashboard entries:");
+	console.error("check-optional-deps: optional peer leaked outside its entry:");
 	for (const o of offenders) console.error("  -", o);
 	process.exit(1);
 }
-console.log("check-optional-deps: ok — optional peers only reachable via ./dashboard");
+console.log(
+	"check-optional-deps: ok — each optional peer only reachable via its own entry",
+);
