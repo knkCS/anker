@@ -2,6 +2,16 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.17.1 — 2026-11-13
+
+### Fixed
+
+- **`ContextRail.Tabs` draws the selected tab's underline** (#353). A
+  `border="none"` shorthand overrode the bottom border's width and style, so
+  the accent underline never drew and only a darker label marked the selected
+  tab. The borders are now set with longhands, and the selected label is
+  semibold.
+
 ## 5.17.0 — 2026-11-13
 
 ### Added
