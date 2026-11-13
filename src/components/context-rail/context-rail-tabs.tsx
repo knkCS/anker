@@ -275,7 +275,12 @@ function ExpandedTabs({
 							// underline replaces it.
 							mb="-1px"
 							bg="transparent"
-							border="none"
+							// Longhands only: a `border="none"` shorthand here won over
+							// the bottom width and style, so the underline never drew.
+							borderStyle="solid"
+							borderTopWidth="0"
+							borderInlineStartWidth="0"
+							borderInlineEndWidth="0"
 							borderBottomWidth="2px"
 							borderBottomColor={isSelected ? "accent" : "transparent"}
 							color={isSelected ? "default" : "muted"}
@@ -291,7 +296,11 @@ function ExpandedTabs({
 							>
 								{tab.props.icon}
 							</Box>
-							<Text as="span" fontSize="sm" fontWeight="medium">
+							<Text
+								as="span"
+								fontSize="sm"
+								fontWeight={isSelected ? "semibold" : "medium"}
+							>
 								{tab.props.label}
 							</Text>
 							{indicator ? (
