@@ -28,8 +28,9 @@ import {
 	useState,
 } from "react";
 import { EmptyState } from "../../atoms/empty-state";
-import { Box, HStack } from "../../primitives/layout";
+import { Box, type BoxProps, HStack } from "../../primitives/layout";
 import { Text } from "../../primitives/typography";
+import { isDevMode } from "../../utils/dev-mode";
 import {
 	KanbanCard,
 	KanbanCardAvatar,
@@ -46,6 +47,13 @@ import type {
 	KanbanDragLabels,
 	KanbanMove,
 } from "./kanban-dnd-types";
+import {
+	columnTone,
+	type KanbanColumnEmphasis,
+	type KanbanColumnGroup,
+	type KanbanColumnTone,
+	resolveGroups,
+} from "./kanban-groups";
 import {
 	type KanbanDirection,
 	type KanbanPosition,
@@ -68,6 +76,17 @@ export interface KanbanColumn<T> {
 	action?: React.ReactNode;
 	/** Replaces the board's `emptyColumnLabel` for this column. */
 	emptyState?: React.ReactNode;
+	/**
+	 * Draws the column's top edge (and its collapsed strip) in a status
+	 * palette. Defaults to its group's `tone`.
+	 */
+	tone?: KanbanColumnTone;
+	/**
+	 * `highlight` fills the column's header and tints its background in its
+	 * tone (`warning` when it has none). Rare, like an `attention` card: set it
+	 * only while the column needs someone — e.g. while it holds items.
+	 */
+	emphasis?: KanbanColumnEmphasis;
 }
 
 /** Where a rendered card sits, handed to `renderCard`. */
@@ -79,6 +98,14 @@ export interface KanbanCardContext {
 
 export interface KanbanProps<T> {
 	columns: readonly KanbanColumn<T>[];
+	/**
+	 * Groups of consecutive columns, each with a header over exactly its
+	 * columns showing its title and the total of their counts. A column's
+	 * `tone` defaults to its group's. Columns outside every group are fine; a
+	 * group naming unknown or non-consecutive columns is ignored (with a
+	 * console warning in development).
+	 */
+	groups?: readonly KanbanColumnGroup[];
 	/** A stable key for an item, unique on the board. */
 	getItemKey: (item: T) => string;
 	/** Renders one card — a `Kanban.Card`, so the board can steer its focus. */
@@ -176,6 +203,44 @@ function useDndModule(enabled: boolean): DndModule | null {
 
 const defaultColumnLabel = (title: string, count: number) =>
 	`${title}, ${count} ${count === 1 ? "card" : "cards"}`;
+
+// The column's top edge, per tone: the status palette's `solid` step, as on
+// an `attention` card's edge; neutral, the border that shows on any surface.
+const TONE_EDGE: Record<KanbanColumnTone, string> = {
+	neutral: "border-emphasized",
+	info: "info.solid",
+	warning: "warning.solid",
+	success: "success.solid",
+	danger: "danger.solid",
+};
+
+// A highlighted column: the header filled in the tone, the column tinted.
+const HIGHLIGHT_HEADER: Record<
+	KanbanColumnTone,
+	{ bg: string; color: string }
+> = {
+	neutral: { bg: "border-emphasized", color: "default" },
+	info: { bg: "info.solid", color: "info.contrast" },
+	warning: { bg: "warning.solid", color: "warning.contrast" },
+	success: { bg: "success.solid", color: "success.contrast" },
+	danger: { bg: "danger.solid", color: "danger.contrast" },
+};
+const HIGHLIGHT_BG: Record<KanbanColumnTone, string> = {
+	neutral: "bg-muted",
+	info: "info.subtle",
+	warning: "warning.subtle",
+	success: "success.subtle",
+	danger: "danger.subtle",
+};
+// A group's title, in its tone.
+const GROUP_TITLE: Record<KanbanColumnTone, string> = {
+	neutral: "emphasized",
+	info: "info.fg",
+	warning: "warning.fg",
+	success: "success.fg",
+	danger: "danger.fg",
+};
+const EDGE_WIDTH = "3px";
 
 const slotKey = (columnId: string, itemKey: string) =>
 	`${columnId}\u0000${itemKey}`;
@@ -314,6 +379,7 @@ KanbanRoot.displayName = "Kanban";
 function KanbanBoard<T>(props: KanbanProps<T> & BoardShared<T>) {
 	const {
 		columns,
+		groups,
 		renderCard,
 		"aria-label": ariaLabel = "Board",
 		collapseEmptyColumns = false,
@@ -338,6 +404,42 @@ function KanbanBoard<T>(props: KanbanProps<T> & BoardShared<T>) {
 		focusCard,
 	} = props;
 	const baseId = useId();
+
+	const columnIds = useMemo(
+		() => columns.map((column) => column.id),
+		[columns],
+	);
+	const resolved = useMemo(
+		() => resolveGroups(columnIds, groups),
+		[columnIds, groups],
+	);
+	const problems = resolved.problems.join("\n");
+	useEffect(() => {
+		if (problems && isDevMode()) console.warn(problems);
+	}, [problems]);
+	const tones = columns.map((column, c) =>
+		columnTone(column.tone, column.emphasis, resolved.groupOf[c]?.group),
+	);
+	// Toned or not, every column keeps the edge's room once one has an edge,
+	// so the column headers stay in line.
+	const anyTone = tones.some((tone) => tone != null);
+	// While a drag previews a card in or out of a column, its count follows —
+	// a server total by the same difference.
+	const counts = columns.map(
+		(column, c) =>
+			(column.count ?? column.items.length) +
+			(keys[c]?.length ?? 0) -
+			column.items.length,
+	);
+	// Collapsed only while empty both on the board and in a drag's preview: a
+	// column a card is dragged out of keeps its width, so the columns don't
+	// shift under the pointer, and one a card is dragged into opens up.
+	const collapsedAt = columns.map(
+		(column, c) =>
+			collapseEmptyColumns &&
+			column.items.length === 0 &&
+			(keys[c]?.length ?? 0) === 0,
+	);
 
 	// The one card in the tab order: the last one focused while it is still on
 	// the board, else the first card of the first column that has one.
@@ -388,199 +490,309 @@ function KanbanBoard<T>(props: KanbanProps<T> & BoardShared<T>) {
 	}
 
 	const heading = `h${headingLevel}` as const;
+	const { segments } = resolved;
+
+	// Grouped, the board is a grid of one track per column under a row of
+	// group headers; each group is a subgrid spanning its columns' tracks, so
+	// its header is exactly as wide as they are, collapsed ones included.
+	// Ungrouped, the board stays the row of flexible columns it always was.
+	const renderColumnAt = (c: number, place?: BoxProps) => {
+		const column = columns[c];
+		const columnKeys = keys[c] ?? [];
+		const count = counts[c];
+		const collapsed = collapsedAt[c];
+		const tone = tones[c];
+		const highlighted = column.emphasis === "highlight" && tone != null;
+		const titleId = `${baseId}-${column.id}`;
+		const listLabel = formatColumnLabel(column.title, count);
+		const virtualized = columnKeys.length > virtualizeAbove;
+		const keepIndex =
+			virtualized && tabStop?.columnId === column.id
+				? columnKeys.indexOf(tabStop.itemKey)
+				: -1;
+		// One card, wrapped in its list item and handed the board's slot.
+		// A virtualised list adds its positioning props to the item; an
+		// editable board wraps it in the drag layer's item.
+		const renderItem = (
+			index: number,
+			itemProps?: React.ComponentProps<typeof Box>,
+		) => {
+			const itemKey = columnKeys[index];
+			const item = itemByKey.get(itemKey) as T;
+			const key = slotKey(column.id, itemKey);
+			const slotRef = (element: HTMLElement | null) => {
+				if (element) {
+					cards.current.set(key, element);
+					if (pendingFocus.current === key) {
+						pendingFocus.current = null;
+						element.focus({ preventScroll: true });
+					}
+				} else cards.current.delete(key);
+			};
+			const listItem = (drag?: KanbanCardDrag) => {
+				const slot: KanbanCardSlot = {
+					tabIndex:
+						tabStop?.columnId === column.id && tabStop.itemKey === itemKey
+							? 0
+							: -1,
+					ref: drag
+						? (element) => {
+								slotRef(element);
+								drag.ref(element);
+							}
+						: slotRef,
+					onFocus: () => {
+						if (pendingFocus.current !== key) pendingFocus.current = null;
+						setActive({ columnId: column.id, itemKey });
+					},
+					onKeyDown: (event) => {
+						if (api?.onCardKeyDown({ column: c, index }, event)) return;
+						onCardKeyDown(c, index, event);
+					},
+					drag,
+				};
+				return (
+					<Box
+						as="li"
+						key={itemKey}
+						aria-posinset={index + 1}
+						aria-setsize={count}
+						{...itemProps}
+					>
+						<KanbanCardSlotContext.Provider value={slot}>
+							{renderCard(item, { columnId: column.id, index })}
+						</KanbanCardSlotContext.Provider>
+					</Box>
+				);
+			};
+			return api ? (
+				<api.Item key={itemKey} itemKey={itemKey} columnId={column.id}>
+					{listItem}
+				</api.Item>
+			) : (
+				listItem()
+			);
+		};
+		const renderColumn = (drop?: {
+			ref: (element: HTMLElement | null) => void;
+			target: boolean;
+		}) => (
+			<Box
+				key={column.id}
+				ref={drop?.ref}
+				data-kanban-column={column.id}
+				data-collapsed={collapsed ? "" : undefined}
+				data-drop-target={drop?.target ? "" : undefined}
+				data-tone={tone}
+				data-emphasis={highlighted ? column.emphasis : undefined}
+				display="flex"
+				flexDirection="column"
+				gap="2"
+				flex={collapsed ? "0 0 auto" : `1 0 ${columnMinWidth}`}
+				minW={collapsed ? undefined : columnMinWidth}
+				borderRadius="md"
+				transitionProperty="background"
+				transitionDuration="fast"
+				bg={
+					drop?.target
+						? "bg-muted"
+						: highlighted
+							? HIGHLIGHT_BG[tone]
+							: undefined
+				}
+				{...(anyTone
+					? {
+							borderTopWidth: EDGE_WIDTH,
+							borderTopStyle: "solid",
+							borderTopColor: tone ? TONE_EDGE[tone] : "transparent",
+						}
+					: undefined)}
+				{...(highlighted ? { px: "1.5", pb: "1.5" } : undefined)}
+				{...place}
+			>
+				<HStack
+					gap="2"
+					px="2"
+					color="muted"
+					minH="8"
+					{...(highlighted
+						? {
+								...HIGHLIGHT_HEADER[tone],
+								borderRadius: "sm",
+								mt: "1.5",
+							}
+						: undefined)}
+					{...(collapsed
+						? {
+								flexDirection: "column",
+								alignItems: "center",
+								py: "2",
+							}
+						: { justify: "space-between", py: "1.5" })}
+				>
+					<HStack
+						gap="2"
+						minW="0"
+						{...(collapsed
+							? { flexDirection: "column", alignItems: "center" }
+							: undefined)}
+					>
+						<Text
+							as={heading}
+							id={titleId}
+							fontSize="xs"
+							fontWeight="semibold"
+							textTransform="uppercase"
+							letterSpacing="wide"
+							truncate={!collapsed}
+							writingMode={collapsed ? "vertical-rl" : undefined}
+						>
+							{column.title}
+						</Text>
+						<Text as="span" fontSize="xs" fontWeight="semibold" aria-hidden>
+							{count}
+						</Text>
+					</HStack>
+					{column.action}
+				</HStack>
+				<KanbanCardList
+					aria-label={listLabel}
+					itemKeys={columnKeys}
+					virtualized={virtualized}
+					estimateSize={estimateCardHeight}
+					maxHeight={columnMaxHeight}
+					keepIndex={keepIndex}
+					onScroller={(scroll) => {
+						if (scroll) scrollers.current.set(column.id, scroll);
+						else scrollers.current.delete(column.id);
+					}}
+					renderItem={renderItem}
+				/>
+				{columnKeys.length === 0 && !collapsed
+					? (column.emptyState ?? (
+							<Text fontSize="xs" color="subtle" px="2">
+								{emptyColumnLabel}
+							</Text>
+						))
+					: null}
+			</Box>
+		);
+		return api ? (
+			<api.Column key={column.id} columnId={column.id}>
+				{renderColumn}
+			</api.Column>
+		) : (
+			renderColumn()
+		);
+	};
+
+	const boardProps = {
+		ref: boardRef,
+		role: "group",
+		"aria-label": ariaLabel,
+		onBlur: (event: React.FocusEvent<HTMLElement>) => {
+			// Focus left the board: a card the keys asked for must not take
+			// focus back when it mounts later.
+			if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+				pendingFocus.current = null;
+			}
+		},
+		overflowX: "auto",
+		maxW: "full",
+		minW: "0",
+		pb: "2",
+	} as const;
+
+	if (!segments) {
+		return (
+			<Box {...boardProps} display="flex" alignItems="flex-start" gap="3">
+				{columns.map((_, c) => renderColumnAt(c))}
+			</Box>
+		);
+	}
 
 	return (
 		<Box
-			ref={boardRef}
-			role="group"
-			aria-label={ariaLabel}
-			onBlur={(event: React.FocusEvent<HTMLElement>) => {
-				// Focus left the board: a card the keys asked for must not take
-				// focus back when it mounts later.
-				if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-					pendingFocus.current = null;
-				}
-			}}
-			display="flex"
-			alignItems="flex-start"
-			gap="3"
-			overflowX="auto"
-			maxW="full"
-			minW="0"
-			pb="2"
+			{...boardProps}
+			display="grid"
+			gridTemplateColumns={collapsedAt
+				.map((collapsed) =>
+					collapsed ? "min-content" : `minmax(${columnMinWidth}, 1fr)`,
+				)
+				.join(" ")}
+			gridTemplateRows="auto auto"
+			alignItems="start"
+			columnGap="3"
+			rowGap="2"
 		>
-			{columns.map((column, c) => {
-				const columnKeys = keys[c] ?? [];
-				// While a drag previews a card in or out of the column, its count
-				// follows — a server total by the same difference.
-				const count =
-					(column.count ?? column.items.length) +
-					columnKeys.length -
-					column.items.length;
-				// Collapsed only while empty both on the board and in a drag's
-				// preview: a column a card is dragged out of keeps its width, so the
-				// columns don't shift under the pointer, and one a card is dragged
-				// into opens up.
-				const collapsed =
-					collapseEmptyColumns &&
-					column.items.length === 0 &&
-					columnKeys.length === 0;
-				const titleId = `${baseId}-${column.id}`;
-				const listLabel = formatColumnLabel(column.title, count);
-				const virtualized = columnKeys.length > virtualizeAbove;
-				const keepIndex =
-					virtualized && tabStop?.columnId === column.id
-						? columnKeys.indexOf(tabStop.itemKey)
-						: -1;
-				// One card, wrapped in its list item and handed the board's slot.
-				// A virtualised list adds its positioning props to the item; an
-				// editable board wraps it in the drag layer's item.
-				const renderItem = (
-					index: number,
-					itemProps?: React.ComponentProps<typeof Box>,
-				) => {
-					const itemKey = columnKeys[index];
-					const item = itemByKey.get(itemKey) as T;
-					const key = slotKey(column.id, itemKey);
-					const slotRef = (element: HTMLElement | null) => {
-						if (element) {
-							cards.current.set(key, element);
-							if (pendingFocus.current === key) {
-								pendingFocus.current = null;
-								element.focus({ preventScroll: true });
-							}
-						} else cards.current.delete(key);
-					};
-					const listItem = (drag?: KanbanCardDrag) => {
-						const slot: KanbanCardSlot = {
-							tabIndex:
-								tabStop?.columnId === column.id && tabStop.itemKey === itemKey
-									? 0
-									: -1,
-							ref: drag
-								? (element) => {
-										slotRef(element);
-										drag.ref(element);
-									}
-								: slotRef,
-							onFocus: () => {
-								if (pendingFocus.current !== key) pendingFocus.current = null;
-								setActive({ columnId: column.id, itemKey });
-							},
-							onKeyDown: (event) => {
-								if (api?.onCardKeyDown({ column: c, index }, event)) return;
-								onCardKeyDown(c, index, event);
-							},
-							drag,
-						};
-						return (
-							<Box
-								as="li"
-								key={itemKey}
-								aria-posinset={index + 1}
-								aria-setsize={count}
-								{...itemProps}
-							>
-								<KanbanCardSlotContext.Provider value={slot}>
-									{renderCard(item, { columnId: column.id, index })}
-								</KanbanCardSlotContext.Provider>
-							</Box>
-						);
-					};
-					return api ? (
-						<api.Item key={itemKey} itemKey={itemKey} columnId={column.id}>
-							{listItem}
-						</api.Item>
-					) : (
-						listItem()
-					);
-				};
-				const renderColumn = (drop?: {
-					ref: (element: HTMLElement | null) => void;
-					target: boolean;
-				}) => (
+			{segments.map((segment) => {
+				if (segment.kind === "column") {
+					return renderColumnAt(segment.index, {
+						gridColumn: `${segment.index + 1}`,
+						gridRow: "2",
+					});
+				}
+				const { group, start, end } = segment.placed;
+				const titleId = `${baseId}-group-${group.id}`;
+				let total = 0;
+				for (let c = start; c < end; c++) total += counts[c];
+				return (
 					<Box
-						key={column.id}
-						ref={drop?.ref}
-						data-kanban-column={column.id}
-						data-collapsed={collapsed ? "" : undefined}
-						data-drop-target={drop?.target ? "" : undefined}
-						display="flex"
-						flexDirection="column"
-						gap="2"
-						flex={collapsed ? "0 0 auto" : `1 0 ${columnMinWidth}`}
-						minW={collapsed ? undefined : columnMinWidth}
-						borderRadius="md"
-						transitionProperty="background"
-						transitionDuration="fast"
-						bg={drop?.target ? "bg-muted" : undefined}
+						key={`group-${group.id}`}
+						role="group"
+						aria-labelledby={titleId}
+						data-kanban-group={group.id}
+						data-tone={group.tone}
+						gridColumn={`${start + 1} / span ${end - start}`}
+						gridRow="1 / span 2"
+						display="grid"
+						gridTemplateColumns="subgrid"
+						gridTemplateRows="subgrid"
+						minW="0"
 					>
 						<HStack
+							data-kanban-group-header=""
+							gridColumn="1 / -1"
+							gridRow="1"
 							gap="2"
 							px="2"
-							color="muted"
 							minH="8"
-							{...(collapsed
-								? {
-										flexDirection: "column",
-										alignItems: "center",
-										py: "2",
-									}
-								: { justify: "space-between", py: "1.5" })}
+							minW="0"
+							overflow="hidden"
+							borderBottomWidth="1px"
+							borderColor="border"
 						>
-							<HStack
-								gap="2"
-								minW="0"
-								{...(collapsed
-									? { flexDirection: "column", alignItems: "center" }
-									: undefined)}
+							<Text
+								as="span"
+								id={titleId}
+								fontSize="xs"
+								fontWeight="semibold"
+								textTransform="uppercase"
+								letterSpacing="wide"
+								color={group.tone ? GROUP_TITLE[group.tone] : "emphasized"}
+								truncate
 							>
-								<Text
-									as={heading}
-									id={titleId}
-									fontSize="xs"
-									fontWeight="semibold"
-									textTransform="uppercase"
-									letterSpacing="wide"
-									truncate={!collapsed}
-									writingMode={collapsed ? "vertical-rl" : undefined}
-								>
-									{column.title}
-								</Text>
-								<Text as="span" fontSize="xs" fontWeight="semibold" aria-hidden>
-									{count}
-								</Text>
-							</HStack>
-							{column.action}
+								{group.title}
+							</Text>
+							<Text
+								as="span"
+								data-kanban-group-count=""
+								fontSize="xs"
+								fontWeight="semibold"
+								color="muted"
+								flexShrink={0}
+								aria-hidden
+							>
+								{total}
+							</Text>
 						</HStack>
-						<KanbanCardList
-							aria-label={listLabel}
-							itemKeys={columnKeys}
-							virtualized={virtualized}
-							estimateSize={estimateCardHeight}
-							maxHeight={columnMaxHeight}
-							keepIndex={keepIndex}
-							onScroller={(scroll) => {
-								if (scroll) scrollers.current.set(column.id, scroll);
-								else scrollers.current.delete(column.id);
-							}}
-							renderItem={renderItem}
-						/>
-						{columnKeys.length === 0 && !collapsed
-							? (column.emptyState ?? (
-									<Text fontSize="xs" color="subtle" px="2">
-										{emptyColumnLabel}
-									</Text>
-								))
-							: null}
+						{Array.from({ length: end - start }, (_, i) =>
+							renderColumnAt(start + i, {
+								gridColumn: `${i + 1}`,
+								gridRow: "2",
+							}),
+						)}
 					</Box>
-				);
-				return api ? (
-					<api.Column key={column.id} columnId={column.id}>
-						{renderColumn}
-					</api.Column>
-				) : (
-					renderColumn()
 				);
 			})}
 		</Box>

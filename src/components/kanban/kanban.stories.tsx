@@ -376,3 +376,83 @@ export const EditableLongColumns: Story = {
 		<EditableBoard initial={LONG_COLUMNS} columnMaxHeight="32rem" />
 	),
 };
+
+// A Spec board: seven statuses under four phases. Each column's top edge is
+// in its phase's tone, empty columns collapse, and "Needs you" is
+// highlighted — only while it holds Tasks, which the consumer decides.
+const PHASE_COLUMNS: KanbanColumn<Task>[] = [
+	{ id: "draft", title: "Draft", items: [] },
+	{ id: "awaiting", title: "Awaiting approval", items: COLUMNS[0].items },
+	{ id: "ready", title: "Ready", items: COLUMNS[1].items },
+	{ id: "in-progress", title: "In progress", items: COLUMNS[2].items },
+	{ id: "review", title: "In review", items: [] },
+	{ id: "needs-you", title: "Needs you", items: COLUMNS[3].items },
+	{ id: "done", title: "Done", items: COLUMNS[5].items },
+].map((column) => ({
+	...column,
+	emphasis:
+		column.id === "needs-you" && column.items.length > 0
+			? ("highlight" as const)
+			: undefined,
+}));
+
+const PHASES: KanbanProps<Task>["groups"] = [
+	{
+		id: "not-started",
+		title: "Not started",
+		columnIds: ["draft", "awaiting"],
+		tone: "neutral",
+	},
+	{
+		id: "agents",
+		title: "Agents at work",
+		columnIds: ["ready", "in-progress", "review"],
+		tone: "info",
+	},
+	{
+		id: "needs-you",
+		title: "Needs you",
+		columnIds: ["needs-you"],
+		tone: "warning",
+	},
+	{ id: "done", title: "Done", columnIds: ["done"], tone: "success" },
+];
+
+const phaseArgs: KanbanProps<Task> = {
+	...boardArgs,
+	columns: PHASE_COLUMNS,
+	groups: PHASES,
+	collapseEmptyColumns: true,
+	emptyState: false,
+};
+
+/**
+ * `groups` puts a header over runs of consecutive columns — here the four
+ * phases of a Spec board over its seven statuses — with the total of their
+ * counts. A column takes its group's `tone` as its top edge (and its
+ * collapsed strip's); `emphasis="highlight"` fills one column's header and
+ * tints it, here "Needs you" while it holds a Task. Keep it to one column.
+ */
+export const GroupedByPhase: Story = {
+	args: phaseArgs as unknown as Story["args"],
+};
+
+/** The grouped board in light and dark mode side by side. */
+export const GroupedByPhaseLightAndDark: Story = {
+	args: phaseArgs as unknown as Story["args"],
+	parameters: { layout: "fullscreen" },
+	render: () => (
+		<Grid templateColumns="1fr" gap="0">
+			<LightMode>
+				<Box bg="bg-canvas" p="6">
+					<Kanban {...phaseArgs} />
+				</Box>
+			</LightMode>
+			<DarkMode>
+				<Box bg="bg-canvas" p="6">
+					<Kanban {...phaseArgs} />
+				</Box>
+			</DarkMode>
+		</Grid>
+	),
+};

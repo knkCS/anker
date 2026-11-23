@@ -1670,6 +1670,40 @@ column per status, a card per item:
   column is loaded, optional `action` in the header. Narrow screens
   scroll the board sideways (`columnMinWidth`, default `16rem`);
   `collapseEmptyColumns` draws empty columns as a narrow strip.
+- **Column groups**: when the statuses fall into a few phases — a Spec
+  board's seven Task statuses under *Not started*, *Agents at work*,
+  *Needs you* and *Done* — pass `groups` (`{ id, title, columnIds,
+  tone? }`). Each group's header spans exactly its columns (collapsed ones
+  included) and shows the total of their counts, following a drag's
+  preview; assistive tech hears each group as a named `role="group"`
+  around its columns. A group's columns must be consecutive; a group
+  naming unknown or non-consecutive columns is ignored, with a console
+  warning in development. Columns outside every group are fine. Group
+  only when the phases mean something to the reader — four statuses
+  side by side need no group row.
+- **Column tones** (`tone` on a column or a group: `neutral`, `info`,
+  `warning`, `success`, `danger`) draw the column's top edge — and its
+  collapsed strip — in that status palette; a column takes its group's
+  tone unless it sets its own. Tone the phase, not each column
+  differently: the edge says which phase a column belongs to.
+- **Column emphasis** (`emphasis: "highlight"`) fills the column's header
+  and tints it in its tone (`warning` when it has none). Same rule as
+  `attention` cards: rare, and only while it is true — the board does not
+  decide, you do. Highlight "Needs you" while it holds items, not always:
+  a column that is always loud stops being read.
+
+  ```tsx
+  columns={STATUSES.map((s) => ({
+    id: s, title: LABEL[s], items: byStatus[s],
+    emphasis: s === "needs-you" && byStatus[s].length > 0 ? "highlight" : undefined,
+  }))}
+  groups={[
+    { id: "todo", title: "Not started", columnIds: ["draft", "ready"], tone: "neutral" },
+    { id: "agents", title: "Agents at work", columnIds: ["queued", "running", "review"], tone: "info" },
+    { id: "you", title: "Needs you", columnIds: ["needs-you"], tone: "warning" },
+    { id: "done", title: "Done", columnIds: ["done"], tone: "success" },
+  ]}
+  ```
 - **Empty states**: an empty column says `emptyColumnLabel` ("No
   cards") or its own `emptyState`; a board with no card at all shows
   `emptyState` (an `EmptyState` by default) — pass `emptyState={false}`

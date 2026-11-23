@@ -662,7 +662,7 @@ screen shows items by status side by side — never hand-build columns from
 `Stack`s. Full guidance: `docs/page-patterns.md` §11 "Boards".
 
 - **Data in, cards out**: `columns` (`{ id, title, items, count?, action?,
-  emptyState? }`), `getItemKey`, and `renderCard(item)` returning a
+  emptyState?, tone?, emphasis? }`), `getItemKey`, and `renderCard(item)` returning a
   `Kanban.Card`. Status derivation stays in your code.
 - **Always render `Kanban.Card`** — the board moves keyboard focus through
   it. Build its content from `Kanban.CardMeta` (with `Kanban.CardAvatar`
@@ -673,6 +673,13 @@ screen shows items by status side by side — never hand-build columns from
   nobody (sunken surface, dashed border); `attention` — someone must act (a
   `warning` edge). Keep `attention` rare. The status itself still goes in a
   `StatusBadge` with a `tone`.
+- **Phases**: `groups` (`{ id, title, columnIds, tone? }`) puts a header
+  with the total count over runs of consecutive columns (non-consecutive or
+  unknown ids: the group is ignored, with a dev warning). A column's `tone`
+  (`neutral` / `info` / `warning` / `success` / `danger`, defaulting to its
+  group's) colours its top edge. `emphasis: "highlight"` fills its header
+  and tints it — rare like `attention`, and only while true (e.g. "Needs
+  you" while it holds items).
 - `collapseEmptyColumns` narrows empty columns; a board with no card shows
   `emptyState` (`false` keeps the columns). Strings are props with English
   defaults (`emptyBoardLabel`, `emptyColumnLabel`, `formatColumnLabel`).

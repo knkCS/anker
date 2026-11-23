@@ -96,6 +96,7 @@ function Board({
 	virtualizeAbove?: number;
 	columnMaxHeight?: string;
 	onMove?: KanbanProps<Task>["onMove"];
+	groups?: KanbanProps<Task>["groups"];
 }) {
 	return (
 		<Kanban
@@ -661,6 +662,8 @@ function EditableBoard({
 	veto?: boolean;
 	onOpen?: (id: string) => void;
 	columnMaxHeight?: string;
+	groups?: KanbanProps<Task>["groups"];
+	collapseEmptyColumns?: boolean;
 }) {
 	const [columns, setColumns] = useState(initial);
 	return (
@@ -1147,5 +1150,305 @@ describe.each<ColorMode>([
 		await vi.waitFor(() =>
 			expect(ready.hasAttribute("data-drop-target")).toBe(false),
 		);
+	});
+});
+
+// Column groups and column tones (agent-control-plane#784): a Spec board's
+// seven statuses under four phases, the "Needs you" column highlighted.
+const PHASED: KanbanColumn<Task>[] = [
+	{ id: "draft", title: "Draft", items: [{ id: "t1", title: "Sketch it" }] },
+	{ id: "queued", title: "Queued", items: [] },
+	{
+		id: "running",
+		title: "Running",
+		items: [
+			{ id: "t2", title: "Write the parser" },
+			{ id: "t3", title: "Wire the API" },
+		],
+	},
+	{
+		id: "needs-you",
+		title: "Needs you",
+		items: [{ id: "t4", title: "Answer the question" }],
+		emphasis: "highlight",
+	},
+	{
+		id: "done",
+		title: "Done",
+		items: [{ id: "t5", title: "Scaffold" }],
+		count: 40,
+	},
+	{ id: "other", title: "Other", items: [{ id: "t6", title: "Loose end" }] },
+];
+
+const PHASES: NonNullable<KanbanProps<Task>["groups"]> = [
+	{
+		id: "not-started",
+		title: "Not started",
+		columnIds: ["draft"],
+		tone: "neutral",
+	},
+	{
+		id: "agents",
+		title: "Agents at work",
+		columnIds: ["queued", "running"],
+		tone: "info",
+	},
+	{
+		id: "needs-you",
+		title: "Needs you",
+		columnIds: ["needs-you"],
+		tone: "warning",
+	},
+	{ id: "done", title: "Done", columnIds: ["done"], tone: "success" },
+];
+
+const groupEl = (el: HTMLElement, id: string) => {
+	const found = el.querySelector<HTMLElement>(`[data-kanban-group='${id}']`);
+	if (!found) throw new Error(`no group ${id}`);
+	return found;
+};
+const columnEl = (el: HTMLElement, id: string) => {
+	const found = el.querySelector<HTMLElement>(`[data-kanban-column='${id}']`);
+	if (!found) throw new Error(`no column ${id}`);
+	return found;
+};
+const groupCount = (group: HTMLElement) =>
+	group.querySelector("[data-kanban-group-count]")?.textContent;
+
+/** The group header spans exactly from its first column's edge to its last's. */
+function expectHeaderOver(el: HTMLElement, groupId: string, ids: string[]) {
+	const header = groupEl(el, groupId).querySelector<HTMLElement>(
+		"[data-kanban-group-header]",
+	);
+	if (!header) throw new Error("no header");
+	const h = header.getBoundingClientRect();
+	const first = columnEl(el, ids[0]).getBoundingClientRect();
+	const last = columnEl(el, ids[ids.length - 1]).getBoundingClientRect();
+	expect(Math.abs(h.left - first.left)).toBeLessThan(1);
+	expect(Math.abs(h.right - last.right)).toBeLessThan(1);
+	expect(h.bottom).toBeLessThanOrEqual(first.top);
+}
+
+describe("Kanban column groups", () => {
+	it("draws a header over each group's columns with the group's total", async () => {
+		const el = await mount(<Board columns={PHASED} groups={PHASES} />);
+		const groups = [...el.querySelectorAll<HTMLElement>("[data-kanban-group]")];
+		expect(groups.map((g) => g.dataset.kanbanGroup)).toEqual([
+			"not-started",
+			"agents",
+			"needs-you",
+			"done",
+		]);
+		expect(groups.map(groupCount)).toEqual(["1", "2", "1", "40"]);
+		expectHeaderOver(el, "agents", ["queued", "running"]);
+		expectHeaderOver(el, "done", ["done"]);
+		// Columns line up whether grouped or not.
+		const top = columnEl(el, "draft").getBoundingClientRect().top;
+		expect(columnEl(el, "other").getBoundingClientRect().top).toBe(top);
+		expect(columnEl(el, "running").getBoundingClientRect().top).toBe(top);
+	});
+
+	it("exposes each group as a labelled group wrapping its columns", async () => {
+		const el = await mount(<Board columns={PHASED} groups={PHASES} />);
+		const agents = groupEl(el, "agents");
+		expect(agents.getAttribute("role")).toBe("group");
+		const labelledBy = agents.getAttribute("aria-labelledby") ?? "";
+		expect(document.getElementById(labelledBy)?.textContent).toBe(
+			"Agents at work",
+		);
+		expect(
+			[...agents.querySelectorAll<HTMLElement>("[data-kanban-column]")].map(
+				(c) => c.dataset.kanbanColumn,
+			),
+		).toEqual(["queued", "running"]);
+		// A column outside every group sits on the board itself.
+		expect(columnEl(el, "other").closest("[data-kanban-group]")).toBeNull();
+		// The board is still the outer group, named as before.
+		expect(el.querySelector("[role='group']")?.getAttribute("aria-label")).toBe(
+			"Spec board",
+		);
+	});
+
+	it("narrows a group's header with a collapsed column inside it", async () => {
+		const el = await mount(
+			<Board columns={PHASED} groups={PHASES} collapseEmptyColumns />,
+		);
+		const queued = columnEl(el, "queued");
+		expect(queued.hasAttribute("data-collapsed")).toBe(true);
+		expect(queued.getBoundingClientRect().width).toBeLessThan(
+			columnEl(el, "running").getBoundingClientRect().width / 2,
+		);
+		expectHeaderOver(el, "agents", ["queued", "running"]);
+		// The collapsed strip keeps its group's edge.
+		expect(queued.dataset.tone).toBe("info");
+	});
+
+	it("draws without a group row when no groups are given", async () => {
+		const el = await mount(<Board columns={PHASED} />);
+		expect(el.querySelector("[data-kanban-group]")).toBeNull();
+		const board = el.querySelector<HTMLElement>("[role='group']");
+		expect(board && getComputedStyle(board).display).toBe("flex");
+	});
+
+	it("warns in development about a group it ignores, and draws the rest", async () => {
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		onTestFinished(() => warn.mockRestore());
+		const el = await mount(
+			<Board
+				columns={PHASED}
+				groups={[
+					...PHASES.slice(2),
+					{ id: "broken", title: "Broken", columnIds: ["draft", "running"] },
+					{ id: "ghost", title: "Ghost", columnIds: ["nope"] },
+				]}
+			/>,
+		);
+		expect(
+			[...el.querySelectorAll<HTMLElement>("[data-kanban-group]")].map(
+				(g) => g.dataset.kanbanGroup,
+			),
+		).toEqual(["needs-you", "done"]);
+		const said = warn.mock.calls.map((call) => String(call[0])).join("\n");
+		expect(said).toMatch(/"broken".*not consecutive/);
+		expect(said).toMatch(/"ghost".*unknown column/);
+	});
+
+	it("warns and draws no group row when every group is invalid", async () => {
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		onTestFinished(() => warn.mockRestore());
+		const el = await mount(
+			<Board
+				columns={PHASED}
+				groups={[{ id: "x", title: "X", columnIds: ["draft", "running"] }]}
+			/>,
+		);
+		expect(el.querySelector("[data-kanban-group]")).toBeNull();
+		expect(warn).toHaveBeenCalled();
+		expect(lists(el)).toHaveLength(PHASED.length);
+	});
+});
+
+describe("Kanban column tones and emphasis", () => {
+	it("gives each column its own tone, else its group's", async () => {
+		const el = await mount(
+			<Board
+				columns={PHASED.map((c) =>
+					c.id === "running" ? { ...c, tone: "danger" } : c,
+				)}
+				groups={PHASES}
+			/>,
+		);
+		const tone = (id: string) => columnEl(el, id).dataset.tone;
+		expect(tone("draft")).toBe("neutral");
+		expect(tone("queued")).toBe("info");
+		expect(tone("running")).toBe("danger");
+		expect(tone("needs-you")).toBe("warning");
+		expect(tone("done")).toBe("success");
+		expect(tone("other")).toBeUndefined();
+		expect(groupEl(el, "agents").dataset.tone).toBe("info");
+	});
+
+	it("draws a toned top edge, and keeps its room on an untoned column", async () => {
+		const el = await mount(<Board columns={PHASED} groups={PHASES} />);
+		const toned = getComputedStyle(columnEl(el, "running"));
+		const plain = getComputedStyle(columnEl(el, "other"));
+		expect(toned.borderTopWidth).toBe("3px");
+		expect(toned.borderTopStyle).toBe("solid");
+		expect(plain.borderTopWidth).toBe("3px");
+		expect(plain.borderTopColor).toBe("rgba(0, 0, 0, 0)");
+		expect(toned.borderTopColor).not.toBe(plain.borderTopColor);
+	});
+
+	it("leaves a board without tones as it was: no edge", async () => {
+		const el = await mount(<Board />);
+		expect(getComputedStyle(columnEl(el, "ready")).borderTopWidth).toBe("0px");
+		expect(columnEl(el, "ready").hasAttribute("data-tone")).toBe(false);
+	});
+
+	it("highlights only the column with emphasis, filling its header", async () => {
+		const el = await mount(<Board columns={PHASED} groups={PHASES} />);
+		const needsYou = columnEl(el, "needs-you");
+		expect(needsYou.dataset.emphasis).toBe("highlight");
+		expect(columnEl(el, "running").hasAttribute("data-emphasis")).toBe(false);
+		const bg = getComputedStyle(needsYou).backgroundColor;
+		expect(bg).not.toBe("rgba(0, 0, 0, 0)");
+		expect(getComputedStyle(columnEl(el, "running")).backgroundColor).toBe(
+			"rgba(0, 0, 0, 0)",
+		);
+		const header = needsYou.querySelector("h3")?.parentElement?.parentElement;
+		expect(header && getComputedStyle(header).backgroundColor).not.toBe(
+			"rgba(0, 0, 0, 0)",
+		);
+	});
+
+	it("highlights in warning when the column has no tone", async () => {
+		const el = await mount(
+			<Board
+				columns={[
+					{
+						id: "solo",
+						title: "Solo",
+						items: [{ id: "t1", title: "One" }],
+						emphasis: "highlight",
+					},
+				]}
+			/>,
+		);
+		expect(columnEl(el, "solo").dataset.tone).toBe("warning");
+		expect(columnEl(el, "solo").dataset.emphasis).toBe("highlight");
+	});
+});
+
+describe("Kanban column groups with the keyboard", () => {
+	it("moves focus across group boundaries by column, skipping empty ones", async () => {
+		const el = await mount(<Board columns={PHASED} groups={PHASES} />);
+		card(el, "Sketch it").focus();
+		await userEvent.keyboard("{ArrowRight}");
+		expect(document.activeElement).toBe(card(el, "Write the parser"));
+		await userEvent.keyboard("{ArrowRight}");
+		expect(document.activeElement).toBe(card(el, "Answer the question"));
+		await userEvent.keyboard("{ArrowRight}");
+		expect(document.activeElement).toBe(card(el, "Scaffold"));
+		await userEvent.keyboard("{ArrowRight}");
+		expect(document.activeElement).toBe(card(el, "Loose end"));
+		await userEvent.keyboard("{ArrowLeft}");
+		expect(document.activeElement).toBe(card(el, "Scaffold"));
+	});
+
+	it("drags a card across a group boundary, the group totals following", async () => {
+		const onMove = vi.fn();
+		const el = await mount(
+			<EditableBoard initial={PHASED} groups={PHASES} onMove={onMove} />,
+		);
+		await editable(el);
+		card(el, "Sketch it").focus();
+		await userEvent.keyboard(" ");
+		await userEvent.keyboard("{ArrowRight}");
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "queued")).toEqual(["Sketch it"]),
+		);
+		// The preview moves the counts: out of Not started, into Agents at work.
+		expect(groupCount(groupEl(el, "not-started"))).toBe("0");
+		expect(groupCount(groupEl(el, "agents"))).toBe("3");
+		await userEvent.keyboard("{ArrowRight}");
+		await userEvent.keyboard("{ArrowRight}");
+		await vi.waitFor(() =>
+			expect(titlesIn(el, "needs-you")).toContain("Sketch it"),
+		);
+		expect(groupCount(groupEl(el, "needs-you"))).toBe("2");
+		await userEvent.keyboard(" ");
+		expect(onMove).toHaveBeenCalledWith(
+			expect.objectContaining({
+				itemKey: "t1",
+				from: { columnId: "draft", index: 0 },
+				to: { columnId: "needs-you", index: 0 },
+			}),
+		);
+		await vi.waitFor(() =>
+			expect(groupCount(groupEl(el, "needs-you"))).toBe("2"),
+		);
+		expect(groupCount(groupEl(el, "not-started"))).toBe("0");
+		expect(document.activeElement).toBe(card(el, "Sketch it"));
 	});
 });
