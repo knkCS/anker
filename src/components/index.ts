@@ -133,13 +133,16 @@ export type {
 	KanbanCardTitleProps,
 	KanbanCardTone,
 	KanbanColumn,
+	KanbanColumnEmphasis,
+	KanbanColumnGroup,
+	KanbanColumnTone,
 	KanbanDragLabels,
 	KanbanDragPlace,
 	KanbanMove,
 	KanbanMovePosition,
 	KanbanProps,
 } from "./kanban";
-export { KANBAN_CARD_TONES, Kanban } from "./kanban";
+export { KANBAN_CARD_TONES, KANBAN_COLUMN_TONES, Kanban } from "./kanban";
 // KnkLogo
 export type { KnkLogoProps } from "./knk-logo";
 export { KnkLogo } from "./knk-logo";

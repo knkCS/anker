@@ -15,3 +15,9 @@ export type {
 	KanbanMove,
 	KanbanMovePosition,
 } from "./kanban-dnd-types";
+export type {
+	KanbanColumnEmphasis,
+	KanbanColumnGroup,
+	KanbanColumnTone,
+} from "./kanban-groups";
+export { KANBAN_COLUMN_TONES } from "./kanban-groups";
