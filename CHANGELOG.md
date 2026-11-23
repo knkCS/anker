@@ -2,6 +2,20 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.18.0 — 2026-11-23
+
+### Added
+
+- **`Kanban` column groups, column tones and a highlight emphasis** (#357).
+  `groups` (`{ id, title, columnIds, tone? }`) draws a header row over
+  consecutive columns with each group's title and total count; each group is a
+  `role="group"` labelled by its title, and keyboard navigation and drag and
+  drop keep working across group boundaries. A column's `tone` (`neutral`,
+  `info`, `warning`, `success`, `danger`) draws a 3px top edge in that status
+  palette, inherited from its group; `emphasis: "highlight"` fills the header
+  and tints the column. Invalid groups are ignored with a dev warning. All
+  props are optional; a board without them renders as before.
+
 ## 5.17.1 — 2026-11-13
 
 ### Fixed
