@@ -87,6 +87,7 @@ consumers run React 19. See `CHANGELOG.md` for migration notes if you're on 18.
 - **No `maxW` on a Card inside a settings/detail template body.** See **Page layout** under Page templates.
 - **No inline create-forms above a DataTable.** Use a header-action button (or `usePageActions` from a tab — the tab's `<Toolbar>` when the header carries the page's Save) that opens a `Modal`. Why: inline forms steal vertical space, drift from the master pattern, and split form state from the rest of the page.
 - **Don't leave two `usePageActions` callers mounted at once.** For a tab page use nav-link tabs: a `<Tabs.Root value={current}>` containing only a `<Tabs.List>`, passed to the template's `tabs` prop, with the router rendering the active panel as `children` — only the active panel is ever mounted. If you own a `<Tabs.Root>` with `<Tabs.Content>` panels in the body, set `lazyMount unmountOnExit` yourself. Why: the page-header actions slot holds a single unkeyed registration, so mounted callers overwrite each other on every render — the header ends up showing an inactive tab's button (the "stuck Add button" fixed in anker 1.12). No template enforces this any more; `bodyTabs`, which applied the guard for you, was removed with the page-header redesign in v2.2.0. Pinned by the `usePageActions collision` tests in `detail-page-template.test.tsx`, mirrored for `SettingsPageTemplate`.
+- **Never label a thing with an id.** An id (a KSUID, a UUID or any other generated key) never labels a thing in the UI: not in text, a table cell, a link, a title, a breadcrumb or a message. Show a name, a code or a reference instead (a Machine's name, `owner/repo#12`, a Spec's title). An id may appear only as a technical detail, in a field labelled with its name (for example "Session ID", in a Code block). Why: nobody reads or recognises a generated key at a glance; a page that names things by id cannot be read, and the id still serves debugging where it is labelled as what it is.
 - **Don't wrap Card children in `<Box p="N">`.** `<Card>` body has built-in padding via Chakra's CardBody (~24px). Wrapping in `<Box p>` doubles it. Pass content directly (use `<Stack>` for layout). Why: a uniform Card body padding is the visual contract; per-Card overrides break visual rhythm and make Cards look heavier than the rest of the design system.
 
 ---
@@ -306,6 +307,10 @@ anker ships 16 reusable cell components for `<DataTable>` columns. They are expo
 
 **Rule:** cells are the contract — if no cell fits, file an issue and propose a new cell. Don't hand-roll.
 
+**Rule:** a DataTable cell renders its value through one of anker's cells; a long text value through TruncatedTextCell or TextCell, never through raw text. Why: anker's text cells keep a long value inside its column (ending in "…", whole on hover); a raw string runs into the next column and neither value can be read.
+
+**Rule:** a cell never shows an id as the label of a row's thing — see **Never label a thing with an id** under Don't.
+
 | Cell | Use for |
 |---|---|
 | `ActionCell` | row action icons |
@@ -319,7 +324,7 @@ anker ships 16 reusable cell components for `<DataTable>` columns. They are expo
 | `LinkCell` | internal link |
 | `MenuCell` | row overflow menu |
 | `NumberCell` | numbers |
-| `SlugCell` | mono IDs |
+| `SlugCell` | mono slugs, handles and codes |
 | `StatusBadgeCell` | status pill: `toneMap={{ failed: "danger" }}` + `fallbackTone` (`colorMap` only for data-driven colours) (+ optional `tooltip`) |
 | `SwitchCell` | inline toggle |
 | `TruncatedTextCell` | text (+ optional `subText`, `maxLength`) |
