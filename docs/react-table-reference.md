@@ -118,7 +118,7 @@ Cells never import from `@tanstack/react-table`. The `info.getValue()` call happ
 |------|-----------|----------|
 | `ActionCell` | N/A (uses `actions` prop) | Row action icon buttons |
 | `BooleanCell` | `boolean` | Yes/No labels (configurable) |
-| `CodeCell` | `string` | Monospace with background |
+| `CodeCell` | `string` | Monospace with background: one line, ends in `…` at the column's edge (or after `maxLength`), whole value on hover |
 | `ColorSwatchCell` | `string` | Color circle + hex value |
 | `CountCell` | `array \| object \| number` | "N items" with pluralization |
 | `DateCell` | `string \| Date \| number` | Date in the UI language (react-i18next's, or `locale`), optional relative tooltip; a `YYYY-MM-DD` day never shifts with the time zone |
@@ -127,10 +127,10 @@ Cells never import from `@tanstack/react-table`. The `info.getValue()` call happ
 | `LinkCell` | `string` | Clickable internal link (anker `Link` primitive) |
 | `MenuCell` | N/A (uses `actions` prop) | Row overflow menu |
 | `NumberCell` | `number \| string` | Locale-aware number formatting |
-| `SlugCell` | `string` | Monospace slugs, handles and codes (never an id as a label — see `CLAUDE-ANKER.md`) |
+| `SlugCell` | `string` | Monospace slugs, handles and codes, one line, ends in `…` at the column's edge, whole value on hover (never an id as a label — see `CLAUDE-ANKER.md`) |
 | `StatusBadgeCell` | `string` | Status badge; `toneMap` / `fallbackTone` map the value to a tone (preferred), `colorMap` / `fallbackColor` to a data-driven colour — a tone wins; supports `detail` line, `tooltip`, and `icon` (rendered before the label) |
 | `SwitchCell` | `boolean` | Inline toggle bound to a row value |
-| `TruncatedTextCell` | `string` | General text: one line, ends in `…` at the column's edge (or after `maxLength`), whole value on hover; supports `subText` |
+| `TruncatedTextCell` | `string` | General text: one line, ends in `…` at the column's edge (or after `maxLength`), whole value on hover; supports `subText`, which behaves the same way |
 | `UrlCell` | `string` | Clickable external link |
 
 The library also exports two non-cell helpers used by `DeviceCell`:
@@ -279,7 +279,7 @@ const columns = [
 - **`minSize` without `size`** gives the column no width of its own: it takes the table's remainder, all of it, and counts `minSize` (plus padding) into the minimum width. Use it for a trailing actions column, so a wide container gives its room to the row's end rather than spreading it over the data.
 - **The table's minimum width is the sum of its columns** — every `size` / `minSize` and every column's padding, the built-in columns' included: the drag handle's `size` is its button, `REORDER_HANDLE_SIZE` (44px, the touch-target minimum — the one constant the button and its column share, #273), the selection checkbox's 16px. In a container narrower than that it scrolls sideways inside DataTable's own `overflowX` box instead of compressing.
 - **With no `size` or `minSize` on any column, nothing changes**: no widths, no minimum, the columns share the table's width. DataTable clears TanStack's default sizes (150 / 20) through `defaultColumn`, so only what a definition says counts; `column.getSize()` still answers with TanStack's defaults.
-- **A cell never draws outside its column** (#361). Every header and body cell is `overflow: hidden`, so content wider than its column — a long value, a custom cell that knows nothing of its column — is cut off at the column's edge instead of painting over the next one. That is a floor, not a way to show text: render a text value through `TruncatedTextCell`, which ends what it cannot fit in `…` and shows the whole value on hover. The clip also cuts whatever a cell draws past its padding box — a control taller or wider than the cell, or an overlay that is not portalled — so portal popovers and menus opened from a cell (anker's `Tooltip`, `Menu` and `Popover` do by default). Proven in Chromium by `__tests__/data-table-clipping.browser.test.tsx`.
+- **A cell never draws outside its column** (#361). Every header and body cell is `overflow: hidden`, so content wider than its column — a long value, a custom cell that knows nothing of its column — is cut off at the column's edge instead of painting over the next one. That is a floor, not a way to show text: render a text value through `TruncatedTextCell` (or `SlugCell` / `CodeCell` for monospace), which end what they cannot fit in `…` and show the whole value on hover (#369). The clip also cuts whatever a cell draws past its padding box — a control taller or wider than the cell, or an overlay that is not portalled — so portal popovers and menus opened from a cell (anker's `Tooltip`, `Menu` and `Popover` do by default). Proven in Chromium by `__tests__/data-table-clipping.browser.test.tsx` and `__tests__/cell-ellipsis.browser.test.tsx`.
 - The arithmetic is `column-width.ts` (unit-tested); that the browser honours it is `__tests__/data-table-layout.browser.test.tsx`, run in Chromium by the `layout` vitest project — jsdom lays nothing out.
 
 ## Performance
