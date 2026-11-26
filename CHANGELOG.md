@@ -2,6 +2,30 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.19.0 — 2026-11-26
+
+### Changed
+
+- **`DataTable` clips every cell at its column's edge** (#361, #365). Body
+  and header cells are `overflow: hidden`, so content wider than its column —
+  one of anker's cells, raw text or custom content — is cut at the edge
+  instead of painting over the next column. Focus rings and the 44px hit areas
+  of small buttons still show.
+- **`TruncatedTextCell` keeps its value on one line** (#361, #365). A value
+  wider than its column ends in "…" at the column's edge, and hovering a cut
+  value opens anker's `Tooltip` with the whole value. A value cut by
+  `maxLength` gets the same tooltip, replacing the native `title`; a screen
+  reader hears the whole value. A value that fits shows no tooltip.
+
+### Documentation
+
+- **Never label a thing with an id; table text renders through anker's
+  cells** (#362, #364). `CLAUDE-ANKER.md` and `docs/page-patterns.md` gain
+  both rules; SlugCell is described for slugs, handles and codes rather than
+  ids. The table-cell rule names `TruncatedTextCell` only: there is no
+  `TextCell`, and without `maxLength` `TruncatedTextCell` is the plain text
+  cell.
+
 ## 5.18.0 — 2026-11-23
 
 ### Added
