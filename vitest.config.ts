@@ -1,4 +1,5 @@
 import { configDefaults, defineConfig } from "vitest/config";
+import { browserApi } from "./src/test/browser-api-port";
 
 // Two projects, one `npm test`.
 //
@@ -67,6 +68,9 @@ export default defineConfig({
 						// A fixed viewport, so "the container is narrower than the
 						// table" is the test's decision and not the machine's.
 						viewport: { width: 1280, height: 900 },
+						// The port an agent run keeps for browser tests, when it sets one
+						// (src/test/browser-api-port.ts); vitest's default otherwise.
+						api: browserApi(process.env),
 					},
 				},
 			},
