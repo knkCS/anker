@@ -5,7 +5,7 @@ import * as Stories from "./code-cell.stories";
 
 # CodeCell
 
-Renders a string value as monospace inline `<code>` text. Long values are truncated at `maxLength` (default 80) and the full value is available via the native `title` tooltip.
+Renders a string value as monospace inline `<code>` text on one line. A value wider than its column ends in `…` at the column's edge, and hovering it shows the whole value in anker's `Tooltip`. `maxLength` (default 80) additionally cuts the value after that many characters, also with the whole value on hover. A value that fits shows no tooltip.
 
 ## Usage
 
