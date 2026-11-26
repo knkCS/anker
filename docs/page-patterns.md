@@ -2462,7 +2462,8 @@ later improvements (a11y fixes, dark-mode tweaks, density updates).
 
 **Rule — text through a cell.** A DataTable cell renders its value
 through one of anker's cells; a long text value through
-TruncatedTextCell or TextCell, never through raw text. How a long
+TruncatedTextCell (without `maxLength` it is the plain text cell),
+never through raw text. How a long
 value is shortened and shown whole lives in anker's text cells, so it
 improves in one place for every table; a raw string has none of it
 and runs into the next column, where neither value can be read.
