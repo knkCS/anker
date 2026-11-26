@@ -1,5 +1,5 @@
 import type React from "react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import { VStack } from "../../../primitives/layout";
 import { Tooltip } from "../../../primitives/tooltip";
 import { Text } from "../../../primitives/typography";
@@ -38,16 +38,23 @@ export const TruncatedTextCell: React.FC<TruncatedTextCellProps> = ({
 }) => {
 	// Chakra types `Text`'s ref as a paragraph's, though it renders a span here.
 	const textRef = useRef<HTMLParagraphElement>(null);
-	const [open, setOpen] = useState(false);
 	const isCut = value != null && maxLength != null && value.length > maxLength;
 
-	// Whether the value is clipped is asked when the tooltip would open, not
-	// watched: a table holds hundreds of these cells, and a ResizeObserver on
-	// each would measure them all on every resize to answer a question only a
-	// hover asks.
-	const onOpenChange = useCallback(
-		({ open: next }: { open: boolean }) => {
-			setOpen(next && (isCut || isClipped(textRef.current)));
+	// A value that fits must never open the tooltip, so the pointer events
+	// that would open it are stopped before zag sees them: its trigger
+	// handlers return on `defaultPrevented`, and React runs these capture
+	// handlers on the same element first. A controlled `open={false}` does
+	// not hold: zag's closed state opens straight away, ignoring `open`, when
+	// another tooltip is still visible — moving from a cut cell to one that
+	// fits showed the fitting one's tooltip too (caught in Chromium, #361).
+	//
+	// Whether the value is clipped is asked on hover, not watched: a table
+	// holds hundreds of these cells, and a ResizeObserver on each would
+	// measure them all on every resize to answer a question only a hover
+	// asks.
+	const suppressIfWhole = useCallback(
+		(event: React.PointerEvent) => {
+			if (!isCut && !isClipped(textRef.current)) event.preventDefault();
 		},
 		[isCut],
 	);
@@ -57,8 +64,6 @@ export const TruncatedTextCell: React.FC<TruncatedTextCellProps> = ({
 	const primary = (
 		<Tooltip
 			content={value}
-			open={open}
-			onOpenChange={onOpenChange}
 			contentProps={{
 				maxW: "md",
 				whiteSpace: "normal",
@@ -72,6 +77,8 @@ export const TruncatedTextCell: React.FC<TruncatedTextCellProps> = ({
 			<Text
 				as="span"
 				ref={textRef}
+				onPointerMoveCapture={suppressIfWhole}
+				onPointerOverCapture={suppressIfWhole}
 				display="block"
 				maxW="full"
 				overflow="hidden"

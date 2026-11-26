@@ -151,6 +151,17 @@ async function expectTooltipOnHover(el: HTMLElement, whole: string) {
 		.toBe(whole);
 }
 
+/** After zag's open and close delays, no open tooltip reads `text`. */
+async function expectNoOpenTooltip(text: string) {
+	await new Promise((resolve) => setTimeout(resolve, 800));
+	const open = [
+		...document.querySelectorAll<HTMLElement>(
+			"[data-scope='tooltip'][data-part='content']",
+		),
+	].filter((el) => el.getAttribute("data-state") === "open");
+	expect(open.map((el) => el.textContent)).not.toContain(text);
+}
+
 describe("DataTable keeps a cell's content inside its column, in a real browser", () => {
 	it("clips custom content wider than its column at the column's edge", async () => {
 		const container = await mount(({ getValue }) => (
@@ -201,6 +212,14 @@ describe("DataTable keeps a cell's content inside its column, in a real browser"
 		if (!th || !header) throw new Error("no header");
 
 		expectClippedTo(header, th);
+		// The label gives way to the sort arrow, which stays whole in the column.
+		const arrow = th.querySelector<SVGElement>("svg");
+		if (!arrow) throw new Error("no sort arrow");
+		const a = arrow.getBoundingClientRect();
+		const box = th.getBoundingClientRect();
+		expect(a.width).toBeGreaterThan(0);
+		expect(a.left).toBeGreaterThanOrEqual(box.left - SLACK);
+		expect(a.right).toBeLessThanOrEqual(box.right + SLACK);
 	});
 
 	it("TruncatedTextCell ends a value wider than its column in an ellipsis, inside the column", async () => {
@@ -262,10 +281,26 @@ describe("DataTable keeps a cell's content inside its column, in a real browser"
 		const text = valueText(cells(container)[0], "short");
 
 		await userEvent.hover(text);
-		// Long enough for zag's open delay to have passed.
-		await new Promise((resolve) => setTimeout(resolve, 800));
-		expect(
-			tooltip() === null || tooltip()?.getAttribute("data-state") !== "open",
-		).toBe(true);
+		await expectNoOpenTooltip("short");
+	});
+
+	it("TruncatedTextCell shows no tooltip for a value that fits right after one that is cut", async () => {
+		// zag opens a tooltip at once, with no delay and past a controlled
+		// `open`, while another one is still visible: the path a pointer takes
+		// down a column of long and short values.
+		const container = await mount(
+			({ getValue }) => <TruncatedTextCell value={String(getValue())} />,
+			[
+				{ id: "1", value: LONG, next: "next" },
+				{ id: "2", value: "short", next: "next" },
+			],
+		);
+		const rows = container.querySelectorAll<HTMLElement>("tbody tr");
+		const cut = valueText(rows[0].querySelector("td") as HTMLElement, LONG);
+		const fits = valueText(rows[1].querySelector("td") as HTMLElement, "short");
+
+		await expectTooltipOnHover(cut, LONG);
+		await userEvent.hover(fits);
+		await expectNoOpenTooltip("short");
 	});
 });

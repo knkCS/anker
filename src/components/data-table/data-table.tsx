@@ -166,6 +166,9 @@ function widthOfColumn<T>(column: Column<T, unknown>): string | undefined {
  */
 const CLIP_TO_COLUMN = { overflow: "hidden" } as const;
 
+/** A sort arrow never shrinks to make room for its column's label. */
+const SORT_ICON_STYLE = { flexShrink: 0 } as const;
+
 const LOADING_ROW_COUNT = 5;
 
 function DataTableInner<T extends Record<string, unknown>>(
@@ -404,20 +407,37 @@ function DataTableInner<T extends Record<string, unknown>>(
 										{...CLIP_TO_COLUMN}
 									>
 										<Flex alignItems="center" gap={1}>
-											{header.isPlaceholder
-												? null
-												: flexRender(
-														header.column.columnDef.header,
-														header.getContext(),
-													)}
+											{/* The label gives way, not the sort arrow: in a narrow
+											    column a long label ends in "…" and the arrow stays
+											    inside the clip, so the sort state still shows. */}
+											<Box minW={0} overflow="hidden" textOverflow="ellipsis">
+												{header.isPlaceholder
+													? null
+													: flexRender(
+															header.column.columnDef.header,
+															header.getContext(),
+														)}
+											</Box>
 											{canSort && sorted === "asc" && (
-												<ArrowUp size={14} aria-hidden="true" />
+												<ArrowUp
+													size={14}
+													aria-hidden="true"
+													style={SORT_ICON_STYLE}
+												/>
 											)}
 											{canSort && sorted === "desc" && (
-												<ArrowDown size={14} aria-hidden="true" />
+												<ArrowDown
+													size={14}
+													aria-hidden="true"
+													style={SORT_ICON_STYLE}
+												/>
 											)}
 											{canSort && !sorted && (
-												<ArrowUpDown size={14} aria-hidden="true" />
+												<ArrowUpDown
+													size={14}
+													aria-hidden="true"
+													style={SORT_ICON_STYLE}
+												/>
 											)}
 										</Flex>
 									</Table.ColumnHeader>
