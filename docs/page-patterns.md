@@ -2460,6 +2460,24 @@ files are the kind of drift the cells library was built to prevent;
 they fragment the visual language across solutions and silently miss
 later improvements (a11y fixes, dark-mode tweaks, density updates).
 
+**Rule — text through a cell.** A DataTable cell renders its value
+through one of anker's cells; a long text value through
+TruncatedTextCell or TextCell, never through raw text. How a long
+value is shortened and shown whole lives in anker's text cells, so it
+improves in one place for every table; a raw string has none of it
+and runs into the next column, where neither value can be read.
+
+**Rule — names, not ids.** An id (a KSUID, a UUID or any other
+generated key) never labels a thing in the UI: not in text, a table
+cell, a link, a title, a breadcrumb or a message. Show a name, a code
+or a reference instead (a Machine's name, `owner/repo#12`, a Spec's
+title). An id may appear only as a technical detail, in a field
+labelled with its name (for example "Session ID", in a Code block).
+In a table, that means the column a row is recognised by holds the
+thing's name, code or reference — never its id. Where an id must
+appear as a technical detail, its column is headed with the id's name
+("Session ID") and renders it through `CodeCell`.
+
 **Why it matters.** Module federation will assemble multiple knkCMS
 solutions (Odon, Core, Template, MAS, Aufgabenmanagement, …) into a
 single browser frame. Tables are the single most common surface in
@@ -2491,7 +2509,7 @@ import {
 | `LinkCell` | Internal Link via the anker `Link` primitive |
 | `MenuCell` | Row overflow menu (`⋯`) |
 | `NumberCell` | Locale-aware number formatting |
-| `SlugCell` | Monospace identifiers (KSUID, slug, handle) |
+| `SlugCell` | Monospace slugs, handles and codes |
 | `StatusBadgeCell` | Status badge; `toneMap` / `fallbackTone` map a value to a tone (`colorMap` only for data-driven colours); supports `detail` and `tooltip` |
 | `SwitchCell` | Inline toggle bound to a row value |
 | `TruncatedTextCell` | General text with optional truncation; supports `subText` |
@@ -2504,7 +2522,7 @@ for:
 |---|---|
 | Status / state pill | `StatusBadgeCell` with `toneMap` (use `tooltip` for descriptions; `detail` for error-line under the badge) |
 | Timestamp | `DateCell` |
-| Mono ID / KSUID | `SlugCell` (small / inline) or `CodeCell` (block-y) |
+| Slug, handle or code | `SlugCell` (small / inline) or `CodeCell` (block-y) |
 | Per-row actions | `ActionCell` (small set) or `MenuCell` (overflow) |
 | Person reference (user, member, requester, author) | `IdentityCell` |
 | Device / User-Agent | `DeviceCell` |
