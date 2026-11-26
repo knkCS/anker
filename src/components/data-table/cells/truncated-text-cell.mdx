@@ -5,7 +5,9 @@ import * as Stories from "./truncated-text-cell.stories";
 
 # TruncatedTextCell
 
-Displays a text value, optionally truncating it to a maximum character length with a `…` suffix and a native `title` tooltip containing the full text.
+Displays a text value on one line. A value wider than its column ends in `…` at the column's edge, and hovering it shows the whole value in anker's `Tooltip`. `maxLength` additionally cuts the value after that many characters, also with a `…` suffix and the whole value on hover. A value that fits shows no tooltip.
+
+Use it for every text value in a `DataTable`: the table clips any cell at its column's edge, so raw text wider than its column is simply cut off, with no `…` and no way to read the rest.
 
 ## Usage
 

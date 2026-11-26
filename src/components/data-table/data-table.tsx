@@ -148,6 +148,27 @@ function widthOfColumn<T>(column: Column<T, unknown>): string | undefined {
 	return columnWidth(widthSource(column));
 }
 
+/**
+ * A cell — a header as much as a body cell — keeps what it draws inside its
+ * column, whatever renders it (#361).
+ *
+ * A column's width fixes the cell's box, not its content: `table-layout:
+ * fixed` makes the cell exactly as wide as its header, and anything wider —
+ * a long value, a custom cell that knows nothing of its column — painted on
+ * over the next column, so two values overlapped. Clipping at the cell
+ * (`overflow: hidden`) makes that impossible for
+ * every cell at once rather than asking each cell to behave. The cell is no
+ * wider than its column already (`table-layout: fixed`), so no `min-width` is
+ * needed. The clip edge is
+ * the cell's padding box, so a focus ring drawn in the padding still shows.
+ * TruncatedTextCell shortens a text value with "…" before this clip is ever
+ * reached; the clip is the floor for everything else.
+ */
+const CLIP_TO_COLUMN = { overflow: "hidden" } as const;
+
+/** A sort arrow never shrinks to make room for its column's label. */
+const SORT_ICON_STYLE = { flexShrink: 0 } as const;
+
 const LOADING_ROW_COUNT = 5;
 
 function DataTableInner<T extends Record<string, unknown>>(
@@ -317,7 +338,11 @@ function DataTableInner<T extends Record<string, unknown>>(
 		};
 
 		const cells = row.getVisibleCells().map((cell) => (
-			<Table.Cell key={cell.id} width={widthOfColumn(cell.column)}>
+			<Table.Cell
+				key={cell.id}
+				width={widthOfColumn(cell.column)}
+				{...CLIP_TO_COLUMN}
+			>
 				{flexRender(cell.column.columnDef.cell, cell.getContext())}
 			</Table.Cell>
 		));
@@ -379,22 +404,40 @@ function DataTableInner<T extends Record<string, unknown>>(
 												: undefined
 										}
 										width={widthOfColumn(header.column)}
+										{...CLIP_TO_COLUMN}
 									>
 										<Flex alignItems="center" gap={1}>
-											{header.isPlaceholder
-												? null
-												: flexRender(
-														header.column.columnDef.header,
-														header.getContext(),
-													)}
+											{/* The label gives way, not the sort arrow: in a narrow
+											    column a long label ends in "…" and the arrow stays
+											    inside the clip, so the sort state still shows. */}
+											<Box minW={0} overflow="hidden" textOverflow="ellipsis">
+												{header.isPlaceholder
+													? null
+													: flexRender(
+															header.column.columnDef.header,
+															header.getContext(),
+														)}
+											</Box>
 											{canSort && sorted === "asc" && (
-												<ArrowUp size={14} aria-hidden="true" />
+												<ArrowUp
+													size={14}
+													aria-hidden="true"
+													style={SORT_ICON_STYLE}
+												/>
 											)}
 											{canSort && sorted === "desc" && (
-												<ArrowDown size={14} aria-hidden="true" />
+												<ArrowDown
+													size={14}
+													aria-hidden="true"
+													style={SORT_ICON_STYLE}
+												/>
 											)}
 											{canSort && !sorted && (
-												<ArrowUpDown size={14} aria-hidden="true" />
+												<ArrowUpDown
+													size={14}
+													aria-hidden="true"
+													style={SORT_ICON_STYLE}
+												/>
 											)}
 										</Flex>
 									</Table.ColumnHeader>
