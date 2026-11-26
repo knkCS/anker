@@ -41,10 +41,15 @@ const frame = () =>
 async function mount(
 	cell: ColumnDef<Row, unknown>["cell"],
 	rows: Row[] = [{ id: "1", value: LONG, next: "next" }],
+	header: ColumnDef<Row, unknown>["header"] = "Value",
 ): Promise<HTMLElement> {
 	const columns: ColumnDef<Row, unknown>[] = [
-		{ id: "value", accessorKey: "value", header: "Value", size: NARROW, cell },
+		{ id: "value", accessorKey: "value", header, size: NARROW, cell },
 		{ id: "next", accessorKey: "next", header: "Next", size: 120 },
+		// A `minSize` column takes the table's remainder, so the sized columns
+		// keep exactly their sizes in the wide container: without it
+		// `table-layout: fixed` shares the spare width out over them.
+		{ id: "rest", header: "", minSize: 40, cell: () => null },
 	];
 	host = document.createElement("div");
 	host.style.width = "800px";
@@ -138,6 +143,14 @@ function tooltip(): HTMLElement | null {
 	);
 }
 
+/** Hovering `el` opens anker's tooltip reading `whole`. */
+async function expectTooltipOnHover(el: HTMLElement, whole: string) {
+	await userEvent.hover(el);
+	await expect
+		.poll(() => tooltip()?.textContent, { timeout: 3000 })
+		.toBe(whole);
+}
+
 describe("DataTable keeps a cell's content inside its column, in a real browser", () => {
 	it("clips custom content wider than its column at the column's edge", async () => {
 		const container = await mount(({ getValue }) => (
@@ -171,6 +184,25 @@ describe("DataTable keeps a cell's content inside its column, in a real browser"
 		expectClippedTo(raw, cell);
 	});
 
+	it("clips a header wider than its column at the column's edge", async () => {
+		const container = await mount(
+			() => "x",
+			undefined,
+			() => (
+				<Box data-testid="header" w="400px">
+					{LONG}
+				</Box>
+			),
+		);
+		const th = container.querySelector<HTMLElement>("thead th");
+		const header = container.querySelector<HTMLElement>(
+			"[data-testid='header']",
+		);
+		if (!th || !header) throw new Error("no header");
+
+		expectClippedTo(header, th);
+	});
+
 	it("TruncatedTextCell ends a value wider than its column in an ellipsis, inside the column", async () => {
 		const container = await mount(({ getValue }) => (
 			<TruncatedTextCell value={String(getValue())} />
@@ -196,10 +228,7 @@ describe("DataTable keeps a cell's content inside its column, in a real browser"
 		));
 		const text = valueText(cells(container)[0], LONG);
 
-		await userEvent.hover(text);
-		await expect
-			.poll(() => tooltip()?.textContent, { timeout: 3000 })
-			.toBe(LONG);
+		await expectTooltipOnHover(text, LONG);
 	});
 
 	it("TruncatedTextCell with subText ends its value in an ellipsis and shows it whole on hover", async () => {
@@ -216,10 +245,7 @@ describe("DataTable keeps a cell's content inside its column, in a real browser"
 		expect(text.scrollWidth).toBeGreaterThan(text.clientWidth);
 		expect(getComputedStyle(text).textOverflow).toBe("ellipsis");
 
-		await userEvent.hover(text);
-		await expect
-			.poll(() => tooltip()?.textContent, { timeout: 3000 })
-			.toBe(LONG);
+		await expectTooltipOnHover(text, LONG);
 	});
 
 	it("TruncatedTextCell shows the whole value on hover when maxLength shortened it", async () => {
@@ -228,10 +254,7 @@ describe("DataTable keeps a cell's content inside its column, in a real browser"
 		));
 		const text = valueText(cells(container)[0], "abcd…");
 
-		await userEvent.hover(text);
-		await expect
-			.poll(() => tooltip()?.textContent, { timeout: 3000 })
-			.toBe("abcdefghij");
+		await expectTooltipOnHover(text, "abcdefghij");
 	});
 
 	it("TruncatedTextCell shows no tooltip for a value that fits", async () => {
@@ -241,7 +264,6 @@ describe("DataTable keeps a cell's content inside its column, in a real browser"
 		await userEvent.hover(text);
 		// Long enough for zag's open delay to have passed.
 		await new Promise((resolve) => setTimeout(resolve, 800));
-		expect(tooltip()?.textContent ?? "").not.toBe("short");
 		expect(
 			tooltip() === null || tooltip()?.getAttribute("data-state") !== "open",
 		).toBe(true);

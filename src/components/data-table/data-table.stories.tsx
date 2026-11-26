@@ -1,10 +1,6 @@
 import { arrayMove } from "@dnd-kit/sortable";
 import type { Meta, StoryObj } from "@storybook/react";
-import type {
-	ColumnDef,
-	RowSelectionState,
-	SortingState,
-} from "@tanstack/react-table";
+import type { RowSelectionState, SortingState } from "@tanstack/react-table";
 import { createColumnHelper } from "@tanstack/react-table";
 import { useState } from "react";
 import { StatusBadge } from "../../atoms/status-badge";
@@ -328,7 +324,9 @@ const longValueColumns = [
 	longValueHelper.display({
 		id: "next",
 		header: "Next",
-		size: 80,
+		// The remainder: the columns before it keep their narrow sizes however
+		// wide the canvas is.
+		minSize: 80,
 		cell: () => <Text fontSize="sm">Next</Text>,
 	}),
 ];
@@ -336,10 +334,12 @@ const longValueColumns = [
 /** A long value in a narrow column stays inside it (#361). */
 export const LongValueInNarrowColumn: Story = {
 	render: () => (
-		<DataTable
-			columns={longValueColumns}
-			data={longValueRows}
-			getRowId={(row) => row.id}
-		/>
+		<Box maxW="640px">
+			<DataTable
+				columns={longValueColumns}
+				data={longValueRows}
+				getRowId={(row) => row.id}
+			/>
+		</Box>
 	),
 };

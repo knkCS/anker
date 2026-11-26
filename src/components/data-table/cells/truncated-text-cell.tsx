@@ -36,6 +36,7 @@ export const TruncatedTextCell: React.FC<TruncatedTextCellProps> = ({
 	maxLength,
 	subText,
 }) => {
+	// Chakra types `Text`'s ref as a paragraph's, though it renders a span here.
 	const textRef = useRef<HTMLParagraphElement>(null);
 	const [open, setOpen] = useState(false);
 	const isCut = value != null && maxLength != null && value.length > maxLength;
@@ -77,7 +78,21 @@ export const TruncatedTextCell: React.FC<TruncatedTextCellProps> = ({
 				textOverflow="ellipsis"
 				whiteSpace="nowrap"
 			>
-				{display}
+				{isCut ? (
+					// `maxLength` cut the text itself, so a screen reader would hear
+					// only the cut value: the tooltip describes the trigger only while
+					// it is open, and a non-focusable span never opens it from the
+					// keyboard. It reads the whole value instead (the `title` this
+					// replaced did that).
+					<>
+						<span aria-hidden="true">{display}</span>
+						<Text as="span" srOnly>
+							{value}
+						</Text>
+					</>
+				) : (
+					display
+				)}
 			</Text>
 		</Tooltip>
 	);
