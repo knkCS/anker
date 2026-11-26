@@ -2462,10 +2462,10 @@ later improvements (a11y fixes, dark-mode tweaks, density updates).
 
 **Rule — text through a cell.** A DataTable cell renders its value
 through one of anker's cells; a long text value through
-TruncatedTextCell or TextCell, never through raw text. anker's text
-cells keep a long value inside its column — it ends in "…" and shows
-whole on hover — while a raw string runs into the next column, and
-neither value can be read.
+TruncatedTextCell or TextCell, never through raw text. How a long
+value is shortened and shown whole lives in anker's text cells, so it
+improves in one place for every table; a raw string has none of it
+and runs into the next column, where neither value can be read.
 
 **Rule — names, not ids.** An id (a KSUID, a UUID or any other
 generated key) never labels a thing in the UI: not in text, a table
@@ -2474,7 +2474,9 @@ or a reference instead (a Machine's name, `owner/repo#12`, a Spec's
 title). An id may appear only as a technical detail, in a field
 labelled with its name (for example "Session ID", in a Code block).
 In a table, that means the column a row is recognised by holds the
-thing's name, code or reference — never its id.
+thing's name, code or reference — never its id. Where an id must
+appear as a technical detail, its column is headed with the id's name
+("Session ID") and renders it through `CodeCell`.
 
 **Why it matters.** Module federation will assemble multiple knkCMS
 solutions (Odon, Core, Template, MAS, Aufgabenmanagement, …) into a
