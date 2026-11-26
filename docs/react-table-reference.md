@@ -130,7 +130,7 @@ Cells never import from `@tanstack/react-table`. The `info.getValue()` call happ
 | `SlugCell` | `string` | Monospace identifiers |
 | `StatusBadgeCell` | `string` | Status badge; `toneMap` / `fallbackTone` map the value to a tone (preferred), `colorMap` / `fallbackColor` to a data-driven colour — a tone wins; supports `detail` line, `tooltip`, and `icon` (rendered before the label) |
 | `SwitchCell` | `boolean` | Inline toggle bound to a row value |
-| `TruncatedTextCell` | `string` | General text with optional truncation; supports `subText` |
+| `TruncatedTextCell` | `string` | General text: one line, ends in `…` at the column's edge (or after `maxLength`), whole value on hover; supports `subText` |
 | `UrlCell` | `string` | Clickable external link |
 
 The library also exports two non-cell helpers used by `DeviceCell`:
@@ -279,6 +279,7 @@ const columns = [
 - **`minSize` without `size`** gives the column no width of its own: it takes the table's remainder, all of it, and counts `minSize` (plus padding) into the minimum width. Use it for a trailing actions column, so a wide container gives its room to the row's end rather than spreading it over the data.
 - **The table's minimum width is the sum of its columns** — every `size` / `minSize` and every column's padding, the built-in columns' included: the drag handle's `size` is its button, `REORDER_HANDLE_SIZE` (44px, the touch-target minimum — the one constant the button and its column share, #273), the selection checkbox's 16px. In a container narrower than that it scrolls sideways inside DataTable's own `overflowX` box instead of compressing.
 - **With no `size` or `minSize` on any column, nothing changes**: no widths, no minimum, the columns share the table's width. DataTable clears TanStack's default sizes (150 / 20) through `defaultColumn`, so only what a definition says counts; `column.getSize()` still answers with TanStack's defaults.
+- **A cell never draws outside its column** (#361). Every body cell is `overflow: hidden` with no minimum width of its own, so content wider than its column — a long value, a custom cell that knows nothing of its column — is cut off at the column's edge instead of painting over the next one. That is a floor, not a way to show text: render a text value through `TruncatedTextCell`, which ends what it cannot fit in `…` and shows the whole value on hover. Proven in Chromium by `__tests__/data-table-clipping.browser.test.tsx`.
 - The arithmetic is `column-width.ts` (unit-tested); that the browser honours it is `__tests__/data-table-layout.browser.test.tsx`, run in Chromium by the `layout` vitest project — jsdom lays nothing out.
 
 ## Performance
@@ -357,6 +358,7 @@ src/components/data-table/
 │   ├── data-table.test.tsx # Rendering, empty state, loading, pagination, reorder
 │   ├── column-width.test.ts # Pure column-width / minimum-width arithmetic
 │   ├── data-table-layout.browser.test.tsx # Real-browser layout: widths, no overflow, scrolling
+│   ├── data-table-clipping.browser.test.tsx # Real-browser: a cell clips at its column, TruncatedTextCell's … and hover
 │   └── row-reorder.test.ts # Pure reorder resolution + announcement wording
 └── cells/
     ├── cell-utils.ts       # emptyCellValue, truncateText, pluralize

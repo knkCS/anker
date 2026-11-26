@@ -1,11 +1,16 @@
 import { arrayMove } from "@dnd-kit/sortable";
 import type { Meta, StoryObj } from "@storybook/react";
-import type { RowSelectionState, SortingState } from "@tanstack/react-table";
+import type {
+	ColumnDef,
+	RowSelectionState,
+	SortingState,
+} from "@tanstack/react-table";
 import { createColumnHelper } from "@tanstack/react-table";
 import { useState } from "react";
 import { StatusBadge } from "../../atoms/status-badge";
 import { Box } from "../../primitives/layout";
 import { Text } from "../../primitives/typography";
+import { TruncatedTextCell } from "./cells/truncated-text-cell";
 import { DataTable } from "./data-table";
 
 type User = {
@@ -269,4 +274,72 @@ const ColumnWidthsDemo = () => {
 
 export const ColumnWidths: Story = {
 	render: () => <ColumnWidthsDemo />,
+};
+
+type LongValueRow = { id: string; path: string; owner: string; note: string };
+
+const longValueRows: LongValueRow[] = [
+	{
+		id: "1",
+		path: "packages/acp-ui/src/screens/a-path-far-too-long-for-its-column.tsx",
+		owner: "knkCS/agent-control-plane",
+		note: "A custom cell that draws a box wider than its column",
+	},
+	{
+		id: "2",
+		path: "README.md",
+		owner: "knkCS/anker",
+		note: "Short",
+	},
+];
+
+const longValueHelper = createColumnHelper<LongValueRow>();
+
+const longValueColumns = [
+	// TruncatedTextCell ends a value wider than its column in "…" and shows
+	// the whole value on hover; one that fits shows no tooltip.
+	longValueHelper.accessor("path", {
+		header: "Path",
+		size: 160,
+		cell: ({ getValue }) => <TruncatedTextCell value={getValue()} />,
+	}),
+	longValueHelper.accessor("owner", {
+		header: "Owner",
+		size: 140,
+		cell: ({ row }) => (
+			<TruncatedTextCell
+				value={row.original.owner}
+				subText={row.original.note}
+			/>
+		),
+	}),
+	// Custom content that knows nothing of its column: DataTable clips it at
+	// the column's edge, so it never paints over the next column.
+	longValueHelper.display({
+		id: "custom",
+		header: "Custom",
+		size: 120,
+		cell: ({ row }) => (
+			<Box bg="bg-muted" px={2} w="320px">
+				{row.original.note}
+			</Box>
+		),
+	}),
+	longValueHelper.display({
+		id: "next",
+		header: "Next",
+		size: 80,
+		cell: () => <Text fontSize="sm">Next</Text>,
+	}),
+];
+
+/** A long value in a narrow column stays inside it (#361). */
+export const LongValueInNarrowColumn: Story = {
+	render: () => (
+		<DataTable
+			columns={longValueColumns}
+			data={longValueRows}
+			getRowId={(row) => row.id}
+		/>
+	),
 };
