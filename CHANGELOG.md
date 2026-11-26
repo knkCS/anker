@@ -2,6 +2,18 @@
 
 All notable changes to `@knkcs/anker` are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## 5.20.0 — 2026-11-26
+
+### Changed
+
+- **`SlugCell`, `CodeCell` and `TruncatedTextCell`'s `subText` end a cut
+  value in "…" and show it whole on hover** (#369, #370). Like
+  `TruncatedTextCell`'s main value since 5.19.0, each renders on one line,
+  ends in "…" at the column's edge, and hovering a cut value opens anker's
+  `Tooltip` with the whole value. A value that fits shows no tooltip.
+  `CodeCell`'s native `title` is replaced by the tooltip, which a `maxLength`
+  cut opens too. Props are unchanged.
+
 ## 5.19.0 — 2026-11-26
 
 ### Changed
